@@ -18,7 +18,6 @@ export default function BusinessPortal() {
           </Routes>
         </div>
       </main>
-      <div className="skeleton-badge">v1 Skeleton</div>
     </>
   )
 }
@@ -27,7 +26,6 @@ function BusinessNav() {
   return (
     <nav className="nav">
       <Link className="nav-logo" to="/business/analytics">
-        <span className="logo-pin">📍</span>
         Local<span className="logo-link">Link</span>
         <span style={{ fontSize: 11, background: 'rgba(255,255,255,0.18)', padding: '2px 8px', borderRadius: 10, marginLeft: 8, fontWeight: 500 }}>
           Business
@@ -48,7 +46,6 @@ const styles = {
   content: { maxWidth: 860, margin: '0 auto', width: '100%' },
 }
 
-/* ══ Pages ══════════════════════════════════════════════════════════ */
 
 function Login() {
   const navigate = useNavigate()
@@ -58,7 +55,6 @@ function Login() {
         <h2>Business Portal</h2>
         <p>Sign in to manage your LocalLink business presence.</p>
       </div>
-      <div className="todo-note"><span>📝</span> Auth flow to be implemented — fields are placeholders only.</div>
       <div className="tab-row" style={{ margin: '0 auto 24px' }}>
         <button className="tab-btn active">Login</button>
         <button className="tab-btn">Register</button>
@@ -85,7 +81,6 @@ function Analytics() {
         <h2>Dashboard</h2>
         <p>Overview of customer engagement and campaign performance.</p>
       </div>
-      <div className="todo-note"><span>📝</span> Real data and chart components to be wired in during development sprints.</div>
       <div className="stat-strip">
         {['Active Customers', 'Deals Redeemed', 'Loyalty Points Issued'].map(label => (
           <div className="stat-tile" key={label}>
@@ -115,7 +110,6 @@ function CreateDeal() {
         <h2>Create Deal</h2>
         <p>Set up a new promotional deal visible to local customers.</p>
       </div>
-      <div className="todo-note"><span>📝</span> Form logic and deal categories to be finalised with client.</div>
       <div className="skeleton-section">
         <div className="skeleton-section-title">Deal Details</div>
         <div className="form-group"><label className="form-label">Deal Title</label><input className="form-input" disabled placeholder="e.g. 20% off this weekend" /></div>
@@ -129,7 +123,7 @@ function CreateDeal() {
           <div className="form-group"><label className="form-label">End Date</label><input className="form-input" disabled placeholder="dd/mm/yyyy" /></div>
         </div>
       </div>
-      <button className="btn-primary" style={{ opacity: .5, cursor: 'not-allowed' }}>Publish Deal (disabled)</button>
+      <button className="btn-primary" style={{ opacity: .5, cursor: 'not-allowed' }}>Publish Deal </button>
     </>
   )
 }
@@ -142,7 +136,6 @@ function CreateLoyalty() {
         <h2>Create Loyalty Programme</h2>
         <p>Design a stamp card or points-based loyalty scheme for your customers.</p>
       </div>
-      <div className="todo-note"><span>📝</span> Earn / redeem logic to be scoped in sprint planning.</div>
       <div className="skeleton-section">
         <div className="skeleton-section-title">Programme Details</div>
         <div className="form-group"><label className="form-label">Programme Name</label><input className="form-input" disabled placeholder="e.g. Coffee Stamp Card" /></div>
@@ -156,7 +149,7 @@ function CreateLoyalty() {
         <div className="skeleton-section-title">Redeem Rules</div>
         <div className="skeleton-box">Redeem rule builder — TBD</div>
       </div>
-      <button className="btn-primary" style={{ opacity: .5, cursor: 'not-allowed' }}>Launch Programme (disabled)</button>
+      <button className="btn-primary" style={{ opacity: .5, cursor: 'not-allowed' }}>Launch Programme</button>
     </>
   )
 }
@@ -168,7 +161,6 @@ function Settings() {
         <h2>Settings</h2>
         <p>Manage your business profile and notification preferences.</p>
       </div>
-      <div className="todo-note"><span>📝</span> Settings fields to be defined — pending UCD research and client sign-off.</div>
       <div className="skeleton-section">
         <div className="skeleton-section-title">Business Profile</div>
         <div className="form-group"><label className="form-label">Business Name</label><input className="form-input" disabled placeholder="Your Business Name" /></div>

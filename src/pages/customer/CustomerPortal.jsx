@@ -44,7 +44,6 @@ const styles = {
   content: { maxWidth: 860, margin: '0 auto', width: '100%' },
 }
 
-/* ══ Pages ══════════════════════════════════════════════════════════ */
 
 function Login() {
   const navigate = useNavigate()
