@@ -19,7 +19,6 @@ export default function CustomerPortal() {
           </Routes>
         </div>
       </main>
-      <div className="skeleton-badge">v1 Skeleton</div>
     </>
   )
 }
@@ -28,7 +27,6 @@ function CustomerNav() {
   return (
     <nav className="nav">
       <Link className="nav-logo" to="/home">
-        <span className="logo-pin">📍</span>
         Local<span className="logo-link">Link</span>
       </Link>
       <div className="nav-links">
@@ -82,7 +80,7 @@ function Home() {
   return (
     <>
       <div className="page-header">
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>Good morning 👋</p>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>Welcome Back</p>
         <h2>Discover Local</h2>
         <p>Find businesses near you and explore what's on.</p>
       </div>
@@ -92,7 +90,7 @@ function Home() {
         ))}
       </div>
       <div className="map-placeholder">
-        <span className="map-placeholder-label">📍 Map Overlay — component TBD</span>
+        <span className="map-placeholder-label">Map Preview</span>
       </div>
       <div className="skeleton-section">
         <div className="skeleton-section-title">Hot Deals Near You</div>
@@ -130,7 +128,7 @@ function Loyalty() {
           <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Placeholder</div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 12, color: 'var(--emerald)', fontWeight: 600 }}>⭐ Gold Member</div>
+          <div style={{ fontSize: 12, color: 'var(--emerald)', fontWeight: 600 }}>Gold Member</div>
           <div className="progress-bar-track" style={{ width: 160 }}>
             <div className="progress-bar-fill" style={{ width: '64%' }} />
           </div>
@@ -171,7 +169,6 @@ function Jobs() {
         <h2>Services</h2>
         <p>Post a job and receive quotes from local tradespeople in your area.</p>
       </div>
-      <div className="todo-note"><span>📝</span> Quote visibility logic and job status flow to be confirmed with client.</div>
       <div className="skeleton-section">
         <div className="skeleton-section-title">Post a Job</div>
         <div className="form-group"><label className="form-label">Job Title</label><input className="form-input" disabled placeholder="e.g. Leaking tap repair" /></div>
@@ -205,7 +202,6 @@ function Profile() {
       </div>
       <div className="skeleton-section">
         <div className="skeleton-section-title">Location Range Filter</div>
-        <div className="todo-note" style={{ marginBottom: 12 }}><span>📝</span> Range slider — scope to be confirmed with client.</div>
         <div className="skeleton-box">Range filter slider — component TBD</div>
       </div>
     </>
