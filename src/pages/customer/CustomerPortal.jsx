@@ -30,9 +30,9 @@ function CustomerNav() {
         Local<span className="logo-link">Link</span>
       </Link>
       <div className="nav-links">
-        <NavLink className={({ isActive }) => `nav-btn${isActive ? ' active' : ''}`} to="/home">Home</NavLink>
-        <NavLink className={({ isActive }) => `nav-btn${isActive ? ' active' : ''}`} to="/loyalty">Loyalty</NavLink>
-        <NavLink className={({ isActive }) => `nav-btn${isActive ? ' active' : ''}`} to="/jobs">Services</NavLink>
+        <NavLink className={({ isActive }) => `nav-btn${isActive ? ' active' : ''}`} to="/home">Test-Home</NavLink>
+        <NavLink className={({ isActive }) => `nav-btn${isActive ? ' active' : ''}`} to="/loyalty">Test-Loyalty</NavLink>
+        <NavLink className={({ isActive }) => `nav-btn${isActive ? ' active' : ''}`} to="/jobs">Test-Services</NavLink>
         <NavLink className={({ isActive }) => `nav-btn${isActive ? ' active' : ''}`} to="/profile">Profile</NavLink>
       </div>
     </nav>
