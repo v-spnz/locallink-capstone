@@ -1,9 +1,19 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import {
+  Navigate,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import useAuth from '../../auth/useAuth'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { user, isLoading: isSessionLoading } = useAuth()
+
+  const destination =
+    location.state?.from?.pathname ?? '/profile'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -27,12 +37,24 @@ export default function LoginPage() {
         return
       }
 
-      navigate('/profile', { replace: true })
+      navigate(destination, { replace: true })
     } catch {
       setError('Unable to sign in right now. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  if (isSessionLoading) {
+    return (
+      <div style={{ textAlign: 'center', padding: 40 }}>
+        Checking session…
+      </div>
+    )
+  }
+
+  if (user) {
+    return <Navigate to="/profile" replace />
   }
 
   return (
