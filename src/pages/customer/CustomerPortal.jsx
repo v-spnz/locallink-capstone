@@ -216,7 +216,9 @@ function getCategoryEmoji(category) {
   const map = {
     'Food & Drink': '\u{1F354}',      // hamburger emoji
     'Retail': '\u{1F6CD}\u{FE0F}',    // shopping bags emoji
-    'Services': '\u{1F6E0}\u{FE0F}',  // hammer and wrench emoji
+    'Services': '\u{2702}\u{FE0F}',   // scissors emoji
+    'Health': '\u{1F3E5}',            // hospital emoji
+    'Trades': '\u{1F527}',            // wrench emoji
   }
   return map[category] || '\u{1F4CD}' // map pin emoji
 }

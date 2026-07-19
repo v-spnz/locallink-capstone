@@ -24,7 +24,7 @@ const mockBusinesses = [
   {
     id: 3,
     name: "Mt Eden Physiotherapy",
-    category: "Services",
+    category: "Health",
     description: "Sports rehab and injury recovery.",
     lat: -36.8770,
     lng: 174.7640,
@@ -33,7 +33,7 @@ const mockBusinesses = [
   {
     id: 4,
     name: "Grey Lynn Plumbing Co.",
-    category: "Services",
+    category: "Trades",
     description: "Licensed plumber — residential & commercial.",
     lat: -36.8610,
     lng: 174.7370,
@@ -78,7 +78,7 @@ const mockBusinesses = [
   {
     id: 9,
     name: "Devonport Dental Clinic",
-    category: "Services",
+    category: "Health",
     description: "Family dentistry across the harbour.",
     lat: -36.8310,
     lng: 174.7950,
@@ -87,7 +87,7 @@ const mockBusinesses = [
   {
     id: 10,
     name: "Henderson Auto Electrical",
-    category: "Services",
+    category: "Trades",
     description: "Vehicle diagnostics and auto-electrical repairs.",
     lat: -36.8780,
     lng: 174.6310,
@@ -105,7 +105,7 @@ const mockBusinesses = [
   {
     id: 12,
     name: "Takapuna Beach Yoga",
-    category: "Services",
+    category: "Health",
     description: "Beachside yoga and meditation classes.",
     lat: -36.7870,
     lng: 174.7740,
