@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Routes, Route, Navigate, NavLink, Link, useNavigate } from 'react-router-dom'
+import mockBusinesses from '../../data/mockBusinesses'
+import { getDistanceKm } from '../../utils/distance'
 
 export default function CustomerPortal() {
   return (
@@ -38,6 +40,9 @@ function CustomerNav() {
     </nav>
   )
 }
+
+// Default user location: Auckland CBD
+const USER_LOCATION = { lat: -36.8485, lng: 174.7633 }
 
 const styles = {
   main:    { minHeight: 'calc(100vh - 60px)', background: 'var(--bg)', padding: '40px 24px' },
