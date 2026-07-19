@@ -80,7 +80,21 @@ function Login() {
 
 function Home() {
   const [activeFilter, setActiveFilter] = useState('All')
+  const [radius, setRadius] = userState(5) // US009: default search radius in km
   const filters = ['All', 'Food & Drink', 'Retail', 'Services', 'Health', 'Trades']
+
+  // US009: calculate distance for each business, filter by radius + category, sort nearest first
+  const businessesWithDistance = mockBusinesses
+    .map(biz => ({
+      ...biz,
+      distance: getDistanceKm(           // attach distance (km) to each business
+        USER_LOCATION.lat, USER_LOCATION.lng,
+        biz.lat, biz.lng
+      ),
+    }))
+    .filter(biz => biz.distance <= radius) // only keep businesses within selected radius
+    .filter(biz => activeFilter === 'ALL' || biz.category === activeFilter) // apply category filter
+    .sort((a, b) => a.distance - b.distance) // sort closest first
   return (
     <>
       <div className="page-header">
