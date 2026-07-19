@@ -210,4 +210,14 @@ function Profile() {
       </div>
     </>
   )
+
+// Helper: emoji icon for categories
+function getCategoryEmoji(category) {
+  const map = {
+    'Food & Drink': '\u{1F354}',      // hamburger emoji
+    'Retail': '\u{1F6CD}\u{FE0F}',    // shopping bags emoji
+    'Services': '\u{1F6E0}\u{FE0F}',  // hammer and wrench emoji
+  }
+  return map[category] || '\u{1F4CD}' // map pin emoji
+}
 }
