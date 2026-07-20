@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Modal from '../../components/Modal'
 import { Routes, Route, Navigate, NavLink, Link, useNavigate } from 'react-router-dom'
 
 export default function CustomerPortal() {
@@ -168,6 +169,7 @@ function Jobs() {
   const [jobLocation, setJobLocation] = useState('')
   const [postedJob, setPostedJob] = useState(null)
   const [jobStatus, setJobStatus] = useState('Not Posted')
+  const [showModal, setShowModal] = useState(false)
 
   function validateForm() {
     if (!jobTitle) {
@@ -192,6 +194,7 @@ function Jobs() {
       if (!validateForm()) {
         return false;
       } else {
+        setShowModal(true)
         setPostedJob({
       title: jobTitle,
       description: jobDescription,
@@ -234,6 +237,7 @@ function Jobs() {
           </div>
         )}
       </div>
+      {showModal && <Modal onClose={() => setShowModal(false)} />}
     </>
   )
 }
