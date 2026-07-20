@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Routes, Route, Navigate, NavLink, Link, useNavigate } from 'react-router-dom'
+import { Routes, Route, Navigate, NavLink, Link } from 'react-router-dom'
+import LoginPage from '../auth/LoginPage'
+import ProtectedRoute from '../../auth/ProtectedRoute'
 
 export default function CustomerPortal() {
   return (
@@ -10,12 +12,19 @@ export default function CustomerPortal() {
           <Routes>
             {/* All Navigates use absolute paths (/home not "home") to prevent loop */}
             <Route index element={<Navigate to="/home" replace />} />
-            <Route path="home"    element={<Home />} />
+            <Route path="home" element={<Home />} />
             <Route path="loyalty" element={<Loyalty />} />
-            <Route path="jobs"    element={<Jobs />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="login"   element={<Login />} />
-            <Route path="*"       element={<Navigate to="/home" replace />} />
+            <Route path="jobs" element={<Jobs />} />
+            <Route
+              path="profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="*" element={<Navigate to="/home" replace />} />
           </Routes>
         </div>
       </main>
@@ -40,37 +49,8 @@ function CustomerNav() {
 }
 
 const styles = {
-  main:    { minHeight: 'calc(100vh - 60px)', background: 'var(--bg)', padding: '40px 24px' },
+  main: { minHeight: 'calc(100vh - 60px)', background: 'var(--bg)', padding: '40px 24px' },
   content: { maxWidth: 860, margin: '0 auto', width: '100%' },
-}
-
-
-function Login() {
-  const navigate = useNavigate()
-  return (
-    <div style={{ maxWidth: 420, margin: '0 auto' }}>
-      <div className="page-header" style={{ textAlign: 'center', marginBottom: 32 }}>
-        <h2>Welcome to LocalLink</h2>
-        <p>Sign in to discover local businesses and track your rewards.</p>
-      </div>
-      <div className="todo-note"><span>📝</span> Auth flow to be implemented — fields are placeholders only.</div>
-      <div className="tab-row" style={{ margin: '0 auto 24px' }}>
-        <button className="tab-btn active">Login</button>
-        <button className="tab-btn">Register</button>
-      </div>
-      <div className="form-group">
-        <label className="form-label">Email</label>
-        <input className="form-input" type="email" placeholder="you@email.com" disabled />
-      </div>
-      <div className="form-group">
-        <label className="form-label">Password</label>
-        <input className="form-input" type="password" placeholder="••••••••" disabled />
-      </div>
-      <button className="btn-primary" style={{ width: '100%', marginTop: 8 }} onClick={() => navigate('/home')}>
-        Sign In →
-      </button>
-    </div>
-  )
 }
 
 function Home() {
@@ -94,7 +74,7 @@ function Home() {
       <div className="skeleton-section">
         <div className="skeleton-section-title">Hot Deals Near You</div>
         <div className="skeleton-grid">
-          {[1,2,3].map(i => (
+          {[1, 2, 3].map(i => (
             <div className="skeleton-card" key={i}>
               <div className="sk-icon" />
               <div className="skeleton-bar short" style={{ margin: 0 }} />
@@ -136,13 +116,13 @@ function Loyalty() {
       </div>
       <div className="tab-row">
         <button className={`tab-btn${tab === 'inprogress' ? ' active' : ''}`} onClick={() => setTab('inprogress')}>In Progress</button>
-        <button className={`tab-btn${tab === 'completed'  ? ' active' : ''}`} onClick={() => setTab('completed')}>Completed</button>
+        <button className={`tab-btn${tab === 'completed' ? ' active' : ''}`} onClick={() => setTab('completed')}>Completed</button>
       </div>
       {tab === 'inprogress' ? (
         <div className="skeleton-section">
           <div className="skeleton-section-title">In Progress</div>
           <div className="skeleton-grid">
-            {[1,2,3].map(i => (
+            {[1, 2, 3].map(i => (
               <div className="skeleton-card" key={i}>
                 <div className="sk-icon" />
                 <div className="skeleton-bar short" style={{ margin: 0 }} />
