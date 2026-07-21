@@ -91,13 +91,13 @@ function Analytics() {
           </div>
         ))}
       </div>
-      <div className="skeleton-section">
-        <div className="skeleton-section-title">Engagement Over Time</div>
-        <div className="skeleton-box tall">Chart component — TBD</div>
+      <div className="placeholder-section">
+        <div className="placeholder-section-title">Engagement Over Time</div>
+        <div className="placeholder-box tall">Chart component — TBD</div>
       </div>
-      <div className="skeleton-section">
-        <div className="skeleton-section-title">Top Performing Deals</div>
-        <div className="skeleton-bar medium" /><div className="skeleton-bar full" /><div className="skeleton-bar short" />
+      <div className="placeholder-section">
+        <div className="placeholder-section-title">Top Performing Deals</div>
+        <div className="placeholder-bar medium" /><div className="placeholder-bar full" /><div className="placeholder-bar short" />
       </div>
     </>
   )
@@ -163,8 +163,8 @@ function CreateDeal() {
         <p>Set up a new promotional deal visible to local customers.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="skeleton-section" noValidate>
-        <div className="skeleton-section-title">Deal Details</div>
+      <form onSubmit={handleSubmit} className="placeholder-section" noValidate>
+        <div className="placeholder-section-title">Deal Details</div>
         
         <div className="form-group">
          <label className="form-label">Deal Title</label>
@@ -215,8 +215,8 @@ function CreateDeal() {
       </form>
 
       {deals.length > 0 && (
-        <div className="skeleton-section">
-          <div className="skeleton-section-title">Your Deals</div>
+        <div className="placeholder-section">
+          <div className="placeholder-section-title">Your Deals</div>
           {deals.map(deal => (
             <div key={deal.id} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
               <strong>{deal.title}</strong> - {deal.discount}
@@ -238,18 +238,18 @@ function CreateLoyalty() {
         <h2>Create Loyalty Programme</h2>
         <p>Design a stamp card or points-based loyalty scheme for your customers.</p>
       </div>
-      <div className="skeleton-section">
-        <div className="skeleton-section-title">Programme Details</div>
+      <div className="placeholder-section">
+        <div className="placeholder-section-title">Programme Details</div>
         <div className="form-group"><label className="form-label">Programme Name</label><input className="form-input" disabled placeholder="e.g. Coffee Stamp Card" /></div>
         <div className="form-group"><label className="form-label">Reward Type</label><input className="form-input" disabled placeholder="Stamp Card / Points…" /></div>
       </div>
-      <div className="skeleton-section">
-        <div className="skeleton-section-title">Earn Rules</div>
-        <div className="skeleton-box">Earn rule builder — TBD</div>
+      <div className="placeholder-section">
+        <div className="placeholder-section-title">Earn Rules</div>
+        <div className="placeholder-box">Earn rule builder — TBD</div>
       </div>
-      <div className="skeleton-section">
-        <div className="skeleton-section-title">Redeem Rules</div>
-        <div className="skeleton-box">Redeem rule builder — TBD</div>
+      <div className="placeholder-section">
+        <div className="placeholder-section-title">Redeem Rules</div>
+        <div className="placeholder-box">Redeem rule builder — TBD</div>
       </div>
       <button className="btn-primary" style={{ opacity: .5, cursor: 'not-allowed' }}>Launch Programme</button>
     </>
@@ -263,15 +263,15 @@ function Settings() {
         <h2>Settings</h2>
         <p>Manage your business profile and notification preferences.</p>
       </div>
-      <div className="skeleton-section">
-        <div className="skeleton-section-title">Business Profile</div>
+      <div className="placeholder-section">
+        <div className="placeholder-section-title">Business Profile</div>
         <div className="form-group"><label className="form-label">Business Name</label><input className="form-input" disabled placeholder="Your Business Name" /></div>
         <div className="form-group"><label className="form-label">Location / Region</label><input className="form-input" disabled placeholder="e.g. Auckland, NZ" /></div>
         <div className="form-group"><label className="form-label">Category</label><input className="form-input" disabled placeholder="e.g. Café, Plumber, Retailer…" /></div>
       </div>
-      <div className="skeleton-section">
-        <div className="skeleton-section-title">Notifications</div>
-        <div className="skeleton-bar medium" /><div className="skeleton-bar short" />
+      <div className="placeholder-section">
+        <div className="placeholder-section-title">Notifications</div>
+        <div className="placeholder-bar medium" /><div className="placeholder-bar short" />
       </div>
     </>
   )
