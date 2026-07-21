@@ -170,24 +170,32 @@ function Jobs() {
   const [postedJob, setPostedJob] = useState(null)
   const [jobStatus, setJobStatus] = useState('Not Posted')
   const [showModal, setShowModal] = useState(false)
+  const [titleError, setTitleError] = useState('')
+  const [descriptionError, setDescriptionError] = useState('')
+  const [categoryError, setCategoryError] = useState('')
+  const [locationError, setLocationError] = useState('')
 
   function validateForm() {
     if (!jobTitle) {
-      alert('Please enter a job title.')
+      setTitleError('Please enter a job title.')
       return false
     }
     if(!jobDescription){
-      alert('Please enter a job description.')
+      setDescriptionError('Please enter a job description.')
       return false
     }
     if(!tradeCategory){
-      alert('Please select a trade category.')
+      setCategoryError('Please enter a trade category.')
       return false
     }
     if(!jobLocation){
-      alert('Please enter a job location.')
+      setLocationError('Please enter a job location.')
       return false
     }
+    setTitleError('')
+    setDescriptionError('')
+    setCategoryError('')
+    setLocationError('')
     return true;
   }
     function submitJob() {
@@ -213,10 +221,38 @@ function Jobs() {
       </div>
       <div className="skeleton-section">
         <div className="skeleton-section-title">Post a Job</div>
-        <div className="form-group"><label className="form-label">Job Title</label><input className="form-input" value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} placeholder="e.g. Leaking tap repair" /></div>
-        <div className="form-group"><label className="form-label">Description</label><input className="form-input" value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Describe the job…" /></div>
-        <div className="form-group"><label className="form-label">Trade Category</label><input className="form-input" value={tradeCategory} onChange={(e) => setTradeCategory(e.target.value)} placeholder="Plumbing / Electrical / Carpentry…" /></div>
-        <div className="form-group"><label className="form-label">Job Location</label><input className="form-input" value={jobLocation} onChange={(e) => setJobLocation(e.target.value)} placeholder="Enter your location…" /></div>
+        <div className="form-group">
+          <label className="form-label">Job Title</label>
+          <input className="form-input" value={jobTitle} onChange={(e) => {
+            setJobTitle(e.target.value)
+            setTitleError('')
+          }} placeholder="e.g. Leaking tap repair" />
+          {titleError && <div className="error">{titleError}</div>}
+        </div>
+        <div className="form-group">
+          <label className="form-label">Description</label>
+          <input className="form-input" value={jobDescription} onChange={(e) => {
+            setJobDescription(e.target.value)
+            setDescriptionError('')
+          }} placeholder="Describe the job…" />
+          {descriptionError && <div className="error">{descriptionError}</div>}
+        </div>
+        <div className="form-group">
+          <label className="form-label">Trade Category</label>
+          <input className="form-input" value={tradeCategory} onChange={(e) => {
+            setTradeCategory(e.target.value)
+            setCategoryError('')
+          }} placeholder="Plumbing / Electrical / Carpentry…" />
+          {categoryError && <div className="error">{categoryError}</div>}
+        </div>
+        <div className="form-group">
+          <label className="form-label">Job Location</label>
+          <input className="form-input" value={jobLocation} onChange={(e) => {
+            setJobLocation(e.target.value)
+            setLocationError('')
+          }} placeholder="Enter your location…" />
+          {locationError && <div className="error">{locationError}</div>}
+        </div>
         <button className="btn-primary" onClick={submitJob}>
           Post Job
         </button>
