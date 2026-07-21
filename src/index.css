@@ -1,8 +1,3 @@
-/* ═══════════════════════════════════════════════════════════════════
-   LocalLink — Design Tokens (Brand Palette v1)
-   Source: LocalLink Visual Identity Palette
-════════════════════════════════════════════════════════════════════ */
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
@@ -399,6 +394,21 @@ body { min-height: 100vh; background: var(--bg); }
   color: var(--blue);
   font-weight: 600;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.auth-error {
+  background: #fff5f5;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  color: #c92a2a;
+  font-size: 13px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+
+.btn-primary:disabled {
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* ─── Stat strip ────────────────────────────────────────────────── */

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Routes, Route, Navigate, NavLink, Link, useNavigate } from 'react-router-dom'
 import mockBusinesses from '../../data/mockBusinesses'
 import { getDistanceKm } from '../../utils/distance'
+import LoginPage from '../auth/LoginPage'
+import ProtectedRoute from '../../auth/ProtectedRoute'
 
 export default function CustomerPortal() {
   return (
@@ -12,12 +14,19 @@ export default function CustomerPortal() {
           <Routes>
             {/* All Navigates use absolute paths (/home not "home") to prevent loop */}
             <Route index element={<Navigate to="/home" replace />} />
-            <Route path="home"    element={<Home />} />
+            <Route path="home" element={<Home />} />
             <Route path="loyalty" element={<Loyalty />} />
-            <Route path="jobs"    element={<Jobs />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="login"   element={<Login />} />
-            <Route path="*"       element={<Navigate to="/home" replace />} />
+            <Route path="jobs" element={<Jobs />} />
+            <Route
+              path="profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="*" element={<Navigate to="/home" replace />} />
           </Routes>
         </div>
       </main>
@@ -45,7 +54,7 @@ function CustomerNav() {
 const USER_LOCATION = { lat: -36.8485, lng: 174.7633 }
 
 const styles = {
-  main:    { minHeight: 'calc(100vh - 60px)', background: 'var(--bg)', padding: '40px 24px' },
+  main: { minHeight: 'calc(100vh - 60px)', background: 'var(--bg)', padding: '40px 24px' },
   content: { maxWidth: 860, margin: '0 auto', width: '100%' },
 }
 
@@ -208,13 +217,13 @@ function Loyalty() {
       </div>
       <div className="tab-row">
         <button className={`tab-btn${tab === 'inprogress' ? ' active' : ''}`} onClick={() => setTab('inprogress')}>In Progress</button>
-        <button className={`tab-btn${tab === 'completed'  ? ' active' : ''}`} onClick={() => setTab('completed')}>Completed</button>
+        <button className={`tab-btn${tab === 'completed' ? ' active' : ''}`} onClick={() => setTab('completed')}>Completed</button>
       </div>
       {tab === 'inprogress' ? (
         <div className="skeleton-section">
           <div className="skeleton-section-title">In Progress</div>
           <div className="skeleton-grid">
-            {[1,2,3].map(i => (
+            {[1, 2, 3].map(i => (
               <div className="skeleton-card" key={i}>
                 <div className="sk-icon" />
                 <div className="skeleton-bar short" style={{ margin: 0 }} />
