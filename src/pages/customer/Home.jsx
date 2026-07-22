@@ -4,17 +4,7 @@ import { useState } from "react";
 
 const USER_LOCATION = { lat: -36.8485, lng: 174.7633 };
 
-const styles = {
-  main: {
-    minHeight: "calc(100vh - 60px)",
-    background: "var(--bg)",
-    padding: "40px 24px",
-  },
-  content: { maxWidth: 860, margin: "0 auto", width: "100%" },
-};
-
-
-function Home() {
+export default function Home() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [radius, setRadius] = useState(5);
   const filters = ["All", "Food & Drink", "Retail", "Services", "Health", "Trades"];

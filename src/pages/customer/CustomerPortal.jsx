@@ -1,7 +1,5 @@
-import { useState } from "react";
+//import { useState } from "react";
 import { Routes, Route, Navigate, NavLink, Link } from "react-router-dom";
-import mockBusinesses from "../../data/mockBusinesses";
-import { getDistanceKm } from "../../utils/distance";
 import LoginPage from "../auth/LoginPage";
 import ProtectedRoute from "../../auth/ProtectedRoute";
 import Loyalty from "./Loyalty";
