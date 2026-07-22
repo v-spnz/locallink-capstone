@@ -587,7 +587,6 @@ function Profile() {
     </>
   );
 }
-
 // Helper: emoji icon for categories
 function getCategoryEmoji(category) {
   const map = {
