@@ -93,21 +93,7 @@ const styles = {
 
 function Login() {
   const navigate = useNavigate();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  async function handleLogout() {
-    setIsLoggingOut(true);
-
-    const { error } = await supabase.auth.signOut();
-
-    if (error) {
-      console.error("Logout failed:", error.message);
-      setIsLoggingOut(false);
-      return;
-    }
-
-    navigate("/login", { replace: true });
-  }
   return (
     <div style={{ maxWidth: 420, margin: "0 auto" }}>
       <div
