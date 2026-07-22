@@ -58,8 +58,8 @@ export default function Jobs() {
         <h2>Services</h2>
         <p>Post a job and receive quotes from local tradespeople in your area.</p>
       </div>
-      <div className="skeleton-section">
-        <div className="skeleton-section-title">Post a Job</div>
+      <div className="placeholder-section">
+        <div className="placeholder-section-title is-complete">Post a Job</div>
         <div className="form-group">
           <label className="form-label">Job Title</label>
           <input className="form-input" value={jobTitle} onChange={(e) => {
@@ -96,13 +96,13 @@ export default function Jobs() {
           Post Job
         </button>
       </div>
-      <div className="skeleton-section">
-        <div className="skeleton-section-title">Quotes Received</div>
-        <div className="skeleton-box">Quotes list — component TBD</div>
+      <div className="placeholder-section">
+        <div className="placeholder-section-title">Quotes Received</div>
+        <div className="placeholder-box">Quotes list — component TBD</div>
       </div>
-      <div className="skeleton-section">
-        <div className="skeleton-section-title" style={{ color: jobStatus === 'Job Posted' ? 'green' : 'red' }}>Job Status: {jobStatus}</div>
-        <div className="skeleton-bar medium" /><div className="skeleton-bar short" />
+      <div className="placeholder-section">
+        <div className="placeholder-section-title" style={{ color: jobStatus === 'Job Posted' ? 'green' : 'red' }}>Job Status: {jobStatus}</div>
+        <div className="placeholder-bar medium" /><div className="placeholder-bar short" />
         {postedJob && (
           <div className="job-status">
             <div><strong>Job Title:</strong> {postedJob.title}</div>

@@ -58,6 +58,23 @@ body { min-height: 100vh; background: var(--bg); }
 }
 .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); }
 
+.btn-danger {
+  background: #c92a2a;
+  color: var(--white);
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 24px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-danger:hover { background: #a61e1e; transform: translateY(-1px); }
+.btn-danger:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
 .btn-secondary {
   background: transparent;
   color: var(--blue);
@@ -260,8 +277,8 @@ body { min-height: 100vh; background: var(--bg); }
   box-shadow: var(--shadow);
 }
 
-/* ─── Skeleton ──────────────────────────────────────────────────── */
-.skeleton-section {
+/* ─── Placeholder ───────────────────────────────────────────────── */
+.placeholder-section {
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -270,7 +287,7 @@ body { min-height: 100vh; background: var(--bg); }
   box-shadow: var(--shadow);
 }
 
-.skeleton-section-title {
+.placeholder-section-title {
   font-size: 12px;
   font-weight: 600;
   letter-spacing: .08em;
@@ -281,7 +298,7 @@ body { min-height: 100vh; background: var(--bg); }
   align-items: center;
   gap: 8px;
 }
-.skeleton-section-title::after {
+.placeholder-section-title::after {
   content: 'placeholder';
   background: var(--bg);
   color: var(--text-muted);
@@ -290,19 +307,22 @@ body { min-height: 100vh; background: var(--bg); }
   border-radius: 10px;
   border: 1px solid var(--border);
 }
+.placeholder-section-title.is-complete::after {
+  content: none;
+}
 
-.skeleton-bar {
+.placeholder-bar {
   height: 13px;
   background: var(--bg);
   border-radius: 6px;
   margin-bottom: 10px;
   border: 1px solid var(--border);
 }
-.skeleton-bar.short  { width: 40%; }
-.skeleton-bar.medium { width: 65%; }
-.skeleton-bar.full   { width: 100%; }
+.placeholder-bar.short  { width: 40%; }
+.placeholder-bar.medium { width: 65%; }
+.placeholder-bar.full   { width: 100%; }
 
-.skeleton-box {
+.placeholder-box {
   height: 80px;
   background: var(--bg);
   border-radius: var(--radius);
@@ -314,16 +334,16 @@ body { min-height: 100vh; background: var(--bg); }
   font-size: 13px;
   font-weight: 500;
 }
-.skeleton-box.tall { height: 160px; }
+.placeholder-box.tall { height: 160px; }
 
-.skeleton-grid {
+.placeholder-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 12px;
   margin-top: 8px;
 }
 
-.skeleton-card {
+.placeholder-card {
   background: var(--bg);
   border: 1.5px dashed var(--border);
   border-radius: var(--radius);
@@ -332,7 +352,7 @@ body { min-height: 100vh; background: var(--bg); }
   flex-direction: column;
   gap: 8px;
 }
-.skeleton-card .sk-icon {
+.placeholder-card .placeholder-icon {
   width: 36px; height: 36px;
   background: var(--border);
   border-radius: 8px;
@@ -352,8 +372,8 @@ body { min-height: 100vh; background: var(--bg); }
   align-items: flex-start;
 }
 
-/* ─── Skeleton badge ────────────────────────────────────────────── */
-.skeleton-badge {
+/* ─── Placeholder badge ─────────────────────────────────────────── */
+.placeholder-badge {
   position: fixed;
   bottom: 18px;
   right: 18px;

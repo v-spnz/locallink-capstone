@@ -27,22 +27,22 @@ export default function Loyalty() {
         <button className={`tab-btn${tab === 'completed' ? ' active' : ''}`} onClick={() => setTab('completed')}>Completed</button>
       </div>
       {tab === 'inprogress' ? (
-        <div className="skeleton-section">
-          <div className="skeleton-section-title">In Progress</div>
-          <div className="skeleton-grid">
+        <div className="placeholder-section">
+          <div className="placeholder-section-title">In Progress</div>
+          <div className="placeholder-grid">
             {[1, 2, 3].map(i => (
-              <div className="skeleton-card" key={i}>
-                <div className="sk-icon" />
-                <div className="skeleton-bar short" style={{ margin: 0 }} />
+              <div className="placeholder-card" key={i}>
+                <div className="placeholder-icon" />
+                <div className="placeholder-bar short" style={{ margin: 0 }} />
                 <div className="progress-bar-track"><div className="progress-bar-fill" style={{ width: `${30 + i * 20}%` }} /></div>
               </div>
             ))}
           </div>
         </div>
       ) : (
-        <div className="skeleton-section">
-          <div className="skeleton-section-title">Completed</div>
-          <div className="skeleton-box">Completed programmes list — component TBD</div>
+        <div className="placeholder-section">
+          <div className="placeholder-section-title">Completed</div>
+          <div className="placeholder-box">Completed programmes list — component TBD</div>
         </div>
       )}
     </>
