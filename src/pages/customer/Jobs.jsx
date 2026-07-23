@@ -1,5 +1,6 @@
 import Modal from '../../components/ui/Modal'
 import { useState } from 'react'
+import ComboBox from '../../components/ui/ComboBox'
 
 export default function Jobs() {
   const [jobTitle, setJobTitle] = useState('')
@@ -90,27 +91,38 @@ export default function Jobs() {
         </div>
         <div className="form-group">
           <label className="form-label">Trade Category</label>
-          <input
-            className="form-input"
+          <select
+            className="selectedTrade"
             value={tradeCategory}
             onChange={(e) => {
               setTradeCategory(e.target.value)
               setCategoryError('')
             }}
-            placeholder="Plumbing / Electrical / Carpentry…"
-          />
+          >
+            <option value="">Select a category</option>
+            <option value="Plumbing">Plumbing</option>
+            <option value="Electrical">Electrical</option>
+            <option value="Carpentry">Carpentry</option>
+          </select>
           {categoryError && <div className="error">{categoryError}</div>}
         </div>
         <div className="form-group">
           <label className="form-label">Job Location</label>
-          <input
-            className="form-input"
+          <ComboBox
+            options={[
+              'Auckland, NZ',
+              'Wellington, NZ',
+              'Christchurch, NZ',
+              'Hamilton, NZ',
+              'Tauranga, NZ'
+            ]}
+            className="location-combobox"
+            placeholder="Select a location..."
             value={jobLocation}
-            onChange={(e) => {
-              setJobLocation(e.target.value)
+            onChange={(value) => {
+              setJobLocation(value)
               setLocationError('')
             }}
-            placeholder="Enter your location…"
           />
           {locationError && <div className="error">{locationError}</div>}
         </div>
