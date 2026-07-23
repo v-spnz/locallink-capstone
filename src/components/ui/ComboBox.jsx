@@ -1,12 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function ComboBox({ options = [], placeholder = "Select an option...", value, onChange }) {
-  const [query, setQuery] = useState(value || "");
   const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    setQuery(value || "");
-  }, [value]);
+  const query = value || "";
 
   const filteredOptions = query === "" 
     ? options 
@@ -15,7 +11,6 @@ export default function ComboBox({ options = [], placeholder = "Select an option
       );
 
   const handleSelect = (option) => {
-    setQuery(option);
     setIsOpen(false);
     onChange?.(option);
   };
@@ -27,11 +22,8 @@ export default function ComboBox({ options = [], placeholder = "Select an option
         value={query}
         onChange={(e) => {
           const newValue = e.target.value;
-          setQuery(newValue);
+          onChange?.(newValue);
           setIsOpen(true);
-          if (newValue === "") {
-            onChange?.("");
-          }
         }}
         onFocus={() => setIsOpen(true)}
         onBlur={() => setTimeout(() => setIsOpen(false), 200)}
