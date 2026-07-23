@@ -91,19 +91,23 @@ export default function Jobs() {
         </div>
         <div className="form-group">
           <label className="form-label">Trade Category</label>
-          <select
-            className="selectedTrade"
+          <ComboBox
+            options={[
+              'Plumbing',
+              'Electrical',
+              'Carpentry',
+              'Painting',
+              'Landscaping',
+              'Roofing'
+            ]}
+            className="category-combobox"
+            placeholder="Select a category..."
             value={tradeCategory}
-            onChange={(e) => {
-              setTradeCategory(e.target.value)
+            onChange={(value) => {
+              setTradeCategory(value)
               setCategoryError('')
             }}
-          >
-            <option value="">Select a category</option>
-            <option value="Plumbing">Plumbing</option>
-            <option value="Electrical">Electrical</option>
-            <option value="Carpentry">Carpentry</option>
-          </select>
+          />
           {categoryError && <div className="error">{categoryError}</div>}
         </div>
         <div className="form-group">
@@ -136,13 +140,11 @@ export default function Jobs() {
       </div>
       <div className="placeholder-section">
         <div
-          className="placeholder-section-title"
+          className="job-status-header"
           style={{ color: jobStatus === 'Job Posted' ? 'green' : 'red' }}
         >
           Job Status: {jobStatus}
         </div>
-        <div className="placeholder-bar medium" />
-        <div className="placeholder-bar short" />
         {postedJob && (
           <div className="job-status">
             <div>

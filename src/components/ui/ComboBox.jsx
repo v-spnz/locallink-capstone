@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function ComboBox({ options = [], placeholder = "Select an option...", value, onChange }) {
-  const [query, setQuery] = useState(value !== undefined ? value : "");
+  const [query, setQuery] = useState(value || "");
   const [isOpen, setIsOpen] = useState(false);
 
-  const displayValue = value !== undefined ? value : query;
+  useEffect(() => {
+    setQuery(value || "");
+  }, [value]);
 
   const filteredOptions = query === "" 
     ? options 
@@ -15,27 +17,24 @@ export default function ComboBox({ options = [], placeholder = "Select an option
   const handleSelect = (option) => {
     setQuery(option);
     setIsOpen(false);
-    if (onChange) {
-      onChange(option);
-    }
+    onChange?.(option);
   };
 
   return (
     <div style={{ position: 'relative', width: '250px', fontFamily: 'sans-serif' }}>
-      {}
       <input
         type="text"
-        value={displayValue}
+        value={query}
         onChange={(e) => {
-            const newValue = e.target.value;
-            setQuery(newValue);
-            setIsOpen(true);
-            if (newValue === "") {
-                onChange && onChange(""); 
-            }
+          const newValue = e.target.value;
+          setQuery(newValue);
+          setIsOpen(true);
+          if (newValue === "") {
+            onChange?.("");
+          }
         }}
         onFocus={() => setIsOpen(true)}
-        onBlur={() => setTimeout(() => setIsOpen(false), 200)} 
+        onBlur={() => setTimeout(() => setIsOpen(false), 200)}
         placeholder={placeholder}
         style={{
           width: '100%',
@@ -60,10 +59,7 @@ export default function ComboBox({ options = [], placeholder = "Select an option
             <div
               key={option}
               onClick={() => handleSelect(option)}
-              style={{
-                padding: '8px',
-                cursor: 'pointer'
-              }}
+              style={{ padding: '8px', cursor: 'pointer' }}
             >
               {option}
             </div>
@@ -71,5 +67,5 @@ export default function ComboBox({ options = [], placeholder = "Select an option
         </div>
       )}
     </div>
-    );
+  );
 }
