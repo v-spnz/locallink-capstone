@@ -1,9 +1,5 @@
 import { useState } from 'react'
-import {
-  Navigate,
-  useLocation,
-  useNavigate,
-} from 'react-router-dom'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import useAuth from '../../auth/useAuth'
 
@@ -12,8 +8,7 @@ export default function LoginPage() {
   const location = useLocation()
   const { user, isLoading: isSessionLoading } = useAuth()
 
-  const destination =
-    location.state?.from?.pathname ?? '/profile'
+  const destination = location.state?.from?.pathname ?? '/profile'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -26,11 +21,10 @@ export default function LoginPage() {
     setIsSubmitting(true)
 
     try {
-      const { error: signInError } =
-        await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        })
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      })
 
       if (signInError) {
         setError('The email or password you entered is incorrect.')
@@ -47,9 +41,7 @@ export default function LoginPage() {
 
   if (isSessionLoading) {
     return (
-      <div style={{ textAlign: 'center', padding: 40 }}>
-        Checking session…
-      </div>
+      <div style={{ textAlign: 'center', padding: 40 }}>Checking session…</div>
     )
   }
 

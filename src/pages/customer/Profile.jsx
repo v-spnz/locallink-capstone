@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -31,13 +30,23 @@ export default function Profile() {
         <p>Manage your personal details and location preferences.</p>
       </div>
       <div className="placeholder-section">
-        <div className="placeholder-section-title is-complete">Profile Details</div>
-        <div className="form-group"><label className="form-label">Full Name</label><input className="form-input" disabled placeholder="Your Name" /></div>
-        <div className="form-group"><label className="form-label">Email</label><input className="form-input" disabled placeholder="you@email.com" /></div>
+        <div className="placeholder-section-title is-complete">
+          Profile Details
+        </div>
+        <div className="form-group">
+          <label className="form-label">Full Name</label>
+          <input className="form-input" disabled placeholder="Your Name" />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Email</label>
+          <input className="form-input" disabled placeholder="you@email.com" />
+        </div>
       </div>
       <div className="placeholder-section">
         <div className="placeholder-section-title">Location Range Filter</div>
-        <div className="placeholder-box">Range filter slider — component TBD</div>
+        <div className="placeholder-box">
+          Range filter slider — component TBD
+        </div>
       </div>
 
       {logoutError && <div className="error">{logoutError}</div>}
