@@ -7,20 +7,12 @@ export default function ProtectedRoute({ children }) {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: 'center', padding: 40 }}>
-        Loading account…
-      </div>
+      <div style={{ textAlign: 'center', padding: 40 }}>Loading account…</div>
     )
   }
 
   if (!user) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-        state={{ from: location }}
-      />
-    )
+    return <Navigate to="/login" replace state={{ from: location }} />
   }
 
   return children

@@ -10,11 +10,11 @@
 
 export const LINKS = {
   // Landing site — the public-facing entry point
-  landing: "http://localhost:5173",             // TODO: replace with client URL
+  landing: 'http://localhost:5173', // TODO: replace with client URL
 
   // Business portal — separate site for business owners
-  businessPortal: "http://localhost:5173/business", // TODO: replace with client URL
+  businessPortal: 'http://localhost:5173/business', // TODO: replace with client URL
 
   // Customer portal — separate site for consumers
-  customerPortal: "http://localhost:5173/customer", // TODO: replace with client URL
-};
+  customerPortal: 'http://localhost:5173/customer', // TODO: replace with client URL
+}
