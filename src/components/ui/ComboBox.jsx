@@ -1,12 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function ComboBox({ options = [], placeholder = "Select an option...", value, onChange }) {
-  const [query, setQuery] = useState(value || "");
+  const [query, setQuery] = useState(value !== undefined ? value : "");
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    setQuery(value || "");
-  }, [value]);
+  const displayValue = value !== undefined ? value : query;
 
   const filteredOptions = query === "" 
     ? options 
@@ -27,7 +25,7 @@ export default function ComboBox({ options = [], placeholder = "Select an option
       {}
       <input
         type="text"
-        value={query}
+        value={displayValue}
         onChange={(e) => {
             const newValue = e.target.value;
             setQuery(newValue);
