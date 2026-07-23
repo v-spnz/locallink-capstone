@@ -58,16 +58,40 @@ export default function Profile() {
           Profile Details
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="profile-first-name">First Name</label>
-          <input id="profile-first-name" className="form-input" disabled value={profile?.first_name ?? user.user_metadata?.first_name ?? ''} placeholder="First name" />
+          <label className="form-label" htmlFor="profile-first-name">
+            First Name
+          </label>
+          <input
+            id="profile-first-name"
+            className="form-input"
+            disabled
+            value={profile?.first_name ?? user.user_metadata?.first_name ?? ''}
+            placeholder="First name"
+          />
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="profile-last-name">Last Name</label>
-          <input id="profile-last-name" className="form-input" disabled value={profile?.last_name ?? user.user_metadata?.last_name ?? ''} placeholder="Last name" />
+          <label className="form-label" htmlFor="profile-last-name">
+            Last Name
+          </label>
+          <input
+            id="profile-last-name"
+            className="form-input"
+            disabled
+            value={profile?.last_name ?? user.user_metadata?.last_name ?? ''}
+            placeholder="Last name"
+          />
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="profile-email">Email</label>
-          <input id="profile-email" className="form-input" disabled value={user.email ?? ''} placeholder="you@email.com" />
+          <label className="form-label" htmlFor="profile-email">
+            Email
+          </label>
+          <input
+            id="profile-email"
+            className="form-input"
+            disabled
+            value={user.email ?? ''}
+            placeholder="you@email.com"
+          />
         </div>
       </div>
       <div className="placeholder-section">
