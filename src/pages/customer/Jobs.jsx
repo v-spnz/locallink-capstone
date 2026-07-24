@@ -1,19 +1,26 @@
 import Modal from '../../components/ui/Modal'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import ComboBox from '../../components/ui/ComboBox'
+import suburbsData from '../../data/Suburbs'
 
 export default function Jobs() {
   const [jobTitle, setJobTitle] = useState('')
   const [jobDescription, setJobDescription] = useState('')
   const [tradeCategory, setTradeCategory] = useState('')
-  const [jobLocation, setJobLocation] = useState('')
+  const [jobCity, setJobCity] = useState('')
+  const [jobSuburb, setJobSuburb] = useState('')
+  const suburbOptions = useMemo(
+    () => (jobCity && suburbsData[jobCity] ? suburbsData[jobCity] : []),
+    [jobCity],
+  )
   const [postedJob, setPostedJob] = useState(null)
   const [jobStatus, setJobStatus] = useState('Not Posted')
   const [showModal, setShowModal] = useState(false)
   const [titleError, setTitleError] = useState('')
   const [descriptionError, setDescriptionError] = useState('')
   const [categoryError, setCategoryError] = useState('')
-  const [locationError, setLocationError] = useState('')
+  const [cityError, setCityError] = useState('')
+  const [suburbError, setSuburbError] = useState('')
 
   function validateForm() {
     if (!jobTitle) {
@@ -28,14 +35,19 @@ export default function Jobs() {
       setCategoryError('Please enter a trade category.')
       return false
     }
-    if (!jobLocation) {
-      setLocationError('Please enter a job location.')
+    if (!jobCity) {
+      setCityError('Please enter a job city.')
+      return false
+    }
+    if (!jobSuburb) {
+      setSuburbError('Please enter a job suburb.')
       return false
     }
     setTitleError('')
     setDescriptionError('')
     setCategoryError('')
-    setLocationError('')
+    setCityError('')
+    setSuburbError('')
     return true
   }
   function submitJob() {
@@ -47,7 +59,8 @@ export default function Jobs() {
         title: jobTitle,
         description: jobDescription,
         category: tradeCategory,
-        location: jobLocation,
+        city: jobCity,
+        suburb: jobSuburb,
       })
       setJobStatus('Job Posted')
     }
@@ -98,7 +111,7 @@ export default function Jobs() {
               'Carpentry',
               'Painting',
               'Landscaping',
-              'Roofing'
+              'Roofing',
             ]}
             className="category-combobox"
             placeholder="Select a category..."
@@ -111,24 +124,50 @@ export default function Jobs() {
           {categoryError && <div className="error">{categoryError}</div>}
         </div>
         <div className="form-group">
-          <label className="form-label">Job Location</label>
+          <label className="form-label">Job City</label>
           <ComboBox
             options={[
-              'Auckland, NZ',
-              'Wellington, NZ',
-              'Christchurch, NZ',
-              'Hamilton, NZ',
-              'Tauranga, NZ'
+              'Auckland',
+              'Wellington',
+              'Christchurch',
+              'Hamilton',
+              'Tauranga',
+              'Dunedin',
+              'Napier',
+              'Hastings',
+              'Palmerston North',
+              'New Plymouth',
+              'Nelson',
+              'Rotorua',
+              'Whangarei',
+              'Invercargill',
+              'Queenstown',
+              'Porirua',
             ]}
-            className="location-combobox"
-            placeholder="Select a location..."
-            value={jobLocation}
+            className="city-combobox"
+            placeholder="Select a city..."
+            value={jobCity}
             onChange={(value) => {
-              setJobLocation(value)
-              setLocationError('')
+              setJobCity(value)
+              setCityError('')
+              setJobSuburb('')
             }}
           />
-          {locationError && <div className="error">{locationError}</div>}
+          {cityError && <div className="error">{cityError}</div>}
+        </div>
+        <div className="form-group">
+          <label className="form-label">Job Suburb</label>
+          <ComboBox
+            options={suburbOptions}
+            className="suburb-combobox"
+            placeholder="Select a suburb..."
+            value={jobSuburb}
+            onChange={(value) => {
+              setJobSuburb(value)
+              setSuburbError('')
+            }}
+          />
+          {suburbError && <div className="error">{suburbError}</div>}
         </div>
         <button className="btn-primary" onClick={submitJob}>
           Post Job
@@ -157,7 +196,10 @@ export default function Jobs() {
               <strong>Category:</strong> {postedJob.category}
             </div>
             <div>
-              <strong>Location:</strong> {postedJob.location}
+              <strong>City:</strong> {postedJob.city}
+            </div>
+            <div>
+              <strong>Suburb:</strong> {postedJob.suburb}
             </div>
           </div>
         )}
