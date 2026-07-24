@@ -252,6 +252,10 @@ export default function Jobs() {
           </div>
         </div>
       )}
+      <div className="placeholder-section">
+        <div className="placeholder-section-title">Quotes Received</div>
+        <div className="placeholder-box">Quotes list — component TBD</div>
+      </div>
 
       <div className="placeholder-section">
         <div
