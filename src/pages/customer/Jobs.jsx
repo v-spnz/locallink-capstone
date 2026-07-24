@@ -9,11 +9,13 @@ export default function Jobs() {
   const [tradeCategory, setTradeCategory] = useState('')
   const [jobCity, setJobCity] = useState('')
   const [jobSuburb, setJobSuburb] = useState('')
+  const [jobPostedDistance, setJobPostedDistance] = useState('')
   const suburbOptions = useMemo(
     () => (jobCity && suburbsData[jobCity] ? suburbsData[jobCity] : []),
     [jobCity],
   )
   const [pendingJob, setPendingJob] = useState(null)
+  const [editingJob, setEditingJob] = useState(null)
   const [jobStatus, setJobStatus] = useState('Not Posted')
   const [step, setStep] = useState('form')
   const [successMessage, setSuccessMessage] = useState('')
@@ -23,6 +25,7 @@ export default function Jobs() {
   const [categoryError, setCategoryError] = useState('')
   const [cityError, setCityError] = useState('')
   const [suburbError, setSuburbError] = useState('')
+  const [distanceError, setDistanceError] = useState('')
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -31,6 +34,17 @@ export default function Jobs() {
 
     return () => clearTimeout(timer)
   }, [successMessage])
+
+  function handleEditJob(job) {
+    setEditingJob(job)
+    setJobTitle(job.title)
+    setJobDescription(job.description)
+    setTradeCategory(job.category)
+    setJobCity(job.city)
+    setJobSuburb(job.suburb)
+    setJobPostedDistance(job.postedDistance)
+    setStep('form')
+  }
 
   function validateForm() {
     if (!jobTitle) {
@@ -53,11 +67,16 @@ export default function Jobs() {
       setSuburbError('Please enter a job suburb.')
       return false
     }
+    if (!jobPostedDistance) {
+      setDistanceError('Please enter a posted distance.')
+      return false
+    }
     setTitleError('')
     setDescriptionError('')
     setCategoryError('')
     setCityError('')
     setSuburbError('')
+    setDistanceError('')
     return true
   }
 
@@ -72,6 +91,7 @@ export default function Jobs() {
       category: tradeCategory,
       city: jobCity,
       suburb: jobSuburb,
+      postedDistance: jobPostedDistance,
     })
     setStep('review')
   }
@@ -81,17 +101,30 @@ export default function Jobs() {
   }
 
   function handleConfirmPost() {
-    setPostedJobs((prevJobs) => [...prevJobs, pendingJob])
-    setJobStatus('Job Posted')
-    setPendingJob(null)
-    setJobTitle('')
-    setJobDescription('')
-    setTradeCategory('')
-    setJobCity('')
-    setJobSuburb('')
-    setStep('form')
-    setSuccessMessage('Job posted successfully!')
+  if (editingJob) {
+    setPostedJobs((prevJobs) =>
+      prevJobs.map((job) =>
+        job.id === editingJob.id ? { ...pendingJob, id: editingJob.id } : job,
+      ),
+    )
+    setEditingJob(null)
+  } else {
+    setPostedJobs((prevJobs) => [
+      ...prevJobs,
+      { ...pendingJob, id: Date.now() },
+    ])
   }
+  setJobStatus('Job Posted')
+  setPendingJob(null)
+  setJobTitle('')
+  setJobDescription('')
+  setTradeCategory('')
+  setJobCity('')
+  setJobSuburb('')
+  setJobPostedDistance('')
+  setStep('form')
+  setSuccessMessage(editingJob ? 'Job updated successfully!' : 'Job posted successfully!')
+}
 
   return (
     <>
@@ -203,6 +236,20 @@ export default function Jobs() {
             />
             {suburbError && <div className="error">{suburbError}</div>}
           </div>
+          <div className="form-group">
+            <label className="form-label">Posted Distance (km)</label>
+            <ComboBox
+              options={['1km', '2km', '3km', '4km', '5km', '6km', '7km', '8km', '9km', '10km']}
+              className="distance-combobox"
+              value={jobPostedDistance}
+              onChange={(value) => {
+                setJobPostedDistance(value)
+                setDistanceError('')
+              }}
+              placeholder="e.g. 5km"
+            />
+            {distanceError && <div className="error">{distanceError}</div>}
+          </div>
 
           <button type="submit" className="btn-primary">
             Post Job
@@ -233,7 +280,7 @@ export default function Jobs() {
           <ReviewRow label="Trade Category" value={pendingJob.category} />
           <ReviewRow label="City" value={pendingJob.city} />
           <ReviewRow label="Suburb" value={pendingJob.suburb} />
-
+          <ReviewRow label="Posted Distance" value={pendingJob.postedDistance} />
           <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
             <button
               type="button"
@@ -281,6 +328,7 @@ export default function Jobs() {
                 </div>
                 <div style={{ fontSize: 12, color: '#999' }}>
                   <p>Time Posted: {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</p>
+                  <p>Posted Distance: {job.postedDistance}</p>
                 </div>
                 <div style={{ fontSize: 12, color: '#999' }}>
                   <button
@@ -292,6 +340,15 @@ export default function Jobs() {
                     }}
                   >
                     Repost Job
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => {
+                      handleEditJob(job)
+                    }}
+                  >`
+                    Edit Job
                   </button>
                 </div>
               </div>
