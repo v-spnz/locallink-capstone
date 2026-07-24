@@ -14,6 +14,7 @@ export default function Jobs() {
     [jobCity],
   )
   const [postedJob, setPostedJob] = useState(null)
+  const [pendingJob, setPendingJob] = useState(null)
   const [jobStatus, setJobStatus] = useState('Not Posted')
   const [showModal, setShowModal] = useState(false)
   const [titleError, setTitleError] = useState('')
@@ -55,15 +56,20 @@ export default function Jobs() {
       return false
     } else {
       setShowModal(true)
-      setPostedJob({
+      setPendingJob({
         title: jobTitle,
         description: jobDescription,
         category: tradeCategory,
         city: jobCity,
         suburb: jobSuburb,
       })
-      setJobStatus('Job Posted')
     }
+  }
+  function confirmJobPosting() {
+    setPostedJob(pendingJob)
+    setPendingJob(null)
+    setJobStatus('Job Posted')
+    setShowModal(false)
   }
 
   return (
@@ -204,7 +210,7 @@ export default function Jobs() {
           </div>
         )}
       </div>
-      {showModal && <Modal onClose={() => setShowModal(false)} />}
+      {showModal && <Modal onClose={() => setShowModal(false)} job={pendingJob} onConfirm={confirmJobPosting} />}
     </>
   )
 }
