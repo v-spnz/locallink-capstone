@@ -13,7 +13,6 @@ export default function Jobs() {
     () => (jobCity && suburbsData[jobCity] ? suburbsData[jobCity] : []),
     [jobCity],
   )
-  const [postedJob, setPostedJob] = useState(null)
   const [pendingJob, setPendingJob] = useState(null)
   const [jobStatus, setJobStatus] = useState('Not Posted')
   const [step, setStep] = useState('form')
