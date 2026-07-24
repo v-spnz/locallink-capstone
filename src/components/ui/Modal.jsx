@@ -1,4 +1,4 @@
-function Modal({ onClose, job, onConfirm }) {
+function Modal({ onClose, job, onConfirm, setSuccessMessage }) {
   return (
     <div className="fixed inset-0 bg-grey bg-opacity-30 backdrop-blur-sm flex justify-center items-center">
       <div className="bg-green-100 border-2 border-black rounded-xl px-20 py-16 flex flex-col gap-4 items-center mx-4">
@@ -22,6 +22,7 @@ function Modal({ onClose, job, onConfirm }) {
           className="mt-4 bg-blue-600 hover:bg-blue-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-600 text-white font-bold py-4 px-6 rounded-md justify-center items-center text-center"
           onClick={() => {
             onConfirm();
+            setSuccessMessage('Job has been successfully posted.');
           }}
         >
           Post

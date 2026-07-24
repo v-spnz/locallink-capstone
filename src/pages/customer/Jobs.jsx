@@ -1,9 +1,9 @@
-import Modal from '../../components/ui/Modal'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import ComboBox from '../../components/ui/ComboBox'
 import suburbsData from '../../data/Suburbs'
 
 export default function Jobs() {
+  const [postedJobs, setPostedJobs] = useState([])
   const [jobTitle, setJobTitle] = useState('')
   const [jobDescription, setJobDescription] = useState('')
   const [tradeCategory, setTradeCategory] = useState('')
@@ -16,12 +16,22 @@ export default function Jobs() {
   const [postedJob, setPostedJob] = useState(null)
   const [pendingJob, setPendingJob] = useState(null)
   const [jobStatus, setJobStatus] = useState('Not Posted')
-  const [showModal, setShowModal] = useState(false)
+  const [step, setStep] = useState('form')
+  const [successMessage, setSuccessMessage] = useState('')
+
   const [titleError, setTitleError] = useState('')
   const [descriptionError, setDescriptionError] = useState('')
   const [categoryError, setCategoryError] = useState('')
   const [cityError, setCityError] = useState('')
   const [suburbError, setSuburbError] = useState('')
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSuccessMessage('')
+    }, 2000)
+
+    return () => clearTimeout(timer)
+  }, [successMessage])
 
   function validateForm() {
     if (!jobTitle) {
@@ -51,25 +61,37 @@ export default function Jobs() {
     setSuburbError('')
     return true
   }
-  function submitJob() {
-    if (!validateForm()) {
-      return false
-    } else {
-      setShowModal(true)
-      setPendingJob({
-        title: jobTitle,
-        description: jobDescription,
-        category: tradeCategory,
-        city: jobCity,
-        suburb: jobSuburb,
-      })
-    }
+
+  function handleReview(event) {
+    event.preventDefault()
+    setSuccessMessage('')
+    if (!validateForm()) return
+
+    setPendingJob({
+      title: jobTitle,
+      description: jobDescription,
+      category: tradeCategory,
+      city: jobCity,
+      suburb: jobSuburb,
+    })
+    setStep('review')
   }
-  function confirmJobPosting() {
-    setPostedJob(pendingJob)
-    setPendingJob(null)
+
+  function handleBackToEdit() {
+    setStep('form')
+  }
+
+  function handleConfirmPost() {
+    setPostedJobs((prevJobs) => [...prevJobs, pendingJob])
     setJobStatus('Job Posted')
-    setShowModal(false)
+    setPendingJob(null)
+    setJobTitle('')
+    setJobDescription('')
+    setTradeCategory('')
+    setJobCity('')
+    setJobSuburb('')
+    setStep('form')
+    setSuccessMessage('Job posted successfully!')
   }
 
   return (
@@ -80,109 +102,158 @@ export default function Jobs() {
           Post a job and receive quotes from local tradespeople in your area.
         </p>
       </div>
-      <div className="placeholder-section">
-        <div className="placeholder-section-title is-complete">Post a Job</div>
-        <div className="form-group">
-          <label className="form-label">Job Title</label>
-          <input
-            className="form-input"
-            value={jobTitle}
-            onChange={(e) => {
-              setJobTitle(e.target.value)
-              setTitleError('')
+
+      {step === 'form' && (
+        <form onSubmit={handleReview} className="placeholder-section" noValidate>
+          <div className="placeholder-section-title is-complete">Post a Job</div>
+
+          <div className="form-group">
+            <label className="form-label">Job Title</label>
+            <input
+              className="form-input"
+              value={jobTitle}
+              onChange={(e) => {
+                setJobTitle(e.target.value)
+                setTitleError('')
+              }}
+              placeholder="e.g. Leaking tap repair"
+            />
+            {titleError && <div className="error">{titleError}</div>}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Description</label>
+            <input
+              className="form-input"
+              value={jobDescription}
+              onChange={(e) => {
+                setJobDescription(e.target.value)
+                setDescriptionError('')
+              }}
+              placeholder="Describe the job…"
+            />
+            {descriptionError && <div className="error">{descriptionError}</div>}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Trade Category</label>
+            <ComboBox
+              options={[
+                'Plumbing',
+                'Electrical',
+                'Carpentry',
+                'Painting',
+                'Landscaping',
+                'Roofing',
+              ]}
+              className="category-combobox"
+              placeholder="Select a category..."
+              value={tradeCategory}
+              onChange={(value) => {
+                setTradeCategory(value)
+                setCategoryError('')
+              }}
+            />
+            {categoryError && <div className="error">{categoryError}</div>}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Job City</label>
+            <ComboBox
+              options={[
+                'Auckland',
+                'Wellington',
+                'Christchurch',
+                'Hamilton',
+                'Tauranga',
+                'Dunedin',
+                'Napier',
+                'Hastings',
+                'Palmerston North',
+                'New Plymouth',
+                'Nelson',
+                'Rotorua',
+                'Whangarei',
+                'Invercargill',
+                'Queenstown',
+                'Porirua',
+              ]}
+              className="city-combobox"
+              placeholder="Select a city..."
+              value={jobCity}
+              onChange={(value) => {
+                setJobCity(value)
+                setCityError('')
+                setJobSuburb('')
+              }}
+            />
+            {cityError && <div className="error">{cityError}</div>}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Job Suburb</label>
+            <ComboBox
+              options={suburbOptions}
+              className="suburb-combobox"
+              placeholder="Select a suburb..."
+              value={jobSuburb}
+              onChange={(value) => {
+                setJobSuburb(value)
+                setSuburbError('')
+              }}
+            />
+            {suburbError && <div className="error">{suburbError}</div>}
+          </div>
+
+          <button type="submit" className="btn-primary">
+            Post Job
+          </button>
+          {successMessage && (
+          <p style={{ color: 'seagreen', marginTop: 10 }}>{successMessage}</p>
+        )}
+        </form>
+        
+      )}
+
+      {step === 'review' && pendingJob && (
+        <div className="placeholder-section">
+          <div className="placeholder-section-title">Review Job</div>
+          <p
+            style={{
+              fontSize: 13,
+              color: '#666',
+              marginTop: -6,
+              marginBottom: 14,
             }}
-            placeholder="e.g. Leaking tap repair"
-          />
-          {titleError && <div className="error">{titleError}</div>}
+          >
+            Please review the job details before posting.
+          </p>
+
+          <ReviewRow label="Job Title" value={pendingJob.title} />
+          <ReviewRow label="Description" value={pendingJob.description} />
+          <ReviewRow label="Trade Category" value={pendingJob.category} />
+          <ReviewRow label="City" value={pendingJob.city} />
+          <ReviewRow label="Suburb" value={pendingJob.suburb} />
+
+          <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={handleBackToEdit}
+            >
+              Back to Edit
+            </button>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={handleConfirmPost}
+            >
+              Confirm &amp; Post Job
+            </button>
+          </div>
         </div>
-        <div className="form-group">
-          <label className="form-label">Description</label>
-          <input
-            className="form-input"
-            value={jobDescription}
-            onChange={(e) => {
-              setJobDescription(e.target.value)
-              setDescriptionError('')
-            }}
-            placeholder="Describe the job…"
-          />
-          {descriptionError && <div className="error">{descriptionError}</div>}
-        </div>
-        <div className="form-group">
-          <label className="form-label">Trade Category</label>
-          <ComboBox
-            options={[
-              'Plumbing',
-              'Electrical',
-              'Carpentry',
-              'Painting',
-              'Landscaping',
-              'Roofing',
-            ]}
-            className="category-combobox"
-            placeholder="Select a category..."
-            value={tradeCategory}
-            onChange={(value) => {
-              setTradeCategory(value)
-              setCategoryError('')
-            }}
-          />
-          {categoryError && <div className="error">{categoryError}</div>}
-        </div>
-        <div className="form-group">
-          <label className="form-label">Job City</label>
-          <ComboBox
-            options={[
-              'Auckland',
-              'Wellington',
-              'Christchurch',
-              'Hamilton',
-              'Tauranga',
-              'Dunedin',
-              'Napier',
-              'Hastings',
-              'Palmerston North',
-              'New Plymouth',
-              'Nelson',
-              'Rotorua',
-              'Whangarei',
-              'Invercargill',
-              'Queenstown',
-              'Porirua',
-            ]}
-            className="city-combobox"
-            placeholder="Select a city..."
-            value={jobCity}
-            onChange={(value) => {
-              setJobCity(value)
-              setCityError('')
-              setJobSuburb('')
-            }}
-          />
-          {cityError && <div className="error">{cityError}</div>}
-        </div>
-        <div className="form-group">
-          <label className="form-label">Job Suburb</label>
-          <ComboBox
-            options={suburbOptions}
-            className="suburb-combobox"
-            placeholder="Select a suburb..."
-            value={jobSuburb}
-            onChange={(value) => {
-              setJobSuburb(value)
-              setSuburbError('')
-            }}
-          />
-          {suburbError && <div className="error">{suburbError}</div>}
-        </div>
-        <button className="btn-primary" onClick={submitJob}>
-          Post Job
-        </button>
-      </div>
-      <div className="placeholder-section">
-        <div className="placeholder-section-title">Quotes Received</div>
-        <div className="placeholder-box">Quotes list — component TBD</div>
-      </div>
+      )}
+
       <div className="placeholder-section">
         <div
           className="job-status-header"
@@ -190,27 +261,37 @@ export default function Jobs() {
         >
           Job Status: {jobStatus}
         </div>
-        {postedJob && (
-          <div className="job-status">
-            <div>
-              <strong>Job Title:</strong> {postedJob.title}
-            </div>
-            <div>
-              <strong>Description:</strong> {postedJob.description}
-            </div>
-            <div>
-              <strong>Category:</strong> {postedJob.category}
-            </div>
-            <div>
-              <strong>City:</strong> {postedJob.city}
-            </div>
-            <div>
-              <strong>Suburb:</strong> {postedJob.suburb}
-            </div>
+        {postedJobs.length > 0 && (
+          <div style={{ marginTop: 10 }}>
+            {postedJobs.map((job) => (
+              <div
+                key={job.id}
+                style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}
+              >
+                <strong>{job.title}</strong> - {job.category}
+                <div style={{ fontSize: 13, color: '#666' }}>
+                  {job.description}
+                </div>
+                <div style={{ fontSize: 12, color: '#999' }}>
+                  {job.city}
+                  {job.suburb ? `, ${job.suburb}` : ''}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
-      {showModal && <Modal onClose={() => setShowModal(false)} job={pendingJob} onConfirm={confirmJobPosting} />}
     </>
+  )
+}
+
+function ReviewRow({ label, value }) {
+  return (
+    <div style={{ padding: '8px 0', borderBottom: '1px solid #eee' }}>
+      <div style={{ fontSize: 12, color: '#999', textTransform: 'uppercase' }}>
+        {label}
+      </div>
+      <div style={{ fontSize: 14 }}>{value || '-'}</div>
+    </div>
   )
 }
