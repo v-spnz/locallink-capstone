@@ -279,6 +279,21 @@ export default function Jobs() {
                   {job.city}
                   {job.suburb ? `, ${job.suburb}` : ''}
                 </div>
+                <div style={{ fontSize: 12, color: '#999' }}>
+                  <p>Time Posted: {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</p>
+                </div>
+                <div style={{ fontSize: 12, color: '#999' }}>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => {
+                      setPendingJob(job)
+                      setStep('review')
+                    }}
+                  >
+                    Repost Job
+                  </button>
+                </div>
               </div>
             ))}
           </div>
