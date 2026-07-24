@@ -3,6 +3,7 @@ import CustomerNav from '../../components/navigation/CustomerNav'
 import PortalLayout from '../../layouts/PortalLayout'
 import ProtectedRoute from '../../auth/ProtectedRoute'
 import LoginPage from '../auth/LoginPage'
+import RegisterPage from '../auth/RegisterPage'
 import Home from './Home'
 import Jobs from './Jobs'
 import Loyalty from './Loyalty'
@@ -25,6 +26,7 @@ export default function CustomerPortal() {
           }
         />
         <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </PortalLayout>

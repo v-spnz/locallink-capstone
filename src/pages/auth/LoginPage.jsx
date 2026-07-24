@@ -64,7 +64,11 @@ export default function LoginPage() {
           Login
         </button>
 
-        <button type="button" className="tab-btn" disabled>
+        <button
+          type="button"
+          className="tab-btn"
+          onClick={() => navigate('/register')}
+        >
           Register
         </button>
       </div>

@@ -1,11 +1,35 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import useAuth from '../../auth/useAuth'
 
 export default function Profile() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState('')
+  const [profile, setProfile] = useState(null)
+
+  useEffect(() => {
+    let active = true
+
+    async function loadProfile() {
+      const { data } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (active) {
+        setProfile(data)
+      }
+    }
+
+    loadProfile()
+    return () => {
+      active = false
+    }
+  }, [user.id])
 
   async function handleLogout() {
     setIsLoggingOut(true)
@@ -34,12 +58,40 @@ export default function Profile() {
           Profile Details
         </div>
         <div className="form-group">
-          <label className="form-label">Full Name</label>
-          <input className="form-input" disabled placeholder="Your Name" />
+          <label className="form-label" htmlFor="profile-first-name">
+            First Name
+          </label>
+          <input
+            id="profile-first-name"
+            className="form-input"
+            disabled
+            value={profile?.first_name ?? user.user_metadata?.first_name ?? ''}
+            placeholder="First name"
+          />
         </div>
         <div className="form-group">
-          <label className="form-label">Email</label>
-          <input className="form-input" disabled placeholder="you@email.com" />
+          <label className="form-label" htmlFor="profile-last-name">
+            Last Name
+          </label>
+          <input
+            id="profile-last-name"
+            className="form-input"
+            disabled
+            value={profile?.last_name ?? user.user_metadata?.last_name ?? ''}
+            placeholder="Last name"
+          />
+        </div>
+        <div className="form-group">
+          <label className="form-label" htmlFor="profile-email">
+            Email
+          </label>
+          <input
+            id="profile-email"
+            className="form-input"
+            disabled
+            value={user.email ?? ''}
+            placeholder="you@email.com"
+          />
         </div>
       </div>
       <div className="placeholder-section">
