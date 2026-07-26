@@ -252,7 +252,7 @@ export default function Jobs() {
           </div>
 
           <button type="submit" className="btn-primary">
-            Post Job
+            Preview Job Request
           </button>
           {successMessage && (
           <p style={{ color: 'seagreen', marginTop: 10 }}>{successMessage}</p>
@@ -263,7 +263,7 @@ export default function Jobs() {
 
       {step === 'review' && pendingJob && (
         <div className="placeholder-section">
-          <div className="placeholder-section-title">Review Job</div>
+          <div className="placeholder-section-title is-complete">Review Job</div>
           <p
             style={{
               fontSize: 13,
@@ -294,7 +294,7 @@ export default function Jobs() {
               className="btn-primary"
               onClick={handleConfirmPost}
             >
-              Confirm &amp; Post Job
+              Confirm &amp; Post Job Request
             </button>
           </div>
         </div>
