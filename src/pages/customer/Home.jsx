@@ -26,9 +26,24 @@ const myJobs = [
 ]
 
 const recentActivity = [
-  { id: 1, text: 'You redeemed a deal at', business: 'Parnell Village Bakery', time: '2 hours ago' },
-  { id: 2, text: 'You picked up a stamp at', business: 'Britomart Espresso Bar', time: 'Yesterday' },
-  { id: 3, text: 'You posted a job —', business: 'Kitchen tap repair', time: '2 days ago' },
+  {
+    id: 1,
+    text: 'You redeemed a deal at',
+    business: 'Parnell Village Bakery',
+    time: '2 hours ago',
+  },
+  {
+    id: 2,
+    text: 'You picked up a stamp at',
+    business: 'Britomart Espresso Bar',
+    time: 'Yesterday',
+  },
+  {
+    id: 3,
+    text: 'You posted a job —',
+    business: 'Kitchen tap repair',
+    time: '2 days ago',
+  },
 ]
 
 export default function Home() {
@@ -70,7 +85,13 @@ export default function Home() {
     <>
       <div className="home-header-row">
         <div>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 3 }}>
+          <p
+            style={{
+              fontSize: 13,
+              color: 'var(--text-muted)',
+              marginBottom: 3,
+            }}
+          >
             {getGreeting()}, Spencer
           </p>
           <h2 style={{ fontSize: 22, fontWeight: 700 }}>My LocalLink</h2>
@@ -93,7 +114,10 @@ export default function Home() {
           {/* Deals Near You - everything here goes to Deals & Discovery */}
           <div className="home-section-head">
             <h3>Deals near you</h3>
-            <button className="section-link-btn" onClick={() => navigate('/deals')}>
+            <button
+              className="section-link-btn"
+              onClick={() => navigate('/deals')}
+            >
               View all →
             </button>
           </div>
@@ -117,11 +141,15 @@ export default function Home() {
                 </div>
                 <div className="featured-deal-body">
                   <span className="deal-tag">{featuredBusiness.category}</span>
-                  <h4 className="featured-deal-name">{featuredBusiness.name}</h4>
-                  <p className="featured-deal-desc">{featuredBusiness.description}</p>
+                  <h4 className="featured-deal-name">
+                    {featuredBusiness.name}
+                  </h4>
+                  <p className="featured-deal-desc">
+                    {featuredBusiness.description}
+                  </p>
                   <div className="featured-deal-foot">
-                    <strong>{featuredBusiness.distance.toFixed(1)} km</strong> away
-                    · closest to you
+                    <strong>{featuredBusiness.distance.toFixed(1)} km</strong>{' '}
+                    away · closest to you
                   </div>
                 </div>
               </div>
@@ -153,7 +181,10 @@ export default function Home() {
           {/* Recent Activity - everything here goes to Profile */}
           <div className="home-section-head block-gap">
             <h3>Recent activity</h3>
-            <button className="section-link-btn" onClick={() => navigate('/profile')}>
+            <button
+              className="section-link-btn"
+              onClick={() => navigate('/profile')}
+            >
               View all →
             </button>
           </div>
@@ -177,22 +208,29 @@ export default function Home() {
         <aside>
           {/* Loyalty - mock display, every button goes to the Loyalty page */}
           <div className="home-side-card">
-            <p className="home-side-label">Loyalty · {loyaltyCard.businessName}</p>
+            <p className="home-side-label">
+              Loyalty · {loyaltyCard.businessName}
+            </p>
             <h3 className="home-side-title">Coffee Card</h3>
             <div className="stamp-row">
-              {Array.from({ length: loyaltyCard.stampsTotal }).map((_, index) => (
-                <span
-                  key={index}
-                  className={`stamp${index < loyaltyCard.stampsFilled ? ' filled' : ''}`}
-                />
-              ))}
+              {Array.from({ length: loyaltyCard.stampsTotal }).map(
+                (_, index) => (
+                  <span
+                    key={index}
+                    className={`stamp${index < loyaltyCard.stampsFilled ? ' filled' : ''}`}
+                  />
+                ),
+              )}
             </div>
             <p className="stamp-note">
               {stampsRemaining === 1
                 ? 'One more coffee and the next one is on us!'
                 : `${stampsRemaining} more coffees and the next one is on us!`}
             </p>
-            <button className="btn-outline" onClick={() => navigate('/loyalty')}>
+            <button
+              className="btn-outline"
+              onClick={() => navigate('/loyalty')}
+            >
               View all loyalty cards
             </button>
           </div>
@@ -204,7 +242,11 @@ export default function Home() {
               {myJobs.length} job{myJobs.length !== 1 ? 's' : ''} in progress
             </h3>
             {myJobs.map((job) => (
-              <button className="job-row" key={job.id} onClick={() => navigate('/jobs')}>
+              <button
+                className="job-row"
+                key={job.id}
+                onClick={() => navigate('/jobs')}
+              >
                 <div className="job-top">
                   <span className="job-name">{job.name}</span>
                   <span className="job-quotes">

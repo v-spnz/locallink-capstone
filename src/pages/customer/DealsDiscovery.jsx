@@ -39,7 +39,9 @@ export default function DealsDiscovery() {
   return (
     <>
       <div className="page-header">
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>
+        <p
+          style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}
+        >
           Deals & Discovery
         </p>
         <h2>Discover Local</h2>
