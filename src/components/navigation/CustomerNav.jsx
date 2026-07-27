@@ -3,8 +3,9 @@ import BrandLogo from './BrandLogo'
 
 const navigationItems = [
   ['/home', 'Home'],
-  ['/loyalty', 'Loyalty'],
-  ['/jobs', 'Services'],
+  ['/deals', 'Deals & Discovery'],
+  ['/loyalty', 'Loyalty Cards'],
+  ['/jobs', 'Service Marketplace'],
   ['/profile', 'Profile'],
 ]
 
