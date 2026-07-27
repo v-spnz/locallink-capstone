@@ -120,7 +120,7 @@ export default function CreateDeal() {
                 style={{
                   padding: '10px 0',
                   borderBottom: '1px solid #eee',
-                  curson: 'pointer',
+                  cursor: 'pointer',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
