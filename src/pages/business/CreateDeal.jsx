@@ -84,89 +84,6 @@ export default function CreateDeal() {
         </p>
       </div>
       {step === 'list' && (
-      {step === 'form' && (
-        <form
-          onSubmit={handleReview}
-          className="placeholder-section"
-          noValidate
-        >
-          <div className="placeholder-section-title">Deal Details</div>
-          <FormField
-            label="Deal Title"
-            value={title}
-            onChange={setTitle}
-            placeholder="e.g. 20% off this weekend"
-            error={errors.title}
-          />
-          <FormField
-            label="Description"
-            value={description}
-            onChange={setDescription}
-            placeholder="Short description..."
-            error={errors.description}
-          />
-          <FormField
-            label="Discount"
-            value={discount}
-            onChange={setDiscount}
-            placeholder="e.g. 20% off, Buy 1 Get 1 Free"
-            error={errors.discount}
-          />
-          <FormField
-            label="Expiry Date"
-            type="date"
-            value={expiryDate}
-            onChange={setExpiryDate}
-            error={errors.expiryDate}
-          />
-          <button type="submit" className="btn-primary">
-            Publish Deal
-          </button>
-          {successMessage && (
-            <p style={{ color: 'seagreen', marginTop: 10 }}>{successMessage}</p>
-          )}
-        </form>
-      )}
-
-      {step === 'review' && (
-        <div className="placeholder-section">
-          <div className="placeholder-section-title">Review Deal</div>
-          <p
-            style={{
-              fontSize: 13,
-              color: '#666',
-              marginTop: -6,
-              marginBottom: 14,
-            }}
-          >
-            Please review the deal details before publishing.
-          </p>
-
-          <ReviewRow label="Deal Title" value={title} />
-          <ReviewRow label="Description" value={description} />
-          <ReviewRow label="Discount" value={discount} />
-          <ReviewRow label="Expiry Date" value={expiryDate} />
-
-          <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={handleBackToEdit}
-            >
-              Back to Edit
-            </button>
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={handleConfirmPublish}
-            >
-              Confirm &amp; Publish
-            </button>
-          </div>
-        </div>
-      )}
-
-      {deals.length > 0 && (
         <div className="placeholder-section">
           <div
             style={{
@@ -176,7 +93,10 @@ export default function CreateDeal() {
               marginBottom: 10,
             }}
           >
-            <div className="placeholder-section-title" style={{ margin: 0 }}>
+            <div
+              className="placeholder-section-title is-complete"
+              style={{ margin: 0 }}
+            >
               {' '}
               All Deals
             </div>
@@ -269,9 +189,49 @@ export default function CreateDeal() {
         </div>
       )}
 
+      {step === 'review' && (
+        <div className="placeholder-section">
+          <div className="placeholder-section-title is-complete">
+            Review Deal
+          </div>
+          <p
+            style={{
+              fontSize: 13,
+              color: '#666',
+              marginTop: -6,
+              marginBottom: 14,
+            }}
+          >
+            Please review the deal details before publishing.
+          </p>
+
+          <ReviewRow label="Deal Title" value={title} />
+          <ReviewRow label="Description" value={description} />
+          <ReviewRow label="Discount" value={discount} />
+          <ReviewRow label="Expiry Date" value={expiryDate} />
+
+          <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={handleBackToEdit}
+            >
+              Back to Edit
+            </button>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={handleConfirmPublish}
+            >
+              Confirm &amp; Publish
+            </button>
+          </div>
+        </div>
+      )}
+
       {step === 'form' && (
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleReview}
           className="placeholder-section"
           noValidate
         >
@@ -285,7 +245,9 @@ export default function CreateDeal() {
             ← Back to Deals
           </button>
 
-          <div className="placeholder-section-title">Deal Details</div>
+          <div className="placeholder-section-title is-complete">
+            Deal Details
+          </div>
 
           <FormField
             label="Deal Title"
