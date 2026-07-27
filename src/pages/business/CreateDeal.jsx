@@ -11,6 +11,7 @@ export default function CreateDeal() {
   const [step, setStep] = useState('list')
   const [status, setStatus] = useState('Active')
   const [selectedDeal, setSelectedDealId] = useState(null)
+  const [editingDealId, setEditingDealId] = useState(null)
 
   function validate() {
     const newErrors = {}
@@ -38,29 +39,49 @@ export default function CreateDeal() {
   }
 
   function handleConfirmPublish() {
-    setDeals((previousDeals) => [
-      {
-        id: Date.now(),
-        title: title.trim(),
-        description: description.trim(),
-        discount: discount.trim(),
-        expiryDate,
-        status,
-      },
-      ...previousDeals,
-    ])
+    if (editingDealId) {
+      setDeals((previousDeals) =>
+        previousDeals.map((deal) =>
+          deal.id === editingDealId
+            ? {
+                ...deal,
+                title: title.trim(),
+                description: description.trim(),
+                discount: discount.trim(),
+                expiryDate,
+                status,
+              }
+            : deal,
+        ),
+      )
+      setSuccessMessage('Deal updated successfully!')
+    } else {
+      setDeals((previousDeals) => [
+        {
+          id: Date.now(),
+          title: title.trim(),
+          description: description.trim(),
+          discount: discount.trim(),
+          expiryDate,
+          status,
+        },
+        ...previousDeals,
+      ])
+      setSuccessMessage('Deal created successfully!')
+    }
     setTitle('')
     setDescription('')
     setDiscount('')
     setExpiryDate('')
     setErrors({})
+    setEditingDealId(null)
     setStep('list')
-    setSuccessMessage('Deal created successfully!')
   }
 
   function handleStartNewDeal() {
     setSuccessMessage('')
     setErrors({})
+    setEditingDealId(null)
     setStep('form')
   }
 
@@ -70,6 +91,30 @@ export default function CreateDeal() {
 
   function handleSelectDeal(dealId) {
     setSelectedDealId((currentId) => (currentId === dealId ? null : dealId))
+  }
+
+  function handlePublishDeal(dealId) {
+    setDeals((previousDeals) =>
+      previousDeals.map((deal) =>
+        deal.id === dealId ? { ...deal, status: 'Active' } : deal,
+      ),
+    )
+    setSuccessMessage('Deal published successfully!')
+  }
+
+  function handleEditDeal(dealId) {
+    const deal = deals.find((d) => d.id === dealId)
+    if (!deal) return
+    setTitle(deal.title)
+    setDescription(deal.description)
+    setDiscount(deal.discount)
+    setExpiryDate(deal.expiryDate)
+    setStatus(deal.status || 'Active')
+    setEditingDealId(dealId)
+    setErrors({})
+    setSuccessMessage('')
+    setSelectedDealId(null)
+    setStep('form')
   }
 
   return (
@@ -173,15 +218,37 @@ export default function CreateDeal() {
                     label="Status"
                     value={deal.status || 'Active'}
                   />
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    style={{ marginTop: 10 }}
-                    onClick={() => setSelectedDealId(null)}
-                  >
-                    {' '}
-                    Close
-                  </button>
+                  <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      style={{ marginTop: 110 }}
+                      onClick={() => setSelectedDealId(null)}
+                    >
+                      {' '}
+                      Close
+                    </button>
+                    {(deal.status || 'Active') === 'Draft' && (
+                      <button
+                        type="button"
+                        className="btn-primary"
+                        style={{ marginTop: 110 }}
+                        onClick={() => handlePublishDeal(deal.id)}
+                      >
+                        Publish Deal
+                      </button>
+                    )}
+                    {(deal.status || 'Active') === 'Active' && (
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        style={{ marginTop: 110 }}
+                        onClick={() => handleEditDeal(deal.id)}
+                      >
+                        Edit Deal
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
