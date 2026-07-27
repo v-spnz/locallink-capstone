@@ -291,7 +291,7 @@ export default function CreateDeal() {
           </div>
 
           <button type="submit" className="btn-primary">
-            Publish Deal
+            Preview Deal
           </button>
         </form>
       )}
