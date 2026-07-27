@@ -2,6 +2,47 @@ import { useState, useMemo, useEffect } from 'react'
 import ComboBox from '../../components/ui/ComboBox'
 import suburbsData from '../../data/Suburbs'
 
+const VALID_TRADE_CATEGORIES = [
+  'Plumbing',
+  'Electrical',
+  'Carpentry',
+  'Painting',
+  'Landscaping',
+  'Roofing',
+]
+
+const VALID_CITIES = [
+  'Auckland',
+  'Wellington',
+  'Christchurch',
+  'Hamilton',
+  'Tauranga',
+  'Dunedin',
+  'Napier',
+  'Hastings',
+  'Palmerston North',
+  'New Plymouth',
+  'Nelson',
+  'Rotorua',
+  'Whangarei',
+  'Invercargill',
+  'Queenstown',
+  'Porirua',
+]
+
+const VALID_DISTANCES = [
+  '1km',
+  '2km',
+  '3km',
+  '4km',
+  '5km',
+  '6km',
+  '7km',
+  '8km',
+  '9km',
+  '10km',
+]
+
 export default function Jobs() {
   const [postedJobs, setPostedJobs] = useState([])
   const [jobTitle, setJobTitle] = useState('')
@@ -9,11 +50,13 @@ export default function Jobs() {
   const [tradeCategory, setTradeCategory] = useState('')
   const [jobCity, setJobCity] = useState('')
   const [jobSuburb, setJobSuburb] = useState('')
+  const [jobPostedDistance, setJobPostedDistance] = useState('')
   const suburbOptions = useMemo(
     () => (jobCity && suburbsData[jobCity] ? suburbsData[jobCity] : []),
     [jobCity],
   )
   const [pendingJob, setPendingJob] = useState(null)
+  const [editingJob, setEditingJob] = useState(null)
   const [jobStatus, setJobStatus] = useState('Not Posted')
   const [step, setStep] = useState('form')
   const [successMessage, setSuccessMessage] = useState('')
@@ -23,6 +66,7 @@ export default function Jobs() {
   const [categoryError, setCategoryError] = useState('')
   const [cityError, setCityError] = useState('')
   const [suburbError, setSuburbError] = useState('')
+  const [distanceError, setDistanceError] = useState('')
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -32,32 +76,94 @@ export default function Jobs() {
     return () => clearTimeout(timer)
   }, [successMessage])
 
+  function handleEditJob(job) {
+    setEditingJob(job)
+    setJobTitle(job.title)
+    setJobDescription(job.description)
+    setTradeCategory(job.category)
+    setJobCity(job.city)
+    setJobSuburb(job.suburb)
+    setJobPostedDistance(job.postedDistance)
+    setStep('form')
+  }
+
   function validateForm() {
-    if (!jobTitle) {
+    const trimmedTitle = jobTitle.trim()
+    if (!trimmedTitle) {
       setTitleError('Please enter a job title.')
       return false
     }
-    if (!jobDescription) {
+    if (trimmedTitle.length < 3) {
+      setTitleError('Job title should be at least 3 characters long.')
+      return false
+    }
+    if (trimmedTitle.length > 60) {
+      setTitleError('Job title cannot exceed 60 characters.')
+      return false
+    }
+
+    const trimmedDescription = jobDescription.trim()
+    if (!trimmedDescription) {
       setDescriptionError('Please enter a job description.')
       return false
     }
-    if (!tradeCategory) {
-      setCategoryError('Please enter a trade category.')
+    if (trimmedDescription.length < 10) {
+      setDescriptionError(
+        'Please include at least 10 characters in the description.',
+      )
       return false
     }
-    if (!jobCity) {
-      setCityError('Please enter a job city.')
+    if (trimmedDescription.length > 400) {
+      setDescriptionError('Description cannot exceed 400 characters.')
       return false
     }
-    if (!jobSuburb) {
-      setSuburbError('Please enter a job suburb.')
+
+    const trimmedCategory = tradeCategory.trim()
+    if (!trimmedCategory) {
+      setCategoryError('Please select a trade category.')
       return false
     }
+    if (!VALID_TRADE_CATEGORIES.includes(trimmedCategory)) {
+      setCategoryError('Please choose a valid trade category from the list.')
+      return false
+    }
+
+    const trimmedCity = jobCity.trim()
+    if (!trimmedCity) {
+      setCityError('Please select a city.')
+      return false
+    }
+    if (!VALID_CITIES.includes(trimmedCity)) {
+      setCityError('Please choose a valid city from the list.')
+      return false
+    }
+
+    const trimmedSuburb = jobSuburb.trim()
+    if (!trimmedSuburb) {
+      setSuburbError('Please select a suburb.')
+      return false
+    }
+    if (!suburbOptions.map((option) => option.trim()).includes(trimmedSuburb)) {
+      setSuburbError('Please choose a suburb that matches the selected city.')
+      return false
+    }
+
+    const trimmedDistance = jobPostedDistance.trim()
+    if (!trimmedDistance) {
+      setDistanceError('Please select a posted distance.')
+      return false
+    }
+    if (!VALID_DISTANCES.includes(trimmedDistance)) {
+      setDistanceError('Please choose a valid distance from the list.')
+      return false
+    }
+
     setTitleError('')
     setDescriptionError('')
     setCategoryError('')
     setCityError('')
     setSuburbError('')
+    setDistanceError('')
     return true
   }
 
@@ -67,11 +173,12 @@ export default function Jobs() {
     if (!validateForm()) return
 
     setPendingJob({
-      title: jobTitle,
-      description: jobDescription,
-      category: tradeCategory,
-      city: jobCity,
-      suburb: jobSuburb,
+      title: jobTitle.trim(),
+      description: jobDescription.trim(),
+      category: tradeCategory.trim(),
+      city: jobCity.trim(),
+      suburb: jobSuburb.trim(),
+      postedDistance: jobPostedDistance.trim(),
     })
     setStep('review')
   }
@@ -81,7 +188,19 @@ export default function Jobs() {
   }
 
   function handleConfirmPost() {
-    setPostedJobs((prevJobs) => [...prevJobs, pendingJob])
+    if (editingJob) {
+      setPostedJobs((prevJobs) =>
+        prevJobs.map((job) =>
+          job.id === editingJob.id ? { ...pendingJob, id: editingJob.id } : job,
+        ),
+      )
+      setEditingJob(null)
+    } else {
+      setPostedJobs((prevJobs) => [
+        ...prevJobs,
+        { ...pendingJob, id: Date.now() },
+      ])
+    }
     setJobStatus('Job Posted')
     setPendingJob(null)
     setJobTitle('')
@@ -89,8 +208,11 @@ export default function Jobs() {
     setTradeCategory('')
     setJobCity('')
     setJobSuburb('')
+    setJobPostedDistance('')
     setStep('form')
-    setSuccessMessage('Job posted successfully!')
+    setSuccessMessage(
+      editingJob ? 'Job updated successfully!' : 'Job posted successfully!',
+    )
   }
 
   return (
@@ -103,8 +225,14 @@ export default function Jobs() {
       </div>
 
       {step === 'form' && (
-        <form onSubmit={handleReview} className="placeholder-section" noValidate>
-          <div className="placeholder-section-title is-complete">Post a Job</div>
+        <form
+          onSubmit={handleReview}
+          className="placeholder-section"
+          noValidate
+        >
+          <div className="placeholder-section-title is-complete">
+            Post a Job
+          </div>
 
           <div className="form-group">
             <label className="form-label">Job Title</label>
@@ -116,8 +244,13 @@ export default function Jobs() {
                 setTitleError('')
               }}
               placeholder="e.g. Leaking tap repair"
+              maxLength={60}
             />
-            {titleError && <div className="error">{titleError}</div>}
+            {titleError && (
+              <div className="error" style={{ color: '#dc2626' }}>
+                {titleError}
+              </div>
+            )}
           </div>
 
           <div className="form-group">
@@ -130,8 +263,13 @@ export default function Jobs() {
                 setDescriptionError('')
               }}
               placeholder="Describe the job…"
+              maxLength={400}
             />
-            {descriptionError && <div className="error">{descriptionError}</div>}
+            {descriptionError && (
+              <div className="error" style={{ color: '#dc2626' }}>
+                {descriptionError}
+              </div>
+            )}
           </div>
 
           <div className="form-group">
@@ -149,11 +287,15 @@ export default function Jobs() {
               placeholder="Select a category..."
               value={tradeCategory}
               onChange={(value) => {
-                setTradeCategory(value)
+                setTradeCategory(value.trim())
                 setCategoryError('')
               }}
             />
-            {categoryError && <div className="error">{categoryError}</div>}
+            {categoryError && (
+              <div className="error" style={{ color: '#dc2626' }}>
+                {categoryError}
+              </div>
+            )}
           </div>
 
           <div className="form-group">
@@ -181,12 +323,16 @@ export default function Jobs() {
               placeholder="Select a city..."
               value={jobCity}
               onChange={(value) => {
-                setJobCity(value)
+                setJobCity(value.trim())
                 setCityError('')
                 setJobSuburb('')
               }}
             />
-            {cityError && <div className="error">{cityError}</div>}
+            {cityError && (
+              <div className="error" style={{ color: '#dc2626' }}>
+                {cityError}
+              </div>
+            )}
           </div>
 
           <div className="form-group">
@@ -197,26 +343,60 @@ export default function Jobs() {
               placeholder="Select a suburb..."
               value={jobSuburb}
               onChange={(value) => {
-                setJobSuburb(value)
+                setJobSuburb(value.trim())
                 setSuburbError('')
               }}
             />
-            {suburbError && <div className="error">{suburbError}</div>}
+            {suburbError && (
+              <div className="error" style={{ color: '#dc2626' }}>
+                {suburbError}
+              </div>
+            )}
+          </div>
+          <div className="form-group">
+            <label className="form-label">Posted Distance (km)</label>
+            <ComboBox
+              options={[
+                '1km',
+                '2km',
+                '3km',
+                '4km',
+                '5km',
+                '6km',
+                '7km',
+                '8km',
+                '9km',
+                '10km',
+              ]}
+              className="distance-combobox"
+              value={jobPostedDistance}
+              onChange={(value) => {
+                setJobPostedDistance(value.trim())
+                setDistanceError('')
+              }}
+              placeholder="e.g. 5km"
+            />
+            {distanceError && (
+              <div className="error" style={{ color: '#dc2626' }}>
+                {distanceError}
+              </div>
+            )}
           </div>
 
           <button type="submit" className="btn-primary">
-            Post Job
+            Preview Job Request
           </button>
           {successMessage && (
-          <p style={{ color: 'seagreen', marginTop: 10 }}>{successMessage}</p>
-        )}
+            <p style={{ color: 'seagreen', marginTop: 10 }}>{successMessage}</p>
+          )}
         </form>
-        
       )}
 
       {step === 'review' && pendingJob && (
         <div className="placeholder-section">
-          <div className="placeholder-section-title">Review Job</div>
+          <div className="placeholder-section-title is-complete">
+            Review Job
+          </div>
           <p
             style={{
               fontSize: 13,
@@ -233,7 +413,10 @@ export default function Jobs() {
           <ReviewRow label="Trade Category" value={pendingJob.category} />
           <ReviewRow label="City" value={pendingJob.city} />
           <ReviewRow label="Suburb" value={pendingJob.suburb} />
-
+          <ReviewRow
+            label="Posted Distance"
+            value={pendingJob.postedDistance}
+          />
           <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
             <button
               type="button"
@@ -247,7 +430,7 @@ export default function Jobs() {
               className="btn-primary"
               onClick={handleConfirmPost}
             >
-              Confirm &amp; Post Job
+              Confirm &amp; Post Job Request
             </button>
           </div>
         </div>
@@ -278,6 +461,41 @@ export default function Jobs() {
                 <div style={{ fontSize: 12, color: '#999' }}>
                   {job.city}
                   {job.suburb ? `, ${job.suburb}` : ''}
+                </div>
+                <div style={{ fontSize: 12, color: '#999' }}>
+                  <p>
+                    Time Posted: {new Date().toLocaleDateString()}{' '}
+                    {new Date().toLocaleTimeString()}
+                  </p>
+                  <p>Posted Distance: {job.postedDistance}</p>
+                </div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: '#999',
+                    display: 'flex',
+                    gap: 10,
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => {
+                      setPendingJob(job)
+                      setStep('review')
+                    }}
+                  >
+                    Repost Job
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => {
+                      handleEditJob(job)
+                    }}
+                  >
+                    Edit Job
+                  </button>
                 </div>
               </div>
             ))}
