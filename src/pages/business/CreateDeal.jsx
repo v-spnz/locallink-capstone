@@ -8,6 +8,9 @@ export default function CreateDeal() {
   const [errors, setErrors] = useState({})
   const [deals, setDeals] = useState([])
   const [successMessage, setSuccessMessage] = useState('')
+  const [step, setStep] = useState('list')
+  const [status, setStatus] = useState('Active')
+  const [selectedDeal, setSelectedDealId] = useState(null)
 
   function validate() {
     const newErrors = {}
@@ -35,6 +38,7 @@ export default function CreateDeal() {
         description: description.trim(),
         discount: discount.trim(),
         expiryDate,
+        status,
       },
       ...previousDeals,
     ])
@@ -43,71 +47,201 @@ export default function CreateDeal() {
     setDiscount('')
     setExpiryDate('')
     setErrors({})
+    setStep('list')
     setSuccessMessage('Deal created successfully!')
+  }
+
+  function handleStartNewDeal() {
+    setSuccessMessage('')
+    setErrors({})
+    setStep('form')
+  }
+
+  function handleBackToList() {
+    setStep('list')
+  }
+
+  function handleSelectDeal(dealId) {
+    setSelectedDealId((currentId) => (currentId === dealId ? null : dealId))
   }
 
   return (
     <>
       <div className="page-header">
         <div className="page-header-eyebrow">Manage → Deals</div>
-        <h2>Create Deal</h2>
-        <p>Set up a new promotional deal visible to local customers.</p>
+        <h2>{step === 'list' ? 'Your Deals' : 'Create Deal'}</h2>
+        <p>
+          {step === 'list'
+            ? 'View and manage all your promotional deals.'
+            : 'Set up a new promotional deal visible to local customers.'}
+        </p>
       </div>
-      <form onSubmit={handleSubmit} className="placeholder-section" noValidate>
-        <div className="placeholder-section-title">Deal Details</div>
-        <FormField
-          label="Deal Title"
-          value={title}
-          onChange={setTitle}
-          placeholder="e.g. 20% off this weekend"
-          error={errors.title}
-        />
-        <FormField
-          label="Description"
-          value={description}
-          onChange={setDescription}
-          placeholder="Short description..."
-          error={errors.description}
-        />
-        <FormField
-          label="Discount"
-          value={discount}
-          onChange={setDiscount}
-          placeholder="e.g. 20% off, Buy 1 Get 1 Free"
-          error={errors.discount}
-        />
-        <FormField
-          label="Expiry Date"
-          type="date"
-          value={expiryDate}
-          onChange={setExpiryDate}
-          error={errors.expiryDate}
-        />
-        <button type="submit" className="btn-primary">
-          Publish Deal
-        </button>
-        {successMessage && (
-          <p style={{ color: 'seagreen', marginTop: 10 }}>{successMessage}</p>
-        )}
-      </form>
-      {deals.length > 0 && (
+      {step === 'list' && (
         <div className="placeholder-section">
-          <div className="placeholder-section-title">Your Deals</div>
-          {deals.map((deal) => (
-            <div
-              key={deal.id}
-              style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 10,
+            }}
+          >
+            <div className="placeholder-section-title" style={{ margin: 0 }}>
+              {' '}
+              All Deals
+            </div>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={handleStartNewDeal}
             >
-              <strong>{deal.title}</strong> - {deal.discount}
-              <div style={{ fontSize: 13, color: '#666' }}>
-                {deal.description}
+              {' '}
+              + New Deal
+            </button>
+          </div>
+
+          {successMessage && (
+            <p style={{ color: 'seagreen', marginTop: 0, marginBottom: 10 }}>
+              {successMessage}
+            </p>
+          )}
+
+          {deals.length === 0 && (
+            <p style={{ fontSize: 13, color: '#999' }}>
+              {' '}
+              No deals yet. Click "+ New Deal" to create one.
+            </p>
+          )}
+
+          {deals.map((deal) => (
+            <div key={deal.id}>
+              <div
+                onClick={() => handleSelectDeal(deal.id)}
+                style={{
+                  padding: '10px 0',
+                  borderBottom: '1px solid #eee',
+                  curson: 'pointer',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <div>
+                  <strong>{deal.title}</strong> - {deal.discount}
+                  <div style={{ fontSize: 12, color: '#999' }}>
+                    {' '}
+                    Expires: {deal.expiryDate}
+                  </div>
+                </div>
+                <span
+                  style={{
+                    fontSize: 12,
+                    padding: '2px 8px',
+                    borderRadius: 12,
+                    background: deal.status === 'Draft' ? '#eee' : '#e3f5e9',
+                    color: deal.status === 'Draft' ? '#666' : 'seagreen',
+                  }}
+                >
+                  {' '}
+                  {deal.status || 'Active'}
+                </span>
               </div>
-              <div style={{ fontSize: 12, color: '#999' }}>
-                Expires: {deal.expiryDate}
-              </div>
+
+              {selectedDeal === deal.id && (
+                <div
+                  style={{
+                    padding: '10px 14px',
+                    marginBottom: 10,
+                    background: '#fafafa',
+                    border: '1px solid #eee',
+                    borderRadius: 6,
+                  }}
+                >
+                  <DealDetailRow label="Title" value={deal.title} />
+                  <DealDetailRow label="Discount" value={deal.discount} />
+                  <DealDetailRow
+                    label="Status"
+                    value={deal.status || 'Active'}
+                  />
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    style={{ marginTop: 10 }}
+                    onClick={() => setSelectedDealId(null)}
+                  >
+                    {' '}
+                    Close
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
+      )}
+
+      {step === 'form' && (
+        <form
+          onSubmit={handleSubmit}
+          className="placeholder-section"
+          noValidate
+        >
+          <button
+            type="button"
+            className="btn-secondary"
+            style={{ marginBottom: 14 }}
+            onClick={handleBackToList}
+          >
+            {' '}
+            ← Back to Deals
+          </button>
+
+          <div className="placeholder-section-title">Deal Details</div>
+
+          <FormField
+            label="Deal Title"
+            value={title}
+            onChange={setTitle}
+            placeholder="e.g. 20% off this weekend"
+            error={errors.title}
+          />
+          <FormField
+            label="Description"
+            value={description}
+            onChange={setDescription}
+            placeholder="Short description..."
+            error={errors.description}
+          />
+          <FormField
+            label="Discount"
+            value={discount}
+            onChange={setDiscount}
+            placeholder="e.g. 20% off, Buy 1 Get 1 Free"
+            error={errors.discount}
+          />
+          <FormField
+            label="Expiry Date"
+            type="date"
+            value={expiryDate}
+            onChange={setExpiryDate}
+            error={errors.expiryDate}
+          />
+
+          <div className="form-group">
+            <label className="form-label">Status</label>
+            <select
+              className="form-input"
+              value={status}
+              onChange={(event) => setStatus(event.target.value)}
+            >
+              <option value="Active">Active</option>
+              <option value="Draft">Draft</option>
+            </select>
+          </div>
+
+          <button type="submit" className="btn-primary">
+            Publish Deal
+          </button>
+        </form>
       )}
     </>
   )
@@ -132,6 +266,17 @@ function FormField({
         placeholder={placeholder}
       />
       {error && <span className="form-error">{error}</span>}
+    </div>
+  )
+}
+
+function DealDetailRow({ label, value }) {
+  return (
+    <div style={{ padding: '8px 0', borderBottom: '1px solid #eee' }}>
+      <div style={{ fontSize: 12, color: '#999', textTransform: 'uppercase' }}>
+        {label}
+      </div>
+      <div style={{ fontSize: 14 }}>{value || '-'}</div>
     </div>
   )
 }
