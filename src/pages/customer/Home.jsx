@@ -1,22 +1,58 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import mockBusinesses from '../../data/mockBusinesses'
 import { getDistanceKm } from '../../utils/distance'
 
 const USER_LOCATION = { lat: -36.8485, lng: 174.7633 }
-const filters = [
-  'All',
-  'Food & Drink',
-  'Retail',
-  'Services',
-  'Health',
-  'Trades',
+
+// Keeping this small on purpose - 5km still feels "local", 20km (the old
+// slider's max) doesn't really. Radius isn't a homepage control anymore
+// per Jim's feedback so this is just a fixed number now, not state.
+const NEARBY_RADIUS_KM = 5
+const DEAL_DISPLAY_COUNT = 4 // 1 featured + 3 in the list, matches the wireframe
+
+// Loyalty / jobs / activity don't have real data hooked up yet so this is
+// just enough mock stuff to make the home page look right for the
+// supervisor meeting. Swap these for real data once those features exist.
+const loyaltyCard = {
+  businessName: 'Britomart Espresso Bar',
+  stampsTotal: 5,
+  stampsFilled: 4,
+}
+
+const myJobs = [
+  { id: 1, name: 'Kitchen tap repair', quotes: 3, posted: 'Posted 2 days ago' },
+  { id: 2, name: 'Car wash needed', quotes: 0, posted: 'Posted 5 days ago' },
+]
+
+const recentActivity = [
+  {
+    id: 1,
+    text: 'You redeemed a deal at',
+    business: 'Parnell Village Bakery',
+    time: '2 hours ago',
+  },
+  {
+    id: 2,
+    text: 'You picked up a stamp at',
+    business: 'Britomart Espresso Bar',
+    time: 'Yesterday',
+  },
+  {
+    id: 3,
+    text: 'You posted a job —',
+    business: 'Kitchen tap repair',
+    time: '2 days ago',
+  },
 ]
 
 export default function Home() {
-  const [activeFilter, setActiveFilter] = useState('All')
-  const [radius, setRadius] = useState(5)
+  const navigate = useNavigate()
+  const [search, setSearch] = useState('')
 
-  const businessesWithDistance = mockBusinesses
+  // Same Haversine calc as before (US009), just no longer wired to a
+  // slider - filtered against the fixed radius above instead.
+  const nearbyBusinesses = mockBusinesses
     .map((business) => ({
       ...business,
       distance: getDistanceKm(
@@ -26,131 +62,213 @@ export default function Home() {
         business.lng,
       ),
     }))
-    .filter((business) => business.distance <= radius)
-    .filter(
-      (business) =>
-        activeFilter === 'All' || business.category === activeFilter,
-    )
-    .sort(
-      (firstBusiness, secondBusiness) =>
-        firstBusiness.distance - secondBusiness.distance,
-    )
+    .filter((business) => business.distance <= NEARBY_RADIUS_KM)
+    .filter((business) => {
+      const query = search.trim().toLowerCase()
+      return (
+        query === '' ||
+        business.name.toLowerCase().includes(query) ||
+        business.category.toLowerCase().includes(query)
+      )
+    })
+    .sort((first, second) => first.distance - second.distance)
+    .slice(0, DEAL_DISPLAY_COUNT)
+
+  // First result shows big as the "featured" one, the rest go in the
+  // plain list below it - same split as the approved draft.
+  const featuredBusiness = nearbyBusinesses[0]
+  const otherBusinesses = nearbyBusinesses.slice(1)
+
+  const stampsRemaining = loyaltyCard.stampsTotal - loyaltyCard.stampsFilled
 
   return (
     <>
-      <div className="page-header">
-        <p
-          style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}
-        >
-          Welcome Back
-        </p>
-        <h2>Discover Local</h2>
-        <p>Find businesses near you and explore what's on.</p>
-      </div>
-
-      <div className="pill-filter-row">
-        {filters.map((filter) => (
-          <button
-            key={filter}
-            className={`pill${activeFilter === filter ? ' active' : ''}`}
-            onClick={() => setActiveFilter(filter)}
+      <div className="home-header-row">
+        <div>
+          <p
+            style={{
+              fontSize: 13,
+              color: 'var(--text-muted)',
+              marginBottom: 3,
+            }}
           >
-            {filter}
-          </button>
-        ))}
-      </div>
-
-      <div className="radius-control">
-        <div className="radius-header">
-          <span className="radius-label">Search Radius</span>
-          <span className="radius-value">{radius} km</span>
+            {getGreeting()}, Spencer
+          </p>
+          <h2 style={{ fontSize: 22, fontWeight: 700 }}>My LocalLink</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 7 }}>
+            Auckland CBD
+          </p>
         </div>
-        <input
-          type="range"
-          className="radius-slider"
-          min={1}
-          max={20}
-          step={1}
-          value={radius}
-          onChange={(event) => setRadius(Number(event.target.value))}
-        />
-        <div className="radius-ticks">
-          <span>1 km</span>
-          <span>10 km</span>
-          <span>20 km</span>
+        <div className="home-search">
+          <input
+            type="text"
+            placeholder="Search businesses, deals, or services"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
         </div>
       </div>
 
-      <div className="map-placeholder">
-        <span className="map-placeholder-label">Map Preview</span>
-      </div>
-
-      <div className="placeholder-section">
-        <div
-          className="placeholder-section-title is-complete"
-          style={{ justifyContent: 'space-between' }}
-        >
-          <span>Businesses Near You</span>
-          <span style={resultCountStyles}>
-            {businessesWithDistance.length} result
-            {businessesWithDistance.length !== 1 ? 's' : ''}
-          </span>
-        </div>
-        {businessesWithDistance.length === 0 ? (
-          <div className="empty-state">
-            No Businesses found within {radius} km. Try increasing your radius.
+      <div className="home-two-col">
+        <div>
+          {/* Deals Near You - everything here goes to Deals & Discovery */}
+          <div className="home-section-head">
+            <h3>Deals near you</h3>
+            <button
+              className="section-link-btn"
+              onClick={() => navigate('/deals')}
+            >
+              View all →
+            </button>
           </div>
-        ) : (
-          <div className="business-grid">
-            {businessesWithDistance.map((business) => (
-              <div className="business-card" key={business.id}>
-                <div className="business-card-icon">
-                  {getCategoryEmoji(business.category)}
+          <p className="home-section-note">
+            Closest first, all within walking distance of you.
+          </p>
+
+          {nearbyBusinesses.length === 0 ? (
+            <div className="empty-state">
+              {search
+                ? `No businesses match "${search}" within ${NEARBY_RADIUS_KM}km.`
+                : 'No businesses found nearby right now.'}
+            </div>
+          ) : (
+            <>
+              <div className="featured-deal" onClick={() => navigate('/deals')}>
+                <div className="featured-deal-photo">
+                  Business photo
+                  <br />
+                  (TBD)
                 </div>
-                <div className="business-card-body">
-                  <div className="business-card-name">{business.name}</div>
-                  <div className="business-card-category">
-                    {business.category}
+                <div className="featured-deal-body">
+                  <span className="deal-tag">{featuredBusiness.category}</span>
+                  <h4 className="featured-deal-name">
+                    {featuredBusiness.name}
+                  </h4>
+                  <p className="featured-deal-desc">
+                    {featuredBusiness.description}
+                  </p>
+                  <div className="featured-deal-foot">
+                    <strong>{featuredBusiness.distance.toFixed(1)} km</strong>{' '}
+                    away · closest to you
                   </div>
-                  <div className="business-card-desc">
-                    {business.description}
-                  </div>
-                </div>
-                <div className="business-card-distance">
-                  {business.distance.toFixed(1)} km
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      <div className="placeholder-section">
-        <div className="placeholder-section-title">Business Detail View</div>
-        <div className="placeholder-box tall">
-          Business detail panel — component TBD
+              {otherBusinesses.length > 0 && (
+                <div className="deal-list">
+                  {otherBusinesses.map((business) => (
+                    <div
+                      className="deal-row"
+                      key={business.id}
+                      onClick={() => navigate('/deals')}
+                    >
+                      <div className="deal-row-body">
+                        <div className="deal-row-name">{business.name}</div>
+                        <div className="deal-row-sub">
+                          {business.category} · {business.description}
+                        </div>
+                      </div>
+                      <div className="deal-row-dist">
+                        {business.distance.toFixed(1)} km
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Recent Activity - everything here goes to Profile */}
+          <div className="home-section-head block-gap">
+            <h3>Recent activity</h3>
+            <button
+              className="section-link-btn"
+              onClick={() => navigate('/profile')}
+            >
+              View all →
+            </button>
+          </div>
+          <p className="home-section-note">
+            Deals you've used, stamps you've collected, jobs you've posted.
+          </p>
+          {recentActivity.map((item) => (
+            <div
+              className="home-activity-row"
+              key={item.id}
+              onClick={() => navigate('/profile')}
+            >
+              <span className="what">
+                {item.text} <b>{item.business}</b>
+              </span>
+              <span className="when">{item.time}</span>
+            </div>
+          ))}
         </div>
+
+        <aside>
+          {/* Loyalty - mock display, every button goes to the Loyalty page */}
+          <div className="home-side-card">
+            <p className="home-side-label">
+              Loyalty · {loyaltyCard.businessName}
+            </p>
+            <h3 className="home-side-title">Coffee Card</h3>
+            <div className="stamp-row">
+              {Array.from({ length: loyaltyCard.stampsTotal }).map(
+                (_, index) => (
+                  <span
+                    key={index}
+                    className={`stamp${index < loyaltyCard.stampsFilled ? ' filled' : ''}`}
+                  />
+                ),
+              )}
+            </div>
+            <p className="stamp-note">
+              {stampsRemaining === 1
+                ? 'One more coffee and the next one is on us!'
+                : `${stampsRemaining} more coffees and the next one is on us!`}
+            </p>
+            <button
+              className="btn-outline"
+              onClick={() => navigate('/loyalty')}
+            >
+              View all loyalty cards
+            </button>
+          </div>
+
+          {/* Service Marketplace - mock display, every button goes to Jobs */}
+          <div className="home-side-card block-gap">
+            <p className="home-side-label">Service Marketplace</p>
+            <h3 className="home-side-title">
+              {myJobs.length} job{myJobs.length !== 1 ? 's' : ''} in progress
+            </h3>
+            {myJobs.map((job) => (
+              <button
+                className="job-row"
+                key={job.id}
+                onClick={() => navigate('/jobs')}
+              >
+                <div className="job-top">
+                  <span className="job-name">{job.name}</span>
+                  <span className="job-quotes">
+                    {job.quotes > 0 ? `${job.quotes} quotes` : 'No quotes yet'}
+                  </span>
+                </div>
+                <div className="job-meta">{job.posted}</div>
+              </button>
+            ))}
+            <button className="btn-outline" onClick={() => navigate('/jobs')}>
+              View Job List →
+            </button>
+          </div>
+        </aside>
       </div>
     </>
   )
 }
 
-const resultCountStyles = {
-  fontSize: 11,
-  fontWeight: 500,
-  color: 'var(--text-muted)',
-  textTransform: 'none',
-  letterSpacing: 'normal',
-}
-
-function getCategoryEmoji(category) {
-  const categoryIcons = {
-    'Food & Drink': '🍔',
-    Retail: '🛍️',
-    Services: '✂️',
-    Health: '🏥',
-    Trades: '🔧',
-  }
-
-  return categoryIcons[category] || '📍'
+function getGreeting() {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 18) return 'Good afternoon'
+  return 'Good evening'
 }

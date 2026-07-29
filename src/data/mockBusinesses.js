@@ -1,6 +1,6 @@
 // src/data/mockBusinesses.js
-// Mock data for US009 — businesses within radius filter
 // Default user location: Auckland CBD (-36.8485, 174.7633)
+// Kept to genuinely inner-Auckland businesses only — no North Shore
 
 const mockBusinesses = [
   {
@@ -77,20 +77,20 @@ const mockBusinesses = [
   },
   {
     id: 9,
-    name: 'Devonport Dental Clinic',
+    name: 'Eden Terrace Dental',
     category: 'Health',
-    description: 'Family dentistry across the harbour.',
-    lat: -36.831,
-    lng: 174.795,
+    description: 'Family dentistry, walk-ins welcome.',
+    lat: -36.8685,
+    lng: 174.7605,
     image: null,
   },
   {
     id: 10,
-    name: 'Henderson Auto Electrical',
+    name: 'Freemans Bay Electrical',
     category: 'Trades',
-    description: 'Vehicle diagnostics and auto-electrical repairs.',
-    lat: -36.878,
-    lng: 174.631,
+    description: 'Licensed electrician — residential & commercial.',
+    lat: -36.8495,
+    lng: 174.7495,
     image: null,
   },
   {
@@ -104,11 +104,11 @@ const mockBusinesses = [
   },
   {
     id: 12,
-    name: 'Takapuna Beach Yoga',
+    name: 'Grafton Yoga Studio',
     category: 'Health',
-    description: 'Beachside yoga and meditation classes.',
-    lat: -36.787,
-    lng: 174.774,
+    description: 'Morning and evening yoga classes.',
+    lat: -36.8605,
+    lng: 174.7685,
     image: null,
   },
 ]

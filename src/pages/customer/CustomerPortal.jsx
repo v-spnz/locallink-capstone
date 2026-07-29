@@ -5,6 +5,7 @@ import ProtectedRoute from '../../auth/ProtectedRoute'
 import LoginPage from '../auth/LoginPage'
 import RegisterPage from '../auth/RegisterPage'
 import Home from './Home'
+import DealsDiscovery from './DealsDiscovery'
 import Jobs from './Jobs'
 import Loyalty from './Loyalty'
 import Profile from './Profile'
@@ -15,6 +16,7 @@ export default function CustomerPortal() {
       <Routes>
         <Route index element={<Navigate to="/home" replace />} />
         <Route path="home" element={<Home />} />
+        <Route path="deals" element={<DealsDiscovery />} />
         <Route path="loyalty" element={<Loyalty />} />
         <Route path="jobs" element={<Jobs />} />
         <Route
