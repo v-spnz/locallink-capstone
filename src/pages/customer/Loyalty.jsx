@@ -1,32 +1,11 @@
 import { useState, useMemo } from 'react'
 import mockLoyaltyPrograms from '../../data/mockLoyaltyPrograms'
+import './Loyalty.css'
 
 function getPercent(p) {
   if (p.type === 'stamp')
     return Math.round((p.stampsEarned / p.stampsRequired) * 100)
   return Math.round((p.points / p.pointsRequired) * 100)
-}
-
-function LoyaltyStyles() {
-  return (
-    <style>{`
-      .ly-card { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; border: 1px solid transparent; animation: ly-rise .35s ease backwards; }
-      .ly-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px -12px rgba(0,0,0,0.18); border-color: rgba(0,0,0,0.06); }
-      @keyframes ly-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-      .ly-bar-fill { transition: width .6s cubic-bezier(.22,1,.36,1); }
-      .ly-ring-fill { transition: stroke-dashoffset .6s cubic-bezier(.22,1,.36,1); }
-      .ly-redeem-btn { transition: transform .12s ease, box-shadow .12s ease, filter .12s ease; }
-      .ly-redeem-btn:hover { filter: brightness(1.06); box-shadow: 0 6px 16px -6px rgba(59,130,246,0.5); }
-      .ly-redeem-btn:active { transform: scale(0.97); }
-      .ly-search { transition: border-color .15s ease, box-shadow .15s ease; }
-      .ly-search:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
-      .ly-badge-pulse { animation: ly-pulse 1.8s ease-in-out infinite; }
-      @keyframes ly-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
-      @media (prefers-reduced-motion: reduce) {
-        .ly-card, .ly-bar-fill, .ly-ring-fill, .ly-redeem-btn, .ly-badge-pulse { animation: none !important; transition: none !important; }
-      }
-    `}</style>
-  )
 }
 
 function BusinessAvatar({ name }) {
@@ -275,7 +254,6 @@ export default function Loyalty() {
   const list = tab === 'inprogress' ? inProgress : completed
   return (
     <>
-      <LoyaltyStyles />
       <div className="page-header">
         <h2>Loyalty Programmes</h2>
         <p>Track your stamp cards and points across local businesses.</p>
