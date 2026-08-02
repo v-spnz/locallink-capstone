@@ -1,71 +1,5 @@
 import { useState, useMemo } from 'react'
-
-const mockPrograms = [
-  {
-    id: 1,
-    business: 'Ponsonby Cafe',
-    category: 'Cafe',
-    type: 'stamp',
-    stampsEarned: 7,
-    stampsRequired: 10,
-    reward: 'Free coffee of your choice',
-    status: 'active',
-  },
-  {
-    id: 2,
-    business: 'Kingsland Blooms',
-    category: 'Florist',
-    type: 'points',
-    points: 320,
-    pointsRequired: 500,
-    reward: '20% off your next bouquet',
-    status: 'active',
-  },
-  {
-    id: 3,
-    business: 'Mount Eden Pizza',
-    category: 'Restaurant',
-    type: 'stamp',
-    stampsEarned: 6,
-    stampsRequired: 8,
-    reward: 'Free medium pizza',
-    status: 'active',
-  },
-  {
-    id: 4,
-    business: 'Devonport Carwash',
-    category: 'Auto',
-    type: 'stamp',
-    stampsEarned: 10,
-    stampsRequired: 10,
-    reward: 'Free  premium car wash',
-    status: 'completed',
-    completedOn: '2026-06-27',
-    redeemed: true,
-  },
-  {
-    id: 5,
-    business: 'Grey Lynn Bookstore',
-    category: 'Bookstore',
-    type: 'points',
-    points: 500,
-    pointsRequired: 500,
-    reward: '$15 voucher',
-    status: 'completed',
-    completedOn: '2026-08-06',
-    redeemed: false,
-  },
-  {
-    id: 6,
-    business: 'Parnell Bakery',
-    category: 'Bakery',
-    type: 'stamp',
-    stampsEarned: 3,
-    stampsRequired: 6,
-    reward: 'Free loaf of bread',
-    status: 'active',
-  },
-]
+import mockLoyaltyPrograms from '../../data/mockLoyaltyPrograms'
 
 function getPercent(p) {
   if (p.type === 'stamp')
@@ -305,7 +239,7 @@ function ProgramCard({ program, onRedeem, index }) {
 export default function Loyalty() {
   const [tab, setTab] = useState('inprogress')
   const [search, setSearch] = useState('')
-  const [programs, setPrograms] = useState(mockPrograms)
+  const [programs, setPrograms] = useState(mockLoyaltyPrograms)
 
   const totalPoints = useMemo(
     () =>
