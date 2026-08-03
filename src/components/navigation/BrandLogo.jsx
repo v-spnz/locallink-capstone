@@ -1,19 +1,14 @@
 import { Link } from 'react-router-dom'
+import { Sparkles } from 'lucide-react'
 
 export default function BrandLogo({ to, badge }) {
   return (
-    <Link className="nav-logo" to={to}>
-      Local<span className="logo-link">Link</span>
-      {badge && <span style={badgeStyles}>{badge}</span>}
+    <Link className="nav-logo" to={to} aria-label="LocalLink home">
+      <span className="nav-logo-mark" aria-hidden="true">
+        <Sparkles />
+      </span>
+      <span>LocalLink</span>
+      {badge && <span className="nav-logo-badge">{badge}</span>}
     </Link>
   )
-}
-
-const badgeStyles = {
-  fontSize: 11,
-  background: 'rgba(255,255,255,0.18)',
-  padding: '2px 8px',
-  borderRadius: 10,
-  marginLeft: 8,
-  fontWeight: 500,
 }

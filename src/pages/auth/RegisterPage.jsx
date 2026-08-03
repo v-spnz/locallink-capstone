@@ -1,7 +1,11 @@
 import { useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { ArrowRight, Eye, EyeOff } from 'lucide-react'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
+import AuthPageHeader from '../../components/auth/AuthPageHeader'
+import localNeighbourhoodStreet from '../../assets/images/local-neighbourhood-street.jpg'
 import { supabase } from '../../lib/supabase'
 import useAuth from '../../auth/useAuth'
+import './RegisterPage.css'
 
 function registrationError(message) {
   const normalised = message.toLowerCase()
@@ -20,8 +24,7 @@ export default function RegisterPage() {
   const navigate = useNavigate()
   const { user, isLoading: isSessionLoading } = useAuth()
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -42,8 +45,9 @@ export default function RegisterPage() {
     setError('')
     setSuccess('')
 
-    const firstName = form.firstName.trim()
-    const lastName = form.lastName.trim()
+    const nameParts = form.fullName.trim().split(/\s+/).filter(Boolean)
+    const firstName = nameParts[0] ?? ''
+    const lastName = nameParts.slice(1).join(' ')
     const email = form.email.trim().toLowerCase()
 
     if (
@@ -53,7 +57,7 @@ export default function RegisterPage() {
       !form.password ||
       !form.confirmPassword
     ) {
-      setError('Please complete all registration details.')
+      setError('Enter your full name and complete all registration details.')
       return
     }
 
@@ -92,7 +96,7 @@ export default function RegisterPage() {
       }
 
       if (data.session) {
-        navigate('/profile', { replace: true })
+        navigate('/home', { replace: true })
         return
       }
 
@@ -107,172 +111,181 @@ export default function RegisterPage() {
   }
 
   if (isSessionLoading) {
-    return (
-      <div style={{ textAlign: 'center', padding: 40 }}>Checking session…</div>
-    )
+    return <div className="register-loading">Checking session…</div>
   }
 
   if (user) {
-    return <Navigate to="/profile" replace />
+    return <Navigate to="/home" replace />
   }
 
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto' }}>
-      <div
-        className="page-header"
-        style={{ textAlign: 'center', marginBottom: 32 }}
-      >
-        <h2>Create your LocalLink account</h2>
-        <p>Join LocalLink to discover local businesses and earn rewards.</p>
-      </div>
+    <div className="register-page">
+      <AuthPageHeader />
 
-      <div className="tab-row" style={{ margin: '0 auto 24px' }}>
-        <button
-          type="button"
-          className="tab-btn"
-          onClick={() => navigate('/login')}
-        >
-          Login
-        </button>
-        <button type="button" className="tab-btn active">
-          Register
-        </button>
-      </div>
+      <main className="register-main">
+        <section className="register-photo-panel">
+          <img
+            src={localNeighbourhoodStreet}
+            alt="People spending time among cafés and businesses in a local neighbourhood"
+          />
+          <div className="register-photo-overlay" />
+          <div className="register-photo-copy">
+            <h2>
+              Make local feel
+              <br />a little closer.
+            </h2>
+            <p>
+              Create an account to save your requests, discover nearby
+              businesses, and keep local rewards in one place.
+            </p>
+          </div>
+        </section>
 
-      <form onSubmit={handleSubmit} noValidate>
-        <div className="form-group">
-          <label className="form-label" htmlFor="register-first-name">
-            First name
-          </label>
-          <input
-            id="register-first-name"
-            name="firstName"
-            className="form-input"
-            type="text"
-            value={form.firstName}
-            onChange={updateField}
-            autoComplete="given-name"
-            disabled={isSubmitting}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label" htmlFor="register-last-name">
-            Last name
-          </label>
-          <input
-            id="register-last-name"
-            name="lastName"
-            className="form-input"
-            type="text"
-            value={form.lastName}
-            onChange={updateField}
-            autoComplete="family-name"
-            disabled={isSubmitting}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label" htmlFor="register-email">
-            Email
-          </label>
-          <input
-            id="register-email"
-            name="email"
-            className="form-input"
-            type="email"
-            value={form.email}
-            onChange={updateField}
-            autoComplete="email"
-            disabled={isSubmitting}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label" htmlFor="register-password">
-            Password
-          </label>
-          <div className="password-input">
-            <input
+        <section className="register-form-panel">
+          <div className="register-eyebrow">Join LocalLink</div>
+          <h1>Create your account.</h1>
+          <p className="register-intro">
+            It only takes a minute to get started.
+          </p>
+
+          <form onSubmit={handleSubmit} noValidate>
+            <RegisterField
+              label="Full name"
+              id="register-full-name"
+              name="fullName"
+              type="text"
+              placeholder="e.g. Alex Morgan"
+              value={form.fullName}
+              onChange={updateField}
+              autoComplete="name"
+              disabled={isSubmitting}
+            />
+            <RegisterField
+              label="Email address"
+              id="register-email"
+              name="email"
+              type="email"
+              placeholder="you@example.com"
+              value={form.email}
+              onChange={updateField}
+              autoComplete="email"
+              disabled={isSubmitting}
+            />
+
+            <PasswordField
+              label="Password"
               id="register-password"
               name="password"
-              className="form-input"
-              type={showPassword ? 'text' : 'password'}
+              placeholder="At least 8 characters"
               value={form.password}
               onChange={updateField}
-              autoComplete="new-password"
+              visible={showPassword}
+              onToggle={() => setShowPassword((current) => !current)}
               disabled={isSubmitting}
-              required
             />
-            <button
-              type="button"
-              className="password-toggle"
-              onClick={() => setShowPassword((visible) => !visible)}
-              disabled={isSubmitting}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-              aria-pressed={showPassword}
-            >
-              {showPassword ? 'Hide' : 'Show'}
-            </button>
-          </div>
-        </div>
-        <div className="form-group">
-          <label className="form-label" htmlFor="register-confirm-password">
-            Confirm password
-          </label>
-          <div className="password-input">
-            <input
+            <PasswordField
+              label="Confirm password"
               id="register-confirm-password"
               name="confirmPassword"
-              className="form-input"
-              type={showConfirmPassword ? 'text' : 'password'}
+              placeholder="Enter your password again"
               value={form.confirmPassword}
               onChange={updateField}
-              autoComplete="new-password"
+              visible={showConfirmPassword}
+              onToggle={() => setShowConfirmPassword((current) => !current)}
               disabled={isSubmitting}
-              required
             />
+
+            <div className="register-location-preview" aria-disabled="true">
+              <strong>Where should local results start?</strong>
+              <p>
+                Choose a starting area now. You can change your registered
+                suburb later from Profile.
+              </p>
+              <div
+                className="register-location-options"
+                aria-label="Location options coming soon"
+              >
+                <span className="active">Takapuna</span>
+                <span>Albany</span>
+                <span>Central Auckland</span>
+              </div>
+            </div>
+
+            {error && (
+              <div className="auth-error register-message" role="alert">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="auth-success register-message" role="status">
+                {success}
+              </div>
+            )}
+
             <button
-              type="button"
-              className="password-toggle"
-              onClick={() => setShowConfirmPassword((visible) => !visible)}
+              className="register-submit"
+              type="submit"
               disabled={isSubmitting}
-              aria-label={
-                showConfirmPassword
-                  ? 'Hide re-entered password'
-                  : 'Show re-entered password'
-              }
-              aria-pressed={showConfirmPassword}
             >
-              {showConfirmPassword ? 'Hide' : 'Show'}
+              {isSubmitting ? 'Creating account…' : 'Create account'}
+              {!isSubmitting && <ArrowRight aria-hidden="true" />}
             </button>
-          </div>
-        </div>
+          </form>
 
-        {error && (
-          <div className="auth-error" role="alert">
-            {error}
+          <div className="register-login-row">
+            <span>Already have an account?</span>
+            <Link to="/login" viewTransition>
+              Log in instead
+            </Link>
           </div>
-        )}
-        {success && (
-          <div className="auth-success" role="status">
-            {success}
-          </div>
-        )}
+        </section>
+      </main>
+    </div>
+  )
+}
 
+function RegisterField({ label, id, ...inputProps }) {
+  return (
+    <div className="register-field">
+      <label htmlFor={id}>{label}</label>
+      <input id={id} required {...inputProps} />
+    </div>
+  )
+}
+
+function PasswordField({
+  label,
+  id,
+  visible,
+  onToggle,
+  disabled,
+  ...inputProps
+}) {
+  return (
+    <div className="register-field">
+      <label htmlFor={id}>{label}</label>
+      <div className="register-password-wrap">
+        <input
+          id={id}
+          type={visible ? 'text' : 'password'}
+          autoComplete="new-password"
+          disabled={disabled}
+          required
+          {...inputProps}
+        />
         <button
-          type="submit"
-          className="btn-primary"
-          disabled={isSubmitting}
-          style={{
-            width: '100%',
-            marginTop: 8,
-            opacity: isSubmitting ? 0.7 : 1,
-          }}
+          type="button"
+          onClick={onToggle}
+          disabled={disabled}
+          aria-label={
+            visible
+              ? `Hide ${label.toLowerCase()}`
+              : `Show ${label.toLowerCase()}`
+          }
         >
-          {isSubmitting ? 'Creating account…' : 'Create Account'}
+          {visible ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
         </button>
-      </form>
+      </div>
     </div>
   )
 }

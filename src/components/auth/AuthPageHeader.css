@@ -1,0 +1,70 @@
+.auth-page-header {
+  width: min(1110px, calc(100% - 48px));
+  height: 78px;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e6ebf5;
+}
+
+.auth-page-brand,
+.auth-page-back {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.auth-page-brand {
+  gap: 11px;
+  color: #202a3a;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.auth-page-brand-mark {
+  width: 33px;
+  height: 33px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  color: #fff;
+  background: #4263eb;
+}
+
+.auth-page-brand-mark svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.4;
+}
+
+.auth-page-back {
+  gap: 7px;
+  color: #3153d8;
+  font-size: 12px;
+}
+
+.auth-page-back svg {
+  width: 13px;
+  height: 13px;
+}
+
+@media (max-width: 760px) {
+  .auth-page-header {
+    width: calc(100% - 28px);
+    height: 68px;
+  }
+
+  .auth-page-brand {
+    font-size: 16px;
+  }
+
+  .auth-page-back {
+    font-size: 0;
+  }
+
+  .auth-page-back svg {
+    width: 24px;
+    height: 24px;
+  }
+}

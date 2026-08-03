@@ -215,63 +215,232 @@ body {
 }
 
 /* ─── Nav ───────────────────────────────────────────────────────── */
-.nav {
-  background: var(--blue);
-  padding: 0 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 60px;
+.portal-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(59, 91, 219, 0.25);
+  background: var(--white);
+}
+
+.nav {
+  width: min(1110px, calc(100% - 48px));
+  height: 78px;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid #e8edf5;
 }
 
 .nav-logo {
   font-family: 'Inter', sans-serif;
   font-weight: 700;
-  font-size: 20px;
-  color: var(--white);
+  font-size: 18px;
+  color: #202a3a;
   cursor: pointer;
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 11px;
+  flex-shrink: 0;
 }
-.nav-logo .logo-pin {
-  color: var(--amber);
+
+.nav-logo-mark {
+  width: 33px;
+  height: 33px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: #4263eb;
+  color: var(--white);
 }
-.nav-logo .logo-link {
-  color: var(--emerald);
+
+.nav-logo-mark svg {
+  width: 16px;
+  height: 16px;
+}
+
+.nav-logo-badge {
+  margin-left: -4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4263eb;
+  font-size: 10px;
+  font-weight: 600;
 }
 
 .nav-links {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin-left: auto;
 }
 
 .nav-btn {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.8);
+  color: #718096;
   font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 7px 14px;
-  border-radius: var(--radius);
+  padding: 9px 12px;
+  border-radius: 999px;
   cursor: pointer;
-  transition: var(--transition);
+  transition:
+    color 160ms ease,
+    background 160ms ease;
   text-decoration: none;
+  white-space: nowrap;
 }
 .nav-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--white);
+  background: #f6f8fb;
+  color: #202a3a;
 }
 .nav-btn.active {
-  background: rgba(255, 255, 255, 0.18);
-  color: var(--white);
+  background: #eef2ff;
+  color: #3451d1;
   font-weight: 600;
+}
+
+.portal-account-link,
+.portal-login-link,
+.portal-create-link {
+  min-height: 36px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform 160ms ease,
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.portal-account-link,
+.portal-create-link {
+  color: var(--white);
+  background: #202a3a;
+  border: 1px solid #202a3a;
+}
+
+.portal-account-link {
+  flex-shrink: 0;
+}
+
+.portal-account-link svg {
+  width: 15px;
+  height: 15px;
+}
+
+.portal-account-link:hover,
+.portal-create-link:hover {
+  background: #2e3a4c;
+  border-color: #2e3a4c;
+  transform: translateY(-1px);
+}
+
+.portal-account-link.active {
+  background: #4263eb;
+  border-color: #4263eb;
+}
+
+.portal-auth-links {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+}
+
+.portal-login-link {
+  color: #202a3a;
+  background: #f6f8fb;
+  border: 1px solid #e6ebf2;
+}
+
+.portal-login-link:hover {
+  background: #edf1f6;
+  transform: translateY(-1px);
+}
+
+.portal-main {
+  min-height: calc(100vh - 78px);
+  padding: 40px 24px;
+  background: var(--bg);
+}
+
+.portal-main-content {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .nav {
+    gap: 12px;
+  }
+
+  .nav-logo {
+    gap: 8px;
+  }
+
+  .nav-logo-badge {
+    display: none;
+  }
+
+  .nav-btn {
+    padding-inline: 8px;
+  }
+}
+
+@media (max-width: 760px) {
+  .nav {
+    width: min(100% - 32px, 1110px);
+    height: auto;
+    min-height: 78px;
+    padding-block: 12px 10px;
+    flex-wrap: wrap;
+  }
+
+  .nav-links {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    padding-top: 8px;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-top: 1px solid #edf1f6;
+  }
+
+  .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .portal-main {
+    padding: 28px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .portal-create-link {
+    display: none;
+  }
+
+  .portal-account-link,
+  .portal-login-link {
+    padding-inline: 13px;
+  }
 }
 
 /* ─── Portal layout ─────────────────────────────────────────────── */
