@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import mockBusinesses from '../../data/mockBusinesses'
 import { getDistanceKm } from '../../utils/distance'
+import useAuth from '../../auth/useAuth'
+import { supabase } from '../../lib/supabase'
 
 const USER_LOCATION = { lat: -36.8485, lng: 174.7633 }
 
@@ -20,7 +22,7 @@ const loyaltyCard = {
   stampsFilled: 4,
 }
 
-const myJobs = [
+const previewJobs = [
   { id: 1, name: 'Kitchen tap repair', quotes: 3, posted: 'Posted 2 days ago' },
   { id: 2, name: 'Car wash needed', quotes: 0, posted: 'Posted 5 days ago' },
 ]
@@ -48,7 +50,45 @@ const recentActivity = [
 
 export default function Home() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [search, setSearch] = useState('')
+  const [accountJobs, setAccountJobs] = useState([])
+
+  useEffect(() => {
+    let active = true
+    if (!user)
+      return () => {
+        active = false
+      }
+
+    async function loadJobs() {
+      const { data } = await supabase
+        .from('job_requests')
+        .select('id, title, created_at')
+        .eq('customer_id', user.id)
+        .eq('status', 'open')
+        .order('created_at', { ascending: false })
+        .limit(3)
+
+      if (active) {
+        setAccountJobs(
+          (data ?? []).map((job) => ({
+            id: job.id,
+            name: job.title,
+            quotes: 0,
+            posted: new Date(job.created_at).toLocaleDateString('en-NZ'),
+          })),
+        )
+      }
+    }
+
+    loadJobs()
+    return () => {
+      active = false
+    }
+  }, [user])
+
+  const displayedJobs = user ? accountJobs : previewJobs
 
   // Same Haversine calc as before (US009), just no longer wired to a
   // slider - filtered against the fixed radius above instead.
@@ -92,7 +132,7 @@ export default function Home() {
               marginBottom: 3,
             }}
           >
-            {getGreeting()}, Spencer
+            {getGreeting()}, {user?.user_metadata?.first_name ?? 'Neighbour'}
           </p>
           <h2 style={{ fontSize: 22, fontWeight: 700 }}>My LocalLink</h2>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 7 }}>
@@ -239,9 +279,10 @@ export default function Home() {
           <div className="home-side-card block-gap">
             <p className="home-side-label">Service Marketplace</p>
             <h3 className="home-side-title">
-              {myJobs.length} job{myJobs.length !== 1 ? 's' : ''} in progress
+              {displayedJobs.length} job{displayedJobs.length !== 1 ? 's' : ''}{' '}
+              in progress
             </h3>
-            {myJobs.map((job) => (
+            {displayedJobs.map((job) => (
               <button
                 className="job-row"
                 key={job.id}

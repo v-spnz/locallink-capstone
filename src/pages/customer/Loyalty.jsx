@@ -1,5 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import mockLoyaltyPrograms from '../../data/mockLoyaltyPrograms'
+import useAuth from '../../auth/useAuth'
+import { supabase } from '../../lib/supabase'
 import './Loyalty.css'
 
 function getPercent(p) {
@@ -84,7 +86,7 @@ function StampRing({ earned, required }) {
   )
 }
 
-function ProgramCard({ program, onRedeem, index }) {
+function ProgramCard({ program, onRedeem, index, isRedeeming }) {
   const percent = getPercent(program)
   const isDone = program.status === 'completed'
   const almostThere = !isDone && percent >= 80
@@ -205,8 +207,9 @@ function ProgramCard({ program, onRedeem, index }) {
               className="ly-redeem-btn tab-btn active"
               style={{ width: '100%', border: 'none', cursor: 'pointer' }}
               onClick={() => onRedeem(program.id)}
+              disabled={isRedeeming}
             >
-              Redeem Reward
+              {isRedeeming ? 'Redeeming…' : 'Redeem Reward'}
             </button>
           )}
         </div>
@@ -216,9 +219,46 @@ function ProgramCard({ program, onRedeem, index }) {
 }
 
 export default function Loyalty() {
+  const { user } = useAuth()
   const [tab, setTab] = useState('inprogress')
   const [search, setSearch] = useState('')
   const [programs, setPrograms] = useState(mockLoyaltyPrograms)
+  const [error, setError] = useState('')
+  const [isRedeeming, setIsRedeeming] = useState(null)
+
+  useEffect(() => {
+    let active = true
+
+    async function loadRedemptions() {
+      const { data, error: queryError } = await supabase
+        .from('reward_redemptions')
+        .select('mock_programme_id, redeemed_at')
+        .eq('user_id', user.id)
+
+      if (!active) return
+      if (queryError) {
+        setError('Unable to load your saved redemptions right now.')
+        return
+      }
+
+      const redemptionByProgramme = new Map(
+        (data ?? []).map((item) => [item.mock_programme_id, item.redeemed_at]),
+      )
+      setPrograms(
+        mockLoyaltyPrograms.map((program) => {
+          const redeemedAt = redemptionByProgramme.get(program.id)
+          return redeemedAt
+            ? { ...program, redeemed: true, completedOn: redeemedAt }
+            : program
+        }),
+      )
+    }
+
+    loadRedemptions()
+    return () => {
+      active = false
+    }
+  }, [user.id])
 
   const totalPoints = useMemo(
     () =>
@@ -241,14 +281,31 @@ export default function Loyalty() {
     .filter((p) => p.status === 'completed')
     .sort((a, b) => new Date(b.completedOn) - new Date(a.completedOn))
 
-  function handleRedeem(id) {
-    setPrograms((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? { ...p, redeemed: true, completedOn: new Date().toISOString() }
-          : p,
-      ),
+  async function handleRedeem(id) {
+    setError('')
+    setIsRedeeming(id)
+    const { data, error: redeemError } = await supabase.rpc(
+      'redeem_mock_loyalty_reward',
+      { p_mock_programme_id: id },
     )
+
+    if (redeemError) {
+      setError('Unable to redeem this reward. Please try again.')
+    } else {
+      const redemption = Array.isArray(data) ? data[0] : data
+      setPrograms((previous) =>
+        previous.map((program) =>
+          program.id === id
+            ? {
+                ...program,
+                redeemed: true,
+                completedOn: redemption.redeemed_at,
+              }
+            : program,
+        ),
+      )
+    }
+    setIsRedeeming(null)
   }
 
   const list = tab === 'inprogress' ? inProgress : completed
@@ -342,6 +399,12 @@ export default function Loyalty() {
         </button>
       </div>
 
+      {error && (
+        <div className="auth-error" role="alert" style={{ marginTop: 16 }}>
+          {error}
+        </div>
+      )}
+
       {list.length > 0 ? (
         <div
           style={{
@@ -357,6 +420,7 @@ export default function Loyalty() {
               program={p}
               onRedeem={handleRedeem}
               index={i}
+              isRedeeming={isRedeeming === p.id}
             />
           ))}
         </div>

@@ -17,8 +17,22 @@ export default function CustomerPortal() {
         <Route index element={<Navigate to="/home" replace />} />
         <Route path="home" element={<Home />} />
         <Route path="deals" element={<DealsDiscovery />} />
-        <Route path="loyalty" element={<Loyalty />} />
-        <Route path="jobs" element={<Jobs />} />
+        <Route
+          path="loyalty"
+          element={
+            <ProtectedRoute>
+              <Loyalty />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="jobs"
+          element={
+            <ProtectedRoute>
+              <Jobs />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="profile"
           element={

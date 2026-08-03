@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import ComboBox from '../../components/ui/ComboBox'
 import suburbsData from '../../data/Suburbs'
+import useAuth from '../../auth/useAuth'
+import { supabase } from '../../lib/supabase'
 
 const VALID_TRADE_CATEGORIES = [
   'Plumbing',
@@ -44,6 +46,7 @@ const VALID_DISTANCES = [
 ]
 
 export default function Jobs() {
+  const { user } = useAuth()
   const [postedJobs, setPostedJobs] = useState([])
   const [jobTitle, setJobTitle] = useState('')
   const [jobDescription, setJobDescription] = useState('')
@@ -60,6 +63,9 @@ export default function Jobs() {
   const [jobStatus, setJobStatus] = useState('Not Posted')
   const [step, setStep] = useState('form')
   const [successMessage, setSuccessMessage] = useState('')
+  const [requestError, setRequestError] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
 
   const [titleError, setTitleError] = useState('')
   const [descriptionError, setDescriptionError] = useState('')
@@ -69,6 +75,43 @@ export default function Jobs() {
   const [distanceError, setDistanceError] = useState('')
 
   useEffect(() => {
+    let active = true
+
+    async function loadJobs() {
+      const { data, error } = await supabase
+        .from('job_requests')
+        .select(
+          'id, title, description, category, city, suburb, radius_km, status, created_at',
+        )
+        .eq('customer_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (!active) return
+      if (error) setRequestError('Unable to load your job requests.')
+      else {
+        setPostedJobs(
+          (data ?? []).map((job) => ({
+            ...job,
+            postedDistance: `${job.radius_km}km`,
+          })),
+        )
+        setJobStatus(
+          data?.some((job) => job.status === 'open')
+            ? 'Job Posted'
+            : 'Not Posted',
+        )
+      }
+      setIsLoading(false)
+    }
+
+    loadJobs()
+    return () => {
+      active = false
+    }
+  }, [user.id])
+
+  useEffect(() => {
+    if (!successMessage) return undefined
     const timer = setTimeout(() => {
       setSuccessMessage('')
     }, 2000)
@@ -187,20 +230,47 @@ export default function Jobs() {
     setStep('form')
   }
 
-  function handleConfirmPost() {
-    if (editingJob) {
-      setPostedJobs((prevJobs) =>
-        prevJobs.map((job) =>
-          job.id === editingJob.id ? { ...pendingJob, id: editingJob.id } : job,
-        ),
-      )
-      setEditingJob(null)
-    } else {
-      setPostedJobs((prevJobs) => [
-        ...prevJobs,
-        { ...pendingJob, id: Date.now() },
-      ])
+  async function handleConfirmPost() {
+    setIsSaving(true)
+    setRequestError('')
+    const wasEditing = Boolean(editingJob)
+    const payload = {
+      customer_id: user.id,
+      title: pendingJob.title,
+      description: pendingJob.description,
+      category: pendingJob.category,
+      city: pendingJob.city,
+      suburb: pendingJob.suburb,
+      radius_km: Number.parseInt(pendingJob.postedDistance, 10),
+      status: 'open',
     }
+
+    const query = wasEditing
+      ? supabase
+          .from('job_requests')
+          .update(payload)
+          .eq('id', editingJob.id)
+          .eq('customer_id', user.id)
+      : supabase.from('job_requests').insert(payload)
+    const { data, error } = await query
+      .select(
+        'id, title, description, category, city, suburb, radius_km, status, created_at',
+      )
+      .single()
+
+    if (error) {
+      setRequestError('Your job request could not be saved. Please try again.')
+      setIsSaving(false)
+      return
+    }
+
+    const savedJob = { ...data, postedDistance: `${data.radius_km}km` }
+    setPostedJobs((current) =>
+      wasEditing
+        ? current.map((job) => (job.id === savedJob.id ? savedJob : job))
+        : [savedJob, ...current],
+    )
+    setEditingJob(null)
     setJobStatus('Job Posted')
     setPendingJob(null)
     setJobTitle('')
@@ -211,8 +281,9 @@ export default function Jobs() {
     setJobPostedDistance('')
     setStep('form')
     setSuccessMessage(
-      editingJob ? 'Job updated successfully!' : 'Job posted successfully!',
+      wasEditing ? 'Job updated successfully!' : 'Job posted successfully!',
     )
+    setIsSaving(false)
   }
 
   return (
@@ -429,8 +500,9 @@ export default function Jobs() {
               type="button"
               className="btn-primary"
               onClick={handleConfirmPost}
+              disabled={isSaving}
             >
-              Confirm &amp; Post Job Request
+              {isSaving ? 'Saving…' : 'Confirm & Post Job Request'}
             </button>
           </div>
         </div>
@@ -447,7 +519,13 @@ export default function Jobs() {
         >
           Job Status: {jobStatus}
         </div>
-        {postedJobs.length > 0 && (
+        {requestError && (
+          <div className="auth-error" role="alert">
+            {requestError}
+          </div>
+        )}
+        {isLoading && <div className="empty-state">Loading your jobs…</div>}
+        {!isLoading && postedJobs.length > 0 && (
           <div style={{ marginTop: 10 }}>
             {postedJobs.map((job) => (
               <div
@@ -464,8 +542,8 @@ export default function Jobs() {
                 </div>
                 <div style={{ fontSize: 12, color: '#999' }}>
                   <p>
-                    Time Posted: {new Date().toLocaleDateString()}{' '}
-                    {new Date().toLocaleTimeString()}
+                    Time Posted:{' '}
+                    {new Date(job.created_at).toLocaleString('en-NZ')}
                   </p>
                   <p>Posted Distance: {job.postedDistance}</p>
                 </div>
