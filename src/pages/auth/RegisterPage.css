@@ -92,6 +92,82 @@
   font-size: 14px;
 }
 
+.register-intent {
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+}
+
+.register-intent legend {
+  margin-bottom: 7px;
+  color: #718096;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.register-intent-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.register-intent-options button {
+  min-height: 58px;
+  padding: 9px 11px;
+  border: 1.5px solid #dbe3f2;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-align: left;
+  background: #f6f8fc;
+  color: #718096;
+  font: inherit;
+  cursor: pointer;
+  transition: 160ms ease;
+}
+
+.register-intent-options button:hover:not(:disabled) {
+  border-color: #a9b9ea;
+}
+
+.register-intent-options button.active {
+  border-color: #4263eb;
+  background: #eef2ff;
+  color: #3153d8;
+  box-shadow: 0 0 0 2px rgba(66, 99, 235, 0.08);
+}
+
+.register-intent-options button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.register-intent-options svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+.register-intent-options span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.register-intent-options strong {
+  color: #202a3a;
+  font-size: 11px;
+}
+
+.register-intent-options small {
+  overflow: hidden;
+  color: #718096;
+  font-size: 8px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+}
+
 .register-field {
   margin-bottom: 13px;
 }
@@ -154,47 +230,6 @@
 .register-password-wrap button svg {
   width: 16px;
   height: 16px;
-}
-
-.register-location-preview {
-  margin-top: 4px;
-  padding: 11px 13px;
-  border-radius: 12px;
-  background: #dce8ff;
-  cursor: default;
-  user-select: none;
-}
-
-.register-location-preview strong {
-  display: block;
-  font-size: 12px;
-}
-
-.register-location-preview p {
-  margin: 2px 0 8px;
-  color: #718096;
-  font-size: 9px;
-}
-
-.register-location-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.register-location-options span {
-  min-width: 84px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  text-align: center;
-  background: #fff;
-  color: #3153d8;
-  font-size: 10px;
-}
-
-.register-location-options span.active {
-  background: #4263eb;
-  color: #fff;
 }
 
 .register-message {

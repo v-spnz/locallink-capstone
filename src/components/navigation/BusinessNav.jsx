@@ -1,14 +1,29 @@
-import { NavLink } from 'react-router-dom'
-import { Settings } from 'lucide-react'
+import { CircleUserRound, House, Settings } from 'lucide-react'
+import { Link, NavLink } from 'react-router-dom'
+import useBusiness from '../../business/useBusiness'
 import BrandLogo from './BrandLogo'
 
-const navigationItems = [
-  ['/business/analytics', 'Dashboard'],
-  ['/business/create-deal', 'Deals'],
-  ['/business/create-loyalty', 'Loyalty'],
-]
-
 export default function BusinessNav() {
+  const { capabilities, membership } = useBusiness()
+  const canManageBusiness = ['owner', 'admin'].includes(membership.role)
+  const navigationItems = [['/business/analytics', 'Dashboard']]
+
+  if (capabilities.deals_enabled) {
+    navigationItems.push(['/business/create-deal', 'Deals'])
+  }
+
+  if (capabilities.loyalty_enabled) {
+    navigationItems.push(['/business/create-loyalty', 'Loyalty'])
+  }
+
+  if (capabilities.service_marketplace_enabled) {
+    navigationItems.push(
+      ['/business/job-leads', 'Job leads'],
+      ['/business/quotes', 'Quotes'],
+      ['/business/active-jobs', 'Active jobs'],
+    )
+  }
+
   return (
     <header className="portal-header">
       <nav className="nav" aria-label="Business navigation">
@@ -28,15 +43,32 @@ export default function BusinessNav() {
           ))}
         </div>
 
-        <NavLink
-          className={({ isActive }) =>
-            `portal-account-link${isActive ? ' active' : ''}`
-          }
-          to="/business/settings"
-        >
-          <Settings aria-hidden="true" />
-          <span>Settings</span>
-        </NavLink>
+        <div className="business-nav-actions">
+          <Link
+            className="business-personal-link"
+            to="/home"
+            aria-label="Open personal LocalLink pages"
+            title="Personal pages"
+          >
+            <House aria-hidden="true" />
+          </Link>
+          {canManageBusiness ? (
+            <NavLink
+              className={({ isActive }) =>
+                `portal-account-link${isActive ? ' active' : ''}`
+              }
+              to="/business/settings"
+            >
+              <Settings aria-hidden="true" />
+              <span>Settings</span>
+            </NavLink>
+          ) : (
+            <Link className="portal-account-link" to="/profile">
+              <CircleUserRound aria-hidden="true" />
+              <span>Profile</span>
+            </Link>
+          )}
+        </div>
       </nav>
     </header>
   )

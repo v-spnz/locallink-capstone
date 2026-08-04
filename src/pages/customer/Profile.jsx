@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import useAuth from '../../auth/useAuth'
 
@@ -9,19 +9,29 @@ export default function Profile() {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState('')
   const [profile, setProfile] = useState(null)
+  const [hasBusinessAccess, setHasBusinessAccess] = useState(false)
 
   useEffect(() => {
     let active = true
 
     async function loadProfile() {
-      const { data } = await supabase
-        .from('profiles')
-        .select('first_name, last_name')
-        .eq('id', user.id)
-        .maybeSingle()
+      const [profileResult, membershipResult] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('id', user.id)
+          .maybeSingle(),
+        supabase
+          .from('business_members')
+          .select('business_id')
+          .eq('profile_id', user.id)
+          .limit(1)
+          .maybeSingle(),
+      ])
 
       if (active) {
-        setProfile(data)
+        setProfile(profileResult.data)
+        setHasBusinessAccess(Boolean(membershipResult.data))
       }
     }
 
@@ -99,6 +109,23 @@ export default function Profile() {
         <div className="placeholder-box">
           Range filter slider — component TBD
         </div>
+      </div>
+
+      <div className="placeholder-section">
+        <div className="placeholder-section-title">Business access</div>
+        <p className="account-section-copy">
+          {hasBusinessAccess
+            ? 'Manage your business without creating another login.'
+            : 'Add business tools to this account while keeping your personal access.'}
+        </p>
+        <Link
+          className="btn-secondary"
+          to={
+            hasBusinessAccess ? '/business/analytics' : '/business/onboarding'
+          }
+        >
+          {hasBusinessAccess ? 'Open business portal' : 'Set up a business'}
+        </Link>
       </div>
 
       {logoutError && <div className="error">{logoutError}</div>}

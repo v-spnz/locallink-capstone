@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowRight, Eye, EyeOff } from 'lucide-react'
+import { ArrowRight, Building2, Eye, EyeOff, UserRound } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import AuthPageHeader from '../../components/auth/AuthPageHeader'
 import localNeighbourhoodStreet from '../../assets/images/local-neighbourhood-street.jpg'
@@ -34,6 +34,7 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [registrationIntent, setRegistrationIntent] = useState('personal')
 
   function updateField(event) {
     const { name, value } = event.target
@@ -81,6 +82,7 @@ export default function RegisterPage() {
           data: {
             first_name: firstName,
             last_name: lastName,
+            registration_intent: registrationIntent,
           },
         },
       })
@@ -96,12 +98,17 @@ export default function RegisterPage() {
       }
 
       if (data.session) {
-        navigate('/home', { replace: true })
+        navigate(
+          registrationIntent === 'business' ? '/business/onboarding' : '/home',
+          { replace: true },
+        )
         return
       }
 
       setSuccess(
-        'Account created. Check your email to confirm your address, then sign in.',
+        registrationIntent === 'business'
+          ? 'Account created. Confirm your email, then sign in to finish setting up your business.'
+          : 'Account created. Check your email to confirm your address, then sign in.',
       )
     } catch (requestError) {
       setError(registrationError(requestError.message || ''))
@@ -149,6 +156,38 @@ export default function RegisterPage() {
           </p>
 
           <form onSubmit={handleSubmit} noValidate>
+            <fieldset className="register-intent">
+              <legend>How would you like to start?</legend>
+              <div className="register-intent-options">
+                <button
+                  type="button"
+                  className={registrationIntent === 'personal' ? 'active' : ''}
+                  onClick={() => setRegistrationIntent('personal')}
+                  aria-pressed={registrationIntent === 'personal'}
+                  disabled={isSubmitting}
+                >
+                  <UserRound aria-hidden="true" />
+                  <span>
+                    <strong>Personal</strong>
+                    <small>Find local help and rewards</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={registrationIntent === 'business' ? 'active' : ''}
+                  onClick={() => setRegistrationIntent('business')}
+                  aria-pressed={registrationIntent === 'business'}
+                  disabled={isSubmitting}
+                >
+                  <Building2 aria-hidden="true" />
+                  <span>
+                    <strong>Business</strong>
+                    <small>Personal access plus business tools</small>
+                  </span>
+                </button>
+              </div>
+            </fieldset>
+
             <RegisterField
               label="Full name"
               id="register-full-name"
@@ -194,22 +233,6 @@ export default function RegisterPage() {
               onToggle={() => setShowConfirmPassword((current) => !current)}
               disabled={isSubmitting}
             />
-
-            <div className="register-location-preview" aria-disabled="true">
-              <strong>Where should local results start?</strong>
-              <p>
-                Choose a starting area now. You can change your registered
-                suburb later from Profile.
-              </p>
-              <div
-                className="register-location-options"
-                aria-label="Location options coming soon"
-              >
-                <span className="active">Takapuna</span>
-                <span>Albany</span>
-                <span>Central Auckland</span>
-              </div>
-            </div>
 
             {error && (
               <div className="auth-error register-message" role="alert">

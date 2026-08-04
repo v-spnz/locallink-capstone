@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import AuthPageHeader from '../../components/auth/AuthPageHeader'
 import loginLocalStreet from '../../assets/images/login-local-street.jpg'
 import { supabase } from '../../lib/supabase'
 import useAuth from '../../auth/useAuth'
+import { getDefaultAuthenticatedPath } from '../../business/businessAccess'
 import './LoginPage.css'
 
 export default function LoginPage() {
@@ -12,7 +13,7 @@ export default function LoginPage() {
   const location = useLocation()
   const { user, isLoading: isSessionLoading } = useAuth()
 
-  const destination = location.state?.from?.pathname ?? '/home'
+  const requestedDestination = location.state?.from?.pathname ?? null
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -20,6 +21,36 @@ export default function LoginPage() {
   const [success, setSuccess] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
+  const [authenticatedDestination, setAuthenticatedDestination] = useState('')
+
+  useEffect(() => {
+    let isActive = true
+
+    async function resolveDestination() {
+      if (!user) {
+        setAuthenticatedDestination('')
+        return
+      }
+
+      if (requestedDestination) {
+        setAuthenticatedDestination(requestedDestination)
+        return
+      }
+
+      try {
+        const nextPath = await getDefaultAuthenticatedPath(user)
+        if (isActive) setAuthenticatedDestination(nextPath)
+      } catch {
+        if (isActive) setAuthenticatedDestination('/home')
+      }
+    }
+
+    resolveDestination()
+
+    return () => {
+      isActive = false
+    }
+  }, [requestedDestination, user])
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -28,17 +59,28 @@ export default function LoginPage() {
     setIsSubmitting(true)
 
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      })
+      const { data, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        })
 
       if (signInError) {
         setError('The email or password you entered is incorrect.')
         return
       }
 
-      navigate(destination, { replace: true })
+      let nextPath = requestedDestination
+
+      if (!nextPath) {
+        try {
+          nextPath = await getDefaultAuthenticatedPath(data.user)
+        } catch {
+          nextPath = '/home'
+        }
+      }
+
+      navigate(nextPath, { replace: true })
     } catch {
       setError('Unable to sign in right now. Please try again.')
     } finally {
@@ -72,7 +114,11 @@ export default function LoginPage() {
   }
 
   if (user) {
-    return <Navigate to="/home" replace />
+    if (!authenticatedDestination) {
+      return <div className="login-loading">Opening your account…</div>
+    }
+
+    return <Navigate to={authenticatedDestination} replace />
   }
 
   return (
@@ -104,7 +150,7 @@ export default function LoginPage() {
             <div className="login-eyebrow">Good to see you again</div>
             <h1>Log in.</h1>
             <p className="login-intro">
-              Enter your details to continue to the Home Page.
+              Enter your details to continue to your LocalLink account.
             </p>
 
             <form onSubmit={handleSubmit}>
