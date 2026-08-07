@@ -1,0 +1,174 @@
+.service-marketplace-message {
+  margin-bottom: 16px;
+}
+
+.service-marketplace-list {
+  display: grid;
+  gap: 14px;
+}
+
+.service-marketplace-card {
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.service-marketplace-card-head {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.service-marketplace-card-head > div > span {
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.service-marketplace-card h3 {
+  margin-top: 3px;
+  font-size: 17px;
+}
+
+.service-marketplace-card > p {
+  margin-bottom: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.service-status {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #f1f3f5;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.service-status.open,
+.service-status.submitted {
+  background: #eef2ff;
+  color: #3153d8;
+}
+
+.service-status.accepted,
+.service-status.in_progress,
+.service-status.completed {
+  background: #e6fcf5;
+  color: #087f5b;
+}
+
+.service-status.rejected,
+.service-status.withdrawn {
+  background: #fff5f5;
+  color: #c92a2a;
+}
+
+.service-marketplace-meta {
+  margin-bottom: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.service-marketplace-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.service-marketplace-meta svg {
+  width: 13px;
+  height: 13px;
+}
+
+.service-quote-summary {
+  margin-bottom: 15px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  display: grid;
+  gap: 4px;
+  background: var(--bg);
+}
+
+.service-quote-summary strong {
+  color: var(--blue);
+  font-size: 16px;
+}
+
+.service-quote-summary span {
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.service-quote-form {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 12px;
+}
+
+.service-quote-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.service-quote-form label > span {
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.service-quote-form input,
+.service-quote-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  outline: 0;
+  resize: vertical;
+  background: var(--white);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.service-quote-form input:focus,
+.service-quote-form textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-light);
+}
+
+.service-quote-form .btn-primary,
+.service-marketplace-card .btn-success {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.service-quote-form svg,
+.service-marketplace-card .btn-success svg {
+  width: 14px;
+  height: 14px;
+}
+
+@media (max-width: 560px) {
+  .service-marketplace-card-head {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

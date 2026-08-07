@@ -13,9 +13,8 @@ const USER_LOCATION = { lat: -36.8485, lng: 174.7633 }
 const NEARBY_RADIUS_KM = 5
 const DEAL_DISPLAY_COUNT = 4 // 1 featured + 3 in the list, matches the wireframe
 
-// Loyalty / jobs / activity don't have real data hooked up yet so this is
-// just enough mock stuff to make the home page look right for the
-// supervisor meeting. Swap these for real data once those features exist.
+// The business, deal, and loyalty displays remain shared mock catalogue data
+// until real participating stores are available.
 const loyaltyCard = {
   businessName: 'Britomart Espresso Bar',
   stampsTotal: 5,
@@ -62,20 +61,32 @@ export default function Home() {
       }
 
     async function loadJobs() {
-      const { data } = await supabase
-        .from('job_requests')
-        .select('id, title, created_at')
-        .eq('customer_id', user.id)
-        .eq('status', 'open')
-        .order('created_at', { ascending: false })
-        .limit(3)
+      const [jobsResult, quotesResult] = await Promise.all([
+        supabase
+          .from('job_requests')
+          .select('id, title, status, created_at')
+          .eq('customer_id', user.id)
+          .in('status', ['open', 'in_progress'])
+          .order('created_at', { ascending: false })
+          .limit(3),
+        supabase.rpc('get_customer_job_quotes'),
+      ])
 
       if (active) {
+        const quoteCounts = (quotesResult.data ?? []).reduce(
+          (counts, quote) => ({
+            ...counts,
+            [quote.job_request_id]: (counts[quote.job_request_id] ?? 0) + 1,
+          }),
+          {},
+        )
+
         setAccountJobs(
-          (data ?? []).map((job) => ({
+          (jobsResult.data ?? []).map((job) => ({
             id: job.id,
             name: job.title,
-            quotes: 0,
+            status: job.status,
+            quotes: quoteCounts[job.id] ?? 0,
             posted: new Date(job.created_at).toLocaleDateString('en-NZ'),
           })),
         )
@@ -275,12 +286,12 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Service Marketplace - mock display, every button goes to Jobs */}
+          {/* Service Marketplace - account jobs and quotes from Supabase */}
           <div className="home-side-card block-gap">
             <p className="home-side-label">Service Marketplace</p>
             <h3 className="home-side-title">
               {displayedJobs.length} job{displayedJobs.length !== 1 ? 's' : ''}{' '}
-              in progress
+              active
             </h3>
             {displayedJobs.map((job) => (
               <button

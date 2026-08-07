@@ -3,6 +3,7 @@ import ComboBox from '../../components/ui/ComboBox'
 import suburbsData from '../../data/Suburbs'
 import useAuth from '../../auth/useAuth'
 import { supabase } from '../../lib/supabase'
+import './Jobs.css'
 
 const VALID_TRADE_CATEGORIES = [
   'Plumbing',
@@ -66,6 +67,9 @@ export default function Jobs() {
   const [requestError, setRequestError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [quotesByJob, setQuotesByJob] = useState({})
+  const [respondingQuoteId, setRespondingQuoteId] = useState(null)
+  const [reloadKey, setReloadKey] = useState(0)
 
   const [titleError, setTitleError] = useState('')
   const [descriptionError, setDescriptionError] = useState('')
@@ -78,27 +82,44 @@ export default function Jobs() {
     let active = true
 
     async function loadJobs() {
-      const { data, error } = await supabase
-        .from('job_requests')
-        .select(
-          'id, title, description, category, city, suburb, radius_km, status, created_at',
-        )
-        .eq('customer_id', user.id)
-        .order('created_at', { ascending: false })
+      setIsLoading(true)
+      setRequestError('')
+
+      const [jobsResult, quotesResult] = await Promise.all([
+        supabase
+          .from('job_requests')
+          .select(
+            'id, title, description, category, city, suburb, radius_km, status, created_at',
+          )
+          .eq('customer_id', user.id)
+          .order('created_at', { ascending: false }),
+        supabase.rpc('get_customer_job_quotes'),
+      ])
 
       if (!active) return
-      if (error) setRequestError('Unable to load your job requests.')
-      else {
+      if (jobsResult.error || quotesResult.error) {
+        setRequestError('Unable to load your job requests and quotes.')
+      }
+
+      if (!jobsResult.error) {
         setPostedJobs(
-          (data ?? []).map((job) => ({
+          (jobsResult.data ?? []).map((job) => ({
             ...job,
             postedDistance: `${job.radius_km}km`,
           })),
         )
-        setJobStatus(
-          data?.some((job) => job.status === 'open')
-            ? 'Job Posted'
-            : 'Not Posted',
+        setJobStatus(getOverallJobStatus(jobsResult.data ?? []))
+      }
+
+      if (!quotesResult.error) {
+        setQuotesByJob(
+          (quotesResult.data ?? []).reduce((groupedQuotes, quote) => {
+            const jobQuotes = groupedQuotes[quote.job_request_id] ?? []
+            return {
+              ...groupedQuotes,
+              [quote.job_request_id]: [...jobQuotes, quote],
+            }
+          }, {}),
         )
       }
       setIsLoading(false)
@@ -108,7 +129,7 @@ export default function Jobs() {
     return () => {
       active = false
     }
-  }, [user.id])
+  }, [reloadKey, user.id])
 
   useEffect(() => {
     if (!successMessage) return undefined
@@ -284,6 +305,30 @@ export default function Jobs() {
       wasEditing ? 'Job updated successfully!' : 'Job posted successfully!',
     )
     setIsSaving(false)
+  }
+
+  async function handleQuoteResponse(quoteId, accept) {
+    setRespondingQuoteId(quoteId)
+    setRequestError('')
+    setSuccessMessage('')
+
+    const { error } = await supabase.rpc('respond_to_job_quote', {
+      p_quote_id: quoteId,
+      p_accept: accept,
+    })
+
+    if (error) {
+      setRequestError(
+        accept
+          ? 'This quote could not be accepted. It may no longer be available.'
+          : 'This quote could not be declined. Please try again.',
+      )
+    } else {
+      setSuccessMessage(accept ? 'Quote accepted!' : 'Quote declined.')
+      setReloadKey((current) => current + 1)
+    }
+
+    setRespondingQuoteId(null)
   }
 
   return (
@@ -508,14 +553,11 @@ export default function Jobs() {
         </div>
       )}
       <div className="placeholder-section">
-        <div className="placeholder-section-title">Quotes Received</div>
-        <div className="placeholder-box">Quotes list — component TBD</div>
-      </div>
-
-      <div className="placeholder-section">
         <div
           className="job-status-header"
-          style={{ color: jobStatus === 'Job Posted' ? 'green' : 'red' }}
+          style={{
+            color: jobStatus === 'Not Posted' ? 'var(--text-muted)' : 'green',
+          }}
         >
           Job Status: {jobStatus}
         </div>
@@ -527,61 +569,139 @@ export default function Jobs() {
         {isLoading && <div className="empty-state">Loading your jobs…</div>}
         {!isLoading && postedJobs.length > 0 && (
           <div style={{ marginTop: 10 }}>
-            {postedJobs.map((job) => (
-              <div
-                key={job.id}
-                style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}
-              >
-                <strong>{job.title}</strong> - {job.category}
-                <div style={{ fontSize: 13, color: '#666' }}>
-                  {job.description}
-                </div>
-                <div style={{ fontSize: 12, color: '#999' }}>
-                  {job.city}
-                  {job.suburb ? `, ${job.suburb}` : ''}
-                </div>
-                <div style={{ fontSize: 12, color: '#999' }}>
-                  <p>
-                    Time Posted:{' '}
-                    {new Date(job.created_at).toLocaleString('en-NZ')}
-                  </p>
-                  <p>Posted Distance: {job.postedDistance}</p>
-                </div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: '#999',
-                    display: 'flex',
-                    gap: 10,
-                  }}
-                >
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => {
-                      setPendingJob(job)
-                      setStep('review')
-                    }}
-                  >
-                    Repost Job
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => {
-                      handleEditJob(job)
-                    }}
-                  >
-                    Edit Job
-                  </button>
-                </div>
-              </div>
-            ))}
+            {postedJobs.map((job) => {
+              const jobQuotes = quotesByJob[job.id] ?? []
+              const canEdit = ['open', 'closed', 'cancelled'].includes(
+                job.status,
+              )
+
+              return (
+                <article className="customer-job-card" key={job.id}>
+                  <div className="customer-job-card-head">
+                    <div>
+                      <strong>{job.title}</strong>
+                      <span>{job.category}</span>
+                    </div>
+                    <span className={`customer-job-status ${job.status}`}>
+                      {formatStatus(job.status)}
+                    </span>
+                  </div>
+                  <p className="customer-job-description">{job.description}</p>
+                  <div className="customer-job-meta">
+                    <span>
+                      {job.suburb ? `${job.suburb}, ` : ''}
+                      {job.city}
+                    </span>
+                    <span>{job.postedDistance} radius</span>
+                    <span>
+                      Posted {new Date(job.created_at).toLocaleString('en-NZ')}
+                    </span>
+                  </div>
+
+                  <section className="customer-job-quotes">
+                    <h4>
+                      {jobQuotes.length} quote
+                      {jobQuotes.length === 1 ? '' : 's'} received
+                    </h4>
+                    {jobQuotes.length === 0 && (
+                      <p className="customer-job-no-quotes">
+                        Local businesses can view this request when its category
+                        and area match their services.
+                      </p>
+                    )}
+                    {jobQuotes.map((quote) => (
+                      <div className="customer-quote" key={quote.quote_id}>
+                        <div className="customer-quote-head">
+                          <div>
+                            <strong>{quote.business_name}</strong>
+                            <span>{formatMoney(quote.amount_cents)}</span>
+                          </div>
+                          <span
+                            className={`customer-quote-status ${quote.quote_status}`}
+                          >
+                            {formatStatus(quote.quote_status)}
+                          </span>
+                        </div>
+                        <p>{quote.message}</p>
+                        {job.status === 'open' &&
+                          quote.quote_status === 'submitted' && (
+                            <div className="customer-quote-actions">
+                              <button
+                                type="button"
+                                className="btn-primary"
+                                onClick={() =>
+                                  handleQuoteResponse(quote.quote_id, true)
+                                }
+                                disabled={respondingQuoteId !== null}
+                              >
+                                {respondingQuoteId === quote.quote_id
+                                  ? 'Saving…'
+                                  : 'Accept quote'}
+                              </button>
+                              <button
+                                type="button"
+                                className="btn-secondary"
+                                onClick={() =>
+                                  handleQuoteResponse(quote.quote_id, false)
+                                }
+                                disabled={respondingQuoteId !== null}
+                              >
+                                Decline
+                              </button>
+                            </div>
+                          )}
+                      </div>
+                    ))}
+                  </section>
+
+                  {canEdit && (
+                    <div className="customer-job-actions">
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => {
+                          setEditingJob(null)
+                          setPendingJob(job)
+                          setStep('review')
+                        }}
+                      >
+                        Repost Job
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => handleEditJob(job)}
+                      >
+                        Edit Job
+                      </button>
+                    </div>
+                  )}
+                </article>
+              )
+            })}
           </div>
         )}
       </div>
     </>
   )
+}
+
+function getOverallJobStatus(jobs) {
+  if (jobs.some((job) => job.status === 'in_progress')) return 'In Progress'
+  if (jobs.some((job) => job.status === 'open')) return 'Job Posted'
+  if (jobs.some((job) => job.status === 'completed')) return 'Completed'
+  return 'Not Posted'
+}
+
+function formatStatus(status) {
+  return status.replaceAll('_', ' ')
+}
+
+function formatMoney(amountCents) {
+  return new Intl.NumberFormat('en-NZ', {
+    style: 'currency',
+    currency: 'NZD',
+  }).format(amountCents / 100)
 }
 
 function ReviewRow({ label, value }) {
