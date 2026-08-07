@@ -1,37 +1,86 @@
-import { useState } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { ArrowRight } from 'lucide-react'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import AuthPageHeader from '../../components/auth/AuthPageHeader'
+import loginLocalStreet from '../../assets/images/login-local-street.jpg'
 import { supabase } from '../../lib/supabase'
 import useAuth from '../../auth/useAuth'
+import { getDefaultAuthenticatedPath } from '../../business/businessAccess'
+import './LoginPage.css'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, isLoading: isSessionLoading } = useAuth()
 
-  const destination = location.state?.from?.pathname ?? '/profile'
+  const requestedDestination = location.state?.from?.pathname ?? null
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isResetting, setIsResetting] = useState(false)
+  const [authenticatedDestination, setAuthenticatedDestination] = useState('')
+
+  useEffect(() => {
+    let isActive = true
+
+    async function resolveDestination() {
+      if (!user) {
+        setAuthenticatedDestination('')
+        return
+      }
+
+      if (requestedDestination) {
+        setAuthenticatedDestination(requestedDestination)
+        return
+      }
+
+      try {
+        const nextPath = await getDefaultAuthenticatedPath(user)
+        if (isActive) setAuthenticatedDestination(nextPath)
+      } catch {
+        if (isActive) setAuthenticatedDestination('/home')
+      }
+    }
+
+    resolveDestination()
+
+    return () => {
+      isActive = false
+    }
+  }, [requestedDestination, user])
 
   async function handleSubmit(event) {
     event.preventDefault()
     setError('')
+    setSuccess('')
     setIsSubmitting(true)
 
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      })
+      const { data, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        })
 
       if (signInError) {
         setError('The email or password you entered is incorrect.')
         return
       }
 
-      navigate(destination, { replace: true })
+      let nextPath = requestedDestination
+
+      if (!nextPath) {
+        try {
+          nextPath = await getDefaultAuthenticatedPath(data.user)
+        } catch {
+          nextPath = '/home'
+        }
+      }
+
+      navigate(nextPath, { replace: true })
     } catch {
       setError('Unable to sign in right now. Please try again.')
     } finally {
@@ -39,96 +88,139 @@ export default function LoginPage() {
     }
   }
 
-  if (isSessionLoading) {
-    return (
-      <div style={{ textAlign: 'center', padding: 40 }}>Checking session…</div>
+  async function handleForgotPassword() {
+    setError('')
+    setSuccess('')
+    if (!email.trim()) {
+      setError(
+        'Enter your email address first, then select “Forgot password?”.',
+      )
+      return
+    }
+
+    setIsResetting(true)
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+      email.trim(),
+      { redirectTo: `${window.location.origin}/login` },
     )
+
+    if (resetError) setError('Unable to send a reset email. Please try again.')
+    else setSuccess('Password reset email sent. Check your inbox.')
+    setIsResetting(false)
+  }
+
+  if (isSessionLoading) {
+    return <div className="login-loading">Checking session…</div>
   }
 
   if (user) {
-    return <Navigate to="/profile" replace />
+    if (!authenticatedDestination) {
+      return <div className="login-loading">Opening your account…</div>
+    }
+
+    return <Navigate to={authenticatedDestination} replace />
   }
 
   return (
-    <div style={{ maxWidth: 420, margin: '0 auto' }}>
-      <div
-        className="page-header"
-        style={{ textAlign: 'center', marginBottom: 32 }}
-      >
-        <h2>Welcome to LocalLink</h2>
-        <p>Sign in to discover local businesses and track your rewards.</p>
-      </div>
+    <div className="login-page">
+      <AuthPageHeader />
 
-      <div className="tab-row" style={{ margin: '0 auto 24px' }}>
-        <button type="button" className="tab-btn active">
-          Login
-        </button>
-
-        <button
-          type="button"
-          className="tab-btn"
-          onClick={() => navigate('/register')}
-        >
-          Register
-        </button>
-      </div>
-
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label className="form-label" htmlFor="login-email">
-            Email
-          </label>
-
-          <input
-            id="login-email"
-            className="form-input"
-            type="email"
-            placeholder="you@email.com"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            autoComplete="email"
-            disabled={isSubmitting}
-            required
+      <main className="login-main">
+        <section className="login-photo-panel">
+          <img
+            src={loginLocalStreet}
+            alt="Rainy city laneway lined with local restaurants and businesses"
           />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label" htmlFor="login-password">
-            Password
-          </label>
-
-          <input
-            id="login-password"
-            className="form-input"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            autoComplete="current-password"
-            disabled={isSubmitting}
-            required
-          />
-        </div>
-
-        {error && (
-          <div className="auth-error" role="alert">
-            {error}
+          <div className="login-photo-overlay" />
+          <div className="login-photo-heading">
+            Welcome
+            <br />
+            back to
+            <br />
+            <span>LocalLink</span>
           </div>
-        )}
+          <p>
+            Pick up where you left, with your requests, nearby choices, and
+            local rewards kept together.
+          </p>
+        </section>
 
-        <button
-          type="submit"
-          className="btn-primary"
-          disabled={isSubmitting}
-          style={{
-            width: '100%',
-            marginTop: 8,
-            opacity: isSubmitting ? 0.7 : 1,
-          }}
-        >
-          {isSubmitting ? 'Signing in…' : 'Sign In →'}
-        </button>
-      </form>
+        <section className="login-form-panel">
+          <div className="login-form-content">
+            <div className="login-eyebrow">Good to see you again</div>
+            <h1>Log in.</h1>
+            <p className="login-intro">
+              Enter your details to continue to your LocalLink account.
+            </p>
+
+            <form onSubmit={handleSubmit}>
+              <div className="login-field">
+                <label htmlFor="login-email">Email address</label>
+                <input
+                  id="login-email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  autoComplete="email"
+                  disabled={isSubmitting || isResetting}
+                  required
+                />
+              </div>
+
+              <div className="login-field">
+                <label htmlFor="login-password">Password</label>
+                <input
+                  id="login-password"
+                  type="password"
+                  placeholder="At least 8 characters"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  autoComplete="current-password"
+                  disabled={isSubmitting || isResetting}
+                  required
+                />
+              </div>
+
+              <button
+                className="login-forgot"
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={isSubmitting || isResetting}
+              >
+                {isResetting ? 'Sending reset email…' : 'Forgot password?'}
+              </button>
+
+              {error && (
+                <div className="auth-error login-message" role="alert">
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="auth-success login-message" role="status">
+                  {success}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="login-submit"
+                disabled={isSubmitting || isResetting}
+              >
+                {isSubmitting ? 'Logging in…' : 'Log in'}
+                {!isSubmitting && <ArrowRight aria-hidden="true" />}
+              </button>
+            </form>
+
+            <div className="login-register-row">
+              <span>New to LocalLink?</span>
+              <Link to="/register" viewTransition>
+                Create an account
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   )
 }

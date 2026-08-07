@@ -214,64 +214,337 @@ body {
   background: #e6fcf5;
 }
 
+.account-section-copy {
+  margin-bottom: 14px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 /* ─── Nav ───────────────────────────────────────────────────────── */
-.nav {
-  background: var(--blue);
-  padding: 0 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 60px;
+.portal-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(59, 91, 219, 0.25);
+  background: var(--white);
+}
+
+.nav {
+  width: min(1110px, calc(100% - 48px));
+  height: 78px;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid #e8edf5;
 }
 
 .nav-logo {
   font-family: 'Inter', sans-serif;
   font-weight: 700;
-  font-size: 20px;
-  color: var(--white);
+  font-size: 18px;
+  color: #202a3a;
   cursor: pointer;
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 11px;
+  flex-shrink: 0;
 }
-.nav-logo .logo-pin {
-  color: var(--amber);
+
+.nav-logo-mark {
+  width: 33px;
+  height: 33px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: #4263eb;
+  color: var(--white);
 }
-.nav-logo .logo-link {
-  color: var(--emerald);
+
+.nav-logo-mark svg {
+  width: 16px;
+  height: 16px;
+}
+
+.nav-logo-badge {
+  margin-left: -4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4263eb;
+  font-size: 10px;
+  font-weight: 600;
 }
 
 .nav-links {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin-left: auto;
 }
 
 .nav-btn {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.8);
+  color: #718096;
   font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 7px 14px;
-  border-radius: var(--radius);
+  padding: 9px 12px;
+  border-radius: 999px;
   cursor: pointer;
-  transition: var(--transition);
+  transition:
+    color 160ms ease,
+    background 160ms ease;
   text-decoration: none;
+  white-space: nowrap;
 }
 .nav-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--white);
+  background: #f6f8fb;
+  color: #202a3a;
 }
 .nav-btn.active {
-  background: rgba(255, 255, 255, 0.18);
-  color: var(--white);
+  background: #eef2ff;
+  color: #3451d1;
   font-weight: 600;
+}
+
+.portal-account-link,
+.portal-login-link,
+.portal-create-link {
+  min-height: 36px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform 160ms ease,
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.portal-account-link,
+.portal-create-link {
+  color: var(--white);
+  background: #202a3a;
+  border: 1px solid #202a3a;
+}
+
+.portal-account-link {
+  flex-shrink: 0;
+}
+
+.portal-account-link svg {
+  width: 15px;
+  height: 15px;
+}
+
+.portal-account-link:hover,
+.portal-create-link:hover {
+  background: #2e3a4c;
+  border-color: #2e3a4c;
+  transform: translateY(-1px);
+}
+
+.portal-account-link.active {
+  background: #4263eb;
+  border-color: #4263eb;
+}
+
+.business-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.business-personal-link {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e6ebf2;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #f6f8fb;
+  color: #202a3a;
+  transition: 160ms ease;
+}
+
+.business-personal-link:hover {
+  background: #edf1f6;
+  transform: translateY(-1px);
+}
+
+.business-personal-link svg {
+  width: 15px;
+  height: 15px;
+}
+
+.portal-auth-links {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+}
+
+.portal-login-link {
+  color: #202a3a;
+  background: #f6f8fb;
+  border: 1px solid #e6ebf2;
+}
+
+.portal-login-link:hover {
+  background: #edf1f6;
+  transform: translateY(-1px);
+}
+
+.portal-main {
+  min-height: calc(100vh - 78px);
+  padding: 40px 24px;
+  background: var(--bg);
+}
+
+.portal-main-content {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.business-module-grid {
+  margin-bottom: 28px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.business-module-card {
+  min-height: 170px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: var(--white);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.business-module-card:hover {
+  border-color: #bac8ff;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.business-module-card > span {
+  width: 38px;
+  height: 38px;
+  margin-bottom: 20px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: #eef2ff;
+  color: #4263eb;
+}
+
+.business-module-card svg {
+  width: 17px;
+  height: 17px;
+}
+
+.business-module-card strong {
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.business-module-card p {
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .nav {
+    gap: 12px;
+  }
+
+  .nav-logo {
+    gap: 8px;
+  }
+
+  .nav-logo-badge {
+    display: none;
+  }
+
+  .nav-btn {
+    padding-inline: 8px;
+  }
+}
+
+@media (max-width: 760px) {
+  .nav {
+    width: min(100% - 32px, 1110px);
+    height: auto;
+    min-height: 78px;
+    padding-block: 12px 10px;
+    flex-wrap: wrap;
+  }
+
+  .nav-links {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    padding-top: 8px;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-top: 1px solid #edf1f6;
+  }
+
+  .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .portal-main {
+    padding: 28px 16px;
+  }
+
+  .business-module-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .portal-create-link {
+    display: none;
+  }
+
+  .portal-account-link,
+  .portal-login-link {
+    padding-inline: 13px;
+  }
+
+  .business-nav-actions .portal-account-link span {
+    display: none;
+  }
+
+  .business-nav-actions .portal-account-link {
+    width: 36px;
+    padding: 0;
+  }
 }
 
 /* ─── Portal layout ─────────────────────────────────────────────── */

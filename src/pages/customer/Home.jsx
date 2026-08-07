@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import mockBusinesses from '../../data/mockBusinesses'
 import { getDistanceKm } from '../../utils/distance'
+import useAuth from '../../auth/useAuth'
+import { supabase } from '../../lib/supabase'
 
 const USER_LOCATION = { lat: -36.8485, lng: 174.7633 }
 
@@ -11,16 +13,15 @@ const USER_LOCATION = { lat: -36.8485, lng: 174.7633 }
 const NEARBY_RADIUS_KM = 5
 const DEAL_DISPLAY_COUNT = 4 // 1 featured + 3 in the list, matches the wireframe
 
-// Loyalty / jobs / activity don't have real data hooked up yet so this is
-// just enough mock stuff to make the home page look right for the
-// supervisor meeting. Swap these for real data once those features exist.
+// The business, deal, and loyalty displays remain shared mock catalogue data
+// until real participating stores are available.
 const loyaltyCard = {
   businessName: 'Britomart Espresso Bar',
   stampsTotal: 5,
   stampsFilled: 4,
 }
 
-const myJobs = [
+const previewJobs = [
   { id: 1, name: 'Kitchen tap repair', quotes: 3, posted: 'Posted 2 days ago' },
   { id: 2, name: 'Car wash needed', quotes: 0, posted: 'Posted 5 days ago' },
 ]
@@ -48,7 +49,57 @@ const recentActivity = [
 
 export default function Home() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [search, setSearch] = useState('')
+  const [accountJobs, setAccountJobs] = useState([])
+
+  useEffect(() => {
+    let active = true
+    if (!user)
+      return () => {
+        active = false
+      }
+
+    async function loadJobs() {
+      const [jobsResult, quotesResult] = await Promise.all([
+        supabase
+          .from('job_requests')
+          .select('id, title, status, created_at')
+          .eq('customer_id', user.id)
+          .in('status', ['open', 'in_progress'])
+          .order('created_at', { ascending: false })
+          .limit(3),
+        supabase.rpc('get_customer_job_quotes'),
+      ])
+
+      if (active) {
+        const quoteCounts = (quotesResult.data ?? []).reduce(
+          (counts, quote) => ({
+            ...counts,
+            [quote.job_request_id]: (counts[quote.job_request_id] ?? 0) + 1,
+          }),
+          {},
+        )
+
+        setAccountJobs(
+          (jobsResult.data ?? []).map((job) => ({
+            id: job.id,
+            name: job.title,
+            status: job.status,
+            quotes: quoteCounts[job.id] ?? 0,
+            posted: new Date(job.created_at).toLocaleDateString('en-NZ'),
+          })),
+        )
+      }
+    }
+
+    loadJobs()
+    return () => {
+      active = false
+    }
+  }, [user])
+
+  const displayedJobs = user ? accountJobs : previewJobs
 
   // Same Haversine calc as before (US009), just no longer wired to a
   // slider - filtered against the fixed radius above instead.
@@ -92,7 +143,7 @@ export default function Home() {
               marginBottom: 3,
             }}
           >
-            {getGreeting()}, Spencer
+            {getGreeting()}, {user?.user_metadata?.first_name ?? 'Neighbour'}
           </p>
           <h2 style={{ fontSize: 22, fontWeight: 700 }}>My LocalLink</h2>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 7 }}>
@@ -235,13 +286,14 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Service Marketplace - mock display, every button goes to Jobs */}
+          {/* Service Marketplace - account jobs and quotes from Supabase */}
           <div className="home-side-card block-gap">
             <p className="home-side-label">Service Marketplace</p>
             <h3 className="home-side-title">
-              {myJobs.length} job{myJobs.length !== 1 ? 's' : ''} in progress
+              {displayedJobs.length} job{displayedJobs.length !== 1 ? 's' : ''}{' '}
+              active
             </h3>
-            {myJobs.map((job) => (
+            {displayedJobs.map((job) => (
               <button
                 className="job-row"
                 key={job.id}
