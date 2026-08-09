@@ -113,7 +113,6 @@ export default function PostJob({
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files)
     update({ imgs: [...draft.imgs, ...files] })
-    // Allow re-selecting the same file after removing it.
     e.target.value = ''
   }
 
