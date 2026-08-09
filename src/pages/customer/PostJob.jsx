@@ -46,35 +46,28 @@ const VALID_CITIES = [
   'Porirua',
 ]
 
-const VALID_DISTANCES = [
-  '1km', '2km', '3km', '4km', '5km',
-  '6km', '7km', '8km'
-]
+const VALID_DISTANCES = ['1km', '2km', '3km', '4km', '5km', '6km', '7km', '8km']
 
 const VALID_CATEGORIES = [
-    'Plumbing',
-    'Electrical',
-    'Carpentry',
-    'Painting',
-    'Landscaping',
-    'Roofing',
+  'Plumbing',
+  'Electrical',
+  'Carpentry',
+  'Painting',
+  'Landscaping',
+  'Roofing',
 ]
-const VALID_URGENCY = [
-    'Flexible',
-    'Normal',
-    'Urgent',
-]
+const VALID_URGENCY = ['Flexible', 'Normal', 'Urgent']
 
 const EMPTY_DRAFT = {
   category: '',
   type: '',
   urgency: '',
-    imgs: [],
+  imgs: [],
   description: '',
   city: '',
   suburb: '',
   postedDistance: '',
-  otherType: '', 
+  otherType: '',
   budget: '',
   jobDate: null,
 }
@@ -112,13 +105,13 @@ export default function PostJob({
   const suburbOptions =
     draft.city && suburbsData[draft.city] ? suburbsData[draft.city] : []
 
-    const jobTypeOptions =
+  const jobTypeOptions =
     draft.category && jobtypes[draft.category] ? jobtypes[draft.category] : []
 
-    const handleFileChange = (e) => {
-        const files = Array.from(e.target.files)
-        update({ imgs: [...draft.imgs, ...files] })
-    }
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files)
+    update({ imgs: [...draft.imgs, ...files] })
+  }
 
   function validateStep(currentStep) {
     const next = {}
@@ -129,22 +122,27 @@ export default function PostJob({
     if (currentStep === 2 && !draft.type) {
       next.type = 'Please select a job type.'
     }
-    if (currentStep === 2 && draft.type === 'Other' && !draft.otherType.trim()) {
+    if (
+      currentStep === 2 &&
+      draft.type === 'Other' &&
+      !draft.otherType.trim()
+    ) {
       next.type = 'Please specify the job type.'
     }
     if (currentStep === 2 && draft.type === 'Other') {
-  const otherType = (draft.otherType || '').trim()
-  if (!otherType) next.type = 'Please specify the job type.'
-  else if (otherType.length < 3)
-    next.type = 'Please include at least 3 characters in the job type.'
-  else if (otherType.length > 30)
-    next.type = 'Job type cannot exceed 30 characters.'
-}
+      const otherType = (draft.otherType || '').trim()
+      if (!otherType) next.type = 'Please specify the job type.'
+      else if (otherType.length < 3)
+        next.type = 'Please include at least 3 characters in the job type.'
+      else if (otherType.length > 30)
+        next.type = 'Job type cannot exceed 30 characters.'
+    }
     if (currentStep === 3) {
       const description = draft.description.trim()
       if (!description) next.description = 'Please enter a job description.'
       else if (description.length < 10)
-        next.description = 'Please include at least 10 characters in the description.'
+        next.description =
+          'Please include at least 10 characters in the description.'
       else if (description.length > 400)
         next.description = 'Description cannot exceed 400 characters.'
     }
@@ -158,15 +156,14 @@ export default function PostJob({
       }
     }
 
-
     if (currentStep === 4) {
       if (!draft.city) next.city = 'Please select a city.'
-      else if (!VALID_CITIES.includes(draft.city)) next.city = 'Please choose a valid city from the list.'
+      else if (!VALID_CITIES.includes(draft.city))
+        next.city = 'Please choose a valid city from the list.'
 
       if (!draft.suburb) next.suburb = 'Please select a suburb.'
       else if (draft.city && !suburbOptions.includes(draft.suburb))
         next.suburb = 'Please choose a suburb that matches the selected city.'
-
     }
 
     if (currentStep === 5) {
@@ -193,7 +190,7 @@ export default function PostJob({
       return
     }
     onSubmit({
-        imgs: draft.imgs,
+      imgs: draft.imgs,
       type: draft.type,
       otherType: draft.otherType,
       description: draft.description.trim(),
@@ -234,7 +231,10 @@ export default function PostJob({
             const n = i + 1
             const state = n < step ? 'done' : n === step ? 'active' : 'pending'
             return (
-              <div className="flex flex-1 items-center last:flex-none" key={label}>
+              <div
+                className="flex flex-1 items-center last:flex-none"
+                key={label}
+              >
                 <div
                   className={
                     'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ' +
@@ -265,20 +265,31 @@ export default function PostJob({
 
         <div className="min-h-[260px] px-6 pb-2">
           {step === 1 && (
-            <StepCategory draft={draft} update={update} errors={errors.category} />
+            <StepCategory
+              draft={draft}
+              update={update}
+              errors={errors.category}
+            />
           )}
 
           {step === 2 && (
-            <StepJobType draft={draft} update={update} errors={errors.type} jobTypeOptions={jobTypeOptions} />
+            <StepJobType
+              draft={draft}
+              update={update}
+              errors={errors.type}
+              jobTypeOptions={jobTypeOptions}
+            />
           )}
           {step === 3 && (
-            <StepJobDetails 
-            draft={draft} 
-            update={update} 
-            errors={errors} 
-            onFileChange={handleFileChange} 
-           onRemoveImage={(idx) => update({ imgs: draft.imgs.filter((_, i) => i !== idx) })
-             } />
+            <StepJobDetails
+              draft={draft}
+              update={update}
+              errors={errors}
+              onFileChange={handleFileChange}
+              onRemoveImage={(idx) =>
+                update({ imgs: draft.imgs.filter((_, i) => i !== idx) })
+              }
+            />
           )}
           {step === 4 && (
             <StepLocation
@@ -351,13 +362,15 @@ function StepCategory({ draft, update, errors }) {
           )
         })}
       </div>
-      {errors && <p className="mt-3 text-xs text-[var(--danger)]">{errors.category}</p>}
+      {errors && (
+        <p className="mt-3 text-xs text-[var(--danger)]">{errors.category}</p>
+      )}
     </>
   )
 }
 
 function StepJobType({ draft, update, errors, jobTypeOptions }) {
-    return (
+  return (
     <>
       <p className="mb-3 text-sm font-semibold text-[var(--text)]">
         What type of job are you looking for?
@@ -398,16 +411,23 @@ function StepJobType({ draft, update, errors, jobTypeOptions }) {
           />
         </>
       )}
-      {errors && <p className="mt-3 text-xs text-[var(--danger)]">{errors.type}</p>}
+      {errors && (
+        <p className="mt-3 text-xs text-[var(--danger)]">{errors.type}</p>
+      )}
     </>
   )
 }
-      
 
-function StepJobDetails({ draft, update, errors, onFileChange, onRemoveImage }) {
+function StepJobDetails({
+  draft,
+  update,
+  errors,
+  onFileChange,
+  onRemoveImage,
+}) {
   return (
     <>
-    <p className="mb-3 text-sm font-semibold text-[var(--text)]">
+      <p className="mb-3 text-sm font-semibold text-[var(--text)]">
         Photos or Videos (Optional)
       </p>
       <input
@@ -465,31 +485,41 @@ function StepJobDetails({ draft, update, errors, onFileChange, onRemoveImage }) 
         onChange={(e) => update({ description: e.target.value })}
       />
       {errors && (
-        <p className="mt-1 text-xs text-[var(--danger)]">{errors.description}</p>
+        <p className="mt-1 text-xs text-[var(--danger)]">
+          {errors.description}
+        </p>
       )}
-    <div className="mt-4" display="flex" flexDirection="row">
-      <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
-        Job Date *
-      </label>
-      <input
-        type="date"
-        className="rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
-        value={draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : ''}
-        onChange={(e) => update({ jobDate: e.target.value ? new Date(e.target.value) : null })}
-      />
-      {errors && <p className="mt-1 text-xs text-[var(--danger)]">{errors.jobDate}</p>}
+      <div className="mt-4" display="flex" flexDirection="row">
+        <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
+          Job Date *
+        </label>
+        <input
+          type="date"
+          className="rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
+          value={draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : ''}
+          onChange={(e) =>
+            update({
+              jobDate: e.target.value ? new Date(e.target.value) : null,
+            })
+          }
+        />
+        {errors && (
+          <p className="mt-1 text-xs text-[var(--danger)]">{errors.jobDate}</p>
+        )}
 
-      <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
-        Budget (Optional)
-      </label>
-      <input
-        type="text"
-        className="mb-3 rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
-        placeholder="Enter your budget (e.g., $1000)"
-        value={draft.budget || ''}
-        onChange={(e) => update({ budget: e.target.value })}
-      />
-      {errors && <p className="mt-1 text-xs text-[var(--danger)]">{errors.budget}</p>}
+        <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
+          Budget (Optional)
+        </label>
+        <input
+          type="text"
+          className="mb-3 rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
+          placeholder="Enter your budget (e.g., $1000)"
+          value={draft.budget || ''}
+          onChange={(e) => update({ budget: e.target.value })}
+        />
+        {errors && (
+          <p className="mt-1 text-xs text-[var(--danger)]">{errors.budget}</p>
+        )}
       </div>
 
       <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
@@ -515,7 +545,9 @@ function StepJobDetails({ draft, update, errors, onFileChange, onRemoveImage }) 
           )
         })}
       </div>
-      {errors && <p className="mt-3 text-xs text-[var(--danger)]">{errors.urgency}</p>}
+      {errors && (
+        <p className="mt-3 text-xs text-[var(--danger)]">{errors.urgency}</p>
+      )}
     </>
   )
 }
@@ -532,7 +564,9 @@ function StepLocation({ draft, update, errors, suburbOptions }) {
         value={draft.city}
         onChange={(value) => update({ city: value.trim(), suburb: '' })}
       />
-      {errors.city && <p className="mt-1 text-xs text-[var(--danger)]">{errors.city}</p>}
+      {errors.city && (
+        <p className="mt-1 text-xs text-[var(--danger)]">{errors.city}</p>
+      )}
 
       <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
         Suburb *
@@ -543,33 +577,39 @@ function StepLocation({ draft, update, errors, suburbOptions }) {
         value={draft.suburb}
         onChange={(value) => update({ suburb: value.trim() })}
       />
-      {errors.suburb && <p className="mt-1 text-xs text-[var(--danger)]">{errors.suburb}</p>}
+      {errors.suburb && (
+        <p className="mt-1 text-xs text-[var(--danger)]">{errors.suburb}</p>
+      )}
 
       <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
         Posted distance (km) *
       </label>
       <input
-          type="range"
-          className="radius-slider"
-          min={1}
-          max={8}
-          step={0.1}
-          value={draft.postedDistance}
-          defaultValue={4.5}
-          onChange={(event) => update({ postedDistance: Number(event.target.value) })}
-        />
-        <div className="radius-ticks">
-          <span>1 km</span>
-          <span>4.5 km</span>
-          <span>8 km</span>
-        </div>
+        type="range"
+        className="radius-slider"
+        min={1}
+        max={8}
+        step={0.1}
+        value={draft.postedDistance}
+        defaultValue={4.5}
+        onChange={(event) =>
+          update({ postedDistance: Number(event.target.value) })
+        }
+      />
+      <div className="radius-ticks">
+        <span>1 km</span>
+        <span>4.5 km</span>
+        <span>8 km</span>
+      </div>
       {errors.postedDistance && (
-        <p className="mt-1 text-xs text-[var(--danger)]">{errors.postedDistance}</p>
+        <p className="mt-1 text-xs text-[var(--danger)]">
+          {errors.postedDistance}
+        </p>
       )}
 
       <div className="mt-4 rounded-md bg-[var(--amber-light)] px-3 py-2 text-xs text-[var(--text)]">
-        Local tradespeople in this category will see this job once it&apos;s posted
-        — matched by category and distance from their service area.
+        Local tradespeople in this category will see this job once it&apos;s
+        posted — matched by category and distance from their service area.
       </div>
     </>
   )
@@ -579,11 +619,27 @@ function StepReview({ draft, errors }) {
   return (
     <div>
       <ReviewRow label="Trade Category" value={draft.category} />
-      <ReviewRow label="Job Type" value={draft.type === 'Other' ? draft.otherType : draft.type} />
-      <ReviewRow label="Photos/Videos" value={draft.imgs.length > 0 ? `${draft.imgs.length} file(s) uploaded` : 'None'} />
+      <ReviewRow
+        label="Job Type"
+        value={draft.type === 'Other' ? draft.otherType : draft.type}
+      />
+      <ReviewRow
+        label="Photos/Videos"
+        value={
+          draft.imgs.length > 0
+            ? `${draft.imgs.length} file(s) uploaded`
+            : 'None'
+        }
+      />
       <ReviewRow label="Description" value={draft.description} />
-      <ReviewRow label="Job Date" value={draft.jobDate ? draft.jobDate.toLocaleDateString() : '—'} />
-      <ReviewRow label="Budget" value={draft.budget ? `${draft.budget}` : '—'} />
+      <ReviewRow
+        label="Job Date"
+        value={draft.jobDate ? draft.jobDate.toLocaleDateString() : '—'}
+      />
+      <ReviewRow
+        label="Budget"
+        value={draft.budget ? `${draft.budget}` : '—'}
+      />
       <ReviewRow label="Urgency" value={draft.urgency} />
       <ReviewRow label="City" value={draft.city} />
       <ReviewRow label="Suburb" value={draft.suburb} />

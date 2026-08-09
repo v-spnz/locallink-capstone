@@ -156,7 +156,9 @@ export default function Jobs() {
         uploadedImageUrls = await uploadJobImages(newImageFiles, user.id)
       }
     } catch {
-      setModalError('One or more photos/videos could not be uploaded. Please try again.')
+      setModalError(
+        'One or more photos/videos could not be uploaded. Please try again.',
+      )
       setIsSaving(false)
       return
     }
@@ -253,7 +255,9 @@ export default function Jobs() {
         <div className="placeholder-section-title is-complete">
           Ready to get quotes?
         </div>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}>
+        <p
+          style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}
+        >
           Post a job in a few quick steps and local tradespeople will send you
           quotes.
         </p>
