@@ -537,9 +537,12 @@ function StepJobDetails({
         </div>
 
         <div className="flex-1">
-          <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
-            Budget (Optional)
-          </label>
+          <p className="mb-1.5 text-sm font-semibold text-[var(--text)]">
+          Budget{' '}
+        <span className="font-normal text-[var(--text-muted)]">
+          (optional)
+        </span>
+      </p>
           <input
             type="text"
             className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
