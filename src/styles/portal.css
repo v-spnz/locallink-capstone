@@ -1,0 +1,17 @@
+.portal-main {
+  min-height: calc(100vh - 78px);
+  padding: 40px 24px;
+  background: var(--bg);
+}
+
+.portal-main-content {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+@media (max-width: 760px) {
+  .portal-main {
+    padding: 28px 16px;
+  }
+}
