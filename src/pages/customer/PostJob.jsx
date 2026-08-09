@@ -434,9 +434,7 @@ function StepJobDetails({
     <>
       <p className="mb-1.5 text-sm font-semibold text-[var(--text)]">
         Photos or video{' '}
-        <span className="font-normal text-[var(--text-muted)]">
-          (optional)
-        </span>
+        <span className="font-normal text-[var(--text-muted)]">(optional)</span>
       </p>
       <div className="mb-1.5 flex flex-wrap gap-3">
         {draft.imgs.map((file, i) => {
@@ -538,11 +536,11 @@ function StepJobDetails({
 
         <div className="flex-1">
           <p className="mb-1.5 text-sm font-semibold text-[var(--text)]">
-          Budget{' '}
-        <span className="font-normal text-[var(--text-muted)]">
-          (optional)
-        </span>
-      </p>
+            Budget{' '}
+            <span className="font-normal text-[var(--text-muted)]">
+              (optional)
+            </span>
+          </p>
           <input
             type="text"
             className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
@@ -551,9 +549,7 @@ function StepJobDetails({
             onChange={(e) => update({ budget: e.target.value })}
           />
           {errors?.budget && (
-            <p className="mt-1 text-xs text-[var(--danger)]">
-              {errors.budget}
-            </p>
+            <p className="mt-1 text-xs text-[var(--danger)]">{errors.budget}</p>
           )}
         </div>
       </div>
