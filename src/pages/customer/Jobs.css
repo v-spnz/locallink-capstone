@@ -1,0 +1,143 @@
+.customer-job-card {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.customer-job-card:last-child {
+  border-bottom: 0;
+}
+
+.customer-job-card-head,
+.customer-quote-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.customer-job-card-head > div,
+.customer-quote-head > div {
+  display: grid;
+  gap: 3px;
+}
+
+.customer-job-card-head strong {
+  font-size: 15px;
+}
+
+.customer-job-card-head > div > span,
+.customer-job-meta,
+.customer-job-no-quotes {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.customer-job-description {
+  margin: 9px 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.customer-job-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 16px;
+}
+
+.customer-job-status,
+.customer-quote-status {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #f1f3f5;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.customer-job-status.open,
+.customer-quote-status.submitted {
+  background: #eef2ff;
+  color: #3153d8;
+}
+
+.customer-job-status.in_progress,
+.customer-job-status.completed,
+.customer-quote-status.accepted {
+  background: #e6fcf5;
+  color: #087f5b;
+}
+
+.customer-job-status.closed,
+.customer-job-status.cancelled,
+.customer-quote-status.rejected,
+.customer-quote-status.withdrawn {
+  background: #fff5f5;
+  color: #c92a2a;
+}
+
+.customer-job-quotes {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.customer-job-quotes h4 {
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.customer-job-no-quotes {
+  line-height: 1.5;
+}
+
+.customer-quote {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.customer-quote:first-of-type {
+  border-top: 0;
+}
+
+.customer-quote-head strong {
+  font-size: 13px;
+}
+
+.customer-quote-head > div > span {
+  color: var(--blue);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.customer-quote > p {
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.customer-quote-actions,
+.customer-job-actions {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.customer-quote-actions .btn-primary,
+.customer-quote-actions .btn-secondary,
+.customer-job-actions .btn-secondary {
+  width: auto;
+}
+
+@media (max-width: 560px) {
+  .customer-job-card-head,
+  .customer-quote-head {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

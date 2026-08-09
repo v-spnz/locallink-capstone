@@ -1,4 +1,4 @@
-const loyaltyPrograms = [
+const mockLoyaltyPrograms = [
   {
     id: 1,
     business: 'Ponsonby Cafe',
@@ -36,7 +36,7 @@ const loyaltyPrograms = [
     type: 'stamp',
     stampsEarned: 10,
     stampsRequired: 10,
-    reward: 'Free premium car wash',
+    reward: 'Free  premium car wash',
     status: 'completed',
     completedOn: '2026-06-27',
     redeemed: true,
@@ -65,4 +65,4 @@ const loyaltyPrograms = [
   },
 ]
 
-export default loyaltyPrograms
+export default mockLoyaltyPrograms

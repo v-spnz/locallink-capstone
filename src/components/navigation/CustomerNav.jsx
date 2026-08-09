@@ -10,7 +10,7 @@ const navigationItems = [
   ['/jobs', 'Job requests'],
 ]
 
-export default function CustomerNavigation() {
+export default function CustomerNav() {
   const { user } = useAuth()
 
   return (

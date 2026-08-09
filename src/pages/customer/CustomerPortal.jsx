@@ -1,20 +1,22 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import CustomerNavigation from '../../components/navigation/CustomerNavigation'
+import CustomerNav from '../../components/navigation/CustomerNav'
 import PortalLayout from '../../layouts/PortalLayout'
 import ProtectedRoute from '../../auth/ProtectedRoute'
+import LoginPage from '../auth/LoginPage'
+import RegisterPage from '../auth/RegisterPage'
 import Home from './Home'
-import Deals from './Deals'
+import DealsDiscovery from './DealsDiscovery'
 import Jobs from './Jobs'
 import Loyalty from './Loyalty'
 import Profile from './Profile'
 
 export default function CustomerPortal() {
   return (
-    <PortalLayout navigation={<CustomerNavigation />}>
+    <PortalLayout navigation={<CustomerNav />}>
       <Routes>
         <Route index element={<Navigate to="/home" replace />} />
         <Route path="home" element={<Home />} />
-        <Route path="deals" element={<Deals />} />
+        <Route path="deals" element={<DealsDiscovery />} />
         <Route
           path="loyalty"
           element={
@@ -39,6 +41,8 @@ export default function CustomerPortal() {
             </ProtectedRoute>
           }
         />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </PortalLayout>

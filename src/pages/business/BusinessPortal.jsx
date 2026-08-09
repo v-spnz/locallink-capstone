@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import BusinessNavigation from '../../components/navigation/BusinessNavigation'
+import BusinessNav from '../../components/navigation/BusinessNav'
 import PortalLayout from '../../layouts/PortalLayout'
 import ProtectedRoute from '../../auth/ProtectedRoute'
 import BusinessProvider from '../../business/BusinessProvider'
@@ -14,9 +14,7 @@ import ServiceMarketplacePage from './ServiceMarketplacePage'
 function BusinessPage({ children, capability, roles }) {
   return (
     <BusinessProtectedRoute capability={capability} roles={roles}>
-      <PortalLayout navigation={<BusinessNavigation />}>
-        {children}
-      </PortalLayout>
+      <PortalLayout navigation={<BusinessNav />}>{children}</PortalLayout>
     </BusinessProtectedRoute>
   )
 }
@@ -63,7 +61,7 @@ export default function BusinessPortal() {
           path="job-leads"
           element={
             <BusinessPage capability="service_marketplace">
-              <ServiceMarketplacePage key="leads" type="leads" />
+              <ServiceMarketplacePage type="leads" />
             </BusinessPage>
           }
         />
@@ -71,7 +69,7 @@ export default function BusinessPortal() {
           path="quotes"
           element={
             <BusinessPage capability="service_marketplace">
-              <ServiceMarketplacePage key="quotes" type="quotes" />
+              <ServiceMarketplacePage type="quotes" />
             </BusinessPage>
           }
         />
@@ -79,7 +77,7 @@ export default function BusinessPortal() {
           path="active-jobs"
           element={
             <BusinessPage capability="service_marketplace">
-              <ServiceMarketplacePage key="jobs" type="jobs" />
+              <ServiceMarketplacePage type="jobs" />
             </BusinessPage>
           }
         />

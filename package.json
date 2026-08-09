@@ -9,7 +9,6 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "node --test",
     "preview": "vite preview"
   },
   "dependencies": {

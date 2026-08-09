@@ -12,7 +12,7 @@ const filters = [
   'Trades',
 ]
 
-export default function Deals() {
+export default function DealsDiscovery() {
   const [activeFilter, setActiveFilter] = useState('All')
   const [radius, setRadius] = useState(5)
 

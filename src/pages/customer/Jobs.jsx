@@ -1,9 +1,3 @@
-import LoadingSpinner from '../../components/ui/LoadingSpinner'
-import CustomerJobCard from '../../features/service-marketplace/components/CustomerJobCard'
-import JobRequestForm from '../../features/service-marketplace/components/JobRequestForm'
-import JobRequestReview from '../../features/service-marketplace/components/JobRequestReview'
-import useCustomerJobs from '../../features/service-marketplace/hooks/useCustomerJobs'
-import '../../features/service-marketplace/ServiceMarketplace.css'
 import { useState, useEffect } from 'react'
 import useAuth from '../../auth/useAuth'
 import { supabase } from '../../lib/supabase'
@@ -13,34 +7,20 @@ import './Jobs.css'
 export default function Jobs() {
   const { user } = useAuth()
   const [postedJobs, setPostedJobs] = useState([])
-  const [jobTitle, setJobTitle] = useState('')
-  const [jobDescription, setJobDescription] = useState('')
-  const [tradeCategory, setTradeCategory] = useState('')
-  const [jobCity, setJobCity] = useState('')
-  const [jobSuburb, setJobSuburb] = useState('')
-  const [jobPostedDistance, setJobPostedDistance] = useState('')
-  const suburbOptions = useMemo(
-    () => (jobCity && suburbsData[jobCity] ? suburbsData[jobCity] : []),
-    [jobCity],
-  )
-  const [pendingJob, setPendingJob] = useState(null)
-  const [editingJob, setEditingJob] = useState(null)
   const [jobStatus, setJobStatus] = useState('Not Posted')
-  const [step, setStep] = useState('form')
   const [successMessage, setSuccessMessage] = useState('')
   const [requestError, setRequestError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
   const [quotesByJob, setQuotesByJob] = useState({})
   const [respondingQuoteId, setRespondingQuoteId] = useState(null)
   const [reloadKey, setReloadKey] = useState(0)
 
-  const [titleError, setTitleError] = useState('')
-  const [descriptionError, setDescriptionError] = useState('')
-  const [categoryError, setCategoryError] = useState('')
-  const [cityError, setCityError] = useState('')
-  const [suburbError, setSuburbError] = useState('')
-  const [distanceError, setDistanceError] = useState('')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingJob, setEditingJob] = useState(null)
+  const [repostSeed, setRepostSeed] = useState(null)
+  const [modalInitialStep, setModalInitialStep] = useState(1)
+  const [isSaving, setIsSaving] = useState(false)
+  const [modalError, setModalError] = useState('')
 
   useEffect(() => {
     let active = true
@@ -53,7 +33,7 @@ export default function Jobs() {
         supabase
           .from('job_requests')
           .select(
-            'id, title, description, category, city, suburb, radius_km, status, created_at',
+            'id, title, description, category, job_type, city, suburb, radius_km, status, image_urls, created_at',
           )
           .eq('customer_id', user.id)
           .order('created_at', { ascending: false }),
@@ -104,130 +84,101 @@ export default function Jobs() {
     return () => clearTimeout(timer)
   }, [successMessage])
 
-  function handleEditJob(job) {
+  async function uploadJobImages(files, userId) {
+    const urls = []
+    for (const file of files) {
+      const ext = file.name.split('.').pop()
+      const path = `${userId}/${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2)}.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('job-images')
+        .upload(path, file)
+
+      if (uploadError) throw uploadError
+
+      const { data } = supabase.storage.from('job-images').getPublicUrl(path)
+
+      urls.push(data.publicUrl)
+    }
+    return urls
+  }
+
+  function openPostModal() {
+    setEditingJob(null)
+    setRepostSeed(null)
+    setModalInitialStep(1)
+    setModalError('')
+    setIsModalOpen(true)
+  }
+
+  function openEditModal(job) {
     setEditingJob(job)
-    setJobTitle(job.title)
-    setJobDescription(job.description)
-    setTradeCategory(job.category)
-    setJobCity(job.city)
-    setJobSuburb(job.suburb)
-    setJobPostedDistance(job.postedDistance)
-    setStep('form')
+    setRepostSeed(null)
+    setModalInitialStep(1)
+    setModalError('')
+    setIsModalOpen(true)
   }
 
-  function validateForm() {
-    const trimmedTitle = jobTitle.trim()
-    if (!trimmedTitle) {
-      setTitleError('Please enter a job title.')
-      return false
-    }
-    if (trimmedTitle.length < 3) {
-      setTitleError('Job title should be at least 3 characters long.')
-      return false
-    }
-    if (trimmedTitle.length > 60) {
-      setTitleError('Job title cannot exceed 60 characters.')
-      return false
-    }
-
-    const trimmedDescription = jobDescription.trim()
-    if (!trimmedDescription) {
-      setDescriptionError('Please enter a job description.')
-      return false
-    }
-    if (trimmedDescription.length < 10) {
-      setDescriptionError(
-        'Please include at least 10 characters in the description.',
-      )
-      return false
-    }
-    if (trimmedDescription.length > 400) {
-      setDescriptionError('Description cannot exceed 400 characters.')
-      return false
-    }
-
-    const trimmedCategory = tradeCategory.trim()
-    if (!trimmedCategory) {
-      setCategoryError('Please select a trade category.')
-      return false
-    }
-    if (!VALID_TRADE_CATEGORIES.includes(trimmedCategory)) {
-      setCategoryError('Please choose a valid trade category from the list.')
-      return false
-    }
-
-    const trimmedCity = jobCity.trim()
-    if (!trimmedCity) {
-      setCityError('Please select a city.')
-      return false
-    }
-    if (!VALID_CITIES.includes(trimmedCity)) {
-      setCityError('Please choose a valid city from the list.')
-      return false
-    }
-
-    const trimmedSuburb = jobSuburb.trim()
-    if (!trimmedSuburb) {
-      setSuburbError('Please select a suburb.')
-      return false
-    }
-    if (!suburbOptions.map((option) => option.trim()).includes(trimmedSuburb)) {
-      setSuburbError('Please choose a suburb that matches the selected city.')
-      return false
-    }
-
-    const trimmedDistance = jobPostedDistance.trim()
-    if (!trimmedDistance) {
-      setDistanceError('Please select a posted distance.')
-      return false
-    }
-    if (!VALID_DISTANCES.includes(trimmedDistance)) {
-      setDistanceError('Please choose a valid distance from the list.')
-      return false
-    }
-
-    setTitleError('')
-    setDescriptionError('')
-    setCategoryError('')
-    setCityError('')
-    setSuburbError('')
-    setDistanceError('')
-    return true
+  function openRepostModal(job) {
+    setEditingJob(null)
+    setRepostSeed(job)
+    setModalInitialStep(4)
+    setModalError('')
+    setIsModalOpen(true)
   }
 
-  function handleReview(event) {
-    event.preventDefault()
-    setSuccessMessage('')
-    if (!validateForm()) return
-
-    setPendingJob({
-      title: jobTitle.trim(),
-      description: jobDescription.trim(),
-      category: tradeCategory.trim(),
-      city: jobCity.trim(),
-      suburb: jobSuburb.trim(),
-      postedDistance: jobPostedDistance.trim(),
-    })
-    setStep('review')
+  function closeModal() {
+    setIsModalOpen(false)
+    setEditingJob(null)
+    setRepostSeed(null)
+    setModalError('')
   }
 
-  function handleBackToEdit() {
-    setStep('form')
-  }
-
-  async function handleConfirmPost() {
+  async function handleSubmitJob(draft) {
     setIsSaving(true)
+    setModalError('')
     setRequestError('')
+
     const wasEditing = Boolean(editingJob)
+
+    const existingImageUrls = (draft.imgs || []).filter(
+      (item) => typeof item === 'string',
+    )
+    const newImageFiles = (draft.imgs || []).filter(
+      (item) => item instanceof File,
+    )
+
+    let uploadedImageUrls = []
+    try {
+      if (newImageFiles.length > 0) {
+        uploadedImageUrls = await uploadJobImages(newImageFiles, user.id)
+      }
+    } catch {
+      setModalError(
+        'One or more photos/videos could not be uploaded. Please try again.',
+      )
+      setIsSaving(false)
+      return
+    }
+
+    const imageUrls = [...existingImageUrls, ...uploadedImageUrls]
+
     const payload = {
       customer_id: user.id,
-      title: pendingJob.title,
-      description: pendingJob.description,
-      category: pendingJob.category,
-      city: pendingJob.city,
-      suburb: pendingJob.suburb,
-      radius_km: Number.parseInt(pendingJob.postedDistance, 10),
+      title: draft.type === 'Other' ? draft.otherType : draft.type,
+      job_type: draft.type === 'Other' ? draft.otherType : draft.type,
+      description: draft.description,
+      category: draft.category,
+      city: draft.city,
+      suburb: draft.suburb,
+      radius_km: Number.parseFloat(draft.postedDistance),
       status: 'open',
+      image_urls: imageUrls,
+      urgency: draft.urgency,
+      job_date: draft.jobDate ? draft.jobDate.toISOString() : null,
+      budget: draft.budget,
     }
 
     const query = wasEditing
@@ -237,14 +188,16 @@ export default function Jobs() {
           .eq('id', editingJob.id)
           .eq('customer_id', user.id)
       : supabase.from('job_requests').insert(payload)
+
     const { data, error } = await query
       .select(
-        'id, title, description, category, city, suburb, radius_km, status, created_at',
+        'id, title, description, category, job_type, city, suburb, radius_km, status, image_urls, created_at',
       )
       .single()
 
     if (error) {
-      setRequestError('Your job request could not be saved. Please try again.')
+      console.error('job_requests save failed:', error)
+      setModalError('Your job request could not be saved. Please try again.')
       setIsSaving(false)
       return
     }
@@ -255,20 +208,12 @@ export default function Jobs() {
         ? current.map((job) => (job.id === savedJob.id ? savedJob : job))
         : [savedJob, ...current],
     )
-    setEditingJob(null)
     setJobStatus('Job Posted')
-    setPendingJob(null)
-    setJobTitle('')
-    setJobDescription('')
-    setTradeCategory('')
-    setJobCity('')
-    setJobSuburb('')
-    setJobPostedDistance('')
-    setStep('form')
+    setIsSaving(false)
     setSuccessMessage(
       wasEditing ? 'Job updated successfully!' : 'Job posted successfully!',
     )
-    setIsSaving(false)
+    closeModal()
   }
 
   async function handleQuoteResponse(quoteId, accept) {
@@ -295,6 +240,8 @@ export default function Jobs() {
     setRespondingQuoteId(null)
   }
 
+  const modalInitialJob = editingJob || repostSeed
+
   return (
     <>
       <div className="page-header">
@@ -304,230 +251,47 @@ export default function Jobs() {
         </p>
       </div>
 
-      {step === 'form' && (
-        <form
-          onSubmit={handleReview}
-          className="placeholder-section"
-          noValidate
-        >
-          <div className="placeholder-section-title is-complete">
-            Post a Job
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Job Title</label>
-            <input
-              className="form-input"
-              value={jobTitle}
-              onChange={(e) => {
-                setJobTitle(e.target.value)
-                setTitleError('')
-              }}
-              placeholder="e.g. Leaking tap repair"
-              maxLength={60}
-            />
-            {titleError && (
-              <div className="error" style={{ color: '#dc2626' }}>
-                {titleError}
-              </div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Description</label>
-            <input
-              className="form-input"
-              value={jobDescription}
-              onChange={(e) => {
-                setJobDescription(e.target.value)
-                setDescriptionError('')
-              }}
-              placeholder="Describe the job…"
-              maxLength={400}
-            />
-            {descriptionError && (
-              <div className="error" style={{ color: '#dc2626' }}>
-                {descriptionError}
-              </div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Trade Category</label>
-            <ComboBox
-              options={[
-                'Plumbing',
-                'Electrical',
-                'Carpentry',
-                'Painting',
-                'Landscaping',
-                'Roofing',
-              ]}
-              className="category-combobox"
-              placeholder="Select a category..."
-              value={tradeCategory}
-              onChange={(value) => {
-                setTradeCategory(value.trim())
-                setCategoryError('')
-              }}
-            />
-            {categoryError && (
-              <div className="error" style={{ color: '#dc2626' }}>
-                {categoryError}
-              </div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Job City</label>
-            <ComboBox
-              options={[
-                'Auckland',
-                'Wellington',
-                'Christchurch',
-                'Hamilton',
-                'Tauranga',
-                'Dunedin',
-                'Napier',
-                'Hastings',
-                'Palmerston North',
-                'New Plymouth',
-                'Nelson',
-                'Rotorua',
-                'Whangarei',
-                'Invercargill',
-                'Queenstown',
-                'Porirua',
-              ]}
-              className="city-combobox"
-              placeholder="Select a city..."
-              value={jobCity}
-              onChange={(value) => {
-                setJobCity(value.trim())
-                setCityError('')
-                setJobSuburb('')
-              }}
-            />
-            {cityError && (
-              <div className="error" style={{ color: '#dc2626' }}>
-                {cityError}
-              </div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Job Suburb</label>
-            <ComboBox
-              options={suburbOptions}
-              className="suburb-combobox"
-              placeholder="Select a suburb..."
-              value={jobSuburb}
-              onChange={(value) => {
-                setJobSuburb(value.trim())
-                setSuburbError('')
-              }}
-            />
-            {suburbError && (
-              <div className="error" style={{ color: '#dc2626' }}>
-                {suburbError}
-              </div>
-            )}
-          </div>
-          <div className="form-group">
-            <label className="form-label">Posted Distance (km)</label>
-            <ComboBox
-              options={[
-                '1km',
-                '2km',
-                '3km',
-                '4km',
-                '5km',
-                '6km',
-                '7km',
-                '8km',
-                '9km',
-                '10km',
-              ]}
-              className="distance-combobox"
-              value={jobPostedDistance}
-              onChange={(value) => {
-                setJobPostedDistance(value.trim())
-                setDistanceError('')
-              }}
-              placeholder="e.g. 5km"
-            />
-            {distanceError && (
-              <div className="error" style={{ color: '#dc2626' }}>
-                {distanceError}
-              </div>
-            )}
-          </div>
-
-          <button type="submit" className="btn-primary">
-            Preview Job Request
-          </button>
-          {successMessage && (
-            <p style={{ color: 'seagreen', marginTop: 10 }}>{successMessage}</p>
-          )}
-        </form>
-      )}
-
-      {step === 'review' && pendingJob && (
-        <div className="placeholder-section">
-          <div className="placeholder-section-title is-complete">
-            Review Job
-          </div>
-          <p
-            style={{
-              fontSize: 13,
-              color: '#666',
-              marginTop: -6,
-              marginBottom: 14,
-            }}
-          >
-            Please review the job details before posting.
-          </p>
-
-          <ReviewRow label="Job Title" value={pendingJob.title} />
-          <ReviewRow label="Description" value={pendingJob.description} />
-          <ReviewRow label="Trade Category" value={pendingJob.category} />
-          <ReviewRow label="City" value={pendingJob.city} />
-          <ReviewRow label="Suburb" value={pendingJob.suburb} />
-          <ReviewRow
-            label="Posted Distance"
-            value={pendingJob.postedDistance}
-          />
-          <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={handleBackToEdit}
-            >
-              Back to Edit
-            </button>
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={handleConfirmPost}
-              disabled={isSaving}
-            >
-              {isSaving ? 'Saving…' : 'Confirm & Post Job Request'}
-            </button>
-          </div>
+      <div className="placeholder-section">
+        <div className="placeholder-section-title is-complete">
+          Ready to get quotes?
         </div>
+        <p
+          style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}
+        >
+          Post a job in a few quick steps and local tradespeople will send you
+          quotes.
+        </p>
+        <button type="button" className="btn-primary" onClick={openPostModal}>
+          Post a Job
+        </button>
+        {successMessage && (
+          <p style={{ color: 'seagreen', marginTop: 10 }}>{successMessage}</p>
+        )}
+      </div>
+
+      {isModalOpen && (
+        <PostJob
+          initialJob={modalInitialJob}
+          initialStep={modalInitialStep}
+          onClose={closeModal}
+          onSubmit={handleSubmitJob}
+          isSaving={isSaving}
+          submitError={modalError}
+        />
       )}
 
       <div className="placeholder-section">
         <div
-          className={`job-status-header ${
-            marketplace.jobStatus === 'Not Posted' ? 'is-empty' : ''
-          }`}
+          className="job-status-header"
+          style={{
+            color: jobStatus === 'Not Posted' ? 'var(--text-muted)' : 'green',
+          }}
         >
-          Job Status: {marketplace.jobStatus}
+          Job Status: {jobStatus}
         </div>
-        {marketplace.requestError && (
+        {requestError && (
           <div className="auth-error" role="alert">
-            {marketplace.requestError}
+            {requestError}
           </div>
         )}
         {isLoading && <div className="empty-state">Loading your jobs…</div>}
@@ -623,18 +387,14 @@ export default function Jobs() {
                       <button
                         type="button"
                         className="btn-secondary"
-                        onClick={() => {
-                          setEditingJob(null)
-                          setPendingJob(job)
-                          setStep('review')
-                        }}
+                        onClick={() => openRepostModal(job)}
                       >
                         Repost Job
                       </button>
                       <button
                         type="button"
                         className="btn-secondary"
-                        onClick={() => handleEditJob(job)}
+                        onClick={() => openEditModal(job)}
                       >
                         Edit Job
                       </button>
@@ -666,15 +426,4 @@ function formatMoney(amountCents) {
     style: 'currency',
     currency: 'NZD',
   }).format(amountCents / 100)
-}
-
-function ReviewRow({ label, value }) {
-  return (
-    <div style={{ padding: '8px 0', borderBottom: '1px solid #eee' }}>
-      <div style={{ fontSize: 12, color: '#999', textTransform: 'uppercase' }}>
-        {label}
-      </div>
-      <div style={{ fontSize: 14 }}>{value || '-'}</div>
-    </div>
-  )
 }
