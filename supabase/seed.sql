@@ -63,7 +63,6 @@ from (
     )
 ) as test_users(user_id, email, first_name, last_name);
 
--- Email identities allow the seeded users to sign in normally.
 
 insert into auth.identities (
   id,
@@ -106,8 +105,6 @@ from (
       'electrician@test.locallink.nz'
     )
 ) as test_identities(identity_id, user_id, email);
-
--- The existing on_auth_user_created trigger automatically creates profiles.
 
 -- ============================================================
 -- Test businesses
@@ -225,10 +222,6 @@ values
     '31000000-0000-0000-0000-000000000001',
     'Auckland'
   );
-
--- ============================================================
--- Consumer job requests
--- ============================================================
 
 -- ============================================================
 -- Consumer job requests
