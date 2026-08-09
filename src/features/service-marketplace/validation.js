@@ -1,4 +1,9 @@
-import { CITIES, POSTED_DISTANCES, TRADE_CATEGORIES, URGENCY_OPTIONS } from './constants'
+import {
+  CITIES,
+  POSTED_DISTANCES,
+  TRADE_CATEGORIES,
+  URGENCY_OPTIONS,
+} from './constants'
 import jobtypes from '../../data/jobtypes'
 
 export function validateJobWizardStep(step, draft, suburbOptions) {
@@ -52,7 +57,9 @@ export function validateJobWizardStep(step, draft, suburbOptions) {
       errors.city = 'Please choose a valid city from the list.'
 
     if (!draft.suburb) errors.suburb = 'Please select a suburb.'
-    else if (!suburbOptions.map((option) => option.trim()).includes(draft.suburb))
+    else if (
+      !suburbOptions.map((option) => option.trim()).includes(draft.suburb)
+    )
       errors.suburb = 'Please choose a suburb that matches the selected city.'
 
     if (!draft.postedDistance)

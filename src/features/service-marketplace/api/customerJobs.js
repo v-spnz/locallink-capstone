@@ -66,9 +66,7 @@ export async function saveCustomerJob({ customerId, draft, jobId }) {
     radius_km: Number.parseInt(draft.postedDistance, 10),
     status: 'open',
     image_urls: imageUrls,
-    job_date: draft.jobDate
-      ? draft.jobDate.toISOString().split('T')[0]
-      : null,
+    job_date: draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : null,
     budget: draft.budget ? draft.budget.trim() : null,
     urgency: draft.urgency,
   }

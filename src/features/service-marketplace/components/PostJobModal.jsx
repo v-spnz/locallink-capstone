@@ -110,7 +110,6 @@ export default function PostJobModal({
   }
 
   function handlePost() {
-
     for (let checkStep = 1; checkStep <= 4; checkStep += 1) {
       const stepErrors = validateJobWizardStep(checkStep, draft, suburbOptions)
       if (Object.keys(stepErrors).length > 0) {
@@ -147,7 +146,10 @@ export default function PostJobModal({
           const n = i + 1
           const state = n < step ? 'done' : n === step ? 'active' : 'pending'
           return (
-            <div className="flex flex-1 items-center last:flex-none" key={label}>
+            <div
+              className="flex flex-1 items-center last:flex-none"
+              key={label}
+            >
               <div
                 className={
                   'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ' +
@@ -249,7 +251,9 @@ function StepCategory({ draft, update, error }) {
             <button
               key={item.value}
               type="button"
-              onClick={() => update({ category: item.value, type: '', otherType: '' })}
+              onClick={() =>
+                update({ category: item.value, type: '', otherType: '' })
+              }
               className={
                 'flex items-center gap-3 rounded-lg border px-4 py-3 text-left text-sm transition ' +
                 (selected
@@ -309,12 +313,20 @@ function StepJobType({ draft, update, errors, jobTypeOptions }) {
           />
         </>
       )}
-      {errors.type && <p className="mt-3 text-xs text-[var(--danger)]">{errors.type}</p>}
+      {errors.type && (
+        <p className="mt-3 text-xs text-[var(--danger)]">{errors.type}</p>
+      )}
     </>
   )
 }
 
-function StepJobDetails({ draft, update, errors, onFileChange, onRemoveImage }) {
+function StepJobDetails({
+  draft,
+  update,
+  errors,
+  onFileChange,
+  onRemoveImage,
+}) {
   const fileInputRef = useRef(null)
 
   return (
@@ -392,7 +404,9 @@ function StepJobDetails({ draft, update, errors, onFileChange, onRemoveImage }) 
         onChange={(e) => update({ description: e.target.value })}
       />
       {errors.description && (
-        <p className="mt-1 text-xs text-[var(--danger)]">{errors.description}</p>
+        <p className="mt-1 text-xs text-[var(--danger)]">
+          {errors.description}
+        </p>
       )}
 
       <div className="mt-4 flex flex-row gap-4">
@@ -403,20 +417,28 @@ function StepJobDetails({ draft, update, errors, onFileChange, onRemoveImage }) 
           <input
             type="date"
             className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
-            value={draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : ''}
+            value={
+              draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : ''
+            }
             onChange={(e) =>
-              update({ jobDate: e.target.value ? new Date(e.target.value) : null })
+              update({
+                jobDate: e.target.value ? new Date(e.target.value) : null,
+              })
             }
           />
           {errors.jobDate && (
-            <p className="mt-1 text-xs text-[var(--danger)]">{errors.jobDate}</p>
+            <p className="mt-1 text-xs text-[var(--danger)]">
+              {errors.jobDate}
+            </p>
           )}
         </div>
 
         <div className="flex-1">
           <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
             Budget{' '}
-            <span className="font-normal text-[var(--text-muted)]">(optional)</span>
+            <span className="font-normal text-[var(--text-muted)]">
+              (optional)
+            </span>
           </label>
           <input
             type="text"
@@ -474,7 +496,9 @@ function StepLocation({ draft, update, errors, suburbOptions }) {
         value={draft.city}
         onChange={(value) => update({ city: value.trim(), suburb: '' })}
       />
-      {errors.city && <p className="mt-1 text-xs text-[var(--danger)]">{errors.city}</p>}
+      {errors.city && (
+        <p className="mt-1 text-xs text-[var(--danger)]">{errors.city}</p>
+      )}
 
       <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
         Suburb *
@@ -489,7 +513,7 @@ function StepLocation({ draft, update, errors, suburbOptions }) {
         <p className="mt-1 text-xs text-[var(--danger)]">{errors.suburb}</p>
       )}
 
-     <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
+      <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
         Posted distance (km) *
       </label>
       <div className="radius-slider-wrapper relative">
@@ -542,7 +566,11 @@ function StepReview({ draft, error }) {
       <ReviewRow label="Job Type" value={displayType} />
       <ReviewRow
         label="Photos/Videos"
-        value={draft.imgs.length > 0 ? `${draft.imgs.length} file(s) attached` : 'None'}
+        value={
+          draft.imgs.length > 0
+            ? `${draft.imgs.length} file(s) attached`
+            : 'None'
+        }
       />
       <ReviewRow label="Description" value={draft.description} />
       <ReviewRow

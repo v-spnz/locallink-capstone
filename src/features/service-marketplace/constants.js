@@ -33,7 +33,6 @@ export const POSTED_DISTANCES = Array.from(
 
 export const URGENCY_OPTIONS = ['Flexible', 'Normal', 'Urgent']
 
-
 export const MARKETPLACE_PAGE_CONTENT = {
   leads: {
     eyebrow: 'Service Marketplace',
