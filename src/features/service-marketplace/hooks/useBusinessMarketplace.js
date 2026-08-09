@@ -7,6 +7,7 @@ import {
 } from '../api/businessJobs'
 import { MARKETPLACE_PAGE_CONTENT } from '../constants'
 import { formatRequestError } from '../formatters'
+import { filterAndSortLeads } from '../leadFilters'
 import { validateQuote } from '../validation'
 
 export default function useBusinessMarketplace(type) {
@@ -21,6 +22,17 @@ export default function useBusinessMarketplace(type) {
   const [quoteMessage, setQuoteMessage] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('')
+  const [sort, setSort] = useState('newest')
+
+  const categories = [
+    ...new Set(items.map((item) => item.category).filter(Boolean)),
+  ].sort()
+  const visibleItems =
+    type === 'leads'
+      ? filterAndSortLeads(items, { search, category, sort })
+      : items
 
   useEffect(() => {
     let active = true
@@ -115,7 +127,12 @@ export default function useBusinessMarketplace(type) {
 
   return {
     content,
-    items,
+    items: visibleItems,
+    totalItems: items.length,
+    categories,
+    search,
+    category,
+    sort,
     isLoading,
     error,
     success,
@@ -125,6 +142,9 @@ export default function useBusinessMarketplace(type) {
     isSaving,
     setQuoteAmount,
     setQuoteMessage,
+    setSearch,
+    setCategory,
+    setSort,
     toggleLead,
     handleQuoteSubmit,
     handleCompleteJob,

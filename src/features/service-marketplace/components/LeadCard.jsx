@@ -1,5 +1,6 @@
-import { MapPin } from 'lucide-react'
+import { CalendarClock, Clock, MapPin, MessageSquareText } from 'lucide-react'
 import Button from '../../../components/ui/Button'
+import { getLeadDisplayDetails } from '../leadFilters'
 import QuoteForm from './QuoteForm'
 
 export default function LeadCard({
@@ -13,12 +14,15 @@ export default function LeadCard({
   onMessageChange,
   onSubmit,
 }) {
+  const details = getLeadDisplayDetails(item)
+  const deadline = new Date(details.quoteDeadline)
+
   return (
     <article className="service-marketplace-card">
       <div className="service-marketplace-card-head">
         <div>
-          <span>{item.category}</span>
-          <h3>{item.title}</h3>
+          <span>{details.category}</span>
+          <h3>{details.title}</h3>
         </div>
         <span className="service-status open">Open lead</span>
       </div>
@@ -26,12 +30,25 @@ export default function LeadCard({
       <div className="service-marketplace-meta">
         <span>
           <MapPin aria-hidden="true" />
-          {item.suburb}, {item.city}
+          {details.suburb}, {item.city}
         </span>
         {item.radius_km && <span>Within {item.radius_km} km</span>}
-        {item.created_at && (
-          <span>{new Date(item.created_at).toLocaleDateString('en-NZ')}</span>
-        )}
+        <span>
+          <Clock aria-hidden="true" />
+          {details.requestedTiming}
+        </span>
+        <span>
+          <MessageSquareText aria-hidden="true" />
+          {details.quoteCount} of {details.maxQuotes} quotes
+        </span>
+        <span>
+          <CalendarClock aria-hidden="true" />
+          Quotes close{' '}
+          {deadline.toLocaleString('en-NZ', {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+          })}
+        </span>
       </div>
       <Button
         variant={item.has_quote ? 'secondary' : 'primary'}
