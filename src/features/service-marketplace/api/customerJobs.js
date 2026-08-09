@@ -26,6 +26,7 @@ export async function saveCustomerJob({ customerId, job, jobId }) {
     title: job.title,
     description: job.description,
     category: job.category,
+    job_type: job.category,
     city: job.city,
     suburb: job.suburb,
     radius_km: Number.parseInt(job.postedDistance, 10),
