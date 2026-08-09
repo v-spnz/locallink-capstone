@@ -63,7 +63,7 @@ export default function BusinessPortal() {
           path="job-leads"
           element={
             <BusinessPage capability="service_marketplace">
-              <ServiceMarketplacePage type="leads" />
+              <ServiceMarketplacePage key="leads" type="leads" />
             </BusinessPage>
           }
         />
@@ -71,7 +71,7 @@ export default function BusinessPortal() {
           path="quotes"
           element={
             <BusinessPage capability="service_marketplace">
-              <ServiceMarketplacePage type="quotes" />
+              <ServiceMarketplacePage key="quotes" type="quotes" />
             </BusinessPage>
           }
         />
@@ -79,7 +79,7 @@ export default function BusinessPortal() {
           path="active-jobs"
           element={
             <BusinessPage capability="service_marketplace">
-              <ServiceMarketplacePage type="jobs" />
+              <ServiceMarketplacePage key="jobs" type="jobs" />
             </BusinessPage>
           }
         />

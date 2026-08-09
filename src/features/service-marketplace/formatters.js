@@ -17,3 +17,10 @@ export function getOverallJobStatus(jobs) {
   if (jobs.some((job) => job.status === 'completed')) return 'Completed'
   return 'Not Posted'
 }
+
+export function formatRequestError(fallbackMessage, error) {
+  if (!import.meta.env.DEV || !error?.message) return fallbackMessage
+
+  const errorCode = error.code ? `${error.code}: ` : ''
+  return `${fallbackMessage} (${errorCode}${error.message})`
+}

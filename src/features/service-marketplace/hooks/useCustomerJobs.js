@@ -6,7 +6,7 @@ import {
   respondToCustomerQuote,
   saveCustomerJob,
 } from '../api/customerJobs'
-import { getOverallJobStatus } from '../formatters'
+import { formatRequestError, getOverallJobStatus } from '../formatters'
 import { validateJobRequest } from '../validation'
 
 const EMPTY_FORM = {
@@ -149,8 +149,14 @@ export default function useCustomerJobs() {
       setSuccessMessage(
         wasEditing ? 'Job updated successfully!' : 'Job posted successfully!',
       )
-    } catch {
-      setRequestError('Your job request could not be saved. Please try again.')
+    } catch (saveError) {
+      console.error('Unable to save job request.', saveError)
+      setRequestError(
+        formatRequestError(
+          'Your job request could not be saved. Please try again.',
+          saveError,
+        ),
+      )
     } finally {
       setIsSaving(false)
     }

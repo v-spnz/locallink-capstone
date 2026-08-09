@@ -6,6 +6,7 @@ import {
   submitBusinessQuote,
 } from '../api/businessJobs'
 import { MARKETPLACE_PAGE_CONTENT } from '../constants'
+import { formatRequestError } from '../formatters'
 import { validateQuote } from '../validation'
 
 export default function useBusinessMarketplace(type) {
@@ -27,11 +28,27 @@ export default function useBusinessMarketplace(type) {
     async function loadItems() {
       setIsLoading(true)
       setError('')
+      setSuccess('')
+      setSelectedLead(null)
       try {
         const nextItems = await fetchBusinessMarketplaceItems(type, business.id)
-        if (active) setItems(nextItems)
-      } catch {
-        if (active) setError(`Unable to load ${content.title.toLowerCase()}.`)
+        if (active) {
+          setItems(nextItems)
+          setError('')
+        }
+      } catch (loadError) {
+        if (active) {
+          console.error(
+            `Unable to load ${content.title.toLowerCase()}.`,
+            loadError,
+          )
+          setError(
+            formatRequestError(
+              `Unable to load ${content.title.toLowerCase()}.`,
+              loadError,
+            ),
+          )
+        }
       } finally {
         if (active) setIsLoading(false)
       }

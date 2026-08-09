@@ -28,9 +28,11 @@ export default function ServiceMarketplacePage({ type }) {
 
       <div className="service-marketplace-list">
         {marketplace.isLoading && <LoadingSpinner />}
-        {!marketplace.isLoading && marketplace.items.length === 0 && (
-          <div className="empty-state">{marketplace.content.empty}</div>
-        )}
+        {!marketplace.isLoading &&
+          !marketplace.error &&
+          marketplace.items.length === 0 && (
+            <div className="empty-state">{marketplace.content.empty}</div>
+          )}
         {!marketplace.isLoading &&
           marketplace.items.map((item) => {
             if (type === 'leads') {

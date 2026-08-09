@@ -6,12 +6,44 @@ const RPC_BY_TYPE = {
   jobs: 'get_business_active_jobs',
 }
 
-export async function fetchBusinessMarketplaceItems(type, businessId) {
-  const { data, error } = await supabase.rpc(RPC_BY_TYPE[type], {
+const pendingMarketplaceRequests = new Map()
+
+async function requestMarketplaceItems(type, businessId) {
+  return supabase.rpc(RPC_BY_TYPE[type], {
     p_business_id: businessId,
   })
-  if (error) throw error
-  return data ?? []
+}
+
+export function fetchBusinessMarketplaceItems(type, businessId) {
+  const requestKey = `${type}:${businessId}`
+  const pendingRequest = pendingMarketplaceRequests.get(requestKey)
+  if (pendingRequest) return pendingRequest
+
+  const request = (async () => {
+    try {
+      let result = await requestMarketplaceItems(type, businessId)
+      const shouldRetry =
+        result.error &&
+        (!result.status || result.status === 401 || result.status >= 500)
+
+      if (shouldRetry) {
+        if (result.status === 401) await supabase.auth.refreshSession()
+        result = await requestMarketplaceItems(type, businessId)
+      }
+
+      if (result.error) {
+        throw Object.assign(new Error(result.error.message), result.error, {
+          status: result.status,
+        })
+      }
+      return result.data ?? []
+    } finally {
+      pendingMarketplaceRequests.delete(requestKey)
+    }
+  })()
+
+  pendingMarketplaceRequests.set(requestKey, request)
+  return request
 }
 
 export async function submitBusinessQuote({
