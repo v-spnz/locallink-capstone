@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { getMarketplaceEmptyMessage } from '../src/features/service-marketplace/constants.js'
 import {
   filterAndSortLeads,
   getLeadDisplayDetails,
   isAvailableLead,
+  isUrgentLead,
   matchesBusinessProfile,
 } from '../src/features/service-marketplace/leadFilters.js'
 
@@ -13,6 +15,7 @@ function lead(overrides = {}) {
   return {
     job_request_id: crypto.randomUUID(),
     title: 'Repair leaking kitchen tap',
+    description: 'The kitchen tap leaks whenever it is turned on.',
     category: 'Plumbing',
     suburb: 'Mount Eden',
     city: 'Auckland',
@@ -26,9 +29,9 @@ function lead(overrides = {}) {
   }
 }
 
-test('only jobs matching the business service and area are eligible', () => {
-  const services = ['Plumbing']
-  const areas = ['Mount Eden']
+test('AC1-2: only jobs matching a registered service and service area are eligible', () => {
+  const services = [' plumbing ']
+  const areas = [' mount eden ']
 
   assert.equal(matchesBusinessProfile(lead(), services, areas), true)
   assert.equal(
@@ -41,7 +44,7 @@ test('only jobs matching the business service and area are eligible', () => {
   )
 })
 
-test('open jobs before their deadline and below their quote limit are available', () => {
+test('AC1: open jobs before their deadline and below their quote limit are available', () => {
   assert.equal(isAvailableLead(lead(), NOW), true)
 })
 
@@ -57,48 +60,80 @@ test('lead details include every field required by the job card', () => {
   })
 })
 
-test('closed, expired, withdrawn, and fully quoted jobs are unavailable', () => {
+test('AC5: expired, withdrawn, accepted, cancelled, and fully quoted jobs are unavailable', () => {
   for (const unavailableLead of [
     lead({ job_status: 'closed' }),
     lead({ quote_deadline: '2026-08-08T23:59:59Z' }),
     lead({ job_status: 'withdrawn' }),
+    lead({ job_status: 'accepted' }),
+    lead({ job_status: 'in_progress' }),
+    lead({ job_status: 'cancelled' }),
     lead({ quote_count: 5, max_quotes: 5 }),
   ]) {
     assert.equal(isAvailableLead(unavailableLead, NOW), false)
   }
 })
 
-test('jobs can be searched by service or suburb and filtered by category', () => {
+test('AC3 and AC7: search finds title, description, and suburb without case sensitivity', () => {
   const jobs = [
     lead(),
     lead({
       title: 'Replace a switch',
+      description: 'The hallway light flickers every evening.',
       category: 'Electrical',
       suburb: 'Ponsonby',
     }),
   ]
 
   assert.deepEqual(
-    filterAndSortLeads(jobs, { search: 'plumb', now: NOW }).map(
-      (item) => item.category,
-    ),
-    ['Plumbing'],
-  )
-  assert.deepEqual(
-    filterAndSortLeads(jobs, { search: 'ponsonby', now: NOW }).map(
+    filterAndSortLeads(jobs, { search: 'REPLACE', now: NOW }).map(
       (item) => item.category,
     ),
     ['Electrical'],
   )
   assert.deepEqual(
-    filterAndSortLeads(jobs, { category: 'Electrical', now: NOW }).map(
+    filterAndSortLeads(jobs, { search: 'FLICKERS', now: NOW }).map(
+      (item) => item.category,
+    ),
+    ['Electrical'],
+  )
+  assert.deepEqual(
+    filterAndSortLeads(jobs, { search: 'PONSONBY', now: NOW }).map(
       (item) => item.category,
     ),
     ['Electrical'],
   )
 })
 
-test('urgency orders jobs by the soonest quote deadline', () => {
+test('AC8: clearing the search displays all matched available jobs again', () => {
+  const jobs = [lead(), lead({ title: 'Install a shower mixer' })]
+
+  assert.equal(filterAndSortLeads(jobs, { search: '', now: NOW }).length, 2)
+})
+
+test('AC4: jobs closing within 48 hours are identified as urgent', () => {
+  assert.equal(
+    isUrgentLead(lead({ quote_deadline: '2026-08-10T23:59:59Z' }), NOW),
+    true,
+  )
+  assert.equal(
+    isUrgentLead(lead({ quote_deadline: '2026-08-11T00:00:01Z' }), NOW),
+    false,
+  )
+})
+
+test('AC6: an appropriate message is returned when no matched jobs exist', () => {
+  assert.equal(
+    getMarketplaceEmptyMessage('leads', 0),
+    'No matching job leads are available right now.',
+  )
+  assert.equal(
+    getMarketplaceEmptyMessage('leads', 3),
+    'No matched job leads match your search.',
+  )
+})
+
+test('AC9: urgency orders jobs by the soonest quote deadline', () => {
   const jobs = [
     lead({ title: 'Later', quote_deadline: '2026-08-15T00:00:00Z' }),
     lead({ title: 'Sooner', quote_deadline: '2026-08-10T00:00:00Z' }),

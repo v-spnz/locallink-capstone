@@ -23,16 +23,14 @@ export default function useBusinessMarketplace(type) {
   const [isSaving, setIsSaving] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const [search, setSearch] = useState('')
-  const [category, setCategory] = useState('')
   const [sort, setSort] = useState('newest')
 
-  const categories = [
-    ...new Set(items.map((item) => item.category).filter(Boolean)),
-  ].sort()
   const visibleItems =
     type === 'leads'
-      ? filterAndSortLeads(items, { search, category, sort })
+      ? filterAndSortLeads(items, { search, sort })
       : items
+  const totalItems =
+    type === 'leads' ? filterAndSortLeads(items).length : items.length
 
   useEffect(() => {
     let active = true
@@ -128,10 +126,8 @@ export default function useBusinessMarketplace(type) {
   return {
     content,
     items: visibleItems,
-    totalItems: items.length,
-    categories,
+    totalItems,
     search,
-    category,
     sort,
     isLoading,
     error,
@@ -143,7 +139,6 @@ export default function useBusinessMarketplace(type) {
     setQuoteAmount,
     setQuoteMessage,
     setSearch,
-    setCategory,
     setSort,
     toggleLead,
     handleQuoteSubmit,

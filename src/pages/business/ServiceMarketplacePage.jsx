@@ -3,6 +3,7 @@ import ActiveJobCard from '../../features/service-marketplace/components/ActiveJ
 import BusinessQuoteCard from '../../features/service-marketplace/components/BusinessQuoteCard'
 import LeadCard from '../../features/service-marketplace/components/LeadCard'
 import useBusinessMarketplace from '../../features/service-marketplace/hooks/useBusinessMarketplace'
+import { getMarketplaceEmptyMessage } from '../../features/service-marketplace/constants'
 import { LEAD_SORT_OPTIONS } from '../../features/service-marketplace/leadFilters'
 import '../../features/service-marketplace/ServiceMarketplace.css'
 
@@ -30,7 +31,7 @@ export default function ServiceMarketplacePage({ type }) {
       {type === 'leads' && !marketplace.isLoading && !marketplace.error && (
         <div
           className="service-marketplace-toolbar"
-          aria-label="Job lead filters"
+          aria-label="Job lead search and ordering"
         >
           <label className="service-marketplace-search">
             <span>Search jobs</span>
@@ -38,22 +39,8 @@ export default function ServiceMarketplacePage({ type }) {
               type="search"
               value={marketplace.search}
               onChange={(event) => marketplace.setSearch(event.target.value)}
-              placeholder="Search by service or suburb"
+              placeholder="Search by keyword or location"
             />
-          </label>
-          <label>
-            <span>Category</span>
-            <select
-              value={marketplace.category}
-              onChange={(event) => marketplace.setCategory(event.target.value)}
-            >
-              <option value="">All categories</option>
-              {marketplace.categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
           </label>
           <label>
             <span>Order</span>
@@ -77,9 +64,7 @@ export default function ServiceMarketplacePage({ type }) {
           !marketplace.error &&
           marketplace.items.length === 0 && (
             <div className="empty-state">
-              {type === 'leads' && marketplace.totalItems > 0
-                ? 'No job leads match your search and filters.'
-                : marketplace.content.empty}
+              {getMarketplaceEmptyMessage(type, marketplace.totalItems)}
             </div>
           )}
         {!marketplace.isLoading &&

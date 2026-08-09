@@ -51,3 +51,11 @@ export const MARKETPLACE_PAGE_CONTENT = {
     empty: 'Accepted service jobs will appear here.',
   },
 }
+
+export function getMarketplaceEmptyMessage(type, totalItems) {
+  if (type === 'leads' && totalItems > 0) {
+    return 'No matched job leads match your search.'
+  }
+
+  return MARKETPLACE_PAGE_CONTENT[type].empty
+}

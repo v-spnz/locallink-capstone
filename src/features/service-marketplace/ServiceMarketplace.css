@@ -167,7 +167,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(150px, 210px));
+  grid-template-columns: minmax(220px, 1fr) minmax(150px, 210px);
   gap: 12px;
   background: var(--white);
 }
@@ -254,6 +254,14 @@
 .service-marketplace-meta svg {
   width: 13px;
   height: 13px;
+}
+
+.service-marketplace-meta .service-marketplace-deadline.is-urgent {
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #fff4e6;
+  color: #c2410c;
+  font-weight: 700;
 }
 
 .service-quote-summary {

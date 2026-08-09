@@ -1,6 +1,6 @@
 import { CalendarClock, Clock, MapPin, MessageSquareText } from 'lucide-react'
 import Button from '../../../components/ui/Button'
-import { getLeadDisplayDetails } from '../leadFilters'
+import { getLeadDisplayDetails, isUrgentLead } from '../leadFilters'
 import QuoteForm from './QuoteForm'
 
 export default function LeadCard({
@@ -16,6 +16,7 @@ export default function LeadCard({
 }) {
   const details = getLeadDisplayDetails(item)
   const deadline = new Date(details.quoteDeadline)
+  const isUrgent = isUrgentLead(item)
 
   return (
     <article className="service-marketplace-card">
@@ -41,9 +42,11 @@ export default function LeadCard({
           <MessageSquareText aria-hidden="true" />
           {details.quoteCount} of {details.maxQuotes} quotes
         </span>
-        <span>
+        <span
+          className={isUrgent ? 'service-marketplace-deadline is-urgent' : ''}
+        >
           <CalendarClock aria-hidden="true" />
-          Quotes close{' '}
+          {isUrgent ? 'Closing soon: ' : 'Quotes close '}
           {deadline.toLocaleString('en-NZ', {
             dateStyle: 'medium',
             timeStyle: 'short',
