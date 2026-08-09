@@ -175,6 +175,8 @@ export default function Jobs() {
       status: 'open',
       image_urls: imageUrls,
       urgency: draft.urgency,
+      job_date: draft.jobDate ? draft.jobDate.toISOString() : null,
+      budget: draft.budget,
     }
 
     const query = wasEditing

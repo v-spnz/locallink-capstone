@@ -75,6 +75,8 @@ const EMPTY_DRAFT = {
   suburb: '',
   postedDistance: '',
   otherType: '', 
+  budget: '',
+  jobDate: null,
 }
 
 export default function PostJob({
@@ -98,6 +100,8 @@ export default function PostJob({
           suburb: initialJob.suburb || '',
           postedDistance: initialJob.postedDistance || '',
           urgency: initialJob.urgency || '',
+          jobDate: initialJob.jobDate ? new Date(initialJob.jobDate) : null,
+          budget: initialJob.budget || '',
         }
       : EMPTY_DRAFT,
   )
@@ -144,6 +148,16 @@ export default function PostJob({
       else if (description.length > 400)
         next.description = 'Description cannot exceed 400 characters.'
     }
+    if (currentStep === 3 && !draft.jobDate) {
+      next.jobDate = 'Please select a job date.'
+    }
+    if (currentStep === 3) {
+      const date = new Date()
+      if (draft.jobDate < date) {
+        next.jobDate = 'Job date cannot be in the past.'
+      }
+    }
+
 
     if (currentStep === 4) {
       if (!draft.city) next.city = 'Please select a city.'
@@ -188,6 +202,8 @@ export default function PostJob({
       suburb: draft.suburb,
       postedDistance: draft.postedDistance,
       urgency: draft.urgency,
+      jobDate: draft.jobDate,
+      budget: draft.budget,
     })
   }
 
@@ -451,6 +467,31 @@ function StepJobDetails({ draft, update, errors, onFileChange, onRemoveImage }) 
       {errors && (
         <p className="mt-1 text-xs text-[var(--danger)]">{errors.description}</p>
       )}
+    <div className="mt-4" display="flex" flexDirection="row">
+      <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
+        Job Date *
+      </label>
+      <input
+        type="date"
+        className="rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
+        value={draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : ''}
+        onChange={(e) => update({ jobDate: e.target.value ? new Date(e.target.value) : null })}
+      />
+      {errors && <p className="mt-1 text-xs text-[var(--danger)]">{errors.jobDate}</p>}
+
+      <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
+        Budget (Optional)
+      </label>
+      <input
+        type="text"
+        className="mb-3 rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
+        placeholder="Enter your budget (e.g., $1000)"
+        value={draft.budget || ''}
+        onChange={(e) => update({ budget: e.target.value })}
+      />
+      {errors && <p className="mt-1 text-xs text-[var(--danger)]">{errors.budget}</p>}
+      </div>
+
       <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
         Urgency *
       </label>
@@ -541,10 +582,12 @@ function StepReview({ draft, errors }) {
       <ReviewRow label="Job Type" value={draft.type === 'Other' ? draft.otherType : draft.type} />
       <ReviewRow label="Photos/Videos" value={draft.imgs.length > 0 ? `${draft.imgs.length} file(s) uploaded` : 'None'} />
       <ReviewRow label="Description" value={draft.description} />
+      <ReviewRow label="Job Date" value={draft.jobDate ? draft.jobDate.toLocaleDateString() : '—'} />
+      <ReviewRow label="Budget" value={draft.budget ? `${draft.budget}` : '—'} />
+      <ReviewRow label="Urgency" value={draft.urgency} />
       <ReviewRow label="City" value={draft.city} />
       <ReviewRow label="Suburb" value={draft.suburb} />
       <ReviewRow label="Posted Distance" value={`${draft.postedDistance} km`} />
-      <ReviewRow label="Urgency" value={draft.urgency} />
       {errors && <p className="mt-3 text-sm text-[var(--danger)]">{errors}</p>}
     </div>
   )
