@@ -3,7 +3,7 @@ import { Link, NavLink } from 'react-router-dom'
 import useBusiness from '../../business/useBusiness'
 import BrandLogo from './BrandLogo'
 
-export default function BusinessNav() {
+export default function BusinessNavigation() {
   const { capabilities, membership } = useBusiness()
   const canManageBusiness = ['owner', 'admin'].includes(membership.role)
   const navigationItems = [['/business/analytics', 'Dashboard']]

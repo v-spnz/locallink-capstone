@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import BusinessNav from '../../components/navigation/BusinessNav'
+import BusinessNavigation from '../../components/navigation/BusinessNavigation'
 import PortalLayout from '../../layouts/PortalLayout'
 import ProtectedRoute from '../../auth/ProtectedRoute'
 import BusinessProvider from '../../business/BusinessProvider'
@@ -14,7 +14,9 @@ import ServiceMarketplacePage from './ServiceMarketplacePage'
 function BusinessPage({ children, capability, roles }) {
   return (
     <BusinessProtectedRoute capability={capability} roles={roles}>
-      <PortalLayout navigation={<BusinessNav />}>{children}</PortalLayout>
+      <PortalLayout navigation={<BusinessNavigation />}>
+        {children}
+      </PortalLayout>
     </BusinessProtectedRoute>
   )
 }
