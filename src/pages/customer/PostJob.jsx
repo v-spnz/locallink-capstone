@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   X,
   Wrench,
@@ -9,6 +9,8 @@ import {
   Home,
   ChevronLeft,
   ChevronRight,
+  Plus,
+  Video,
 } from 'lucide-react'
 import Modal from '../../components/ui/Modal'
 import ComboBox from '../../components/ui/ComboBox'
@@ -111,6 +113,8 @@ export default function PostJob({
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files)
     update({ imgs: [...draft.imgs, ...files] })
+    // Allow re-selecting the same file after removing it.
+    e.target.value = ''
   }
 
   function validateStep(currentStep) {
@@ -425,56 +429,75 @@ function StepJobDetails({
   onFileChange,
   onRemoveImage,
 }) {
+  const fileInputRef = useRef(null)
+
   return (
     <>
-      <p className="mb-3 text-sm font-semibold text-[var(--text)]">
-        Photos or Videos (Optional)
+      <p className="mb-1.5 text-sm font-semibold text-[var(--text)]">
+        Photos or video{' '}
+        <span className="font-normal text-[var(--text-muted)]">
+          (optional)
+        </span>
       </p>
-      <input
-        type="file"
-        accept="image/*,video/*"
-        multiple
-        className="upload-input"
-        onChange={onFileChange}
-      />
-      {draft.imgs.length > 0 && (
-        <div className="mb-4 flex flex-wrap gap-3">
-          {draft.imgs.map((file, i) => {
-            const isExistingUrl = typeof file === 'string'
-            const src = isExistingUrl ? file : URL.createObjectURL(file)
-            const isVideo = isExistingUrl
-              ? /\.(mp4|mov|webm|avi|mkv)$/i.test(file)
-              : file.type.startsWith('video/')
+      <div className="mb-1.5 flex flex-wrap gap-3">
+        {draft.imgs.map((file, i) => {
+          const isExistingUrl = typeof file === 'string'
+          const src = isExistingUrl ? file : URL.createObjectURL(file)
+          const isVideo = isExistingUrl
+            ? /\.(mp4|mov|webm|avi|mkv)$/i.test(file)
+            : file.type.startsWith('video/')
 
-            return (
-              <div key={i} className="relative">
-                {isVideo ? (
-                  <video
-                    src={src}
-                    className="h-24 w-24 rounded-md border border-[var(--border)] object-cover"
-                    controls
-                  />
-                ) : (
-                  <img
-                    src={src}
-                    alt={`Preview ${i + 1}`}
-                    width="120"
-                    className="h-24 w-24 rounded-md border border-[var(--border)] object-cover"
-                  />
-                )}
-                <button
-                  type="button"
-                  onClick={() => onRemoveImage(i)}
-                  className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--danger)] text-xs text-white"
-                >
-                  ×
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      )}
-      <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
+          return (
+            <div
+              key={i}
+              className="relative h-20 w-20 overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--bg)]"
+            >
+              {isVideo ? (
+                <div className="flex h-full w-full items-center justify-center">
+                  <Video size={24} className="text-[var(--text-muted)]" />
+                </div>
+              ) : (
+                <img
+                  src={src}
+                  alt={`Preview ${i + 1}`}
+                  className="h-full w-full object-cover"
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => onRemoveImage(i)}
+                aria-label="Remove"
+                className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--danger)] text-xs leading-none text-white"
+              >
+                ×
+              </button>
+            </div>
+          )
+        })}
+
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          aria-label="Add photo or video"
+          className="flex h-20 w-20 items-center justify-center rounded-lg border border-dashed border-[var(--border)] text-[var(--text-muted)] transition hover:border-[var(--blue)] hover:text-[var(--blue)]"
+        >
+          <Plus size={22} />
+        </button>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*,video/*"
+          multiple
+          className="hidden"
+          onChange={onFileChange}
+        />
+      </div>
+      <p className="mb-4 text-xs text-[var(--text-muted)]">
+        Helps providers judge the job before quoting.
+      </p>
+
+      <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
         Description *
       </label>
       <textarea
@@ -484,42 +507,53 @@ function StepJobDetails({
         value={draft.description}
         onChange={(e) => update({ description: e.target.value })}
       />
-      {errors && (
+      {errors?.description && (
         <p className="mt-1 text-xs text-[var(--danger)]">
           {errors.description}
         </p>
       )}
-      <div className="mt-4" display="flex" flexDirection="row">
-        <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
-          Job Date *
-        </label>
-        <input
-          type="date"
-          className="rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
-          value={draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : ''}
-          onChange={(e) =>
-            update({
-              jobDate: e.target.value ? new Date(e.target.value) : null,
-            })
-          }
-        />
-        {errors && (
-          <p className="mt-1 text-xs text-[var(--danger)]">{errors.jobDate}</p>
-        )}
 
-        <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
-          Budget (Optional)
-        </label>
-        <input
-          type="text"
-          className="mb-3 rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
-          placeholder="Enter your budget (e.g., $1000)"
-          value={draft.budget || ''}
-          onChange={(e) => update({ budget: e.target.value })}
-        />
-        {errors && (
-          <p className="mt-1 text-xs text-[var(--danger)]">{errors.budget}</p>
-        )}
+      <div className="mt-4 flex flex-row gap-4">
+        <div className="flex-1">
+          <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
+            Job Date *
+          </label>
+          <input
+            type="date"
+            className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
+            value={
+              draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : ''
+            }
+            onChange={(e) =>
+              update({
+                jobDate: e.target.value ? new Date(e.target.value) : null,
+              })
+            }
+          />
+          {errors?.jobDate && (
+            <p className="mt-1 text-xs text-[var(--danger)]">
+              {errors.jobDate}
+            </p>
+          )}
+        </div>
+
+        <div className="flex-1">
+          <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
+            Budget (Optional)
+          </label>
+          <input
+            type="text"
+            className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
+            placeholder="Enter your budget (e.g., $1000)"
+            value={draft.budget || ''}
+            onChange={(e) => update({ budget: e.target.value })}
+          />
+          {errors?.budget && (
+            <p className="mt-1 text-xs text-[var(--danger)]">
+              {errors.budget}
+            </p>
+          )}
+        </div>
       </div>
 
       <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
@@ -545,7 +579,7 @@ function StepJobDetails({
           )
         })}
       </div>
-      {errors && (
+      {errors?.urgency && (
         <p className="mt-3 text-xs text-[var(--danger)]">{errors.urgency}</p>
       )}
     </>
