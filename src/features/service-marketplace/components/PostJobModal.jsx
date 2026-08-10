@@ -532,7 +532,7 @@ function StepLocation({ draft, update, errors, suburbOptions }) {
           className="radius-slider"
           min={1}
           max={8}
-          step={0.1}
+          step={1}
           value={draft.postedDistance}
           onChange={(event) =>
             update({ postedDistance: Number(event.target.value) })

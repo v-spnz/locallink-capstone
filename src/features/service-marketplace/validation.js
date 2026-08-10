@@ -1,6 +1,5 @@
 import {
   CITIES,
-  POSTED_DISTANCES,
   QUOTE_PRICE_TYPES,
   TRADE_CATEGORIES,
   URGENCY_OPTIONS,
@@ -63,9 +62,14 @@ export function validateJobWizardStep(step, draft, suburbOptions) {
     )
       errors.suburb = 'Please choose a suburb that matches the selected city.'
 
+    const postedDistance = Number(draft.postedDistance)
     if (!draft.postedDistance)
       errors.postedDistance = 'Please select a posted distance.'
-    else if (!POSTED_DISTANCES.includes(draft.postedDistance))
+    else if (
+      !Number.isInteger(postedDistance) ||
+      postedDistance < 1 ||
+      postedDistance > 10
+    )
       errors.postedDistance = 'Please choose a valid distance from the list.'
   }
 

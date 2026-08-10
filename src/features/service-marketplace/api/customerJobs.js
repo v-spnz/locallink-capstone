@@ -2,7 +2,7 @@ import { supabase } from '../../../lib/supabase'
 
 const JOB_FIELDS =
   'id, title, description, category, job_type, city, suburb, radius_km, ' +
-  'status, image_urls, job_date, budget, urgency, created_at'
+  'status, image_urls, job_date, budget, urgency, requested_timing, created_at'
 
 export async function fetchCustomerJobs(customerId) {
   const [jobsResult, quotesResult] = await Promise.all([
@@ -69,6 +69,7 @@ export async function saveCustomerJob({ customerId, draft, jobId }) {
     job_date: draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : null,
     budget: draft.budget ? draft.budget.trim() : null,
     urgency: draft.urgency,
+    requested_timing: draft.urgency,
   }
 
   const query = jobId
