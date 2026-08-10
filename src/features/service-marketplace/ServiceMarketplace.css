@@ -845,6 +845,11 @@
 
 .sm-detail-actions {
   margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .sm-detail-actions-right {
@@ -857,4 +862,43 @@
   .sm-field-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* US0052/US0053 refinement: meta icons, urgent badge, detail header layout */
+.customer-job-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.customer-job-meta svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.sm-badge--urgent {
+  background: #fff5f5;
+  color: #c92a2a;
+}
+
+.sm-detail-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sm-detail-card-top > div:first-child {
+  min-width: 0;
+  flex: 1;
+}
+
+.sm-view-quotes-btn {
+  border-color: #a3690c;
+  color: #a3690c;
+}
+
+.sm-delete-btn {
+  border-color: #c92a2a;
+  color: #c92a2a;
 }

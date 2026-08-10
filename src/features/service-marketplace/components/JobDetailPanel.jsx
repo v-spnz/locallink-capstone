@@ -13,6 +13,7 @@ export default function JobDetailPanel({
   onEdit,
   onRepost,
   onQuoteResponse,
+  onViewQuotes = () => {},
 }) {
   const badge = getJobBadge(job, quotes.length)
   const canEdit = ['open', 'closed', 'cancelled'].includes(job.status)
@@ -24,14 +25,27 @@ export default function JobDetailPanel({
       </button>
 
       <div className="sm-detail-card">
-        <div className="sm-badge-row">
-          <span className={`sm-badge sm-badge--${badge.tone}`}>
-            {badge.label}
-          </span>
-          <span className="sm-badge sm-badge--category">{job.category}</span>
+        <div className="sm-detail-card-top">
+          <div>
+            <div className="sm-badge-row">
+              <span className={`sm-badge sm-badge--${badge.tone}`}>
+                {badge.label}
+              </span>
+              <span className="sm-badge sm-badge--category">{job.category}</span>
+              {job.urgency === 'Urgent' && (
+                <span className="sm-badge sm-badge--urgent">Urgent</span>
+              )}
+            </div>
+            <h2 className="sm-detail-title">{job.title}</h2>
+            <p className="sm-detail-description">{job.description}</p>
+          </div>
+          <div
+            className={`sm-quote-count-box${quotes.length === 0 ? ' sm-quote-count-box--zero' : ''}`}
+          >
+            <div className="sm-quote-count-num">{quotes.length}</div>
+            <div className="sm-quote-count-label">Quotes</div>
+          </div>
         </div>
-        <h2 className="sm-detail-title">{job.title}</h2>
-        <p className="sm-detail-description">{job.description}</p>
 
         <div className="sm-field-grid">
           <div>
@@ -77,8 +91,16 @@ export default function JobDetailPanel({
         onRespond={onQuoteResponse}
       />
 
-      {canEdit && (
-        <div className="sm-detail-actions">
+      <div className="sm-detail-actions">
+        <Button
+          variant="secondary"
+          className="sm-view-quotes-btn"
+          onClick={() => onViewQuotes(job.id)}
+        >
+          View {quotes.length} quote{quotes.length === 1 ? '' : 's'}
+        </Button>
+
+        {canEdit && (
           <div className="sm-detail-actions-right">
             <Button variant="secondary" onClick={() => onEdit(job)}>
               Edit Job
@@ -86,12 +108,16 @@ export default function JobDetailPanel({
             <Button variant="secondary" onClick={() => onRepost(job)}>
               Repost Job
             </Button>
-            <Button variant="secondary" disabled>
+            <Button
+              variant="secondary"
+              className="sm-delete-btn"
+              onClick={() => {}}
+            >
               Delete Job
             </Button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
