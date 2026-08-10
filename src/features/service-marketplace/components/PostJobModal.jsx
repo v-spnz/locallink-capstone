@@ -491,6 +491,8 @@ function StepLocation({ draft, update, errors, suburbOptions }) {
         City *
       </label>
       <ComboBox
+        maxHeight="200px"
+        overflowY="auto"
         options={CITIES}
         placeholder="Select a city..."
         value={draft.city}
@@ -504,6 +506,8 @@ function StepLocation({ draft, update, errors, suburbOptions }) {
         Suburb *
       </label>
       <ComboBox
+        maxHeight="200px"
+        overflowY="auto"
         options={suburbOptions}
         placeholder="Select a suburb..."
         value={draft.suburb}
