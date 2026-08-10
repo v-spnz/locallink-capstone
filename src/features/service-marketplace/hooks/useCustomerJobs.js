@@ -1,22 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import useAuth from '../../../auth/useAuth'
-import suburbsData from '../../../data/suburbs'
 import {
   fetchCustomerJobs,
   respondToCustomerQuote,
   saveCustomerJob,
 } from '../api/customerJobs'
 import { formatRequestError, getOverallJobStatus } from '../formatters'
-import { validateJobRequest } from '../validation'
-
-const EMPTY_FORM = {
-  title: '',
-  description: '',
-  category: '',
-  city: '',
-  suburb: '',
-  postedDistance: '',
-}
 
 function groupQuotesByJob(quotes) {
   return quotes.reduce((groupedQuotes, quote) => {
@@ -36,23 +25,21 @@ export default function useCustomerJobs() {
   const { user } = useAuth()
   const [postedJobs, setPostedJobs] = useState([])
   const [quotesByJob, setQuotesByJob] = useState({})
-  const [form, setForm] = useState(EMPTY_FORM)
-  const [errors, setErrors] = useState({})
-  const [pendingJob, setPendingJob] = useState(null)
-  const [editingJob, setEditingJob] = useState(null)
-  const [step, setStep] = useState('form')
   const [successMessage, setSuccessMessage] = useState('')
   const [requestError, setRequestError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
   const [respondingQuoteId, setRespondingQuoteId] = useState(null)
   const [reloadKey, setReloadKey] = useState(0)
 
-  const suburbOptions = useMemo(
-    () => (form.city && suburbsData[form.city] ? suburbsData[form.city] : []),
-    [form.city],
-  )
-  const jobStatus = useMemo(() => getOverallJobStatus(postedJobs), [postedJobs])
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingJob, setEditingJob] = useState(null)
+  const [repostSeed, setRepostSeed] = useState(null)
+  const [modalInitialStep, setModalInitialStep] = useState(1)
+  const [isSaving, setIsSaving] = useState(false)
+  const [modalError, setModalError] = useState('')
+
+  const jobStatus = getOverallJobStatus(postedJobs)
+  const modalInitialJob = editingJob || repostSeed
 
   useEffect(() => {
     let active = true
@@ -82,59 +69,49 @@ export default function useCustomerJobs() {
     return () => clearTimeout(timer)
   }, [successMessage])
 
-  function setField(field, value) {
-    setForm((current) => ({
-      ...current,
-      [field]: value,
-      ...(field === 'city' ? { suburb: '' } : {}),
-    }))
-    setErrors((current) => ({ ...current, [field]: '' }))
-  }
-
-  function handleReview(event) {
-    event.preventDefault()
-    setSuccessMessage('')
-    const validationErrors = validateJobRequest(form, suburbOptions)
-    setErrors(validationErrors)
-    if (Object.keys(validationErrors).length > 0) return
-
-    setPendingJob(
-      Object.fromEntries(
-        Object.entries(form).map(([key, value]) => [key, value.trim()]),
-      ),
-    )
-    setStep('review')
-  }
-
-  function handleEditJob(job) {
-    setEditingJob(job)
-    setForm({
-      title: job.title,
-      description: job.description,
-      category: job.category,
-      city: job.city,
-      suburb: job.suburb,
-      postedDistance: job.postedDistance,
-    })
-    setErrors({})
-    setStep('form')
-  }
-
-  function handleRepostJob(job) {
+  function openPostModal() {
     setEditingJob(null)
-    setPendingJob(job)
-    setStep('review')
+    setRepostSeed(null)
+    setModalInitialStep(1)
+    setModalError('')
+    setIsModalOpen(true)
   }
 
-  async function handleConfirmPost() {
+  function openEditModal(job) {
+    setEditingJob(job)
+    setRepostSeed(null)
+    setModalInitialStep(1)
+    setModalError('')
+    setIsModalOpen(true)
+  }
+
+  function openRepostModal(job) {
+    // Repost reuses the same job details as a fresh posting, opened
+    // straight on the review step for a quick re-confirm.
+    setEditingJob(null)
+    setRepostSeed(job)
+    setModalInitialStep(5)
+    setModalError('')
+    setIsModalOpen(true)
+  }
+
+  function closeModal() {
+    setIsModalOpen(false)
+    setEditingJob(null)
+    setRepostSeed(null)
+    setModalError('')
+  }
+
+  async function handleSubmitJob(draft) {
     setIsSaving(true)
+    setModalError('')
     setRequestError('')
     const wasEditing = Boolean(editingJob)
 
     try {
       const savedJob = await saveCustomerJob({
         customerId: user.id,
-        job: pendingJob,
+        draft,
         jobId: editingJob?.id,
       })
       setPostedJobs((current) =>
@@ -142,16 +119,13 @@ export default function useCustomerJobs() {
           ? current.map((job) => (job.id === savedJob.id ? savedJob : job))
           : [savedJob, ...current],
       )
-      setEditingJob(null)
-      setPendingJob(null)
-      setForm(EMPTY_FORM)
-      setStep('form')
       setSuccessMessage(
         wasEditing ? 'Job updated successfully!' : 'Job posted successfully!',
       )
+      closeModal()
     } catch (saveError) {
       console.error('Unable to save job request.', saveError)
-      setRequestError(
+      setModalError(
         formatRequestError(
           'Your job request could not be saved. Please try again.',
           saveError,
@@ -185,23 +159,21 @@ export default function useCustomerJobs() {
   return {
     postedJobs,
     quotesByJob,
-    form,
-    errors,
-    suburbOptions,
-    pendingJob,
-    step,
+    jobStatus,
     successMessage,
     requestError,
     isLoading,
-    isSaving,
     respondingQuoteId,
-    jobStatus,
-    setField,
-    handleReview,
-    handleEditJob,
-    handleRepostJob,
-    handleConfirmPost,
+    isModalOpen,
+    modalInitialJob,
+    modalInitialStep,
+    isSaving,
+    modalError,
+    openPostModal,
+    openEditModal,
+    openRepostModal,
+    closeModal,
+    handleSubmitJob,
     handleQuoteResponse,
-    handleBackToEdit: () => setStep('form'),
   }
 }

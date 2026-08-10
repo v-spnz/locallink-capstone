@@ -37,6 +37,8 @@ export const QUOTE_PRICE_TYPES = [
   { value: 'call_out', label: 'Call-out fee' },
 ]
 
+export const URGENCY_OPTIONS = ['Flexible', 'Normal', 'Urgent']
+
 export const MARKETPLACE_PAGE_CONTENT = {
   leads: {
     eyebrow: 'Service Marketplace',
