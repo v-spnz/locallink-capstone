@@ -1,7 +1,6 @@
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import CustomerJobCard from '../../features/service-marketplace/components/CustomerJobCard'
-import JobRequestForm from '../../features/service-marketplace/components/JobRequestForm'
-import JobRequestReview from '../../features/service-marketplace/components/JobRequestReview'
+import PostJobModal from '../../features/service-marketplace/components/PostJobModal'
 import useCustomerJobs from '../../features/service-marketplace/hooks/useCustomerJobs'
 import '../../features/service-marketplace/ServiceMarketplace.css'
 
@@ -17,22 +16,38 @@ export default function Jobs() {
         </p>
       </div>
 
-      {marketplace.step === 'form' && (
-        <JobRequestForm
-          form={marketplace.form}
-          errors={marketplace.errors}
-          suburbOptions={marketplace.suburbOptions}
-          successMessage={marketplace.successMessage}
-          onChange={marketplace.setField}
-          onSubmit={marketplace.handleReview}
-        />
-      )}
-      {marketplace.step === 'review' && marketplace.pendingJob && (
-        <JobRequestReview
-          job={marketplace.pendingJob}
+      <div className="placeholder-section">
+        <div className="placeholder-section-title is-complete">
+          Ready to get quotes?
+        </div>
+        <p
+          style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}
+        >
+          Post a job in a few quick steps and local tradespeople will send you
+          quotes.
+        </p>
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={marketplace.openPostModal}
+        >
+          Post a Job
+        </button>
+        {marketplace.successMessage && (
+          <p style={{ color: 'seagreen', marginTop: 10 }}>
+            {marketplace.successMessage}
+          </p>
+        )}
+      </div>
+
+      {marketplace.isModalOpen && (
+        <PostJobModal
+          initialJob={marketplace.modalInitialJob}
+          initialStep={marketplace.modalInitialStep}
+          onClose={marketplace.closeModal}
+          onSubmit={marketplace.handleSubmitJob}
           isSaving={marketplace.isSaving}
-          onBack={marketplace.handleBackToEdit}
-          onConfirm={marketplace.handleConfirmPost}
+          submitError={marketplace.modalError}
         />
       )}
 
@@ -58,8 +73,8 @@ export default function Jobs() {
                 job={job}
                 quotes={marketplace.quotesByJob[job.id] ?? []}
                 respondingQuoteId={marketplace.respondingQuoteId}
-                onEdit={marketplace.handleEditJob}
-                onRepost={marketplace.handleRepostJob}
+                onEdit={marketplace.openEditModal}
+                onRepost={marketplace.openRepostModal}
                 onQuoteResponse={marketplace.handleQuoteResponse}
               />
             ))}
