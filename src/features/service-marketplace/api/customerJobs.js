@@ -1,8 +1,9 @@
 import { supabase } from '../../../lib/supabase'
+import { validateJobMediaFiles } from '../media'
 
 const JOB_FIELDS =
   'id, title, description, category, job_type, city, suburb, radius_km, ' +
-  'status, image_urls, job_date, budget, urgency, created_at'
+  'status, image_urls, measurements, job_date, budget, urgency, requested_timing, created_at'
 
 export async function fetchCustomerJobs(customerId) {
   const [jobsResult, quotesResult] = await Promise.all([
@@ -41,8 +42,12 @@ async function uploadJobImages(files, customerId) {
 }
 
 export async function resolveJobImages(imgs, customerId) {
+  if ((imgs || []).length > 10)
+    throw new Error('A job can include up to 10 photos or videos.')
   const existingUrls = (imgs || []).filter((item) => typeof item === 'string')
   const newFiles = (imgs || []).filter((item) => item instanceof File)
+
+  await validateJobMediaFiles(newFiles)
 
   const uploadedUrls =
     newFiles.length > 0 ? await uploadJobImages(newFiles, customerId) : []
@@ -66,9 +71,11 @@ export async function saveCustomerJob({ customerId, draft, jobId }) {
     radius_km: Number.parseInt(draft.postedDistance, 10),
     status: 'open',
     image_urls: imageUrls,
+    measurements: draft.measurements ? draft.measurements.trim() : null,
     job_date: draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : null,
     budget: draft.budget ? draft.budget.trim() : null,
     urgency: draft.urgency,
+    requested_timing: draft.urgency,
   }
 
   const query = jobId

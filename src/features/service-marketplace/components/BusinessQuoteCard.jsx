@@ -1,7 +1,12 @@
 import { MapPin } from 'lucide-react'
 import { formatMoney, formatStatus } from '../formatters'
+import { QUOTE_PRICE_TYPES } from '../constants'
 
 export default function BusinessQuoteCard({ item }) {
+  const priceType = QUOTE_PRICE_TYPES.find(
+    ({ value }) => value === item.price_type,
+  )?.label
+
   return (
     <article className="service-marketplace-card">
       <div className="service-marketplace-card-head">
@@ -24,8 +29,15 @@ export default function BusinessQuoteCard({ item }) {
         )}
       </div>
       <div className="service-quote-summary">
-        <strong>{formatMoney(item.amount_cents)}</strong>
-        {item.message && <span>{item.message}</span>}
+        <strong>
+          {formatMoney(item.amount_cents)} {priceType && `· ${priceType}`}
+        </strong>
+        <span>Available {item.availability_date}</span>
+        <span>Arrival: {item.arrival_window}</span>
+        <span>Duration: {item.expected_duration}</span>
+        <span>Included: {item.included_work}</span>
+        <span>Conditions: {item.conditions}</span>
+        {item.message && <span>Message: {item.message}</span>}
       </div>
     </article>
   )

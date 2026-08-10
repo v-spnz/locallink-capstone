@@ -36,6 +36,7 @@ const EMPTY_DRAFT = {
   type: '',
   otherType: '',
   imgs: [],
+  measurements: '',
   description: '',
   jobDate: null,
   budget: '',
@@ -58,6 +59,7 @@ function buildInitialDraft(initialJob) {
     type: isCustomType ? 'Other' : savedType,
     otherType: isCustomType ? savedType : '',
     imgs: initialJob.image_urls || [],
+    measurements: initialJob.measurements || '',
     description: initialJob.description || '',
     jobDate: initialJob.job_date ? new Date(initialJob.job_date) : null,
     budget: initialJob.budget || '',
@@ -394,6 +396,24 @@ function StepJobDetails({
       </p>
 
       <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
+        Measurements{' '}
+        <span className="font-normal text-[var(--text-muted)]">(optional)</span>
+      </label>
+      <input
+        type="text"
+        className="mb-4 w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
+        placeholder="e.g. Wall is 3.2 m wide and 2.4 m high"
+        maxLength={500}
+        value={draft.measurements}
+        onChange={(e) => update({ measurements: e.target.value })}
+      />
+      {errors.measurements && (
+        <p className="-mt-3 mb-4 text-xs text-[var(--danger)]">
+          {errors.measurements}
+        </p>
+      )}
+
+      <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
         Description *
       </label>
       <textarea
@@ -532,7 +552,7 @@ function StepLocation({ draft, update, errors, suburbOptions }) {
           className="radius-slider"
           min={1}
           max={8}
-          step={0.1}
+          step={1}
           value={draft.postedDistance}
           onChange={(event) =>
             update({ postedDistance: Number(event.target.value) })
@@ -573,6 +593,7 @@ function StepReview({ draft, error }) {
         }
       />
       <ReviewRow label="Description" value={draft.description} />
+      <ReviewRow label="Measurements" value={draft.measurements || '—'} />
       <ReviewRow
         label="Job Date"
         value={draft.jobDate ? draft.jobDate.toLocaleDateString() : '—'}
