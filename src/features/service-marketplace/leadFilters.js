@@ -5,6 +5,18 @@ export const LEAD_URGENCY_FILTERS = {
   Flexible: 'Flexible',
 }
 
+export const LEAD_ORDER_OPTIONS = {
+  urgent_first: 'Urgent first',
+  normal_first: 'Normal first',
+  flexible_first: 'Flexible first',
+}
+
+const LEAD_URGENCY_ORDER = {
+  urgent_first: ['urgent', 'normal', 'flexible'],
+  normal_first: ['normal', 'urgent', 'flexible'],
+  flexible_first: ['flexible', 'urgent', 'normal'],
+}
+
 const URGENT_DEADLINE_WINDOW_MS = 48 * 60 * 60 * 1000
 
 function normalize(value) {
@@ -59,12 +71,23 @@ export function isUrgentLead(lead, now = new Date()) {
 
 export function filterAndSortLeads(
   leads,
-  { search = '', urgency = 'all', now = new Date() } = {},
+  {
+    search = '',
+    urgency = 'all',
+    order = 'urgent_first',
+    now = new Date(),
+  } = {},
 ) {
   const normalizedSearch = normalize(search)
   const normalizedUrgency = normalize(urgency)
   const matchingLeads = leads.filter((lead) => {
-    const searchableText = [lead.title, lead.description, lead.suburb]
+    const searchableText = [
+      lead.title,
+      lead.description,
+      lead.suburb,
+      lead.city,
+      lead.category,
+    ]
       .map(normalize)
       .join(' ')
 
@@ -76,6 +99,12 @@ export function filterAndSortLeads(
   })
 
   return matchingLeads.toSorted((first, second) => {
+    const urgencyOrder = LEAD_URGENCY_ORDER[order] ?? LEAD_URGENCY_ORDER.urgent_first
+    const urgencyDifference =
+      urgencyOrder.indexOf(normalize(first.urgency)) -
+      urgencyOrder.indexOf(normalize(second.urgency))
+    if (urgencyDifference !== 0) return urgencyDifference
+
     return (
       new Date(second.created_at).getTime() -
       new Date(first.created_at).getTime()

@@ -4,8 +4,18 @@ import BusinessQuoteCard from '../../features/service-marketplace/components/Bus
 import LeadCard from '../../features/service-marketplace/components/LeadCard'
 import useBusinessMarketplace from '../../features/service-marketplace/hooks/useBusinessMarketplace'
 import { getMarketplaceEmptyMessage } from '../../features/service-marketplace/constants'
-import { LEAD_URGENCY_FILTERS } from '../../features/service-marketplace/leadFilters'
-import { BUSINESS_QUOTE_STATUS_OPTIONS } from '../../features/service-marketplace/quoteTracking'
+import {
+  LEAD_ORDER_OPTIONS,
+  LEAD_URGENCY_FILTERS,
+} from '../../features/service-marketplace/leadFilters'
+import {
+  BUSINESS_JOB_ORDER_OPTIONS,
+  BUSINESS_JOB_STATUS_OPTIONS,
+} from '../../features/service-marketplace/jobTracking'
+import {
+  BUSINESS_QUOTE_ORDER_OPTIONS,
+  BUSINESS_QUOTE_STATUS_OPTIONS,
+} from '../../features/service-marketplace/quoteTracking'
 import '../../features/service-marketplace/ServiceMarketplace.css'
 
 export default function ServiceMarketplacePage({ type }) {
@@ -34,12 +44,12 @@ export function ServiceMarketplaceContent({ type, marketplace }) {
           aria-label="Job lead search and ordering"
         >
           <label className="service-marketplace-search">
-            <span>Search jobs</span>
+            <span>Search</span>
             <input
               type="search"
               value={marketplace.search}
               onChange={(event) => marketplace.setSearch(event.target.value)}
-              placeholder="Search by keyword or location"
+              placeholder="Search by keyword"
             />
           </label>
           <label>
@@ -57,14 +67,36 @@ export function ServiceMarketplaceContent({ type, marketplace }) {
               ))}
             </select>
           </label>
+          <label>
+            <span>Order</span>
+            <select
+              value={marketplace.leadOrder}
+              onChange={(event) => marketplace.setLeadOrder(event.target.value)}
+            >
+              {Object.entries(LEAD_ORDER_OPTIONS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       )}
 
       {type === 'quotes' && !marketplace.isLoading && !marketplace.error && (
         <div
           className="service-marketplace-toolbar service-quote-toolbar"
-          aria-label="Filter submitted quotes"
+          aria-label="Search, filter, and order submitted quotes"
         >
+          <label className="service-marketplace-search">
+            <span>Search</span>
+            <input
+              type="search"
+              value={marketplace.search}
+              onChange={(event) => marketplace.setSearch(event.target.value)}
+              placeholder="Search by keyword"
+            />
+          </label>
           <label>
             <span>Status</span>
             <select
@@ -74,6 +106,64 @@ export function ServiceMarketplaceContent({ type, marketplace }) {
               }
             >
               {BUSINESS_QUOTE_STATUS_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>Order</span>
+            <select
+              value={marketplace.quoteOrder}
+              onChange={(event) =>
+                marketplace.setQuoteOrder(event.target.value)
+              }
+            >
+              {BUSINESS_QUOTE_ORDER_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      )}
+
+      {type === 'jobs' && !marketplace.isLoading && !marketplace.error && (
+        <div
+          className="service-marketplace-toolbar service-quote-toolbar"
+          aria-label="Search, filter, and order jobs"
+        >
+          <label className="service-marketplace-search">
+            <span>Search</span>
+            <input
+              type="search"
+              value={marketplace.search}
+              onChange={(event) => marketplace.setSearch(event.target.value)}
+              placeholder="Search by keyword"
+            />
+          </label>
+          <label>
+            <span>Status</span>
+            <select
+              value={marketplace.jobStatus}
+              onChange={(event) => marketplace.setJobStatus(event.target.value)}
+            >
+              {BUSINESS_JOB_STATUS_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>Order</span>
+            <select
+              value={marketplace.jobOrder}
+              onChange={(event) => marketplace.setJobOrder(event.target.value)}
+            >
+              {BUSINESS_JOB_ORDER_OPTIONS.map(({ value, label }) => (
                 <option key={value} value={value}>
                   {label}
                 </option>

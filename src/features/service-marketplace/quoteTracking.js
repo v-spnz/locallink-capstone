@@ -1,11 +1,16 @@
 export const BUSINESS_QUOTE_STATUS_OPTIONS = [
-  { value: 'all', label: 'All statuses' },
+  { value: 'all', label: 'All' },
   { value: 'awaiting_response', label: 'Awaiting response' },
   { value: 'accepted', label: 'Accepted' },
   { value: 'declined', label: 'Declined' },
   { value: 'expired', label: 'Expired' },
   { value: 'withdrawn', label: 'Withdrawn' },
   { value: 'request_withdrawn', label: 'Request withdrawn' },
+]
+
+export const BUSINESS_QUOTE_ORDER_OPTIONS = [
+  { value: 'newest', label: 'Newest first' },
+  { value: 'oldest', label: 'Oldest first' },
 ]
 
 const BUSINESS_QUOTE_STATUS_LABELS = Object.fromEntries(
@@ -16,9 +21,36 @@ export function formatBusinessQuoteStatus(status) {
   return BUSINESS_QUOTE_STATUS_LABELS[status] ?? status.replaceAll('_', ' ')
 }
 
-export function filterBusinessQuotes(quotes, status) {
-  if (status === 'all') return quotes
-  return quotes.filter((quote) => quote.quote_status === status)
+export function filterBusinessQuotes(
+  quotes,
+  { status = 'all', search = '', order = 'newest' } = {},
+) {
+  const normalizedSearch = search.trim().toLocaleLowerCase('en-NZ')
+  const matchingQuotes = quotes.filter((quote) => {
+    const searchableText = [
+      quote.title,
+      quote.description,
+      quote.suburb,
+      quote.city,
+      quote.category,
+      quote.message,
+    ]
+      .map((value) => String(value ?? '').toLocaleLowerCase('en-NZ'))
+      .join(' ')
+
+    return (
+      (status === 'all' || quote.quote_status === status) &&
+      (!normalizedSearch || searchableText.includes(normalizedSearch))
+    )
+  })
+
+  const direction = order === 'oldest' ? 1 : -1
+  return matchingQuotes.toSorted(
+    (first, second) =>
+      (new Date(first.created_at).getTime() -
+        new Date(second.created_at).getTime()) *
+      direction,
+  )
 }
 
 export function getBusinessQuoteResponseDeadline(quote) {

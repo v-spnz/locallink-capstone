@@ -59,7 +59,7 @@ test('AC2: supplied photos and supported videos are classified for viewing', () 
 test('AC4: lead RPC exposes review fields without consumer identity or contact fields', async () => {
   const migration = await readFile(migrationUrl, 'utf8')
   const returnShape = migration.match(
-    /create function public\.get_business_job_leads[\s\S]+?returns table \(([\s\S]+?)\)\nlanguage/,
+    /create function public\.get_business_job_leads[\s\S]+?returns table \(([\s\S]+?)\)\r?\nlanguage/,
   )?.[1]
 
   assert.ok(returnShape)

@@ -301,13 +301,9 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(150px, 210px);
+  grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(150px, 210px));
   gap: 12px;
   background: var(--white);
-}
-
-.service-quote-toolbar {
-  grid-template-columns: minmax(180px, 240px);
 }
 
 .service-marketplace-toolbar label {

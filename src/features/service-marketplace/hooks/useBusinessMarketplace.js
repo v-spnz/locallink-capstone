@@ -13,6 +13,7 @@ import {
 } from '../constants'
 import { formatRequestError } from '../formatters'
 import { filterAndSortLeads } from '../leadFilters'
+import { filterBusinessJobs } from '../jobTracking'
 import {
   notifyBusinessMarketplaceChanged,
   subscribeToBusinessMarketplaceChanges,
@@ -49,16 +50,32 @@ export default function useBusinessMarketplace(type) {
   const [reloadKey, setReloadKey] = useState(0)
   const [search, setSearch] = useState('')
   const [urgencyFilter, setUrgencyFilter] = useState('all')
+  const [leadOrder, setLeadOrder] = useState('urgent_first')
   const [quoteStatus, setQuoteStatus] = useState('all')
+  const [quoteOrder, setQuoteOrder] = useState('newest')
+  const [jobStatus, setJobStatus] = useState('all')
+  const [jobOrder, setJobOrder] = useState('active_first')
   const [withdrawConfirmationId, setWithdrawConfirmationId] = useState(null)
   const [withdrawingQuoteId, setWithdrawingQuoteId] = useState(null)
 
   const visibleItems =
     type === 'leads'
-      ? filterAndSortLeads(items, { search, urgency: urgencyFilter })
+      ? filterAndSortLeads(items, {
+          search,
+          urgency: urgencyFilter,
+          order: leadOrder,
+        })
       : type === 'quotes'
-        ? filterBusinessQuotes(items, quoteStatus)
-        : items
+        ? filterBusinessQuotes(items, {
+            status: quoteStatus,
+            search,
+            order: quoteOrder,
+          })
+        : filterBusinessJobs(items, {
+            status: jobStatus,
+            search,
+            order: jobOrder,
+          })
   const totalItems =
     type === 'leads' ? filterAndSortLeads(items).length : items.length
 
@@ -287,7 +304,11 @@ export default function useBusinessMarketplace(type) {
     totalItems,
     search,
     urgencyFilter,
+    leadOrder,
     quoteStatus,
+    quoteOrder,
+    jobStatus,
+    jobOrder,
     isLoading,
     error,
     success,
@@ -302,7 +323,11 @@ export default function useBusinessMarketplace(type) {
     setQuoteField,
     setSearch,
     setUrgencyFilter,
+    setLeadOrder,
     setQuoteStatus,
+    setQuoteOrder,
+    setJobStatus,
+    setJobOrder,
     setWithdrawConfirmationId,
     toggleLead,
     toggleLeadReview,

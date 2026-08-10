@@ -147,3 +147,24 @@ test('AC9: urgency filters use the value stored with each job', () => {
     ['Urgent job'],
   )
 })
+
+test('leads can be ordered with each urgency first', () => {
+  const jobs = [
+    lead({ title: 'Normal job', urgency: 'Normal' }),
+    lead({ title: 'Flexible job', urgency: 'Flexible' }),
+    lead({ title: 'Urgent job', urgency: 'Urgent' }),
+  ]
+
+  assert.equal(
+    filterAndSortLeads(jobs, { order: 'urgent_first', now: NOW })[0].title,
+    'Urgent job',
+  )
+  assert.equal(
+    filterAndSortLeads(jobs, { order: 'normal_first', now: NOW })[0].title,
+    'Normal job',
+  )
+  assert.equal(
+    filterAndSortLeads(jobs, { order: 'flexible_first', now: NOW })[0].title,
+    'Flexible job',
+  )
+})

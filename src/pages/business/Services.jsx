@@ -8,9 +8,9 @@ import useBusinessMarketplace from '../../features/service-marketplace/hooks/use
 import { ServiceMarketplaceContent } from './ServiceMarketplacePage'
 
 const SERVICE_TABS = [
-  { value: 'leads', label: 'Job Leads' },
+  { value: 'leads', label: 'Leads' },
   { value: 'quotes', label: 'Quotes' },
-  { value: 'jobs', label: 'Active Jobs' },
+  { value: 'jobs', label: 'Jobs' },
 ]
 
 export default function Services() {
@@ -27,27 +27,23 @@ export default function Services() {
   const summaries = [
     {
       type: 'leads',
-      label: 'New Leads',
+      label: 'Leads',
       value: leads.allItems.length,
       description: 'Leads waiting for your quote',
       icon: UsersRound,
     },
     {
       type: 'quotes',
-      label: 'Open Quotes',
-      value: quotes.allItems.filter(
-        ({ quote_status: status }) => status === 'awaiting_response',
-      ).length,
-      description: 'Quotes sent, awaiting response',
+      label: 'Quotes',
+      value: quotes.allItems.length,
+      description: 'Submitted quotes and outcomes',
       icon: FileText,
     },
     {
       type: 'jobs',
-      label: 'Active Jobs',
-      value: jobs.allItems.filter(
-        ({ job_status: status }) => status === 'in_progress',
-      ).length,
-      description: 'Jobs in progress',
+      label: 'Jobs',
+      value: jobs.allItems.length,
+      description: 'Active and completed jobs',
       icon: BriefcaseBusiness,
     },
   ]

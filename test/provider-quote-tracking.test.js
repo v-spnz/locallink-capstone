@@ -16,6 +16,7 @@ const migrationUrl = new URL(
 )
 
 test('AC1: every provider quote outcome has the required display status', () => {
+  assert.equal(BUSINESS_QUOTE_STATUS_OPTIONS[0].label, 'All')
   assert.deepEqual(
     BUSINESS_QUOTE_STATUS_OPTIONS.slice(1).map(({ label }) => label),
     [
@@ -47,11 +48,35 @@ test('AC2: quotes can be filtered by their current status', () => {
     { quote_id: '2', quote_status: 'expired' },
     { quote_id: '3', quote_status: 'accepted' },
   ]
-  assert.deepEqual(filterBusinessQuotes(quotes, 'accepted'), [
+  assert.deepEqual(filterBusinessQuotes(quotes, { status: 'accepted' }), [
     quotes[0],
     quotes[2],
   ])
-  assert.equal(filterBusinessQuotes(quotes, 'all'), quotes)
+  assert.deepEqual(filterBusinessQuotes(quotes, { status: 'all' }), quotes)
+})
+
+test('quotes can be searched and ordered', () => {
+  const quotes = [
+    {
+      quote_id: '1',
+      title: 'Kitchen tap',
+      created_at: '2026-08-10T00:00:00Z',
+    },
+    {
+      quote_id: '2',
+      title: 'Bathroom sink',
+      created_at: '2026-08-11T00:00:00Z',
+    },
+  ]
+
+  assert.deepEqual(
+    filterBusinessQuotes(quotes, { search: 'kitchen' }),
+    [quotes[0]],
+  )
+  assert.deepEqual(
+    filterBusinessQuotes(quotes, { order: 'oldest' }),
+    quotes,
+  )
 })
 
 test('AC3: awaiting quotes show the remaining consumer response period', () => {
