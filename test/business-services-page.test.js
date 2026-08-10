@@ -57,14 +57,12 @@ test('jobs can be filtered by active and completed status', () => {
   assert.deepEqual(filterBusinessJobs(jobs, { status: 'in_progress' }), [
     jobs[0],
   ])
-  assert.deepEqual(filterBusinessJobs(jobs, { status: 'completed' }), [
-    jobs[1],
-  ])
+  assert.deepEqual(filterBusinessJobs(jobs, { status: 'completed' }), [jobs[1]])
   assert.deepEqual(filterBusinessJobs(jobs, { status: 'all' }), jobs)
-  assert.deepEqual(
-    filterBusinessJobs(jobs, { order: 'completed_first' }),
-    [jobs[1], jobs[0]],
-  )
+  assert.deepEqual(filterBusinessJobs(jobs, { order: 'completed_first' }), [
+    jobs[1],
+    jobs[0],
+  ])
 })
 
 test('submitting a quote refreshes every mounted services tab', async () => {
@@ -77,7 +75,10 @@ test('submitting a quote refreshes every mounted services tab', async () => {
   )
 
   assert.match(marketplaceHook, /subscribeToBusinessMarketplaceChanges/)
-  assert.match(marketplaceHook, /notifyBusinessMarketplaceChanged\(business\.id\)/)
+  assert.match(
+    marketplaceHook,
+    /notifyBusinessMarketplaceChanged\(business\.id\)/,
+  )
   assert.match(
     marketplaceHook,
     /current\.filter\(\(item\) => item\.job_request_id !== selectedLead\)/,

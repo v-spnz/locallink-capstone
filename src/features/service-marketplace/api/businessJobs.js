@@ -37,9 +37,7 @@ export function fetchBusinessMarketplaceItems(type, businessId) {
         })
       }
       const items = result.data ?? []
-      return type === 'leads'
-        ? items.filter((item) => !item.has_quote)
-        : items
+      return type === 'leads' ? items.filter((item) => !item.has_quote) : items
     } finally {
       pendingMarketplaceRequests.delete(requestKey)
     }

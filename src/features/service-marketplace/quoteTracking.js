@@ -13,6 +13,14 @@ export const BUSINESS_QUOTE_ORDER_OPTIONS = [
   { value: 'oldest', label: 'Oldest first' },
 ]
 
+export const MAX_QUOTES_PER_REQUEST = 3
+
+const QUOTE_DRAFT_STORAGE_PREFIX = 'locallink.quoteDraft.'
+
+function getQuoteDraftStorageKey(requestedId, providerId) {
+  return `${QUOTE_DRAFT_STORAGE_PREFIX}${requestedId}.${providerId}`
+}
+
 const BUSINESS_QUOTE_STATUS_LABELS = Object.fromEntries(
   BUSINESS_QUOTE_STATUS_OPTIONS.map(({ value, label }) => [value, label]),
 )
@@ -125,4 +133,80 @@ export function formatResponseTimeRemaining(deadline, now = new Date()) {
 
   const minutes = Math.max(1, Math.ceil(remaining / minute))
   return `${minutes} minute${minutes === 1 ? '' : 's'} remaining`
+}
+
+export function saveBusinessQuoteDraft(requestedId, providerId, draftFields) {
+  if (!requestedId || !providerId) return null
+
+  const draft = {
+    requestedId,
+    providerId,
+    fields: draftFields,
+    saved_at: new Date().toISOString(),
+  }
+
+  try {
+    sessionStorage.setItem(
+      getQuoteDraftStorageKey(requestedId, providerId),
+      JSON.stringify(draft),
+    )
+  } catch {
+    return null
+  }
+
+  return draft
+}
+
+export function getBusinessQuoteDraft(requestedId, providerId) {
+  if (!requestedId || !providerId) return null
+
+  try {
+    const raw = sessionStorage.getItem(
+      getQuoteDraftStorageKey(requestedId, providerId),
+    )
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+export function clearBusinessQuoteDraft(requestedId, providerId) {
+  if (!requestedId || !providerId) return
+  try {
+    sessionStorage.removeItem(getQuoteDraftStorageKey(requestedId, providerId))
+  } catch {}
+}
+
+export function countSubmittedQuotesForRequest(quotes) {
+  return quotes.filter((quote) => quote.quote_status !== 'draft').length
+}
+
+export function hasReachedMaxQuotesForRequest(quotes) {
+  return countSubmittedQuotesForRequest(quotes) >= MAX_QUOTES_PER_REQUEST
+}
+
+export function isRequestOpenForQuoteSubmission(request, now = new Date()) {
+  if (!request) return false
+  if (request.status === 'closed' || request.status === 'expired') {
+    return false
+  }
+
+  if (request.submission_deadline) {
+    const deadline = new Date(request.submission_deadline)
+    if (
+      !Number.isNaN(deadline.getTime()) &&
+      deadline.getTime() <= now.getTime()
+    ) {
+      return false
+    }
+  }
+
+  return true
+}
+
+export function canSubmitQuoteDraft(request, existingQuotes, now = new Date()) {
+  return (
+    isRequestOpenForQuoteSubmission(request, now) &&
+    !hasReachedMaxQuotes(existingQuotes)
+  )
 }
