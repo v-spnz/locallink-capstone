@@ -38,6 +38,9 @@ export default function useCustomerJobs() {
   const [isSaving, setIsSaving] = useState(false)
   const [modalError, setModalError] = useState('')
 
+  // US0053: which job's detail panel is open, if any.
+  const [selectedJobId, setSelectedJobId] = useState(null)
+
   const jobStatus = getOverallJobStatus(postedJobs)
   const modalInitialJob = editingJob || repostSeed
 
@@ -100,6 +103,14 @@ export default function useCustomerJobs() {
     setEditingJob(null)
     setRepostSeed(null)
     setModalError('')
+  }
+
+  function openJobDetail(jobId) {
+    setSelectedJobId(jobId)
+  }
+
+  function closeJobDetail() {
+    setSelectedJobId(null)
   }
 
   async function handleSubmitJob(draft) {
@@ -169,10 +180,13 @@ export default function useCustomerJobs() {
     modalInitialStep,
     isSaving,
     modalError,
+    selectedJobId,
     openPostModal,
     openEditModal,
     openRepostModal,
     closeModal,
+    openJobDetail,
+    closeJobDetail,
     handleSubmitJob,
     handleQuoteResponse,
   }

@@ -450,3 +450,76 @@
   color: var(--text-muted);
   text-transform: uppercase;
 }
+
+/* US0053: job detail panel */
+.sm-back-link {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+.sm-back-link:hover {
+  color: var(--blue);
+}
+
+.sm-detail-card {
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.sm-detail-title {
+  margin: 6px 0 8px;
+  font-size: 18px;
+}
+
+.sm-detail-description {
+  margin-bottom: 18px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.sm-field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.sm-field-label {
+  margin-bottom: 3px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.sm-field-value {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sm-detail-actions {
+  margin-top: 16px;
+}
+
+.sm-detail-actions-right {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 560px) {
+  .sm-field-grid {
+    grid-template-columns: 1fr;
+  }
+}
