@@ -5,6 +5,8 @@ export default function ComboBox({
   placeholder = 'Select an option...',
   value,
   onChange,
+  maxHeight = 'auto',
+  overflowY = 'visible'
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const query = value || ''
@@ -55,6 +57,8 @@ export default function ComboBox({
             border: '1px solid #ccc',
             borderRadius: '4px',
             zIndex: 1000,
+            maxHeight: maxHeight,
+            overflowY: overflowY,
           }}
         >
           {filteredOptions.map((option) => (

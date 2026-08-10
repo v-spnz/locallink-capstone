@@ -32,7 +32,6 @@ function Modal({
   return createPortal(
     <div
       className="fixed inset-0 z-[1000] flex h-[100dvh] items-center justify-center overflow-hidden overscroll-none bg-black/50 p-4"
-      onClick={onClose}
     >
       <div
         className={`${widthClassName} ${maxWidthClassName} max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl bg-white shadow-xl`}
