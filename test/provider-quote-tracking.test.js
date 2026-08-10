@@ -69,14 +69,10 @@ test('quotes can be searched and ordered', () => {
     },
   ]
 
-  assert.deepEqual(
-    filterBusinessQuotes(quotes, { search: 'kitchen' }),
-    [quotes[0]],
-  )
-  assert.deepEqual(
-    filterBusinessQuotes(quotes, { order: 'oldest' }),
-    quotes,
-  )
+  assert.deepEqual(filterBusinessQuotes(quotes, { search: 'kitchen' }), [
+    quotes[0],
+  ])
+  assert.deepEqual(filterBusinessQuotes(quotes, { order: 'oldest' }), quotes)
 })
 
 test('AC3: awaiting quotes show the remaining consumer response period', () => {

@@ -99,7 +99,8 @@ export function filterAndSortLeads(
   })
 
   return matchingLeads.toSorted((first, second) => {
-    const urgencyOrder = LEAD_URGENCY_ORDER[order] ?? LEAD_URGENCY_ORDER.urgent_first
+    const urgencyOrder =
+      LEAD_URGENCY_ORDER[order] ?? LEAD_URGENCY_ORDER.urgent_first
     const urgencyDifference =
       urgencyOrder.indexOf(normalize(first.urgency)) -
       urgencyOrder.indexOf(normalize(second.urgency))

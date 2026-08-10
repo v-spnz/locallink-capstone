@@ -45,16 +45,16 @@ export function validateJobWizardStep(step, draft, suburbOptions) {
     else if (draft.jobDate < new Date(new Date().toDateString()))
       errors.jobDate = 'Job date cannot be in the past.'
 
-   if (draft.minBudget !== null && !MIN_BUDGET.includes(draft.minBudget))
-  errors.minBudget = 'Please select a valid minimum budget from the list.'
-else if (draft.maxBudget !== null && !MAX_BUDGET.includes(draft.maxBudget))
-  errors.maxBudget = 'Please select a valid maximum budget from the list.'
-else if (
-  draft.minBudget !== null &&
-  draft.maxBudget !== null &&
-  draft.minBudget > draft.maxBudget
-)
-  errors.minBudget = 'Minimum budget cannot be higher than maximum budget.'
+    if (draft.minBudget !== null && !MIN_BUDGET.includes(draft.minBudget))
+      errors.minBudget = 'Please select a valid minimum budget from the list.'
+    else if (draft.maxBudget !== null && !MAX_BUDGET.includes(draft.maxBudget))
+      errors.maxBudget = 'Please select a valid maximum budget from the list.'
+    else if (
+      draft.minBudget !== null &&
+      draft.maxBudget !== null &&
+      draft.minBudget > draft.maxBudget
+    )
+      errors.minBudget = 'Minimum budget cannot be higher than maximum budget.'
 
     if (!draft.urgency) errors.urgency = 'Please select an urgency level.'
     else if (!URGENCY_OPTIONS.includes(draft.urgency))

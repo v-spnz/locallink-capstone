@@ -1,8 +1,4 @@
-import {
-  BriefcaseBusiness,
-  FileText,
-  UsersRound,
-} from 'lucide-react'
+import { BriefcaseBusiness, FileText, UsersRound } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import useBusinessMarketplace from '../../features/service-marketplace/hooks/useBusinessMarketplace'
 import { ServiceMarketplaceContent } from './ServiceMarketplacePage'

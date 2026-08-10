@@ -17,7 +17,13 @@ import Button from '../../../components/ui/Button'
 import ComboBox from '../../../components/ui/ComboBox'
 import suburbsData from '../../../data/suburbs'
 import jobtypes from '../../../data/jobtypes'
-import { CITIES, POSTED_DISTANCES, URGENCY_OPTIONS, MIN_BUDGET, MAX_BUDGET } from '../constants'
+import {
+  CITIES,
+  POSTED_DISTANCES,
+  URGENCY_OPTIONS,
+  MIN_BUDGET,
+  MAX_BUDGET,
+} from '../constants'
 import { validateJobWizardStep } from '../validation'
 import { parseBudgetRange } from '../formatters'
 
@@ -414,16 +420,14 @@ function StepJobDetails({
         </p>
       )}
 
-       <div className="mt-4">
+      <div className="mt-4">
         <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
           Job Date *
         </label>
         <input
           type="date"
           className="w-35 rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
-          value={
-            draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : ''
-          }
+          value={draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : ''}
           onChange={(e) =>
             update({
               jobDate: e.target.value ? new Date(e.target.value) : null,
@@ -431,9 +435,7 @@ function StepJobDetails({
           }
         />
         {errors.jobDate && (
-          <p className="mt-1 text-xs text-[var(--danger)]">
-            {errors.jobDate}
-          </p>
+          <p className="mt-1 text-xs text-[var(--danger)]">{errors.jobDate}</p>
         )}
       </div>
 
@@ -445,29 +447,37 @@ function StepJobDetails({
           </span>
         </label>
         <div className="flex items-center gap-2">
-  <ComboBox
-    maxHeight="200px"
-    overflowY="auto"
-    options={MIN_BUDGET}
-    placeholder="Min"
-    value={draft.minBudget}
-    onChange={(value) => update({ minBudget: value === '' ? null : Number(value) })}
-  />
-  <span className="shrink-0 text-sm text-[var(--text-muted)]">–</span>
-  <ComboBox
-    maxHeight="200px"
-    overflowY="auto"
-    options={MAX_BUDGET}
-    placeholder="Max"
-    value={draft.maxBudget}
-    onChange={(value) => update({ maxBudget: value === '' ? null : Number(value) })}
-  />
-</div>
+          <ComboBox
+            maxHeight="200px"
+            overflowY="auto"
+            options={MIN_BUDGET}
+            placeholder="Min"
+            value={draft.minBudget}
+            onChange={(value) =>
+              update({ minBudget: value === '' ? null : Number(value) })
+            }
+          />
+          <span className="shrink-0 text-sm text-[var(--text-muted)]">–</span>
+          <ComboBox
+            maxHeight="200px"
+            overflowY="auto"
+            options={MAX_BUDGET}
+            placeholder="Max"
+            value={draft.maxBudget}
+            onChange={(value) =>
+              update({ maxBudget: value === '' ? null : Number(value) })
+            }
+          />
+        </div>
         {errors.minBudget && (
-          <p className="mt-1 text-xs text-[var(--danger)]">{errors.minBudget}</p>
+          <p className="mt-1 text-xs text-[var(--danger)]">
+            {errors.minBudget}
+          </p>
         )}
         {errors.maxBudget && (
-          <p className="mt-1 text-xs text-[var(--danger)]">{errors.maxBudget}</p>
+          <p className="mt-1 text-xs text-[var(--danger)]">
+            {errors.maxBudget}
+          </p>
         )}
       </div>
 
@@ -598,7 +608,10 @@ function StepReview({ draft, error }) {
         label="Job Date"
         value={draft.jobDate ? draft.jobDate.toLocaleDateString() : '—'}
       />
-      <ReviewRow label="Budget" value={`${draft.minBudget !== null ? `$${draft.minBudget}` : '—'} – ${draft.maxBudget !== null ? `$${draft.maxBudget}` : '—'}`} />
+      <ReviewRow
+        label="Budget"
+        value={`${draft.minBudget !== null ? `$${draft.minBudget}` : '—'} – ${draft.maxBudget !== null ? `$${draft.maxBudget}` : '—'}`}
+      />
       <ReviewRow label="Urgency" value={draft.urgency} />
       <ReviewRow label="City" value={draft.city} />
       <ReviewRow label="Suburb" value={draft.suburb} />

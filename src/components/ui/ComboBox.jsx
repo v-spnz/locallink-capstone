@@ -6,25 +6,14 @@ export default function ComboBox({
   value,
   onChange,
   maxHeight = 'auto',
-  overflowY = 'visible'
+  overflowY = 'visible',
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const toText = (v) => (v === null || v === undefined ? '' : String(v))
 
-  // What's shown in the input. Normally mirrors `value`, but while the user
-  // is actively typing we let their exact keystrokes stand even if `value`
-  // gets transformed into something else upstream (e.g. an invalid budget
-  // turning into NaN) - that way what they typed stays on screen so any
-  // validation message about it has something to point at.
   const [inputText, setInputText] = useState(toText(value))
 
-  // Resync from the outside only when not mid-typing (e.g. initial load,
-  // form reset, or value changed by something other than this input) AND
-  // the value is something actually worth displaying. If `value` is NaN
-  // (e.g. a parent did Number("abc") on invalid typed text), don't let it
-  // stomp what the user typed - leave the original text on screen so any
-  // validation message about it still makes sense.
   useEffect(() => {
     const isInvalidNumber = typeof value === 'number' && Number.isNaN(value)
     if (!isFocused && !isInvalidNumber) {
