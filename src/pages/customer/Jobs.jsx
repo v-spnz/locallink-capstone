@@ -9,36 +9,25 @@ export default function Jobs() {
 
   return (
     <>
-      <div className="page-header">
-        <h2>Services</h2>
-        <p>
-          Post a job and receive quotes from local tradespeople in your area.
-        </p>
-      </div>
-
-      <div className="placeholder-section">
-        <div className="placeholder-section-title is-complete">
-          Ready to get quotes?
+      <div className="page-header sm-page-head">
+        <div>
+          <h2>Service Marketplace</h2>
+          <p>Find trusted local help for your next job</p>
         </div>
-        <p
-          style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}
-        >
-          Post a job in a few quick steps and local tradespeople will send you
-          quotes.
-        </p>
         <button
           type="button"
           className="btn-primary"
           onClick={marketplace.openPostModal}
         >
-          Post a Job
+          + Post a Service Job
         </button>
-        {marketplace.successMessage && (
-          <p style={{ color: 'seagreen', marginTop: 10 }}>
-            {marketplace.successMessage}
-          </p>
-        )}
       </div>
+
+      {marketplace.successMessage && (
+        <p style={{ color: 'seagreen', marginBottom: 14 }}>
+          {marketplace.successMessage}
+        </p>
+      )}
 
       {marketplace.isModalOpen && (
         <PostJobModal
@@ -51,36 +40,26 @@ export default function Jobs() {
         />
       )}
 
-      <div className="placeholder-section">
-        <div
-          className={`job-status-header ${
-            marketplace.jobStatus === 'Not Posted' ? 'is-empty' : ''
-          }`}
-        >
-          Job Status: {marketplace.jobStatus}
+      {marketplace.requestError && (
+        <div className="auth-error" role="alert">
+          {marketplace.requestError}
         </div>
-        {marketplace.requestError && (
-          <div className="auth-error" role="alert">
-            {marketplace.requestError}
-          </div>
-        )}
-        {marketplace.isLoading && <LoadingSpinner label="Loading your jobs…" />}
-        {!marketplace.isLoading && marketplace.postedJobs.length > 0 && (
-          <div className="customer-job-list">
-            {marketplace.postedJobs.map((job) => (
-              <CustomerJobCard
-                key={job.id}
-                job={job}
-                quotes={marketplace.quotesByJob[job.id] ?? []}
-                respondingQuoteId={marketplace.respondingQuoteId}
-                onEdit={marketplace.openEditModal}
-                onRepost={marketplace.openRepostModal}
-                onQuoteResponse={marketplace.handleQuoteResponse}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      )}
+
+      {marketplace.isLoading && <LoadingSpinner label="Loading your jobs…" />}
+
+      {!marketplace.isLoading && marketplace.postedJobs.length > 0 && (
+        <div className="customer-job-list sm-job-grid">
+          {marketplace.postedJobs.map((job) => (
+            <CustomerJobCard
+              key={job.id}
+              job={job}
+              quoteCount={(marketplace.quotesByJob[job.id] ?? []).length}
+              onSelect={() => {}}
+            />
+          ))}
+        </div>
+      )}
     </>
   )
 }

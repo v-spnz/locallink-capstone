@@ -341,3 +341,112 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* US0052: My Jobs list layout, status badges, quote count */
+.sm-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.sm-job-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.sm-job-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.sm-job-card:hover {
+  border-color: var(--blue);
+}
+
+.sm-job-card-body {
+  flex: 1;
+}
+
+.sm-badge-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.sm-badge {
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: capitalize;
+  white-space: nowrap;
+  background: #f1f3f5;
+  color: var(--text-muted);
+}
+
+.sm-badge--quotes-received {
+  background: #fdf3e0;
+  color: #a3690c;
+}
+
+.sm-badge--in-progress,
+.sm-badge--completed {
+  background: #e6fcf5;
+  color: #087f5b;
+}
+
+.sm-badge--awaiting {
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.sm-badge--category {
+  background: #f1f3f5;
+  color: var(--text-muted);
+}
+
+.sm-job-title {
+  display: block;
+  margin: 6px 0;
+  font-size: 15px;
+}
+
+.sm-quote-count-box {
+  text-align: center;
+  background: #fdf3e0;
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  min-width: 60px;
+  height: fit-content;
+}
+
+.sm-quote-count-box--zero {
+  background: var(--bg);
+}
+
+.sm-quote-count-num {
+  font-size: 18px;
+  font-weight: 700;
+  color: #a3690c;
+}
+
+.sm-quote-count-box--zero .sm-quote-count-num {
+  color: var(--text-muted);
+}
+
+.sm-quote-count-label {
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}

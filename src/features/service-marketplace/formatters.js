@@ -24,3 +24,18 @@ export function formatRequestError(fallbackMessage, error) {
   const errorCode = error.code ? `${error.code}: ` : ''
   return `${fallbackMessage} (${errorCode}${error.message})`
 }
+
+export function getJobBadge(job, quoteCount) {
+  if (job.status === 'in_progress') {
+    return { label: 'In Progress', tone: 'in-progress' }
+  }
+  if (job.status === 'completed') {
+    return { label: 'Completed', tone: 'completed' }
+  }
+  if (job.status === 'closed' || job.status === 'cancelled') {
+    return { label: formatStatus(job.status), tone: 'completed' }
+  }
+  return quoteCount > 0
+    ? { label: 'Quotes Received', tone: 'quotes-received' }
+    : { label: 'Awaiting Quotes', tone: 'awaiting' }
+}
