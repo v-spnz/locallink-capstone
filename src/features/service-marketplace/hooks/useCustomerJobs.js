@@ -38,8 +38,10 @@ export default function useCustomerJobs() {
   const [isSaving, setIsSaving] = useState(false)
   const [modalError, setModalError] = useState('')
 
-  // US0053: which job's detail panel is open, if any.
   const [selectedJobId, setSelectedJobId] = useState(null)
+  // US0054: My Jobs vs Quotes tab, and which job's quotes are showing.
+  const [activeTab, setActiveTab] = useState('jobs')
+  const [selectedQuoteJobId, setSelectedQuoteJobId] = useState(null)
 
   const jobStatus = getOverallJobStatus(postedJobs)
   const modalInitialJob = editingJob || repostSeed
@@ -89,8 +91,6 @@ export default function useCustomerJobs() {
   }
 
   function openRepostModal(job) {
-    // Repost reuses the same job details as a fresh posting, opened
-    // straight on the review step for a quick re-confirm.
     setEditingJob(null)
     setRepostSeed(job)
     setModalInitialStep(5)
@@ -111,6 +111,26 @@ export default function useCustomerJobs() {
 
   function closeJobDetail() {
     setSelectedJobId(null)
+  }
+
+  // Switching tabs closes any open detail panel. Jumping into Quotes
+  // defaults to the first job if none is picked yet.
+  function switchTab(tab) {
+    setActiveTab(tab)
+    setSelectedJobId(null)
+    if (tab === 'quotes' && !selectedQuoteJobId && postedJobs.length > 0) {
+      setSelectedQuoteJobId(postedJobs[0].id)
+    }
+  }
+
+  function viewQuotesForJob(jobId) {
+    setSelectedQuoteJobId(jobId)
+    setSelectedJobId(null)
+    setActiveTab('quotes')
+  }
+
+  function selectQuoteJob(jobId) {
+    setSelectedQuoteJobId(jobId)
   }
 
   async function handleSubmitJob(draft) {
@@ -181,12 +201,17 @@ export default function useCustomerJobs() {
     isSaving,
     modalError,
     selectedJobId,
+    activeTab,
+    selectedQuoteJobId,
     openPostModal,
     openEditModal,
     openRepostModal,
     closeModal,
     openJobDetail,
     closeJobDetail,
+    switchTab,
+    viewQuotesForJob,
+    selectQuoteJob,
     handleSubmitJob,
     handleQuoteResponse,
   }

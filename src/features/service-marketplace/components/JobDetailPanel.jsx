@@ -1,21 +1,15 @@
 import Button from '../../../components/ui/Button'
 import { getJobBadge } from '../formatters'
-import QuoteList from './QuoteList'
 
-// Full-panel job detail view (US0053). Replaces the My Jobs grid when
-// a job is selected -- "closing" means going back to the grid (full
-// panel swap), not an overlay popup.
 export default function JobDetailPanel({
   job,
-  quotes,
-  respondingQuoteId,
+  quoteCount,
   onBack,
   onEdit,
   onRepost,
-  onQuoteResponse,
-  onViewQuotes = () => {},
+  onViewQuotes,
 }) {
-  const badge = getJobBadge(job, quotes.length)
+  const badge = getJobBadge(job, quoteCount)
   const canEdit = ['open', 'closed', 'cancelled'].includes(job.status)
 
   return (
@@ -40,9 +34,9 @@ export default function JobDetailPanel({
             <p className="sm-detail-description">{job.description}</p>
           </div>
           <div
-            className={`sm-quote-count-box${quotes.length === 0 ? ' sm-quote-count-box--zero' : ''}`}
+            className={`sm-quote-count-box${quoteCount === 0 ? ' sm-quote-count-box--zero' : ''}`}
           >
-            <div className="sm-quote-count-num">{quotes.length}</div>
+            <div className="sm-quote-count-num">{quoteCount}</div>
             <div className="sm-quote-count-label">Quotes</div>
           </div>
         </div>
@@ -84,20 +78,13 @@ export default function JobDetailPanel({
         </div>
       </div>
 
-      <QuoteList
-        jobStatus={job.status}
-        quotes={quotes}
-        respondingQuoteId={respondingQuoteId}
-        onRespond={onQuoteResponse}
-      />
-
       <div className="sm-detail-actions">
         <Button
           variant="secondary"
           className="sm-view-quotes-btn"
           onClick={() => onViewQuotes(job.id)}
         >
-          View {quotes.length} quote{quotes.length === 1 ? '' : 's'}
+          View {quoteCount} quote{quoteCount === 1 ? '' : 's'}
         </Button>
 
         {canEdit && (
