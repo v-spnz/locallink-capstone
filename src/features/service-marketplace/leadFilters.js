@@ -41,7 +41,7 @@ export function getLeadDisplayDetails(lead) {
     title: lead.title,
     category: lead.category,
     suburb: lead.suburb,
-    requestedTiming: lead.requested_timing,
+    urgency: lead.urgency,
     quoteCount: Number(lead.quote_count),
     maxQuotes: Number(lead.max_quotes),
     quoteDeadline: lead.quote_deadline,

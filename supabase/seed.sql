@@ -237,7 +237,7 @@ insert into public.job_requests (
   city,
   suburb,
   radius_km,
-  requested_timing,
+  urgency,
   quote_deadline,
   max_quotes,
   status,

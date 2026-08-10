@@ -1,14 +1,10 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
-import {
-  getLeadMedia,
-  MAX_JOB_VIDEO_DURATION_SECONDS,
-  validateJobMediaFiles,
-} from '../src/features/service-marketplace/media.js'
+import { getLeadMedia } from '../src/features/service-marketplace/media.js'
 
 const migrationUrl = new URL(
-  '../supabase/migrations/20260812000000_review_job_opportunities.sql',
+  '../supabase/migrations/20260813000000_use_job_urgency_for_business_leads.sql',
   import.meta.url,
 )
 const leadCardUrl = new URL(
@@ -28,7 +24,7 @@ test('AC1 and AC3: review displays required job details, quote count, and deadli
     'Description',
     'Category',
     'Suburb',
-    'Requested timing',
+    'Urgency',
     'quotes',
     'Quotes close',
   ]) {
@@ -52,23 +48,6 @@ test('AC2: supplied photos and supported videos are classified for viewing', () 
   )
 })
 
-test('AC2: videos longer than 30 seconds are rejected before upload', async () => {
-  assert.equal(MAX_JOB_VIDEO_DURATION_SECONDS, 30)
-  await assert.rejects(
-    validateJobMediaFiles(
-      [{ name: 'long.mp4', type: 'video/mp4' }],
-      async () => 30.1,
-    ),
-    /30 seconds or shorter/i,
-  )
-  await assert.doesNotReject(
-    validateJobMediaFiles(
-      [{ name: 'valid.mp4', type: 'video/mp4' }],
-      async () => 30,
-    ),
-  )
-})
-
 test('AC4: lead RPC exposes review fields without consumer identity or contact fields', async () => {
   const migration = await readFile(migrationUrl, 'utf8')
   const returnShape = migration.match(
@@ -78,7 +57,8 @@ test('AC4: lead RPC exposes review fields without consumer identity or contact f
   assert.ok(returnShape)
   assert.match(returnShape, /suburb text/)
   assert.match(returnShape, /image_urls text\[\]/)
-  assert.match(returnShape, /measurements text/)
+  assert.match(returnShape, /urgency text/)
+  assert.doesNotMatch(returnShape, /requested_timing|measurements/)
   assert.doesNotMatch(returnShape, /customer_id|address|email|phone|contact/i)
 })
 

@@ -3,11 +3,11 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { validateJobWizardStep } from '../src/features/service-marketplace/validation.js'
 
-test('job wizard accepts a valid numeric service distance', () => {
+test('job wizard accepts a valid decimal service distance', () => {
   const draft = {
     city: 'Auckland',
     suburb: 'Ponsonby',
-    postedDistance: 5,
+    postedDistance: 4.5,
   }
 
   assert.deepEqual(validateJobWizardStep(4, draft, ['Ponsonby']), {})

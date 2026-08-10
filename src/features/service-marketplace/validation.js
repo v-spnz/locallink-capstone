@@ -46,9 +46,6 @@ export function validateJobWizardStep(step, draft, suburbOptions) {
     if (draft.budget && draft.budget.trim().length > 40)
       errors.budget = 'Budget cannot exceed 40 characters.'
 
-    if (draft.measurements && draft.measurements.trim().length > 500)
-      errors.measurements = 'Measurements cannot exceed 500 characters.'
-
     if (!draft.urgency) errors.urgency = 'Please select an urgency level.'
     else if (!URGENCY_OPTIONS.includes(draft.urgency))
       errors.urgency = 'Please choose a valid urgency level.'
@@ -65,15 +62,8 @@ export function validateJobWizardStep(step, draft, suburbOptions) {
     )
       errors.suburb = 'Please choose a suburb that matches the selected city.'
 
-    const postedDistance = Number(draft.postedDistance)
     if (!draft.postedDistance)
       errors.postedDistance = 'Please select a posted distance.'
-    else if (
-      !Number.isInteger(postedDistance) ||
-      postedDistance < 1 ||
-      postedDistance > 10
-    )
-      errors.postedDistance = 'Please choose a valid distance from the list.'
   }
 
   return errors

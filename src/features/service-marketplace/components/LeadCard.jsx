@@ -59,7 +59,7 @@ export default function LeadCard({
         </span>
         <span>
           <Clock aria-hidden="true" />
-          {details.requestedTiming}
+          {details.urgency}
         </span>
         <span>
           <MessageSquareText aria-hidden="true" />
@@ -97,21 +97,14 @@ export default function LeadCard({
               <dd>{details.suburb}</dd>
             </div>
             <div>
-              <dt>Requested timing</dt>
-              <dd>{details.requestedTiming}</dd>
+              <dt>Urgency</dt>
+              <dd>{details.urgency}</dd>
             </div>
           </dl>
           <div className="service-opportunity-copy">
             <h5>Description</h5>
             <p>{item.description}</p>
           </div>
-          {item.measurements && (
-            <div className="service-opportunity-copy">
-              <h5>Measurements</h5>
-              <p>{item.measurements}</p>
-            </div>
-          )}
-
           <div className="service-opportunity-media">
             <h5>Photos and videos</h5>
             {media.length === 0 ? (
