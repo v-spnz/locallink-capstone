@@ -62,6 +62,18 @@ export async function submitBusinessQuote({ businessId, jobRequestId, quote }) {
   if (error) throw error
 }
 
+export async function declineBusinessOpportunity(businessId, jobRequestId) {
+  const { data, error } = await supabase.rpc(
+    'decline_business_job_opportunity',
+    {
+      p_business_id: businessId,
+      p_job_request_id: jobRequestId,
+    },
+  )
+  if (error || !data)
+    throw error ?? new Error('Opportunity could not be declined')
+}
+
 export async function completeBusinessJob(businessId, jobRequestId) {
   const { data, error } = await supabase.rpc('complete_business_job', {
     p_business_id: businessId,

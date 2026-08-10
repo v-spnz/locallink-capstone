@@ -46,6 +46,9 @@ export function validateJobWizardStep(step, draft, suburbOptions) {
     if (draft.budget && draft.budget.trim().length > 40)
       errors.budget = 'Budget cannot exceed 40 characters.'
 
+    if (draft.measurements && draft.measurements.trim().length > 500)
+      errors.measurements = 'Measurements cannot exceed 500 characters.'
+
     if (!draft.urgency) errors.urgency = 'Please select an urgency level.'
     else if (!URGENCY_OPTIONS.includes(draft.urgency))
       errors.urgency = 'Please choose a valid urgency level.'

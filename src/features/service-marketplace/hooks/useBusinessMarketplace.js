@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import useBusiness from '../../../business/useBusiness'
 import {
   completeBusinessJob,
+  declineBusinessOpportunity,
   fetchBusinessMarketplaceItems,
   submitBusinessQuote,
 } from '../api/businessJobs'
@@ -156,6 +157,31 @@ export default function useBusinessMarketplace(type) {
     }
   }
 
+  async function handleDeclineOpportunity(jobRequestId) {
+    setError('')
+    setSuccess('')
+    setIsSaving(true)
+    try {
+      await declineBusinessOpportunity(business.id, jobRequestId)
+      setItems((current) =>
+        current.filter((item) => item.job_request_id !== jobRequestId),
+      )
+      if (selectedLead === jobRequestId) setSelectedLead(null)
+      setSuccess(
+        'Opportunity declined. It remains available to other eligible providers.',
+      )
+    } catch (declineError) {
+      setError(
+        formatRequestError(
+          'Unable to decline this opportunity. It may no longer be available.',
+          declineError,
+        ),
+      )
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return {
     content,
     items: visibleItems,
@@ -177,6 +203,7 @@ export default function useBusinessMarketplace(type) {
     handleQuoteReview,
     handleQuoteSubmit,
     handleQuoteEdit: () => setQuoteStep('form'),
+    handleDeclineOpportunity,
     handleCompleteJob,
   }
 }

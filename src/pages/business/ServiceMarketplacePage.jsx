@@ -79,7 +79,10 @@ export default function ServiceMarketplacePage({ type }) {
                   quoteErrors={marketplace.quoteErrors}
                   quoteStep={marketplace.quoteStep}
                   isSaving={marketplace.isSaving}
-                  onToggle={() => marketplace.toggleLead(item.job_request_id)}
+                  onQuote={() => marketplace.toggleLead(item.job_request_id)}
+                  onDecline={() =>
+                    marketplace.handleDeclineOpportunity(item.job_request_id)
+                  }
                   onQuoteChange={marketplace.setQuoteField}
                   onReview={marketplace.handleQuoteReview}
                   onEdit={marketplace.handleQuoteEdit}
