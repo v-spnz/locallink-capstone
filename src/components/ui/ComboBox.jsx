@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function ComboBox({
   options = [],
@@ -9,17 +9,39 @@ export default function ComboBox({
   overflowY = 'visible'
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const query = value || ''
+  const [isFocused, setIsFocused] = useState(false)
+  const toText = (v) => (v === null || v === undefined ? '' : String(v))
+
+  // What's shown in the input. Normally mirrors `value`, but while the user
+  // is actively typing we let their exact keystrokes stand even if `value`
+  // gets transformed into something else upstream (e.g. an invalid budget
+  // turning into NaN) - that way what they typed stays on screen so any
+  // validation message about it has something to point at.
+  const [inputText, setInputText] = useState(toText(value))
+
+  // Resync from the outside only when not mid-typing (e.g. initial load,
+  // form reset, or value changed by something other than this input) AND
+  // the value is something actually worth displaying. If `value` is NaN
+  // (e.g. a parent did Number("abc") on invalid typed text), don't let it
+  // stomp what the user typed - leave the original text on screen so any
+  // validation message about it still makes sense.
+  useEffect(() => {
+    const isInvalidNumber = typeof value === 'number' && Number.isNaN(value)
+    if (!isFocused && !isInvalidNumber) {
+      setInputText(toText(value))
+    }
+  }, [value, isFocused])
 
   const filteredOptions =
-    query === ''
+    inputText === ''
       ? options
       : options.filter((option) =>
-          option.toLowerCase().includes(query.toLowerCase()),
+          String(option).toLowerCase().includes(inputText.toLowerCase()),
         )
 
   const handleSelect = (option) => {
     setIsOpen(false)
+    setInputText(toText(option))
     onChange?.(option)
   }
 
@@ -29,14 +51,21 @@ export default function ComboBox({
     >
       <input
         type="text"
-        value={query}
+        value={inputText}
         onChange={(e) => {
-          const newValue = e.target.value
-          onChange?.(newValue)
+          const newText = e.target.value
+          setInputText(newText)
+          setIsOpen(true)
+          onChange?.(newText)
+        }}
+        onFocus={() => {
+          setIsFocused(true)
           setIsOpen(true)
         }}
-        onFocus={() => setIsOpen(true)}
-        onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+        onBlur={() => {
+          setIsFocused(false)
+          setTimeout(() => setIsOpen(false), 200)
+        }}
         placeholder={placeholder}
         style={{
           width: '100%',
