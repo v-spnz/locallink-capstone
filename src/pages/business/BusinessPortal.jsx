@@ -9,7 +9,7 @@ import CreateDeal from './CreateDeal'
 import CreateLoyalty from './CreateLoyalty'
 import Settings from './Settings'
 import BusinessOnboarding from './BusinessOnboarding'
-import ServiceMarketplacePage from './ServiceMarketplacePage'
+import Services from './Services'
 
 function BusinessPage({ children, capability, roles }) {
   return (
@@ -60,28 +60,24 @@ export default function BusinessPortal() {
           }
         />
         <Route
-          path="job-leads"
+          path="services"
           element={
             <BusinessPage capability="service_marketplace">
-              <ServiceMarketplacePage key="leads" type="leads" />
+              <Services />
             </BusinessPage>
           }
+        />
+        <Route
+          path="job-leads"
+          element={<Navigate to="/business/services" replace />}
         />
         <Route
           path="quotes"
-          element={
-            <BusinessPage capability="service_marketplace">
-              <ServiceMarketplacePage key="quotes" type="quotes" />
-            </BusinessPage>
-          }
+          element={<Navigate to="/business/services?tab=quotes" replace />}
         />
         <Route
           path="active-jobs"
-          element={
-            <BusinessPage capability="service_marketplace">
-              <ServiceMarketplacePage key="jobs" type="jobs" />
-            </BusinessPage>
-          }
+          element={<Navigate to="/business/services?tab=jobs" replace />}
         />
         <Route
           path="settings"

@@ -19,7 +19,7 @@ function lead(overrides = {}) {
     category: 'Plumbing',
     suburb: 'Mount Eden',
     city: 'Auckland',
-    urgency: 'Within a week',
+    urgency: 'Normal',
     job_status: 'open',
     quote_count: 1,
     max_quotes: 3,
@@ -53,7 +53,7 @@ test('lead details include every field required by the job card', () => {
     title: 'Repair leaking kitchen tap',
     category: 'Plumbing',
     suburb: 'Mount Eden',
-    urgency: 'Within a week',
+    urgency: 'Normal',
     quoteCount: 1,
     maxQuotes: 3,
     quoteDeadline: '2026-08-12T00:00:00Z',
@@ -129,20 +129,21 @@ test('AC6: an appropriate message is returned when no matched jobs exist', () =>
   )
   assert.equal(
     getMarketplaceEmptyMessage('leads', 3),
-    'No matched job leads match your search.',
+    'No matched job leads match your search or filters.',
   )
 })
 
-test('AC9: urgency orders jobs by the soonest quote deadline', () => {
+test('AC9: urgency filters use the value stored with each job', () => {
   const jobs = [
-    lead({ title: 'Later', quote_deadline: '2026-08-15T00:00:00Z' }),
-    lead({ title: 'Sooner', quote_deadline: '2026-08-10T00:00:00Z' }),
+    lead({ title: 'Urgent job', urgency: 'Urgent' }),
+    lead({ title: 'Normal job', urgency: 'Normal' }),
+    lead({ title: 'Flexible job', urgency: 'Flexible' }),
   ]
 
   assert.deepEqual(
-    filterAndSortLeads(jobs, { sort: 'urgency', now: NOW }).map(
+    filterAndSortLeads(jobs, { urgency: 'Urgent', now: NOW }).map(
       (item) => item.title,
     ),
-    ['Sooner', 'Later'],
+    ['Urgent job'],
   )
 })

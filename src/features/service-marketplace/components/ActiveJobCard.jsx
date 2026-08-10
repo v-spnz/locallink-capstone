@@ -7,7 +7,6 @@ export default function ActiveJobCard({ item, isSaving, onComplete }) {
     <article className="service-marketplace-card">
       <div className="service-marketplace-card-head">
         <div>
-          <span>{item.category}</span>
           <h3>{item.title}</h3>
         </div>
         <span className={`service-status ${item.job_status}`}>

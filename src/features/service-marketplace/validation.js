@@ -100,6 +100,14 @@ export function validateQuote(values, today = new Date()) {
       errors[field] = `${label[0].toUpperCase()}${label.slice(1)} is too long.`
   }
 
+  if (
+    values.arrivalStart &&
+    values.arrivalEnd &&
+    values.arrivalStart >= values.arrivalEnd
+  ) {
+    errors.arrivalWindow = 'Arrival end time must be after the start time.'
+  }
+
   if ((values.message?.trim() ?? '').length > 1000)
     errors.message = 'Message cannot exceed 1000 characters.'
 

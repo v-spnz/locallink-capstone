@@ -1,6 +1,8 @@
-export const LEAD_SORT_OPTIONS = {
-  newest: 'Newest first',
-  urgency: 'Most urgent',
+export const LEAD_URGENCY_FILTERS = {
+  all: 'All',
+  Urgent: 'Urgent',
+  Normal: 'Normal',
+  Flexible: 'Flexible',
 }
 
 const URGENT_DEADLINE_WINDOW_MS = 48 * 60 * 60 * 1000
@@ -57,9 +59,10 @@ export function isUrgentLead(lead, now = new Date()) {
 
 export function filterAndSortLeads(
   leads,
-  { search = '', sort = 'newest', now = new Date() } = {},
+  { search = '', urgency = 'all', now = new Date() } = {},
 ) {
   const normalizedSearch = normalize(search)
+  const normalizedUrgency = normalize(urgency)
   const matchingLeads = leads.filter((lead) => {
     const searchableText = [lead.title, lead.description, lead.suburb]
       .map(normalize)
@@ -67,16 +70,15 @@ export function filterAndSortLeads(
 
     return (
       isAvailableLead(lead, now) &&
-      (!normalizedSearch || searchableText.includes(normalizedSearch))
+      (!normalizedSearch || searchableText.includes(normalizedSearch)) &&
+      (urgency === 'all' || normalize(lead.urgency) === normalizedUrgency)
     )
   })
 
   return matchingLeads.toSorted((first, second) => {
-    const field = sort === 'urgency' ? 'quote_deadline' : 'created_at'
-    const direction = sort === 'urgency' ? 1 : -1
     return (
-      (new Date(first[field]).getTime() - new Date(second[field]).getTime()) *
-      direction
+      new Date(second.created_at).getTime() -
+      new Date(first.created_at).getTime()
     )
   })
 }
