@@ -209,6 +209,6 @@ export function isRequestOpenForQuoteSubmission(request, now = new Date()) {
 export function canSubmitQuoteDraft(request, existingQuotes, now = new Date()) {
   return (
     isRequestOpenForQuoteSubmission(request, now) &&
-    !hasReachedMaxQuotesforRequest(existingQuotes)
+    !hasReachedMaxQuotesForRequest(existingQuotes)
   )
 }
