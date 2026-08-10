@@ -3,6 +3,8 @@ export const LEAD_SORT_OPTIONS = {
   urgency: 'Most urgent',
 }
 
+const URGENT_DEADLINE_WINDOW_MS = 48 * 60 * 60 * 1000
+
 function normalize(value) {
   return String(value ?? '')
     .trim()
@@ -39,27 +41,33 @@ export function getLeadDisplayDetails(lead) {
     title: lead.title,
     category: lead.category,
     suburb: lead.suburb,
-    requestedTiming: lead.requested_timing,
+    urgency: lead.urgency,
     quoteCount: Number(lead.quote_count),
     maxQuotes: Number(lead.max_quotes),
     quoteDeadline: lead.quote_deadline,
   }
 }
 
+export function isUrgentLead(lead, now = new Date()) {
+  const deadline = new Date(lead.quote_deadline)
+  const timeRemaining = deadline.getTime() - now.getTime()
+
+  return timeRemaining > 0 && timeRemaining <= URGENT_DEADLINE_WINDOW_MS
+}
+
 export function filterAndSortLeads(
   leads,
-  { search = '', category = '', sort = 'newest', now = new Date() } = {},
+  { search = '', sort = 'newest', now = new Date() } = {},
 ) {
   const normalizedSearch = normalize(search)
   const matchingLeads = leads.filter((lead) => {
-    const searchableText = [lead.title, lead.category, lead.suburb]
+    const searchableText = [lead.title, lead.description, lead.suburb]
       .map(normalize)
       .join(' ')
 
     return (
       isAvailableLead(lead, now) &&
-      (!normalizedSearch || searchableText.includes(normalizedSearch)) &&
-      (!category || lead.category === category)
+      (!normalizedSearch || searchableText.includes(normalizedSearch))
     )
   })
 

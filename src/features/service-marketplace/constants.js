@@ -31,6 +31,12 @@ export const POSTED_DISTANCES = Array.from(
   (_, index) => `${index + 1}km`,
 )
 
+export const QUOTE_PRICE_TYPES = [
+  { value: 'fixed', label: 'Fixed total' },
+  { value: 'hourly', label: 'Hourly rate' },
+  { value: 'call_out', label: 'Call-out fee' },
+]
+
 export const URGENCY_OPTIONS = ['Flexible', 'Normal', 'Urgent']
 
 export const MARKETPLACE_PAGE_CONTENT = {
@@ -52,4 +58,12 @@ export const MARKETPLACE_PAGE_CONTENT = {
     description: 'Keep track of accepted work and its current status.',
     empty: 'Accepted service jobs will appear here.',
   },
+}
+
+export function getMarketplaceEmptyMessage(type, totalItems) {
+  if (type === 'leads' && totalItems > 0) {
+    return 'No matched job leads match your search.'
+  }
+
+  return MARKETPLACE_PAGE_CONTENT[type].empty
 }

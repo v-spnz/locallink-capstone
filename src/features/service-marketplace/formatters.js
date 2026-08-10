@@ -8,6 +8,8 @@ export function formatMoney(amountCents) {
 }
 
 export function formatStatus(status = '') {
+  if (status === 'awaiting_response' || status === 'submitted')
+    return 'Awaiting response'
   return status.replaceAll('_', ' ')
 }
 

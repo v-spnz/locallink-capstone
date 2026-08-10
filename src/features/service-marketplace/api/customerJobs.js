@@ -1,5 +1,4 @@
 import { supabase } from '../../../lib/supabase'
-
 const JOB_FIELDS =
   'id, title, description, category, job_type, city, suburb, radius_km, ' +
   'status, image_urls, job_date, budget, urgency, created_at'

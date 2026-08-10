@@ -61,7 +61,7 @@ function buildInitialDraft(initialJob) {
     description: initialJob.description || '',
     jobDate: initialJob.job_date ? new Date(initialJob.job_date) : null,
     budget: initialJob.budget || '',
-    urgency: initialJob.requested_timing || '',
+    urgency: initialJob.urgency || '',
     city: initialJob.city || '',
     suburb: initialJob.suburb || '',
     postedDistance: initialJob.postedDistance || '',
