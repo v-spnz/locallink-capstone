@@ -22,7 +22,7 @@ function lead(overrides = {}) {
     requested_timing: 'Within a week',
     job_status: 'open',
     quote_count: 1,
-    max_quotes: 5,
+    max_quotes: 3,
     quote_deadline: '2026-08-12T00:00:00Z',
     created_at: '2026-08-08T00:00:00Z',
     ...overrides,
@@ -55,7 +55,7 @@ test('lead details include every field required by the job card', () => {
     suburb: 'Mount Eden',
     requestedTiming: 'Within a week',
     quoteCount: 1,
-    maxQuotes: 5,
+    maxQuotes: 3,
     quoteDeadline: '2026-08-12T00:00:00Z',
   })
 })
@@ -68,7 +68,7 @@ test('AC5: expired, withdrawn, accepted, cancelled, and fully quoted jobs are un
     lead({ job_status: 'accepted' }),
     lead({ job_status: 'in_progress' }),
     lead({ job_status: 'cancelled' }),
-    lead({ quote_count: 5, max_quotes: 5 }),
+    lead({ quote_count: 3, max_quotes: 3 }),
   ]) {
     assert.equal(isAvailableLead(unavailableLead, NOW), false)
   }

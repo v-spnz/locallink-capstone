@@ -75,12 +75,14 @@ export default function ServiceMarketplacePage({ type }) {
                   key={item.job_request_id}
                   item={item}
                   isSelected={marketplace.selectedLead === item.job_request_id}
-                  quoteAmount={marketplace.quoteAmount}
-                  quoteMessage={marketplace.quoteMessage}
+                  quote={marketplace.quote}
+                  quoteErrors={marketplace.quoteErrors}
+                  quoteStep={marketplace.quoteStep}
                   isSaving={marketplace.isSaving}
                   onToggle={() => marketplace.toggleLead(item.job_request_id)}
-                  onAmountChange={marketplace.setQuoteAmount}
-                  onMessageChange={marketplace.setQuoteMessage}
+                  onQuoteChange={marketplace.setQuoteField}
+                  onReview={marketplace.handleQuoteReview}
+                  onEdit={marketplace.handleQuoteEdit}
                   onSubmit={marketplace.handleQuoteSubmit}
                 />
               )

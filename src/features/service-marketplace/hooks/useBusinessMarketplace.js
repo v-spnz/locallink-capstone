@@ -10,6 +10,17 @@ import { formatRequestError } from '../formatters'
 import { filterAndSortLeads } from '../leadFilters'
 import { validateQuote } from '../validation'
 
+export const EMPTY_QUOTE = {
+  priceType: '',
+  amount: '',
+  availability: '',
+  arrivalWindow: '',
+  includedWork: '',
+  conditions: '',
+  expectedDuration: '',
+  message: '',
+}
+
 export default function useBusinessMarketplace(type) {
   const content = MARKETPLACE_PAGE_CONTENT[type]
   const { business } = useBusiness()
@@ -18,17 +29,16 @@ export default function useBusinessMarketplace(type) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [selectedLead, setSelectedLead] = useState(null)
-  const [quoteAmount, setQuoteAmount] = useState('')
-  const [quoteMessage, setQuoteMessage] = useState('')
+  const [quote, setQuote] = useState(EMPTY_QUOTE)
+  const [quoteErrors, setQuoteErrors] = useState({})
+  const [quoteStep, setQuoteStep] = useState('form')
   const [isSaving, setIsSaving] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState('newest')
 
   const visibleItems =
-    type === 'leads'
-      ? filterAndSortLeads(items, { search, sort })
-      : items
+    type === 'leads' ? filterAndSortLeads(items, { search, sort }) : items
   const totalItems =
     type === 'leads' ? filterAndSortLeads(items).length : items.length
 
@@ -76,33 +86,56 @@ export default function useBusinessMarketplace(type) {
     )
     setError('')
     setSuccess('')
+    setQuote(EMPTY_QUOTE)
+    setQuoteErrors({})
+    setQuoteStep('form')
   }
 
-  async function handleQuoteSubmit(event) {
+  function setQuoteField(field, value) {
+    setQuote((current) => ({ ...current, [field]: value }))
+    setQuoteErrors((current) => ({ ...current, [field]: '' }))
+  }
+
+  function handleQuoteReview(event) {
     event.preventDefault()
     setError('')
     setSuccess('')
-    const validationError = validateQuote(quoteAmount, quoteMessage)
-    if (validationError) {
-      setError(validationError)
+    const validationErrors = validateQuote(quote)
+    setQuoteErrors(validationErrors)
+    if (Object.keys(validationErrors).length > 0) return
+    setQuoteStep('review')
+  }
+
+  async function handleQuoteSubmit() {
+    const validationErrors = validateQuote(quote)
+    setQuoteErrors(validationErrors)
+    if (Object.keys(validationErrors).length > 0) {
+      setQuoteStep('form')
       return
     }
 
+    setError('')
+    setSuccess('')
     setIsSaving(true)
     try {
       await submitBusinessQuote({
         businessId: business.id,
         jobRequestId: selectedLead,
-        amount: quoteAmount,
-        message: quoteMessage,
+        quote,
       })
-      setSuccess('Quote submitted. The customer can now review it.')
+      setSuccess('Quote submitted with Awaiting response status.')
       setSelectedLead(null)
-      setQuoteAmount('')
-      setQuoteMessage('')
+      setQuote(EMPTY_QUOTE)
+      setQuoteErrors({})
+      setQuoteStep('form')
       setReloadKey((current) => current + 1)
-    } catch {
-      setError('Unable to submit this quote. The lead may no longer be open.')
+    } catch (submitError) {
+      setError(
+        formatRequestError(
+          'Unable to submit this quote. The three-working-day window may have closed, the request may already have three quotes, or it may no longer be open.',
+          submitError,
+        ),
+      )
     } finally {
       setIsSaving(false)
     }
@@ -133,15 +166,17 @@ export default function useBusinessMarketplace(type) {
     error,
     success,
     selectedLead,
-    quoteAmount,
-    quoteMessage,
+    quote,
+    quoteErrors,
+    quoteStep,
     isSaving,
-    setQuoteAmount,
-    setQuoteMessage,
+    setQuoteField,
     setSearch,
     setSort,
     toggleLead,
+    handleQuoteReview,
     handleQuoteSubmit,
+    handleQuoteEdit: () => setQuoteStep('form'),
     handleCompleteJob,
   }
 }

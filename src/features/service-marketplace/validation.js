@@ -1,4 +1,9 @@
-import { CITIES, POSTED_DISTANCES, TRADE_CATEGORIES } from './constants'
+import {
+  CITIES,
+  POSTED_DISTANCES,
+  QUOTE_PRICE_TYPES,
+  TRADE_CATEGORIES,
+} from './constants.js'
 
 export function validateJobRequest(values, suburbOptions) {
   const errors = {}
@@ -42,11 +47,39 @@ export function validateJobRequest(values, suburbOptions) {
   return errors
 }
 
-export function validateQuote(amountValue, messageValue) {
-  const amount = Number(amountValue)
-  if (!Number.isFinite(amount) || amount < 1)
-    return 'Enter a valid quote amount.'
-  if (messageValue.trim().length < 10)
-    return 'Add a quote message of at least 10 characters.'
-  return ''
+export function validateQuote(values, today = new Date()) {
+  const errors = {}
+  const amount = Number(values.amount)
+  const todayValue = new Date(today)
+  const localToday = [
+    todayValue.getFullYear(),
+    String(todayValue.getMonth() + 1).padStart(2, '0'),
+    String(todayValue.getDate()).padStart(2, '0'),
+  ].join('-')
+
+  if (!QUOTE_PRICE_TYPES.some(({ value }) => value === values.priceType))
+    errors.priceType = 'Please select a price type.'
+  if (!Number.isFinite(amount) || amount < 1 || amount > 1000000)
+    errors.amount = 'Enter a valid quote price between $1 and $1,000,000.'
+  if (!values.availability)
+    errors.availability = 'Please select an available date.'
+  else if (values.availability < localToday)
+    errors.availability = 'Availability cannot be in the past.'
+
+  for (const [field, label, maxLength] of [
+    ['arrivalWindow', 'arrival window', 120],
+    ['includedWork', 'included work', 1000],
+    ['conditions', 'conditions', 1000],
+    ['expectedDuration', 'expected duration', 120],
+  ]) {
+    const value = values[field]?.trim() ?? ''
+    if (!value) errors[field] = `Please enter the ${label}.`
+    else if (value.length > maxLength)
+      errors[field] = `${label[0].toUpperCase()}${label.slice(1)} is too long.`
+  }
+
+  if ((values.message?.trim() ?? '').length > 1000)
+    errors.message = 'Message cannot exceed 1000 characters.'
+
+  return errors
 }

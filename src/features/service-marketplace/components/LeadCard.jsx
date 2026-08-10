@@ -2,16 +2,19 @@ import { CalendarClock, Clock, MapPin, MessageSquareText } from 'lucide-react'
 import Button from '../../../components/ui/Button'
 import { getLeadDisplayDetails, isUrgentLead } from '../leadFilters'
 import QuoteForm from './QuoteForm'
+import QuoteReview from './QuoteReview'
 
 export default function LeadCard({
   item,
   isSelected,
-  quoteAmount,
-  quoteMessage,
+  quote,
+  quoteErrors,
+  quoteStep,
   isSaving,
   onToggle,
-  onAmountChange,
-  onMessageChange,
+  onQuoteChange,
+  onReview,
+  onEdit,
   onSubmit,
 }) {
   const details = getLeadDisplayDetails(item)
@@ -59,16 +62,23 @@ export default function LeadCard({
       >
         {item.has_quote ? 'Update quote' : 'Send quote'}
       </Button>
-      {isSelected && (
-        <QuoteForm
-          amount={quoteAmount}
-          message={quoteMessage}
-          isSaving={isSaving}
-          onAmountChange={onAmountChange}
-          onMessageChange={onMessageChange}
-          onSubmit={onSubmit}
-        />
-      )}
+      {isSelected &&
+        (quoteStep === 'review' ? (
+          <QuoteReview
+            quote={quote}
+            isSaving={isSaving}
+            onEdit={onEdit}
+            onSubmit={onSubmit}
+          />
+        ) : (
+          <QuoteForm
+            quote={quote}
+            errors={quoteErrors}
+            isSaving={isSaving}
+            onChange={onQuoteChange}
+            onReview={onReview}
+          />
+        ))}
     </article>
   )
 }

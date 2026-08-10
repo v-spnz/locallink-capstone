@@ -84,8 +84,10 @@
 
 .customer-job-status.open,
 .customer-quote-status.submitted,
+.customer-quote-status.awaiting_response,
 .service-status.open,
-.service-status.submitted {
+.service-status.submitted,
+.service-status.awaiting_response {
   background: #eef2ff;
   color: #3153d8;
 }
@@ -150,6 +152,27 @@
   color: var(--text-muted);
   font-size: 12px;
   line-height: 1.5;
+}
+
+.customer-quote-details {
+  margin-top: 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.customer-quote-details div {
+  display: grid;
+  grid-template-columns: minmax(90px, 120px) 1fr;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.customer-quote-details dt {
+  color: var(--text-muted);
+}
+
+.customer-quote-details dd {
+  margin: 0;
 }
 
 .service-marketplace-message {
@@ -297,6 +320,12 @@
   gap: 6px;
 }
 
+.service-quote-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .service-quote-form label > span {
   color: var(--text-muted);
   font-size: 10px;
@@ -304,6 +333,7 @@
 }
 
 .service-quote-form input,
+.service-quote-form select,
 .service-quote-form textarea {
   width: 100%;
   padding: 10px 12px;
@@ -318,9 +348,64 @@
 }
 
 .service-quote-form input:focus,
+.service-quote-form select:focus,
 .service-quote-form textarea:focus {
   border-color: var(--blue);
   box-shadow: 0 0 0 3px var(--blue-light);
+}
+
+.service-quote-form .form-error {
+  color: var(--danger);
+  font-size: 11px;
+  text-transform: none;
+}
+
+.service-quote-review {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.service-quote-review > p {
+  margin: 5px 0 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.service-quote-review dl {
+  display: grid;
+  gap: 0;
+}
+
+.service-quote-review dl > div {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: minmax(110px, 145px) 1fr;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.service-quote-review dt {
+  color: var(--text-muted);
+}
+
+.service-quote-review dd {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.service-quote-review-actions {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.service-quote-review-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 }
 
 .service-quote-form .btn-primary,
@@ -347,5 +432,12 @@
 
   .service-marketplace-toolbar {
     grid-template-columns: 1fr;
+  }
+
+  .service-quote-form-grid,
+  .service-quote-review dl > div,
+  .customer-quote-details div {
+    grid-template-columns: 1fr;
+    gap: 3px;
   }
 }

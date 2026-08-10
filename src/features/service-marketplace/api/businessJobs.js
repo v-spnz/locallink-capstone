@@ -46,17 +46,18 @@ export function fetchBusinessMarketplaceItems(type, businessId) {
   return request
 }
 
-export async function submitBusinessQuote({
-  businessId,
-  jobRequestId,
-  amount,
-  message,
-}) {
+export async function submitBusinessQuote({ businessId, jobRequestId, quote }) {
   const { error } = await supabase.rpc('submit_business_quote', {
     p_business_id: businessId,
     p_job_request_id: jobRequestId,
-    p_amount_cents: Math.round(Number(amount) * 100),
-    p_message: message.trim(),
+    p_price_type: quote.priceType,
+    p_amount_cents: Math.round(Number(quote.amount) * 100),
+    p_availability_date: quote.availability,
+    p_arrival_window: quote.arrivalWindow.trim(),
+    p_included_work: quote.includedWork.trim(),
+    p_conditions: quote.conditions.trim(),
+    p_expected_duration: quote.expectedDuration.trim(),
+    p_message: quote.message.trim(),
   })
   if (error) throw error
 }
