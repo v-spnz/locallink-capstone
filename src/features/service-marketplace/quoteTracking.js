@@ -174,7 +174,9 @@ export function clearBusinessQuoteDraft(requestedId, providerId) {
   if (!requestedId || !providerId) return
   try {
     sessionStorage.removeItem(getQuoteDraftStorageKey(requestedId, providerId))
-  } catch {}
+  } catch {
+    //Ignore storage errors
+  }
 }
 
 export function countSubmittedQuotesForRequest(quotes) {
@@ -207,6 +209,6 @@ export function isRequestOpenForQuoteSubmission(request, now = new Date()) {
 export function canSubmitQuoteDraft(request, existingQuotes, now = new Date()) {
   return (
     isRequestOpenForQuoteSubmission(request, now) &&
-    !hasReachedMaxQuotes(existingQuotes)
+    !hasReachedMaxQuotesforRequest(existingQuotes)
   )
 }
