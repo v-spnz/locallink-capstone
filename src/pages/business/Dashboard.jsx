@@ -18,9 +18,9 @@ export default function Dashboard() {
       icon: Gift,
     },
     capabilities.service_marketplace_enabled && {
-      title: 'Service Marketplace',
+      title: 'Services',
       description: 'Review matched job leads, quotes and active work.',
-      to: '/business/job-leads',
+      to: '/business/services',
       icon: BriefcaseBusiness,
     },
   ].filter(Boolean)

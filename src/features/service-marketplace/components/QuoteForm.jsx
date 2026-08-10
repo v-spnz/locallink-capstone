@@ -1,6 +1,10 @@
 import { ArrowRight } from 'lucide-react'
 import Button from '../../../components/ui/Button'
-import { QUOTE_PRICE_TYPES } from '../constants'
+import {
+  QUOTE_ARRIVAL_TIMES,
+  QUOTE_DURATION_OPTIONS,
+  QUOTE_PRICE_TYPES,
+} from '../constants'
 
 function FieldError({ id, message }) {
   if (!message) return null
@@ -35,8 +39,11 @@ export default function QuoteForm({
     <form className="service-quote-form" onSubmit={onReview} noValidate>
       <div className="service-quote-form-grid">
         <label>
-          <span>Price type</span>
+          <span>
+            Price type <span className="service-required-mark">*</span>
+          </span>
           <select
+            required
             value={quote.priceType}
             onChange={(event) => onChange('priceType', event.target.value)}
             disabled={isSaving}
@@ -52,8 +59,11 @@ export default function QuoteForm({
           <FieldError id="quote-priceType-error" message={errors.priceType} />
         </label>
         <label>
-          <span>Price (NZD)</span>
+          <span>
+            Price (NZD) <span className="service-required-mark">*</span>
+          </span>
           <input
+            required
             type="number"
             min="1"
             max="1000000"
@@ -67,8 +77,11 @@ export default function QuoteForm({
           <FieldError id="quote-amount-error" message={errors.amount} />
         </label>
         <label>
-          <span>Available date</span>
+          <span>
+            Available date <span className="service-required-mark">*</span>
+          </span>
           <input
+            required
             type="date"
             min={minAvailability}
             value={quote.availability}
@@ -81,33 +94,73 @@ export default function QuoteForm({
             message={errors.availability}
           />
         </label>
-        <label>
-          <span>Arrival window</span>
-          <input
-            value={quote.arrivalWindow}
-            onChange={(event) => onChange('arrivalWindow', event.target.value)}
-            placeholder="e.g. 8:00–10:00 AM"
-            maxLength="120"
-            disabled={isSaving}
-            {...fieldErrorProps('arrivalWindow', errors)}
-          />
+        <fieldset className="service-arrival-window">
+          <legend>
+            Arrival window <span className="service-required-mark">*</span>
+          </legend>
+          <div className="service-arrival-window-selects">
+            <label>
+              <span>From</span>
+              <select
+                required
+                value={quote.arrivalStart}
+                onChange={(event) =>
+                  onChange('arrivalStart', event.target.value)
+                }
+                disabled={isSaving}
+                {...fieldErrorProps('arrivalWindow', errors)}
+              >
+                <option value="">Start time</option>
+                {QUOTE_ARRIVAL_TIMES.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>To</span>
+              <select
+                required
+                value={quote.arrivalEnd}
+                onChange={(event) => onChange('arrivalEnd', event.target.value)}
+                disabled={isSaving}
+                {...fieldErrorProps('arrivalWindow', errors)}
+              >
+                <option value="">End time</option>
+                {QUOTE_ARRIVAL_TIMES.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           <FieldError
             id="quote-arrivalWindow-error"
             message={errors.arrivalWindow}
           />
-        </label>
+        </fieldset>
         <label>
-          <span>Expected duration</span>
-          <input
+          <span>
+            Expected duration <span className="service-required-mark">*</span>
+          </span>
+          <select
+            required
             value={quote.expectedDuration}
             onChange={(event) =>
               onChange('expectedDuration', event.target.value)
             }
-            placeholder="e.g. Around 2 hours"
-            maxLength="120"
             disabled={isSaving}
             {...fieldErrorProps('expectedDuration', errors)}
-          />
+          >
+            <option value="">Select a duration</option>
+            {QUOTE_DURATION_OPTIONS.map((duration) => (
+              <option key={duration} value={duration}>
+                {duration}
+              </option>
+            ))}
+          </select>
           <FieldError
             id="quote-expectedDuration-error"
             message={errors.expectedDuration}
@@ -115,8 +168,11 @@ export default function QuoteForm({
         </label>
       </div>
       <label>
-        <span>Included work</span>
+        <span>
+          Included work <span className="service-required-mark">*</span>
+        </span>
         <textarea
+          required
           value={quote.includedWork}
           onChange={(event) => onChange('includedWork', event.target.value)}
           placeholder="Describe the labour, materials and other work included"
@@ -131,8 +187,11 @@ export default function QuoteForm({
         />
       </label>
       <label>
-        <span>Conditions</span>
+        <span>
+          Conditions <span className="service-required-mark">*</span>
+        </span>
         <textarea
+          required
           value={quote.conditions}
           onChange={(event) => onChange('conditions', event.target.value)}
           placeholder="List assumptions or conditions, or enter ‘None’"

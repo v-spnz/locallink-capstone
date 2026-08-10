@@ -5,16 +5,28 @@ import {
   declineBusinessOpportunity,
   fetchBusinessMarketplaceItems,
   submitBusinessQuote,
+  withdrawBusinessQuote,
 } from '../api/businessJobs'
-import { MARKETPLACE_PAGE_CONTENT } from '../constants'
+import {
+  formatQuoteArrivalWindow,
+  MARKETPLACE_PAGE_CONTENT,
+} from '../constants'
 import { formatRequestError } from '../formatters'
 import { filterAndSortLeads } from '../leadFilters'
+import { filterBusinessJobs } from '../jobTracking'
+import {
+  notifyBusinessMarketplaceChanged,
+  subscribeToBusinessMarketplaceChanges,
+} from '../marketplaceEvents'
+import { filterBusinessQuotes } from '../quoteTracking'
 import { validateQuote } from '../validation'
 
 export const EMPTY_QUOTE = {
   priceType: '',
   amount: '',
   availability: '',
+  arrivalStart: '',
+  arrivalEnd: '',
   arrivalWindow: '',
   includedWork: '',
   conditions: '',
@@ -30,16 +42,40 @@ export default function useBusinessMarketplace(type) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [selectedLead, setSelectedLead] = useState(null)
+  const [reviewedLead, setReviewedLead] = useState(null)
   const [quote, setQuote] = useState(EMPTY_QUOTE)
   const [quoteErrors, setQuoteErrors] = useState({})
   const [quoteStep, setQuoteStep] = useState('form')
   const [isSaving, setIsSaving] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const [search, setSearch] = useState('')
-  const [sort, setSort] = useState('newest')
+  const [urgencyFilter, setUrgencyFilter] = useState('all')
+  const [leadOrder, setLeadOrder] = useState('urgent_first')
+  const [quoteStatus, setQuoteStatus] = useState('all')
+  const [quoteOrder, setQuoteOrder] = useState('newest')
+  const [jobStatus, setJobStatus] = useState('all')
+  const [jobOrder, setJobOrder] = useState('active_first')
+  const [withdrawConfirmationId, setWithdrawConfirmationId] = useState(null)
+  const [withdrawingQuoteId, setWithdrawingQuoteId] = useState(null)
 
   const visibleItems =
-    type === 'leads' ? filterAndSortLeads(items, { search, sort }) : items
+    type === 'leads'
+      ? filterAndSortLeads(items, {
+          search,
+          urgency: urgencyFilter,
+          order: leadOrder,
+        })
+      : type === 'quotes'
+        ? filterBusinessQuotes(items, {
+            status: quoteStatus,
+            search,
+            order: quoteOrder,
+          })
+        : filterBusinessJobs(items, {
+            status: jobStatus,
+            search,
+            order: jobOrder,
+          })
   const totalItems =
     type === 'leads' ? filterAndSortLeads(items).length : items.length
 
@@ -51,11 +87,13 @@ export default function useBusinessMarketplace(type) {
       setError('')
       setSuccess('')
       setSelectedLead(null)
+      setReviewedLead(null)
       try {
         const nextItems = await fetchBusinessMarketplaceItems(type, business.id)
         if (active) {
           setItems(nextItems)
           setError('')
+          setWithdrawConfirmationId(null)
         }
       } catch (loadError) {
         if (active) {
@@ -81,6 +119,16 @@ export default function useBusinessMarketplace(type) {
     }
   }, [business.id, content.title, reloadKey, type])
 
+  useEffect(
+    () =>
+      subscribeToBusinessMarketplaceChanges((changedBusinessId) => {
+        if (changedBusinessId === business.id) {
+          setReloadKey((current) => current + 1)
+        }
+      }),
+    [business.id],
+  )
+
   function toggleLead(jobRequestId) {
     setSelectedLead((current) =>
       current === jobRequestId ? null : jobRequestId,
@@ -92,9 +140,44 @@ export default function useBusinessMarketplace(type) {
     setQuoteStep('form')
   }
 
+  function toggleLeadReview(jobRequestId) {
+    setReviewedLead((current) =>
+      current === jobRequestId ? null : jobRequestId,
+    )
+    setSelectedLead(null)
+    setQuote(EMPTY_QUOTE)
+    setQuoteErrors({})
+    setQuoteStep('form')
+    setError('')
+    setSuccess('')
+  }
+
+  function showLeadReview(jobRequestId) {
+    setReviewedLead(jobRequestId)
+    setSelectedLead(null)
+    setQuote(EMPTY_QUOTE)
+    setQuoteErrors({})
+    setQuoteStep('form')
+  }
+
   function setQuoteField(field, value) {
-    setQuote((current) => ({ ...current, [field]: value }))
-    setQuoteErrors((current) => ({ ...current, [field]: '' }))
+    setQuote((current) => {
+      const next = { ...current, [field]: value }
+      if (field === 'arrivalStart' || field === 'arrivalEnd') {
+        next.arrivalWindow = formatQuoteArrivalWindow(
+          next.arrivalStart,
+          next.arrivalEnd,
+        )
+      }
+      return next
+    })
+    setQuoteErrors((current) => ({
+      ...current,
+      [field]: '',
+      ...(['arrivalStart', 'arrivalEnd'].includes(field)
+        ? { arrivalWindow: '' }
+        : {}),
+    }))
   }
 
   function handleQuoteReview(event) {
@@ -126,10 +209,14 @@ export default function useBusinessMarketplace(type) {
       })
       setSuccess('Quote submitted with Awaiting response status.')
       setSelectedLead(null)
+      setReviewedLead(null)
       setQuote(EMPTY_QUOTE)
       setQuoteErrors({})
       setQuoteStep('form')
-      setReloadKey((current) => current + 1)
+      setItems((current) =>
+        current.filter((item) => item.job_request_id !== selectedLead),
+      )
+      notifyBusinessMarketplaceChanged(business.id)
     } catch (submitError) {
       setError(
         formatRequestError(
@@ -167,6 +254,7 @@ export default function useBusinessMarketplace(type) {
         current.filter((item) => item.job_request_id !== jobRequestId),
       )
       if (selectedLead === jobRequestId) setSelectedLead(null)
+      if (reviewedLead === jobRequestId) setReviewedLead(null)
       setSuccess(
         'Opportunity declined. It remains available to other eligible providers.',
       )
@@ -182,28 +270,73 @@ export default function useBusinessMarketplace(type) {
     }
   }
 
+  async function handleWithdrawQuote(quoteId) {
+    setError('')
+    setSuccess('')
+    setWithdrawingQuoteId(quoteId)
+    try {
+      await withdrawBusinessQuote(business.id, quoteId)
+      setItems((current) =>
+        current.map((item) =>
+          item.quote_id === quoteId
+            ? { ...item, quote_status: 'withdrawn' }
+            : item,
+        ),
+      )
+      setWithdrawConfirmationId(null)
+      setSuccess('Quote withdrawn. It can no longer be accepted or edited.')
+    } catch (withdrawError) {
+      setError(
+        formatRequestError(
+          'Unable to withdraw this quote. It may no longer be awaiting a response.',
+          withdrawError,
+        ),
+      )
+    } finally {
+      setWithdrawingQuoteId(null)
+    }
+  }
+
   return {
     content,
     items: visibleItems,
+    allItems: items,
     totalItems,
     search,
-    sort,
+    urgencyFilter,
+    leadOrder,
+    quoteStatus,
+    quoteOrder,
+    jobStatus,
+    jobOrder,
     isLoading,
     error,
     success,
     selectedLead,
+    reviewedLead,
     quote,
     quoteErrors,
     quoteStep,
     isSaving,
+    withdrawConfirmationId,
+    withdrawingQuoteId,
     setQuoteField,
     setSearch,
-    setSort,
+    setUrgencyFilter,
+    setLeadOrder,
+    setQuoteStatus,
+    setQuoteOrder,
+    setJobStatus,
+    setJobOrder,
+    setWithdrawConfirmationId,
     toggleLead,
+    toggleLeadReview,
+    showLeadReview,
     handleQuoteReview,
     handleQuoteSubmit,
     handleQuoteEdit: () => setQuoteStep('form'),
     handleDeclineOpportunity,
     handleCompleteJob,
+    handleWithdrawQuote,
   }
 }
