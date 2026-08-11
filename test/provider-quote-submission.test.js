@@ -60,6 +60,18 @@ test('AC3: invalid price and past availability are identified', () => {
   assert.match(errors.availability, /past/i)
 })
 
+test('arrival window requires an end time after its start time', () => {
+  const errors = validateQuote(
+    {
+      ...VALID_QUOTE,
+      arrivalStart: '14:00',
+      arrivalEnd: '09:00',
+    },
+    TODAY,
+  )
+  assert.match(errors.arrivalWindow, /after the start time/i)
+})
+
 test('AC4: quote entry leads to review and only review confirms submission', async () => {
   const [form, review] = await Promise.all([
     readFile(
@@ -79,9 +91,35 @@ test('AC4: quote entry leads to review and only review confirms submission', asy
   ])
 
   assert.match(form, /Review quote/)
+  assert.match(form, /QUOTE_ARRIVAL_TIMES/)
+  assert.match(form, /onChange\('arrivalStart'/)
+  assert.match(form, /onChange\('arrivalEnd'/)
+  assert.match(form, /QUOTE_DURATION_OPTIONS/)
+  assert.match(form, /service-required-mark/)
+  assert.match(form, /Price type[\s\S]+service-required-mark/)
+  assert.doesNotMatch(
+    form,
+    /Message to customer \(optional\)[\s\S]{0,80}service-required-mark/,
+  )
   assert.doesNotMatch(form, /Confirm and submit/)
   assert.match(review, /Review your quote/)
   assert.match(review, /Confirm and submit/)
+})
+
+test('quote submission opens in a modal instead of expanding inside job details', async () => {
+  const card = await readFile(
+    new URL(
+      '../src/features/service-marketplace/components/LeadCard.jsx',
+      import.meta.url,
+    ),
+    'utf8',
+  )
+  assert.match(card, /<Modal onClose=\{onQuote\}/)
+  assert.match(card, /className="service-quote-modal"/)
+  assert.match(card, /className="service-quote-workspace"/)
+  assert.match(card, /className="service-quote-job-context"/)
+  assert.match(card, /<LeadMediaGrid media=\{media\}/)
+  assert.match(card, /aria-label="Close quote form"/)
 })
 
 test('AC7: submitted quotes display Awaiting response', () => {

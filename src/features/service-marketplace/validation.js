@@ -3,6 +3,8 @@ import {
   QUOTE_PRICE_TYPES,
   TRADE_CATEGORIES,
   URGENCY_OPTIONS,
+  MIN_BUDGET,
+  MAX_BUDGET,
 } from './constants.js'
 import jobtypes from '../../data/jobtypes.js'
 
@@ -43,8 +45,16 @@ export function validateJobWizardStep(step, draft, suburbOptions) {
     else if (draft.jobDate < new Date(new Date().toDateString()))
       errors.jobDate = 'Job date cannot be in the past.'
 
-    if (draft.budget && draft.budget.trim().length > 40)
-      errors.budget = 'Budget cannot exceed 40 characters.'
+    if (draft.minBudget !== null && !MIN_BUDGET.includes(draft.minBudget))
+      errors.minBudget = 'Please select a valid minimum budget from the list.'
+    else if (draft.maxBudget !== null && !MAX_BUDGET.includes(draft.maxBudget))
+      errors.maxBudget = 'Please select a valid maximum budget from the list.'
+    else if (
+      draft.minBudget !== null &&
+      draft.maxBudget !== null &&
+      draft.minBudget > draft.maxBudget
+    )
+      errors.minBudget = 'Minimum budget cannot be higher than maximum budget.'
 
     if (!draft.urgency) errors.urgency = 'Please select an urgency level.'
     else if (!URGENCY_OPTIONS.includes(draft.urgency))
@@ -98,6 +108,14 @@ export function validateQuote(values, today = new Date()) {
     if (!value) errors[field] = `Please enter the ${label}.`
     else if (value.length > maxLength)
       errors[field] = `${label[0].toUpperCase()}${label.slice(1)} is too long.`
+  }
+
+  if (
+    values.arrivalStart &&
+    values.arrivalEnd &&
+    values.arrivalStart >= values.arrivalEnd
+  ) {
+    errors.arrivalWindow = 'Arrival end time must be after the start time.'
   }
 
   if ((values.message?.trim() ?? '').length > 1000)

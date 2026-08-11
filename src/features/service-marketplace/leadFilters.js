@@ -1,6 +1,20 @@
-export const LEAD_SORT_OPTIONS = {
-  newest: 'Newest first',
-  urgency: 'Most urgent',
+export const LEAD_URGENCY_FILTERS = {
+  all: 'All',
+  Urgent: 'Urgent',
+  Normal: 'Normal',
+  Flexible: 'Flexible',
+}
+
+export const LEAD_ORDER_OPTIONS = {
+  urgent_first: 'Urgent first',
+  normal_first: 'Normal first',
+  flexible_first: 'Flexible first',
+}
+
+const LEAD_URGENCY_ORDER = {
+  urgent_first: ['urgent', 'normal', 'flexible'],
+  normal_first: ['normal', 'urgent', 'flexible'],
+  flexible_first: ['flexible', 'urgent', 'normal'],
 }
 
 const URGENT_DEADLINE_WINDOW_MS = 48 * 60 * 60 * 1000
@@ -57,26 +71,44 @@ export function isUrgentLead(lead, now = new Date()) {
 
 export function filterAndSortLeads(
   leads,
-  { search = '', sort = 'newest', now = new Date() } = {},
+  {
+    search = '',
+    urgency = 'all',
+    order = 'urgent_first',
+    now = new Date(),
+  } = {},
 ) {
   const normalizedSearch = normalize(search)
+  const normalizedUrgency = normalize(urgency)
   const matchingLeads = leads.filter((lead) => {
-    const searchableText = [lead.title, lead.description, lead.suburb]
+    const searchableText = [
+      lead.title,
+      lead.description,
+      lead.suburb,
+      lead.city,
+      lead.category,
+    ]
       .map(normalize)
       .join(' ')
 
     return (
       isAvailableLead(lead, now) &&
-      (!normalizedSearch || searchableText.includes(normalizedSearch))
+      (!normalizedSearch || searchableText.includes(normalizedSearch)) &&
+      (urgency === 'all' || normalize(lead.urgency) === normalizedUrgency)
     )
   })
 
   return matchingLeads.toSorted((first, second) => {
-    const field = sort === 'urgency' ? 'quote_deadline' : 'created_at'
-    const direction = sort === 'urgency' ? 1 : -1
+    const urgencyOrder =
+      LEAD_URGENCY_ORDER[order] ?? LEAD_URGENCY_ORDER.urgent_first
+    const urgencyDifference =
+      urgencyOrder.indexOf(normalize(first.urgency)) -
+      urgencyOrder.indexOf(normalize(second.urgency))
+    if (urgencyDifference !== 0) return urgencyDifference
+
     return (
-      (new Date(first[field]).getTime() - new Date(second[field]).getTime()) *
-      direction
+      new Date(second.created_at).getTime() -
+      new Date(first.created_at).getTime()
     )
   })
 }

@@ -17,7 +17,7 @@ const marketplaceCssUrl = new URL(
   import.meta.url,
 )
 
-test('AC1 and AC3: review displays required job details, quote count, and deadline', async () => {
+test('AC1 and AC3: lead summary displays location, closing date, and urgency', async () => {
   const card = await readFile(leadCardUrl, 'utf8')
 
   for (const label of [
@@ -25,11 +25,19 @@ test('AC1 and AC3: review displays required job details, quote count, and deadli
     'Category',
     'Suburb',
     'Urgency',
-    'quotes',
     'Quotes close',
   ]) {
     assert.match(card, new RegExp(label, 'i'))
   }
+  assert.match(card, /toLocaleDateString/)
+  assert.doesNotMatch(card, /details\.quoteCount/)
+  assert.match(card, /details\.urgency === 'Urgent'/)
+  assert.match(card, /service-lead-urgency-dot/)
+  assert.match(card, /service-lead-divider/)
+  assert.match(card, /photoCount/)
+  assert.match(card, /videoCount/)
+  assert.match(card, /service-lead-attachment-count/)
+  assert.match(card, /image.*video/)
 })
 
 test('AC2: supplied photos and supported videos are classified for viewing', () => {
@@ -51,7 +59,7 @@ test('AC2: supplied photos and supported videos are classified for viewing', () 
 test('AC4: lead RPC exposes review fields without consumer identity or contact fields', async () => {
   const migration = await readFile(migrationUrl, 'utf8')
   const returnShape = migration.match(
-    /create function public\.get_business_job_leads[\s\S]+?returns table \(([\s\S]+?)\)\nlanguage/,
+    /create function public\.get_business_job_leads[\s\S]+?returns table \(([\s\S]+?)\)\r?\nlanguage/,
   )?.[1]
 
   assert.ok(returnShape)
@@ -68,7 +76,8 @@ test('AC5-7: review supports quoting and confirmed provider-specific decline', a
     readFile(migrationUrl, 'utf8'),
   ])
 
-  assert.match(card, /Create quote/)
+  assert.match(card, /Submit quote/)
+  assert.match(card, /View details/)
   assert.match(card, /Decline this opportunity\?/)
   assert.match(card, /Confirm decline/)
   assert.match(migration, /business_job_opportunity_declines/)
@@ -102,4 +111,26 @@ test('AC8: clicking an image or video opens a viewport-fitted in-app preview', a
     styles,
     /\.service-image-lightbox > div video[\s\S]+width: auto[\s\S]+height: auto[\s\S]+object-fit: contain/,
   )
+})
+
+test('only one business lead review can be expanded at a time', async () => {
+  const [page, hook] = await Promise.all([
+    readFile(
+      new URL(
+        '../src/pages/business/ServiceMarketplacePage.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/service-marketplace/hooks/useBusinessMarketplace.js',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
+  assert.match(page, /marketplace\.reviewedLead === item\.job_request_id/)
+  assert.match(hook, /setReviewedLead\(\(current\) =>/)
+  assert.match(hook, /current === jobRequestId \? null : jobRequestId/)
 })

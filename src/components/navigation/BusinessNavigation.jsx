@@ -17,11 +17,7 @@ export default function BusinessNavigation() {
   }
 
   if (capabilities.service_marketplace_enabled) {
-    navigationItems.push(
-      ['/business/job-leads', 'Job leads'],
-      ['/business/quotes', 'Quotes'],
-      ['/business/active-jobs', 'Active jobs'],
-    )
+    navigationItems.push(['/business/services', 'Services'])
   }
 
   return (

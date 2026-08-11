@@ -36,7 +36,8 @@ export function fetchBusinessMarketplaceItems(type, businessId) {
           status: result.status,
         })
       }
-      return result.data ?? []
+      const items = result.data ?? []
+      return type === 'leads' ? items.filter((item) => !item.has_quote) : items
     } finally {
       pendingMarketplaceRequests.delete(requestKey)
     }
@@ -80,4 +81,12 @@ export async function completeBusinessJob(businessId, jobRequestId) {
     p_job_request_id: jobRequestId,
   })
   if (error || !data) throw error ?? new Error('Job was not completed')
+}
+
+export async function withdrawBusinessQuote(businessId, quoteId) {
+  const { data, error } = await supabase.rpc('withdraw_business_quote', {
+    p_business_id: businessId,
+    p_quote_id: quoteId,
+  })
+  if (error || !data) throw error ?? new Error('Quote was not withdrawn')
 }

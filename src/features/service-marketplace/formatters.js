@@ -41,3 +41,31 @@ export function getJobBadge(job, quoteCount) {
     ? { label: 'Quotes Received', tone: 'quotes-received' }
     : { label: 'Awaiting Quotes', tone: 'awaiting' }
 }
+export function formatBudgetRange(minBudget, maxBudget) {
+  if (minBudget == null && maxBudget == null) return null
+  if (minBudget != null && maxBudget != null)
+    return `$${minBudget} - $${maxBudget}`
+  if (minBudget != null) return `$${minBudget}+`
+  return `Up to $${maxBudget}`
+}
+
+export function parseBudgetRange(budget) {
+  if (!budget) return { minBudget: null, maxBudget: null }
+
+  const rangeMatch = budget.match(/^\$(\d+) - \$(\d+)$/)
+  if (rangeMatch)
+    return {
+      minBudget: Number(rangeMatch[1]),
+      maxBudget: Number(rangeMatch[2]),
+    }
+
+  const minOnlyMatch = budget.match(/^\$(\d+)\+$/)
+  if (minOnlyMatch)
+    return { minBudget: Number(minOnlyMatch[1]), maxBudget: null }
+
+  const maxOnlyMatch = budget.match(/^Up to \$(\d+)$/)
+  if (maxOnlyMatch)
+    return { minBudget: null, maxBudget: Number(maxOnlyMatch[1]) }
+
+  return { minBudget: null, maxBudget: null }
+}

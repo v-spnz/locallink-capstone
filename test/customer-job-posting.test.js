@@ -26,3 +26,25 @@ test('job posting migration provides every field selected by the consumer API', 
     assert.match(migration, new RegExp(`add column if not exists ${column}`))
   }
 })
+
+test('seeded jobs use only supported urgency values', async () => {
+  const seed = await readFile(
+    new URL('../supabase/seed.sql', import.meta.url),
+    'utf8',
+  )
+
+  for (const outdatedUrgency of [
+    'Within a week',
+    'As soon as possible',
+    'Within three days',
+    'Next week',
+    'Within two weeks',
+    'This weekend',
+    'Within a month',
+    'Within two days',
+    'Work already arranged',
+    'No longer required',
+  ]) {
+    assert.doesNotMatch(seed, new RegExp(`'${outdatedUrgency}'`))
+  }
+})

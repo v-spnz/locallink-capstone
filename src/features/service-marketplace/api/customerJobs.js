@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabase'
+import { formatBudgetRange } from '../formatters'
 const JOB_FIELDS =
   'id, title, description, category, job_type, city, suburb, radius_km, ' +
   'status, image_urls, job_date, budget, urgency, created_at'
@@ -66,7 +67,7 @@ export async function saveCustomerJob({ customerId, draft, jobId }) {
     status: 'open',
     image_urls: imageUrls,
     job_date: draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : null,
-    budget: draft.budget ? draft.budget.trim() : null,
+    budget: formatBudgetRange(draft.minBudget, draft.maxBudget),
     urgency: draft.urgency,
   }
 
