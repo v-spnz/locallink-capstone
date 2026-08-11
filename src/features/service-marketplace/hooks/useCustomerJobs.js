@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import useAuth from '../../../auth/useAuth'
 import {
+  confirmCustomerJobCompletion,
   fetchCustomerJobs,
   respondToCustomerQuote,
   saveCustomerJob,
@@ -18,7 +19,19 @@ function groupQuotesByJob(quotes) {
 }
 
 function normalizeJob(job) {
-  return { ...job, postedDistance: `${job.radius_km}km` }
+  const statusHistory = Array.isArray(job.status_history)
+    ? job.status_history.toSorted(
+        (first, second) =>
+          new Date(first.updated_at).getTime() -
+          new Date(second.updated_at).getTime(),
+      )
+    : []
+
+  return {
+    ...job,
+    status_history: statusHistory,
+    postedDistance: `${job.radius_km}km`,
+  }
 }
 
 export default function useCustomerJobs() {
@@ -29,6 +42,7 @@ export default function useCustomerJobs() {
   const [requestError, setRequestError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [respondingQuoteId, setRespondingQuoteId] = useState(null)
+  const [confirmingJobId, setConfirmingJobId] = useState(null)
   const [reloadKey, setReloadKey] = useState(0)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -187,6 +201,33 @@ export default function useCustomerJobs() {
     }
   }
 
+  async function handleConfirmCompletion(jobRequestId) {
+    setConfirmingJobId(jobRequestId)
+    setRequestError('')
+    setSuccessMessage('')
+
+    try {
+      const updatedJob = await confirmCustomerJobCompletion(jobRequestId)
+      setPostedJobs((current) =>
+        current.map((job) =>
+          job.id === jobRequestId
+            ? normalizeJob({ ...job, ...updatedJob })
+            : job,
+        ),
+      )
+      setSuccessMessage('Job completion confirmed!')
+    } catch (confirmationError) {
+      setRequestError(
+        formatRequestError(
+          'This job could not be confirmed as completed. Its status may have changed.',
+          confirmationError,
+        ),
+      )
+    } finally {
+      setConfirmingJobId(null)
+    }
+  }
+
   return {
     postedJobs,
     quotesByJob,
@@ -195,6 +236,7 @@ export default function useCustomerJobs() {
     requestError,
     isLoading,
     respondingQuoteId,
+    confirmingJobId,
     isModalOpen,
     modalInitialJob,
     modalInitialStep,
@@ -214,5 +256,6 @@ export default function useCustomerJobs() {
     selectQuoteJob,
     handleSubmitJob,
     handleQuoteResponse,
+    handleConfirmCompletion,
   }
 }

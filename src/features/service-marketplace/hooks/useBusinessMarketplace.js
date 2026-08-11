@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import useBusiness from '../../../business/useBusiness'
 import {
-  completeBusinessJob,
   declineBusinessOpportunity,
   fetchBusinessMarketplaceItems,
   submitBusinessQuote,
+  updateBusinessJobStatus,
   withdrawBusinessQuote,
 } from '../api/businessJobs'
 import {
@@ -13,7 +13,12 @@ import {
 } from '../constants'
 import { formatRequestError } from '../formatters'
 import { filterAndSortLeads } from '../leadFilters'
-import { filterBusinessJobs } from '../jobTracking'
+import {
+  filterBusinessJobs,
+  formatJobProgressStage,
+  getNextJobProgressStage,
+  isValidJobProgressTransition,
+} from '../jobTracking'
 import {
   notifyBusinessMarketplaceChanged,
   subscribeToBusinessMarketplaceChanges,
@@ -62,6 +67,7 @@ export default function useBusinessMarketplace(type) {
   const [jobOrder, setJobOrder] = useState('active_first')
   const [withdrawConfirmationId, setWithdrawConfirmationId] = useState(null)
   const [withdrawingQuoteId, setWithdrawingQuoteId] = useState(null)
+  const [updatingJobId, setUpdatingJobId] = useState(null)
 
   const visibleItems =
     type === 'leads'
@@ -244,18 +250,42 @@ export default function useBusinessMarketplace(type) {
     }
   }
 
-  async function handleCompleteJob(jobRequestId) {
+  async function handleAdvanceJobStatus(jobRequestId, currentStatus) {
+    const nextStatus = getNextJobProgressStage(currentStatus)
+    if (!isValidJobProgressTransition(currentStatus, nextStatus)) {
+      return
+    }
+
     setError('')
     setSuccess('')
-    setIsSaving(true)
+    setUpdatingJobId(jobRequestId)
     try {
-      await completeBusinessJob(business.id, jobRequestId)
-      setSuccess('Job marked as completed for you and the customer.')
-      setReloadKey((current) => current + 1)
-    } catch {
-      setError('Unable to update this job.')
+      const updatedJob = await updateBusinessJobStatus(
+        business.id,
+        jobRequestId,
+        nextStatus,
+      )
+      setItems((current) =>
+        current.map((item) =>
+          item.job_request_id === jobRequestId
+            ? { ...item, ...updatedJob }
+            : item,
+        ),
+      )
+      setSuccess(
+        nextStatus === 'pending_completion'
+          ? 'Job marked as completed. Awaiting customer confirmation.'
+          : `Job status updated to ${formatJobProgressStage(nextStatus)}.`,
+      )
+    } catch (updateError) {
+      setError(
+        formatRequestError(
+          'Unable to update this job status. It may no longer be available or the status transition may not be valid.',
+          updateError,
+        ),
+      )
     } finally {
-      setIsSaving(false)
+      setUpdatingJobId(null)
     }
   }
 
@@ -335,6 +365,7 @@ export default function useBusinessMarketplace(type) {
     isSaving,
     withdrawConfirmationId,
     withdrawingQuoteId,
+    updatingJobId,
     setQuoteField,
     setSearch,
     setUrgencyFilter,
@@ -351,7 +382,7 @@ export default function useBusinessMarketplace(type) {
     handleQuoteSubmit,
     handleQuoteEdit: () => setQuoteStep('form'),
     handleDeclineOpportunity,
-    handleCompleteJob,
+    handleAdvanceJobStatus,
     handleWithdrawQuote,
   }
 }

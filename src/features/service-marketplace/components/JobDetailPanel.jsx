@@ -1,13 +1,16 @@
 import Button from '../../../components/ui/Button'
 import { getJobBadge } from '../formatters'
+import ActiveJobProgressTimeline from './ActiveJobProgressTimeline'
 
 export default function JobDetailPanel({
   job,
   quoteCount,
+  isConfirmingCompletion,
   onBack,
   onEdit,
   onRepost,
   onViewQuotes,
+  onConfirmCompletion,
 }) {
   const badge = getJobBadge(job, quoteCount)
   const canEdit = ['open', 'closed', 'cancelled'].includes(job.status)
@@ -25,7 +28,9 @@ export default function JobDetailPanel({
               <span className={`sm-badge sm-badge--${badge.tone}`}>
                 {badge.label}
               </span>
-              <span className="sm-badge sm-badge--category">{job.category}</span>
+              <span className="sm-badge sm-badge--category">
+                {job.category}
+              </span>
               {job.urgency === 'Urgent' && (
                 <span className="sm-badge sm-badge--urgent">Urgent</span>
               )}
@@ -65,7 +70,9 @@ export default function JobDetailPanel({
           </div>
           <div>
             <div className="sm-field-label">Budget</div>
-            <div className="sm-field-value">{job.budget || 'Not specified'}</div>
+            <div className="sm-field-value">
+              {job.budget || 'Not specified'}
+            </div>
           </div>
           <div>
             <div className="sm-field-label">Search distance</div>
@@ -76,6 +83,8 @@ export default function JobDetailPanel({
             <div className="sm-field-value">{job.category}</div>
           </div>
         </div>
+
+        <ActiveJobProgressTimeline job={job} />
       </div>
 
       <div className="sm-detail-actions">
@@ -86,6 +95,16 @@ export default function JobDetailPanel({
         >
           View {quoteCount} quote{quoteCount === 1 ? '' : 's'}
         </Button>
+
+        {job.status === 'pending_completion' && (
+          <Button
+            variant="success"
+            disabled={isConfirmingCompletion}
+            onClick={() => onConfirmCompletion(job.id)}
+          >
+            {isConfirmingCompletion ? 'Confirming…' : 'Confirm work completed'}
+          </Button>
+        )}
 
         {canEdit && (
           <div className="sm-detail-actions-right">

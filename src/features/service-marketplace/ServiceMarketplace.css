@@ -568,6 +568,91 @@
   height: 13px;
 }
 
+.service-job-progress-timeline {
+  margin: 0 0 18px;
+  padding: 14px;
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(92px, 1fr));
+  overflow-x: auto;
+  background: var(--bg);
+  list-style: none;
+}
+
+.service-job-progress-step {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 6px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.service-job-progress-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: 12px;
+  left: calc(50% + 13px);
+  width: calc(100% - 26px);
+  height: 2px;
+  background: var(--border);
+}
+
+.service-job-progress-step.is-complete:not(:last-child)::after {
+  background: var(--emerald);
+}
+
+.service-job-progress-marker {
+  position: relative;
+  z-index: 1;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #edf1f5;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.service-job-progress-marker svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 3;
+}
+
+.service-job-progress-step.is-complete .service-job-progress-marker,
+.service-job-progress-step.is-current .service-job-progress-marker {
+  background: var(--emerald);
+  color: var(--white);
+}
+
+.service-job-progress-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.service-job-progress-label {
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.service-job-progress-step.is-complete .service-job-progress-label,
+.service-job-progress-step.is-current .service-job-progress-label {
+  color: var(--emerald);
+  font-weight: 700;
+}
+
+.service-job-progress-time {
+  color: var(--text-muted);
+  font-size: 9px;
+  line-height: 1.35;
+}
+
 .service-quote-timeline {
   margin: 0 0 18px;
   padding: 0;

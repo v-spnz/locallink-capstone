@@ -66,10 +66,14 @@ export default function Jobs() {
         <JobDetailPanel
           job={selectedJob}
           quoteCount={(marketplace.quotesByJob[selectedJob.id] ?? []).length}
+          isConfirmingCompletion={
+            marketplace.confirmingJobId === selectedJob.id
+          }
           onBack={marketplace.closeJobDetail}
           onEdit={marketplace.openEditModal}
           onRepost={marketplace.openRepostModal}
           onViewQuotes={marketplace.viewQuotesForJob}
+          onConfirmCompletion={marketplace.handleConfirmCompletion}
         />
       )}
 
@@ -82,7 +86,9 @@ export default function Jobs() {
               onClick={() => marketplace.switchTab('jobs')}
             >
               My Jobs
-              <span className="sm-tab-count">{marketplace.postedJobs.length}</span>
+              <span className="sm-tab-count">
+                {marketplace.postedJobs.length}
+              </span>
             </button>
             <button
               type="button"
@@ -94,18 +100,21 @@ export default function Jobs() {
             </button>
           </div>
 
-          {marketplace.activeTab === 'jobs' && marketplace.postedJobs.length > 0 && (
-            <div className="customer-job-list sm-job-grid">
-              {marketplace.postedJobs.map((job) => (
-                <CustomerJobCard
-                  key={job.id}
-                  job={job}
-                  quoteCount={(marketplace.quotesByJob[job.id] ?? []).length}
-                  onSelect={(selected) => marketplace.openJobDetail(selected.id)}
-                />
-              ))}
-            </div>
-          )}
+          {marketplace.activeTab === 'jobs' &&
+            marketplace.postedJobs.length > 0 && (
+              <div className="customer-job-list sm-job-grid">
+                {marketplace.postedJobs.map((job) => (
+                  <CustomerJobCard
+                    key={job.id}
+                    job={job}
+                    quoteCount={(marketplace.quotesByJob[job.id] ?? []).length}
+                    onSelect={(selected) =>
+                      marketplace.openJobDetail(selected.id)
+                    }
+                  />
+                ))}
+              </div>
+            )}
 
           {marketplace.activeTab === 'quotes' && (
             <div className="sm-quotes-layout">
@@ -124,7 +133,9 @@ export default function Jobs() {
                     onRespond={marketplace.handleQuoteResponse}
                   />
                 ) : (
-                  <p className="sm-empty-sub">Select a job to see its quotes.</p>
+                  <p className="sm-empty-sub">
+                    Select a job to see its quotes.
+                  </p>
                 )}
               </div>
             </div>
