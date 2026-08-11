@@ -19,8 +19,22 @@ function groupQuotesByJob(quotes) {
   }, {})
 }
 
+// Keeps status_history sorted oldest-first, which
+// ActiveJobProgressTimeline relies on.
 function normalizeJob(job) {
-  return { ...job, postedDistance: `${job.radius_km}km` }
+  const statusHistory = Array.isArray(job.status_history)
+    ? job.status_history.toSorted(
+        (first, second) =>
+          new Date(first.updated_at).getTime() -
+          new Date(second.updated_at).getTime(),
+      )
+    : []
+
+  return {
+    ...job,
+    status_history: statusHistory,
+    postedDistance: `${job.radius_km}km`,
+  }
 }
 
 export default function useCustomerJobs() {
@@ -190,24 +204,22 @@ export default function useCustomerJobs() {
   async function handleConfirmCompletion(jobId) {
     setConfirmingJobId(jobId)
     setRequestError('')
+    setSuccessMessage('')
+
     try {
-      const result = await confirmCustomerJobCompletion(jobId)
+      const updatedJob = await confirmCustomerJobCompletion(jobId)
       setPostedJobs((current) =>
         current.map((job) =>
-          job.id === jobId
-            ? {
-                ...job,
-                status: result.status,
-                updated_at: result.updated_at,
-                status_history: result.status_history,
-              }
-            : job,
+          job.id === jobId ? normalizeJob({ ...job, ...updatedJob }) : job,
         ),
       )
-      setSuccessMessage('Job marked as complete!')
-    } catch {
+      setSuccessMessage('Job completion confirmed!')
+    } catch (confirmationError) {
       setRequestError(
-        'This job could not be confirmed as complete. Please try again.',
+        formatRequestError(
+          'This job could not be confirmed as completed. Its status may have changed.',
+          confirmationError,
+        ),
       )
     } finally {
       setConfirmingJobId(null)
