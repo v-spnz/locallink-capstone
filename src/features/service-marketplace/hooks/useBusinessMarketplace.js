@@ -18,7 +18,12 @@ import {
   notifyBusinessMarketplaceChanged,
   subscribeToBusinessMarketplaceChanges,
 } from '../marketplaceEvents'
-import { filterBusinessQuotes } from '../quoteTracking'
+import {
+  filterBusinessQuotes,
+  getBusinessQuoteDraft,
+  saveBusinessQuoteDraft,
+  clearBusinessQuoteDraft,
+} from '../quoteTracking'
 import { validateQuote } from '../validation'
 
 export const EMPTY_QUOTE = {
@@ -130,12 +135,18 @@ export default function useBusinessMarketplace(type) {
   )
 
   function toggleLead(jobRequestId) {
-    setSelectedLead((current) =>
-      current === jobRequestId ? null : jobRequestId,
-    )
+    setSelectedLead((current) => {
+      const next = current === jobRequestId ? null : jobRequestId
+      if (next) {
+        const draft = getBusinessQuoteDraft(next, business.id)
+        setQuote(draft?.fields ?? EMPTY_QUOTE)
+      } else {
+        setQuote(EMPTY_QUOTE)
+      }
+      return next
+    })
     setError('')
     setSuccess('')
-    setQuote(EMPTY_QUOTE)
     setQuoteErrors({})
     setQuoteStep('form')
   }
@@ -168,6 +179,9 @@ export default function useBusinessMarketplace(type) {
           next.arrivalStart,
           next.arrivalEnd,
         )
+      }
+      if (selectedLead) {
+        saveBusinessQuoteDraft(selectedLead, business.id, next)
       }
       return next
     })
@@ -207,6 +221,7 @@ export default function useBusinessMarketplace(type) {
         jobRequestId: selectedLead,
         quote,
       })
+      clearBusinessQuoteDraft(selectedLead, business.id)
       setSuccess('Quote submitted with Awaiting response status.')
       setSelectedLead(null)
       setReviewedLead(null)
