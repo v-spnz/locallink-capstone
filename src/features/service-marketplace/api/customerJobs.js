@@ -2,7 +2,8 @@ import { supabase } from '../../../lib/supabase'
 import { formatBudgetRange } from '../formatters'
 const JOB_FIELDS =
   'id, title, description, category, job_type, city, suburb, radius_km, ' +
-  'status, image_urls, job_date, budget, urgency, created_at'
+  'status, image_urls, job_date, budget, urgency, created_at, updated_at, ' +
+  'status_history:job_status_history(status, updated_at)'
 
 export async function fetchCustomerJobs(customerId) {
   const [jobsResult, quotesResult] = await Promise.all([
@@ -91,4 +92,20 @@ export async function respondToCustomerQuote(quoteId, accept) {
     p_accept: accept,
   })
   if (error) throw error
+}
+
+export async function confirmCustomerJobCompletion(jobRequestId) {
+  const { data, error } = await supabase.rpc('confirm_job_completion', {
+    p_job_request_id: jobRequestId,
+  })
+  if (error || !data) {
+    throw error ?? new Error('Job completion could not be confirmed')
+  }
+
+  const updatedJob = Array.isArray(data) ? data[0] : data
+  return {
+    status: updatedJob.job_status,
+    updated_at: updatedJob.status_updated_at,
+    status_history: updatedJob.status_history,
+  }
 }

@@ -1,14 +1,17 @@
 import Button from '../../../components/ui/Button'
 import { formatStatus } from '../formatters'
+import ActiveJobProgressTimeline from './ActiveJobProgressTimeline'
 import QuoteList from './QuoteList'
 
 export default function CustomerJobCard({
   job,
   quotes,
   respondingQuoteId,
+  isConfirmingCompletion,
   onEdit,
   onRepost,
   onQuoteResponse,
+  onConfirmCompletion,
 }) {
   const canEdit = ['open', 'closed', 'cancelled'].includes(job.status)
 
@@ -32,12 +35,24 @@ export default function CustomerJobCard({
         <span>{job.postedDistance} radius</span>
         <span>Posted {new Date(job.created_at).toLocaleString('en-NZ')}</span>
       </div>
+      <ActiveJobProgressTimeline job={job} />
       <QuoteList
         jobStatus={job.status}
         quotes={quotes}
         respondingQuoteId={respondingQuoteId}
         onRespond={onQuoteResponse}
       />
+      {job.status === 'pending_completion' && (
+        <div className="customer-job-actions">
+          <Button
+            variant="success"
+            disabled={isConfirmingCompletion}
+            onClick={() => onConfirmCompletion(job.id)}
+          >
+            {isConfirmingCompletion ? 'Confirming…' : 'Confirm work completed'}
+          </Button>
+        </div>
+      )}
       {canEdit && (
         <div className="customer-job-actions">
           <Button variant="secondary" onClick={() => onRepost(job)}>

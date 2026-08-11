@@ -1,17 +1,18 @@
-import { CheckCircle2, MapPin } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import Button from '../../../components/ui/Button'
-import { formatMoney, formatStatus } from '../formatters'
+import ActiveJobProgressTimeline from './ActiveJobProgressTimeline'
+import { formatMoney } from '../formatters'
+import { formatJobProgressStage, getNextJobProgressStage } from '../jobTracking'
 
-export default function ActiveJobCard({ item, isSaving, onComplete }) {
+export default function ActiveJobCard({ item, isUpdating, onAdvanceStatus }) {
+  const nextStatus = getNextJobProgressStage(item.job_status)
+
   return (
     <article className="service-marketplace-card">
       <div className="service-marketplace-card-head">
         <div>
           <h3>{item.title}</h3>
         </div>
-        <span className={`service-status ${item.job_status}`}>
-          {formatStatus(item.job_status)}
-        </span>
       </div>
       {item.description && <p>{item.description}</p>}
       <div className="service-marketplace-meta">
@@ -23,18 +24,22 @@ export default function ActiveJobCard({ item, isSaving, onComplete }) {
           <span>{new Date(item.created_at).toLocaleDateString('en-NZ')}</span>
         )}
       </div>
+      <ActiveJobProgressTimeline job={item} />
       <div className="service-quote-summary">
         <strong>{formatMoney(item.amount_cents)}</strong>
         {item.message && <span>{item.message}</span>}
       </div>
-      {item.job_status === 'in_progress' && (
+      {nextStatus && (
         <Button
           variant="success"
-          onClick={() => onComplete(item.job_request_id)}
-          disabled={isSaving}
+          onClick={onAdvanceStatus}
+          disabled={isUpdating}
         >
-          <CheckCircle2 aria-hidden="true" />
-          {isSaving ? 'Updating…' : 'Mark completed'}
+          {isUpdating
+            ? 'Updating…'
+            : nextStatus === 'pending_completion'
+              ? 'Mark work complete'
+              : `Mark as ${formatJobProgressStage(nextStatus)}`}
         </Button>
       )}
     </article>

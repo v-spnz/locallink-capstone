@@ -75,12 +75,18 @@ export async function declineBusinessOpportunity(businessId, jobRequestId) {
     throw error ?? new Error('Opportunity could not be declined')
 }
 
-export async function completeBusinessJob(businessId, jobRequestId) {
-  const { data, error } = await supabase.rpc('complete_business_job', {
+export async function updateBusinessJobStatus(
+  businessId,
+  jobRequestId,
+  nextStatus,
+) {
+  const { data, error } = await supabase.rpc('update_business_job_status', {
     p_business_id: businessId,
     p_job_request_id: jobRequestId,
+    p_status: nextStatus,
   })
-  if (error || !data) throw error ?? new Error('Job was not completed')
+  if (error || !data) throw error ?? new Error('Job status was not updated')
+  return Array.isArray(data) ? data[0] : data
 }
 
 export async function withdrawBusinessQuote(businessId, quoteId) {
