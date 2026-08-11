@@ -109,3 +109,14 @@ export async function confirmCustomerJobCompletion(jobRequestId) {
     status_history: updatedJob.status_history,
   }
 }
+
+// Testing-only utility, not tied to a user story yet.
+export async function deleteCustomerJob(jobId, customerId) {
+  const { error } = await supabase
+    .from('job_requests')
+    .delete()
+    .eq('id', jobId)
+    .eq('customer_id', customerId)
+
+  if (error) throw error
+}

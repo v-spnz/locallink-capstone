@@ -37,6 +37,30 @@ export function formatRequestError(fallbackMessage, error) {
   const errorCode = error.code ? `${error.code}: ` : ''
   return `${fallbackMessage} (${errorCode}${error.message})`
 }
+
+const IN_PROGRESS_STATUSES = [
+  'accepted',
+  'scheduled',
+  'on_the_way',
+  'in_progress',
+  'pending_completion',
+]
+
+export function getJobBadge(job, quoteCount) {
+  if (IN_PROGRESS_STATUSES.includes(job.status)) {
+    return { label: 'In Progress', tone: 'in-progress' }
+  }
+  if (job.status === 'completed') {
+    return { label: 'Completed', tone: 'completed' }
+  }
+  if (job.status === 'closed' || job.status === 'cancelled') {
+    return { label: formatStatus(job.status), tone: 'completed' }
+  }
+  return quoteCount > 0
+    ? { label: 'Quotes Received', tone: 'quotes-received' }
+    : { label: 'Awaiting Quotes', tone: 'awaiting' }
+}
+
 export function formatBudgetRange(minBudget, maxBudget) {
   if (minBudget == null && maxBudget == null) return null
   if (minBudget != null && maxBudget != null)

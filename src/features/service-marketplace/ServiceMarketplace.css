@@ -1428,6 +1428,329 @@
   }
 }
 
+/* US0052: My Jobs list layout, status badges, quote count */
+.sm-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.sm-job-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.sm-job-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.sm-job-card:hover {
+  border-color: var(--blue);
+}
+
+.sm-job-card-body {
+  flex: 1;
+}
+
+.sm-badge-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.sm-badge {
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: capitalize;
+  white-space: nowrap;
+  background: #f1f3f5;
+  color: var(--text-muted);
+}
+
+.sm-badge--quotes-received {
+  background: #fdf3e0;
+  color: #a3690c;
+}
+
+.sm-badge--in-progress,
+.sm-badge--completed {
+  background: #e6fcf5;
+  color: #087f5b;
+}
+
+.sm-badge--awaiting {
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.sm-badge--category {
+  background: #f1f3f5;
+  color: var(--text-muted);
+}
+
+.sm-job-title {
+  display: block;
+  margin: 6px 0;
+  font-size: 15px;
+}
+
+.sm-quote-count-box {
+  text-align: center;
+  background: #fdf3e0;
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  min-width: 60px;
+  height: fit-content;
+}
+
+.sm-quote-count-box--zero {
+  background: var(--bg);
+}
+
+.sm-quote-count-num {
+  font-size: 18px;
+  font-weight: 700;
+  color: #a3690c;
+}
+
+.sm-quote-count-box--zero .sm-quote-count-num {
+  color: var(--text-muted);
+}
+
+.sm-quote-count-label {
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* US0053: job detail panel */
+.sm-back-link {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+.sm-back-link:hover {
+  color: var(--blue);
+}
+
+.sm-detail-card {
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.sm-detail-title {
+  margin: 6px 0 8px;
+  font-size: 18px;
+}
+
+.sm-detail-description {
+  margin-bottom: 18px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.sm-field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.sm-field-label {
+  margin-bottom: 3px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.sm-field-value {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sm-detail-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sm-detail-actions-right {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 560px) {
+  .sm-field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* US0052/US0053 refinement: meta icons, urgent badge, detail header layout */
+.customer-job-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.customer-job-meta svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.sm-badge--urgent {
+  background: #fff5f5;
+  color: #c92a2a;
+}
+
+.sm-detail-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sm-detail-card-top > div:first-child {
+  min-width: 0;
+  flex: 1;
+}
+
+.sm-view-quotes-btn {
+  border-color: #a3690c;
+  color: #a3690c;
+}
+
+.sm-delete-btn {
+  border-color: #c92a2a;
+  color: #c92a2a;
+}
+
+/* US0054: tabs + quotes layout, empty state */
+.sm-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.sm-tab {
+  background: none;
+  border: none;
+  padding: 0 0 12px;
+  font-size: 14px;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sm-tab--active {
+  color: var(--blue);
+  font-weight: 700;
+  border-bottom-color: var(--blue);
+}
+
+.sm-tab-count {
+  background: #f1f3f5;
+  color: var(--text-muted);
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+
+.sm-tab--active .sm-tab-count {
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.sm-quotes-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 18px;
+}
+
+.sm-quote-sidebar-item {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  cursor: pointer;
+  background: var(--white);
+}
+
+.sm-quote-sidebar-item--selected {
+  border-color: var(--blue);
+  background: var(--blue-light);
+}
+
+.sm-quote-sidebar-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.sm-quote-sidebar-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.sm-empty-state {
+  padding: 36px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  text-align: center;
+}
+
+.sm-empty-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.sm-empty-sub {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 560px) {
+  .sm-quotes-layout {
+    grid-template-columns: 1fr;
+  }
+}
 @media (max-width: 820px) {
   .service-quote-modal {
     overflow-y: auto;
