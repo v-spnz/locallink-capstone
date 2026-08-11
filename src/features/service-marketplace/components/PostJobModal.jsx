@@ -17,8 +17,15 @@ import Button from '../../../components/ui/Button'
 import ComboBox from '../../../components/ui/ComboBox'
 import suburbsData from '../../../data/suburbs'
 import jobtypes from '../../../data/jobtypes'
-import { CITIES, POSTED_DISTANCES, URGENCY_OPTIONS } from '../constants'
+import {
+  CITIES,
+  POSTED_DISTANCES,
+  URGENCY_OPTIONS,
+  MIN_BUDGET,
+  MAX_BUDGET,
+} from '../constants'
 import { validateJobWizardStep } from '../validation'
+import { parseBudgetRange } from '../formatters'
 
 const STEPS = ['Category', 'Job Type', 'Job Details', 'Location', 'Review']
 
@@ -38,7 +45,8 @@ const EMPTY_DRAFT = {
   imgs: [],
   description: '',
   jobDate: null,
-  budget: '',
+  minBudget: null,
+  maxBudget: null,
   urgency: '',
   city: '',
   suburb: '',
@@ -53,6 +61,8 @@ function buildInitialDraft(initialJob) {
   const savedType = initialJob.job_type || ''
   const isCustomType = savedType && !knownTypes.includes(savedType)
 
+  const { minBudget, maxBudget } = parseBudgetRange(initialJob.budget)
+
   return {
     category,
     type: isCustomType ? 'Other' : savedType,
@@ -60,7 +70,8 @@ function buildInitialDraft(initialJob) {
     imgs: initialJob.image_urls || [],
     description: initialJob.description || '',
     jobDate: initialJob.job_date ? new Date(initialJob.job_date) : null,
-    budget: initialJob.budget || '',
+    minBudget,
+    maxBudget,
     urgency: initialJob.urgency || '',
     city: initialJob.city || '',
     suburb: initialJob.suburb || '',
@@ -409,49 +420,65 @@ function StepJobDetails({
         </p>
       )}
 
-      <div className="mt-4 flex flex-row gap-4">
-        <div className="flex-1">
-          <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
-            Job Date *
-          </label>
-          <input
-            type="date"
-            className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
-            value={
-              draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : ''
-            }
-            onChange={(e) =>
-              update({
-                jobDate: e.target.value ? new Date(e.target.value) : null,
-              })
-            }
-          />
-          {errors.jobDate && (
-            <p className="mt-1 text-xs text-[var(--danger)]">
-              {errors.jobDate}
-            </p>
-          )}
-        </div>
+      <div className="mt-4">
+        <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
+          Job Date *
+        </label>
+        <input
+          type="date"
+          className="w-35 rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
+          value={draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : ''}
+          onChange={(e) =>
+            update({
+              jobDate: e.target.value ? new Date(e.target.value) : null,
+            })
+          }
+        />
+        {errors.jobDate && (
+          <p className="mt-1 text-xs text-[var(--danger)]">{errors.jobDate}</p>
+        )}
+      </div>
 
-        <div className="flex-1">
-          <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
-            Budget{' '}
-            <span className="font-normal text-[var(--text-muted)]">
-              (optional)
-            </span>
-          </label>
-          <input
-            type="text"
-            className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
-            placeholder="e.g. $1000"
-            maxLength={40}
-            value={draft.budget}
-            onChange={(e) => update({ budget: e.target.value })}
+      <div className="mt-4">
+        <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
+          Budget{' '}
+          <span className="font-normal text-[var(--text-muted)]">
+            (optional)
+          </span>
+        </label>
+        <div className="flex items-center gap-2">
+          <ComboBox
+            maxHeight="200px"
+            overflowY="auto"
+            options={MIN_BUDGET}
+            placeholder="Min"
+            value={draft.minBudget}
+            onChange={(value) =>
+              update({ minBudget: value === '' ? null : Number(value) })
+            }
           />
-          {errors.budget && (
-            <p className="mt-1 text-xs text-[var(--danger)]">{errors.budget}</p>
-          )}
+          <span className="shrink-0 text-sm text-[var(--text-muted)]">–</span>
+          <ComboBox
+            maxHeight="200px"
+            overflowY="auto"
+            options={MAX_BUDGET}
+            placeholder="Max"
+            value={draft.maxBudget}
+            onChange={(value) =>
+              update({ maxBudget: value === '' ? null : Number(value) })
+            }
+          />
         </div>
+        {errors.minBudget && (
+          <p className="mt-1 text-xs text-[var(--danger)]">
+            {errors.minBudget}
+          </p>
+        )}
+        {errors.maxBudget && (
+          <p className="mt-1 text-xs text-[var(--danger)]">
+            {errors.maxBudget}
+          </p>
+        )}
       </div>
 
       <label className="mb-1.5 mt-4 block text-sm font-semibold text-[var(--text)]">
@@ -491,6 +518,8 @@ function StepLocation({ draft, update, errors, suburbOptions }) {
         City *
       </label>
       <ComboBox
+        maxHeight="200px"
+        overflowY="auto"
         options={CITIES}
         placeholder="Select a city..."
         value={draft.city}
@@ -504,6 +533,8 @@ function StepLocation({ draft, update, errors, suburbOptions }) {
         Suburb *
       </label>
       <ComboBox
+        maxHeight="200px"
+        overflowY="auto"
         options={suburbOptions}
         placeholder="Select a suburb..."
         value={draft.suburb}
@@ -577,7 +608,10 @@ function StepReview({ draft, error }) {
         label="Job Date"
         value={draft.jobDate ? draft.jobDate.toLocaleDateString() : '—'}
       />
-      <ReviewRow label="Budget" value={draft.budget || '—'} />
+      <ReviewRow
+        label="Budget"
+        value={`${draft.minBudget !== null ? `$${draft.minBudget}` : '—'} – ${draft.maxBudget !== null ? `$${draft.maxBudget}` : '—'}`}
+      />
       <ReviewRow label="Urgency" value={draft.urgency} />
       <ReviewRow label="City" value={draft.city} />
       <ReviewRow label="Suburb" value={draft.suburb} />

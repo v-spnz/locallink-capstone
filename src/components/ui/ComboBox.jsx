@@ -1,24 +1,45 @@
 import { useState } from 'react'
 
+const toText = (v) => (v === null || v === undefined ? '' : String(v))
+
 export default function ComboBox({
   options = [],
   placeholder = 'Select an option...',
   value,
   onChange,
+  maxHeight = 'auto',
+  overflowY = 'visible',
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const query = value || ''
+
+  const [inputText, setInputText] = useState(toText(value))
 
   const filteredOptions =
-    query === ''
+    inputText === ''
       ? options
       : options.filter((option) =>
-          option.toLowerCase().includes(query.toLowerCase()),
+          String(option).toLowerCase().includes(inputText.toLowerCase()),
         )
 
   const handleSelect = (option) => {
     setIsOpen(false)
+    setInputText(toText(option))
     onChange?.(option)
+  }
+
+  const handleInputChange = (e) => {
+    const newText = e.target.value
+    setInputText(newText)
+    setIsOpen(true)
+    onChange?.(newText)
+  }
+
+  const handleBlur = () => {
+    setTimeout(() => setIsOpen(false), 200)
+    const isInvalidNumber = typeof value === 'number' && Number.isNaN(value)
+    if (!isInvalidNumber) {
+      setInputText(toText(value))
+    }
   }
 
   return (
@@ -27,14 +48,10 @@ export default function ComboBox({
     >
       <input
         type="text"
-        value={query}
-        onChange={(e) => {
-          const newValue = e.target.value
-          onChange?.(newValue)
-          setIsOpen(true)
-        }}
+        value={inputText}
+        onChange={handleInputChange}
         onFocus={() => setIsOpen(true)}
-        onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+        onBlur={handleBlur}
         placeholder={placeholder}
         style={{
           width: '100%',
@@ -55,6 +72,8 @@ export default function ComboBox({
             border: '1px solid #ccc',
             borderRadius: '4px',
             zIndex: 1000,
+            maxHeight: maxHeight,
+            overflowY: overflowY,
           }}
         >
           {filteredOptions.map((option) => (

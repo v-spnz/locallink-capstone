@@ -25,6 +25,9 @@ export const CITIES = [
   'Queenstown',
   'Porirua',
 ]
+export const MIN_BUDGET = [0, 50, 100, 250, 500, 1000, 2000, 5000, 10000]
+
+export const MAX_BUDGET = [50, 100, 150, 250, 500, 1000, 2000, 5000, 10000]
 
 export const POSTED_DISTANCES = Array.from(
   { length: 10 },
