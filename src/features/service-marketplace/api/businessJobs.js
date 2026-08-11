@@ -83,6 +83,20 @@ export async function completeBusinessJob(businessId, jobRequestId) {
   if (error || !data) throw error ?? new Error('Job was not completed')
 }
 
+export async function updateBusinessJobStatus(
+  businessId,
+  jobRequestId,
+  nextStatus,
+) {
+  const { data, error } = await supabase.rpc('update_business_job_status', {
+    p_business_id: businessId,
+    p_job_request_id: jobRequestId,
+    p_status: nextStatus,
+  })
+  if (error || !data) throw error ?? new Error('Job status was not updated')
+  return Array.isArray(data) ? data[0] : data
+}
+
 export async function withdrawBusinessQuote(businessId, quoteId) {
   const { data, error } = await supabase.rpc('withdraw_business_quote', {
     p_business_id: businessId,

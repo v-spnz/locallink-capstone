@@ -241,8 +241,13 @@ export function ServiceMarketplaceContent({ type, marketplace }) {
               <ActiveJobCard
                 key={item.quote_id ?? item.job_request_id}
                 item={item}
-                isSaving={marketplace.isSaving}
-                onComplete={marketplace.handleCompleteJob}
+                isUpdating={marketplace.updatingJobId === item.job_request_id}
+                onAdvanceStatus={() =>
+                  marketplace.handleAdvanceJobStatus(
+                    item.job_request_id,
+                    item.job_status,
+                  )
+                }
               />
             )
           })}
