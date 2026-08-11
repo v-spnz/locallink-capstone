@@ -72,6 +72,7 @@ export default function Jobs() {
           onBack={marketplace.closeJobDetail}
           onEdit={marketplace.openEditModal}
           onRepost={marketplace.openRepostModal}
+          onDelete={marketplace.handleDeleteJob}
           onViewQuotes={marketplace.viewQuotesForJob}
           onConfirmCompletion={marketplace.handleConfirmCompletion}
         />
@@ -127,10 +128,12 @@ export default function Jobs() {
               <div>
                 {selectedQuoteJob ? (
                   <QuoteList
+                    jobId={selectedQuoteJob.id}
                     jobStatus={selectedQuoteJob.status}
                     quotes={marketplace.quotesByJob[selectedQuoteJob.id] ?? []}
                     respondingQuoteId={marketplace.respondingQuoteId}
                     onRespond={marketplace.handleQuoteResponse}
+                    onViewJob={marketplace.openJobDetail}
                   />
                 ) : (
                   <p className="sm-empty-sub">

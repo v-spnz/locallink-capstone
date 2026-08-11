@@ -9,6 +9,7 @@ export default function JobDetailPanel({
   onBack,
   onEdit,
   onRepost,
+  onDelete,
   onViewQuotes,
   onConfirmCompletion,
 }) {
@@ -117,7 +118,15 @@ export default function JobDetailPanel({
             <Button
               variant="secondary"
               className="sm-delete-btn"
-              onClick={() => {}}
+              onClick={() => {
+                if (
+                  window.confirm(
+                    'Delete this job? This is for testing only and cannot be undone.',
+                  )
+                ) {
+                  onDelete(job.id)
+                }
+              }}
             >
               Delete Job
             </Button>

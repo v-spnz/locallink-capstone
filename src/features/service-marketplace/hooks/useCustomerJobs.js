@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import useAuth from '../../../auth/useAuth'
 import {
   confirmCustomerJobCompletion,
+  deleteCustomerJob,
   fetchCustomerJobs,
   respondToCustomerQuote,
   saveCustomerJob,
@@ -19,19 +20,7 @@ function groupQuotesByJob(quotes) {
 }
 
 function normalizeJob(job) {
-  const statusHistory = Array.isArray(job.status_history)
-    ? job.status_history.toSorted(
-        (first, second) =>
-          new Date(first.updated_at).getTime() -
-          new Date(second.updated_at).getTime(),
-      )
-    : []
-
-  return {
-    ...job,
-    status_history: statusHistory,
-    postedDistance: `${job.radius_km}km`,
-  }
+  return { ...job, postedDistance: `${job.radius_km}km` }
 }
 
 export default function useCustomerJobs() {
@@ -42,7 +31,6 @@ export default function useCustomerJobs() {
   const [requestError, setRequestError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [respondingQuoteId, setRespondingQuoteId] = useState(null)
-  const [confirmingJobId, setConfirmingJobId] = useState(null)
   const [reloadKey, setReloadKey] = useState(0)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -53,9 +41,9 @@ export default function useCustomerJobs() {
   const [modalError, setModalError] = useState('')
 
   const [selectedJobId, setSelectedJobId] = useState(null)
-  // US0054: My Jobs vs Quotes tab, and which job's quotes are showing.
   const [activeTab, setActiveTab] = useState('jobs')
   const [selectedQuoteJobId, setSelectedQuoteJobId] = useState(null)
+  const [confirmingJobId, setConfirmingJobId] = useState(null)
 
   const jobStatus = getOverallJobStatus(postedJobs)
   const modalInitialJob = editingJob || repostSeed
@@ -127,8 +115,6 @@ export default function useCustomerJobs() {
     setSelectedJobId(null)
   }
 
-  // Switching tabs closes any open detail panel. Jumping into Quotes
-  // defaults to the first job if none is picked yet.
   function switchTab(tab) {
     setActiveTab(tab)
     setSelectedJobId(null)
@@ -201,30 +187,48 @@ export default function useCustomerJobs() {
     }
   }
 
-  async function handleConfirmCompletion(jobRequestId) {
-    setConfirmingJobId(jobRequestId)
+  async function handleConfirmCompletion(jobId) {
+    setConfirmingJobId(jobId)
     setRequestError('')
-    setSuccessMessage('')
-
     try {
-      const updatedJob = await confirmCustomerJobCompletion(jobRequestId)
+      const result = await confirmCustomerJobCompletion(jobId)
       setPostedJobs((current) =>
         current.map((job) =>
-          job.id === jobRequestId
-            ? normalizeJob({ ...job, ...updatedJob })
+          job.id === jobId
+            ? {
+                ...job,
+                status: result.status,
+                updated_at: result.updated_at,
+                status_history: result.status_history,
+              }
             : job,
         ),
       )
-      setSuccessMessage('Job completion confirmed!')
-    } catch (confirmationError) {
+      setSuccessMessage('Job marked as complete!')
+    } catch {
       setRequestError(
-        formatRequestError(
-          'This job could not be confirmed as completed. Its status may have changed.',
-          confirmationError,
-        ),
+        'This job could not be confirmed as complete. Please try again.',
       )
     } finally {
       setConfirmingJobId(null)
+    }
+  }
+
+  // Testing-only utility, not tied to a user story yet.
+  async function handleDeleteJob(jobId) {
+    setRequestError('')
+    try {
+      await deleteCustomerJob(jobId, user.id)
+      setPostedJobs((current) => current.filter((job) => job.id !== jobId))
+      setQuotesByJob((current) => {
+        const next = { ...current }
+        delete next[jobId]
+        return next
+      })
+      setSelectedJobId((current) => (current === jobId ? null : current))
+      setSuccessMessage('Job deleted.')
+    } catch {
+      setRequestError('This job could not be deleted. Please try again.')
     }
   }
 
@@ -236,7 +240,6 @@ export default function useCustomerJobs() {
     requestError,
     isLoading,
     respondingQuoteId,
-    confirmingJobId,
     isModalOpen,
     modalInitialJob,
     modalInitialStep,
@@ -245,6 +248,7 @@ export default function useCustomerJobs() {
     selectedJobId,
     activeTab,
     selectedQuoteJobId,
+    confirmingJobId,
     openPostModal,
     openEditModal,
     openRepostModal,
@@ -257,5 +261,6 @@ export default function useCustomerJobs() {
     handleSubmitJob,
     handleQuoteResponse,
     handleConfirmCompletion,
+    handleDeleteJob,
   }
 }
