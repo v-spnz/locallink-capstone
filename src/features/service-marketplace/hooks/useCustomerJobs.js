@@ -45,6 +45,7 @@ export default function useCustomerJobs() {
   const [requestError, setRequestError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [respondingQuoteId, setRespondingQuoteId] = useState(null)
+  const [confirmingJobId, setConfirmingJobId] = useState(null)
   const [reloadKey, setReloadKey] = useState(0)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -252,6 +253,7 @@ export default function useCustomerJobs() {
     requestError,
     isLoading,
     respondingQuoteId,
+    confirmingJobId,
     isModalOpen,
     modalInitialJob,
     modalInitialStep,
