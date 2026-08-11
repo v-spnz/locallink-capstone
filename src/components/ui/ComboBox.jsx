@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+
+const toText = (v) => (v === null || v === undefined ? '' : String(v))
 
 export default function ComboBox({
   options = [],
@@ -9,17 +11,8 @@ export default function ComboBox({
   overflowY = 'visible',
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
-  const toText = (v) => (v === null || v === undefined ? '' : String(v))
 
   const [inputText, setInputText] = useState(toText(value))
-
-  useEffect(() => {
-    const isInvalidNumber = typeof value === 'number' && Number.isNaN(value)
-    if (!isFocused && !isInvalidNumber) {
-      setInputText(toText(value))
-    }
-  }, [value, isFocused])
 
   const filteredOptions =
     inputText === ''
@@ -34,6 +27,21 @@ export default function ComboBox({
     onChange?.(option)
   }
 
+  const handleInputChange = (e) => {
+    const newText = e.target.value
+    setInputText(newText)
+    setIsOpen(true)
+    onChange?.(newText)
+  }
+
+  const handleBlur = () => {
+    setTimeout(() => setIsOpen(false), 200)
+    const isInvalidNumber = typeof value === 'number' && Number.isNaN(value)
+    if (!isInvalidNumber) {
+      setInputText(toText(value))
+    }
+  }
+
   return (
     <div
       style={{ position: 'relative', width: '250px', fontFamily: 'sans-serif' }}
@@ -41,20 +49,9 @@ export default function ComboBox({
       <input
         type="text"
         value={inputText}
-        onChange={(e) => {
-          const newText = e.target.value
-          setInputText(newText)
-          setIsOpen(true)
-          onChange?.(newText)
-        }}
-        onFocus={() => {
-          setIsFocused(true)
-          setIsOpen(true)
-        }}
-        onBlur={() => {
-          setIsFocused(false)
-          setTimeout(() => setIsOpen(false), 200)
-        }}
+        onChange={handleInputChange}
+        onFocus={() => setIsOpen(true)}
+        onBlur={handleBlur}
         placeholder={placeholder}
         style={{
           width: '100%',
