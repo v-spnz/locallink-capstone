@@ -2,25 +2,33 @@ import { Check } from 'lucide-react'
 import { JOB_PROGRESS_STAGES, formatJobStatusTimestamp } from '../jobTracking'
 
 export default function ActiveJobProgressTimeline({ job }) {
-  const history = Array.isArray(job.status_history) ? job.status_history : []
+  const currentStatus = job.job_status ?? job.status
+  const history = Array.isArray(job.status_history)
+    ? job.status_history.toSorted(
+        (first, second) =>
+          new Date(first.updated_at).getTime() -
+          new Date(second.updated_at).getTime(),
+      )
+    : []
   const timestampByStatus = Object.fromEntries(
     history.map((entry) => [entry.status, entry.updated_at]),
   )
-  const isPendingCompletion = job.job_status === 'pending_completion'
+  const isPendingCompletion = currentStatus === 'pending_completion'
   const currentIndex = JOB_PROGRESS_STAGES.findIndex(
-    (stage) => stage.value === job.job_status,
+    (stage) => stage.value === currentStatus,
   )
+
+  if (currentIndex === -1 && !isPendingCompletion) return null
 
   return (
     <ol className="service-job-progress-timeline" aria-label="Job progress">
       {JOB_PROGRESS_STAGES.map((stage, index) => {
         const isFinalStage = stage.value === 'completed'
         const isComplete = isFinalStage
-          ? isPendingCompletion || job.job_status === 'completed'
+          ? isPendingCompletion || currentStatus === 'completed'
           : index < currentIndex || isPendingCompletion
         const isCurrent =
-          stage.value === job.job_status ||
-          (isFinalStage && isPendingCompletion)
+          stage.value === currentStatus || (isFinalStage && isPendingCompletion)
         const updatedAt =
           timestampByStatus[stage.value] ??
           (isFinalStage ? timestampByStatus.pending_completion : undefined)

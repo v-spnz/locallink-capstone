@@ -73,9 +73,11 @@ export default function Jobs() {
                 job={job}
                 quotes={marketplace.quotesByJob[job.id] ?? []}
                 respondingQuoteId={marketplace.respondingQuoteId}
+                isConfirmingCompletion={marketplace.confirmingJobId === job.id}
                 onEdit={marketplace.openEditModal}
                 onRepost={marketplace.openRepostModal}
                 onQuoteResponse={marketplace.handleQuoteResponse}
+                onConfirmCompletion={marketplace.handleConfirmCompletion}
               />
             ))}
           </div>

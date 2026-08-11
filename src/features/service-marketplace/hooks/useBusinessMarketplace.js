@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import useBusiness from '../../../business/useBusiness'
 import {
-  completeBusinessJob,
   declineBusinessOpportunity,
   fetchBusinessMarketplaceItems,
   submitBusinessQuote,

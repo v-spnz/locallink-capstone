@@ -1,4 +1,4 @@
-import { CheckCircle2, MapPin } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import Button from '../../../components/ui/Button'
 import ActiveJobProgressTimeline from './ActiveJobProgressTimeline'
 import { formatMoney } from '../formatters'

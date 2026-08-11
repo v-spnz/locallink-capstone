@@ -14,7 +14,18 @@ export function formatStatus(status = '') {
 }
 
 export function getOverallJobStatus(jobs) {
-  if (jobs.some((job) => job.status === 'in_progress')) return 'In Progress'
+  if (
+    jobs.some((job) =>
+      [
+        'accepted',
+        'scheduled',
+        'on_the_way',
+        'in_progress',
+        'pending_completion',
+      ].includes(job.status),
+    )
+  )
+    return 'In Progress'
   if (jobs.some((job) => job.status === 'open')) return 'Job Posted'
   if (jobs.some((job) => job.status === 'completed')) return 'Completed'
   return 'Not Posted'
