@@ -45,7 +45,7 @@ test('AC2 and AC4: the database locks the job and enforces the same order', asyn
 })
 
 test('AC3: every change is timestamped and returned to both parties', async () => {
-  const [migration, providerTimeline, customerCard] = await Promise.all([
+  const [migration, providerTimeline, customerDetail] = await Promise.all([
     readFile(migrationUrl, 'utf8'),
     readFile(
       new URL(
@@ -56,7 +56,7 @@ test('AC3: every change is timestamped and returned to both parties', async () =
     ),
     readFile(
       new URL(
-        '../src/features/service-marketplace/components/CustomerJobCard.jsx',
+        '../src/features/service-marketplace/components/JobDetailPanel.jsx',
         import.meta.url,
       ),
       'utf8',
@@ -67,7 +67,7 @@ test('AC3: every change is timestamped and returned to both parties', async () =
   assert.match(migration, /create trigger job_requests_record_status_change/)
   assert.match(migration, /status_history jsonb/g)
   assert.match(providerTimeline, /formatJobStatusTimestamp\(updatedAt\)/)
-  assert.match(customerCard, /<ActiveJobProgressTimeline job=\{job\} \/>/)
+  assert.match(customerDetail, /<ActiveJobProgressTimeline job=\{job\} \/>/)
   assert.notEqual(formatJobStatusTimestamp('2026-08-11T03:00:00Z'), '')
 })
 
@@ -89,11 +89,11 @@ test('AC5: On the way is a manual status with no location tracking', async () =>
 })
 
 test('AC6: provider completion starts customer confirmation', async () => {
-  const [migration, customerCard] = await Promise.all([
+  const [migration, customerDetail] = await Promise.all([
     readFile(migrationUrl, 'utf8'),
     readFile(
       new URL(
-        '../src/features/service-marketplace/components/CustomerJobCard.jsx',
+        '../src/features/service-marketplace/components/JobDetailPanel.jsx',
         import.meta.url,
       ),
       'utf8',
@@ -103,5 +103,5 @@ test('AC6: provider completion starts customer confirmation', async () => {
   assert.match(migration, /when 'in_progress' then 'pending_completion'/)
   assert.match(migration, /confirm_job_completion/)
   assert.match(migration, /set status = 'completed'/)
-  assert.match(customerCard, /Confirm work completed/)
+  assert.match(customerDetail, /Confirm work completed/)
 })

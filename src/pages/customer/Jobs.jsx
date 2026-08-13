@@ -1,44 +1,47 @@
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import CustomerJobCard from '../../features/service-marketplace/components/CustomerJobCard'
+import JobDetailPanel from '../../features/service-marketplace/components/JobDetailPanel'
 import PostJobModal from '../../features/service-marketplace/components/PostJobModal'
+import QuoteJobSidebar from '../../features/service-marketplace/components/QuoteJobSidebar'
+import QuoteList from '../../features/service-marketplace/components/QuoteList'
 import useCustomerJobs from '../../features/service-marketplace/hooks/useCustomerJobs'
 import '../../features/service-marketplace/ServiceMarketplace.css'
 
 export default function Jobs() {
   const marketplace = useCustomerJobs()
 
+  const selectedJob = marketplace.postedJobs.find(
+    (job) => job.id === marketplace.selectedJobId,
+  )
+  const selectedQuoteJob = marketplace.postedJobs.find(
+    (job) => job.id === marketplace.selectedQuoteJobId,
+  )
+  const totalQuoteCount = Object.values(marketplace.quotesByJob).reduce(
+    (total, list) => total + list.length,
+    0,
+  )
+
   return (
     <>
-      <div className="page-header">
-        <h2>Services</h2>
-        <p>
-          Post a job and receive quotes from local tradespeople in your area.
-        </p>
-      </div>
-
-      <div className="placeholder-section">
-        <div className="placeholder-section-title is-complete">
-          Ready to get quotes?
+      <div className="page-header sm-page-head">
+        <div>
+          <h2>Service Marketplace</h2>
+          <p>Find trusted local help for your next job</p>
         </div>
-        <p
-          style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}
-        >
-          Post a job in a few quick steps and local tradespeople will send you
-          quotes.
-        </p>
         <button
           type="button"
           className="btn-primary"
           onClick={marketplace.openPostModal}
         >
-          Post a Job
+          + Post a Service Job
         </button>
-        {marketplace.successMessage && (
-          <p style={{ color: 'seagreen', marginTop: 10 }}>
-            {marketplace.successMessage}
-          </p>
-        )}
       </div>
+
+      {marketplace.successMessage && (
+        <p style={{ color: 'seagreen', marginBottom: 14 }}>
+          {marketplace.successMessage}
+        </p>
+      )}
 
       {marketplace.isModalOpen && (
         <PostJobModal
@@ -51,38 +54,97 @@ export default function Jobs() {
         />
       )}
 
-      <div className="placeholder-section">
-        <div
-          className={`job-status-header ${
-            marketplace.jobStatus === 'Not Posted' ? 'is-empty' : ''
-          }`}
-        >
-          Job Status: {marketplace.jobStatus}
+      {marketplace.requestError && (
+        <div className="auth-error" role="alert">
+          {marketplace.requestError}
         </div>
-        {marketplace.requestError && (
-          <div className="auth-error" role="alert">
-            {marketplace.requestError}
+      )}
+
+      {marketplace.isLoading && <LoadingSpinner label="Loading your jobs…" />}
+
+      {!marketplace.isLoading && selectedJob && (
+        <JobDetailPanel
+          job={selectedJob}
+          quoteCount={(marketplace.quotesByJob[selectedJob.id] ?? []).length}
+          isConfirmingCompletion={
+            marketplace.confirmingJobId === selectedJob.id
+          }
+          onBack={marketplace.closeJobDetail}
+          onEdit={marketplace.openEditModal}
+          onRepost={marketplace.openRepostModal}
+          onDelete={marketplace.handleDeleteJob}
+          onViewQuotes={marketplace.viewQuotesForJob}
+          onConfirmCompletion={marketplace.handleConfirmCompletion}
+        />
+      )}
+
+      {!marketplace.isLoading && !selectedJob && (
+        <>
+          <div className="sm-tabs">
+            <button
+              type="button"
+              className={`sm-tab${marketplace.activeTab === 'jobs' ? ' sm-tab--active' : ''}`}
+              onClick={() => marketplace.switchTab('jobs')}
+            >
+              My Jobs
+              <span className="sm-tab-count">
+                {marketplace.postedJobs.length}
+              </span>
+            </button>
+            <button
+              type="button"
+              className={`sm-tab${marketplace.activeTab === 'quotes' ? ' sm-tab--active' : ''}`}
+              onClick={() => marketplace.switchTab('quotes')}
+            >
+              Quotes
+              <span className="sm-tab-count">{totalQuoteCount}</span>
+            </button>
           </div>
-        )}
-        {marketplace.isLoading && <LoadingSpinner label="Loading your jobs…" />}
-        {!marketplace.isLoading && marketplace.postedJobs.length > 0 && (
-          <div className="customer-job-list">
-            {marketplace.postedJobs.map((job) => (
-              <CustomerJobCard
-                key={job.id}
-                job={job}
-                quotes={marketplace.quotesByJob[job.id] ?? []}
-                respondingQuoteId={marketplace.respondingQuoteId}
-                isConfirmingCompletion={marketplace.confirmingJobId === job.id}
-                onEdit={marketplace.openEditModal}
-                onRepost={marketplace.openRepostModal}
-                onQuoteResponse={marketplace.handleQuoteResponse}
-                onConfirmCompletion={marketplace.handleConfirmCompletion}
+
+          {marketplace.activeTab === 'jobs' &&
+            marketplace.postedJobs.length > 0 && (
+              <div className="customer-job-list sm-job-grid">
+                {marketplace.postedJobs.map((job) => (
+                  <CustomerJobCard
+                    key={job.id}
+                    job={job}
+                    quoteCount={(marketplace.quotesByJob[job.id] ?? []).length}
+                    onSelect={(selected) =>
+                      marketplace.openJobDetail(selected.id)
+                    }
+                  />
+                ))}
+              </div>
+            )}
+
+          {marketplace.activeTab === 'quotes' && (
+            <div className="sm-quotes-layout">
+              <QuoteJobSidebar
+                jobs={marketplace.postedJobs}
+                quotesByJob={marketplace.quotesByJob}
+                selectedJobId={marketplace.selectedQuoteJobId}
+                onSelect={marketplace.selectQuoteJob}
               />
-            ))}
-          </div>
-        )}
-      </div>
+              <div>
+                {selectedQuoteJob ? (
+                  <QuoteList
+                    jobId={selectedQuoteJob.id}
+                    jobStatus={selectedQuoteJob.status}
+                    quotes={marketplace.quotesByJob[selectedQuoteJob.id] ?? []}
+                    respondingQuoteId={marketplace.respondingQuoteId}
+                    onRespond={marketplace.handleQuoteResponse}
+                    onViewJob={marketplace.openJobDetail}
+                  />
+                ) : (
+                  <p className="sm-empty-sub">
+                    Select a job to see its quotes.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </>
   )
 }
