@@ -215,7 +215,7 @@ export default function useCustomerJobs() {
 
     try {
       const updatedJob = await confirmCustomerJobCompletion(jobId)
-      const acceptedQuote = (quotesByJob[jobRequestId] ?? []).find(
+      const acceptedQuote = (quotesByJob[jobId] ?? []).find(
         (quote) => quote.quote_status === 'accepted',
       )
       if (acceptedQuote?.business_id) {
