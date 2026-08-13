@@ -1,3 +1,4 @@
+import { useLayoutEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import BusinessNavigation from '../../components/navigation/BusinessNavigation'
 import PortalLayout from '../../layouts/PortalLayout'
@@ -10,6 +11,7 @@ import CreateLoyalty from './CreateLoyalty'
 import Settings from './Settings'
 import BusinessOnboarding from './BusinessOnboarding'
 import Services from './Services'
+import './BusinessTypography.css'
 
 function BusinessPage({ children, capability, roles }) {
   return (
@@ -22,6 +24,12 @@ function BusinessPage({ children, capability, roles }) {
 }
 
 export default function BusinessPortal() {
+  useLayoutEffect(() => {
+    document.body.classList.add('business-surface')
+
+    return () => document.body.classList.remove('business-surface')
+  }, [])
+
   return (
     <BusinessProvider>
       <Routes>

@@ -1,0 +1,73 @@
+body.business-surface {
+  --font-ui: 'Figtree', sans-serif;
+  --business-copy: #6b7280;
+  --business-copy-size: 14px;
+  --business-copy-leading: 1.625;
+  --business-primary-gradient: linear-gradient(135deg, #2f4ac4, #4b69e8);
+  --business-hero-gradient: linear-gradient(
+    135deg,
+    #1a2e9e 0%,
+    #2f4ac4 45%,
+    #4b69e8 100%
+  );
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+/*
+ * Business pages and their portalled modals share one UI typeface. The
+ * explicit descendant rule wins over older component-level Inter declarations.
+ */
+body.business-surface *,
+body.business-surface *::before,
+body.business-surface *::after {
+  font-family: var(--font-ui);
+}
+
+/* Supporting and descriptive copy uses the business body-copy scale. */
+body.business-surface .page-header > p,
+body.business-surface .business-module-card > p,
+body.business-surface
+  .placeholder-section
+  > p:not(.form-success, .auth-error, .auth-success),
+body.business-surface .placeholder-box,
+body.business-surface .deal-empty-state,
+body.business-surface .review-introduction,
+body.business-surface .service-lead-description,
+body.business-surface .service-quote-description,
+body.business-surface .service-marketplace-card > p,
+body.business-surface .service-opportunity-copy p,
+body.business-surface .service-opportunity-empty-media,
+body.business-surface .service-quote-job-description p,
+body.business-surface .service-quote-attachment-summary,
+body.business-surface .service-quote-review > p,
+body.business-surface .service-withdraw-confirmation p,
+body.business-surface .service-decline-confirmation p,
+body.business-surface .account-section-copy,
+body.business-surface .business-onboarding-intro p,
+body.business-surface .business-onboarding-section p,
+body.business-surface .business-capability-options small {
+  color: var(--business-copy);
+  font-family: var(--font-ui);
+  font-size: var(--business-copy-size);
+  font-weight: 400;
+  line-height: var(--business-copy-leading);
+}
+
+body.business-surface .btn-primary,
+body.business-surface .business-onboarding-submit {
+  border-color: transparent;
+  background: var(--business-primary-gradient);
+  box-shadow: 0 5px 12px rgb(47 74 196 / 22%);
+}
+
+body.business-surface .btn-primary:hover,
+body.business-surface .business-onboarding-submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #263fae, #405ed7);
+  box-shadow: 0 7px 16px rgb(47 74 196 / 28%);
+}
+
+body.business-surface .business-services-hero .page-header > p {
+  color: rgb(255 255 255 / 78%);
+}

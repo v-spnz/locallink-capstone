@@ -2,7 +2,10 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { formatStatus } from '../src/features/service-marketplace/formatters.js'
-import { validateQuote } from '../src/features/service-marketplace/validation.js'
+import {
+  sanitizeQuoteAmount,
+  validateQuote,
+} from '../src/features/service-marketplace/validation.js'
 
 const VALID_QUOTE = {
   priceType: 'fixed',
@@ -60,6 +63,16 @@ test('AC3: invalid price and past availability are identified', () => {
   assert.match(errors.availability, /past/i)
 })
 
+test('quote price accepts currency digits only', () => {
+  assert.equal(sanitizeQuoteAmount('1e3'), '13')
+  assert.equal(sanitizeQuoteAmount('$1,285.459'), '1285.45')
+  assert.equal(sanitizeQuoteAmount('abc'), '')
+  assert.match(
+    validateQuote({ ...VALID_QUOTE, amount: '1e3' }, TODAY).amount,
+    /valid quote price/i,
+  )
+})
+
 test('arrival window requires an end time after its start time', () => {
   const errors = validateQuote(
     {
@@ -97,13 +110,16 @@ test('AC4: quote entry leads to review and only review confirms submission', asy
   assert.match(form, /QUOTE_DURATION_OPTIONS/)
   assert.match(form, /service-required-mark/)
   assert.match(form, /Price type[\s\S]+service-required-mark/)
+  assert.match(form, /className="service-price-prefix"/)
+  assert.match(form, /inputMode="decimal"/)
+  assert.match(form, /sanitizeQuoteAmount/)
   assert.doesNotMatch(
     form,
     /Message to customer \(optional\)[\s\S]{0,80}service-required-mark/,
   )
-  assert.doesNotMatch(form, /Confirm and submit/)
+  assert.doesNotMatch(form, /Confirm and send/)
   assert.match(review, /Review your quote/)
-  assert.match(review, /Confirm and submit/)
+  assert.match(review, /Confirm and send/)
 })
 
 test('quote submission opens in a modal instead of expanding inside job details', async () => {

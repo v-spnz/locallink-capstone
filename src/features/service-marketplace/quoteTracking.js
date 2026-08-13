@@ -1,7 +1,6 @@
 export const BUSINESS_QUOTE_STATUS_OPTIONS = [
   { value: 'all', label: 'All' },
   { value: 'awaiting_response', label: 'Awaiting response' },
-  { value: 'accepted', label: 'Accepted' },
   { value: 'declined', label: 'Declined' },
   { value: 'expired', label: 'Expired' },
   { value: 'withdrawn', label: 'Withdrawn' },

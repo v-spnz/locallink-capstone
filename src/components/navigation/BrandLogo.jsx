@@ -1,11 +1,17 @@
 import { Link } from 'react-router-dom'
-import { Sparkles } from 'lucide-react'
+import { MapPin, Sparkles } from 'lucide-react'
 
-export default function BrandLogo({ to, badge }) {
+export default function BrandLogo({ to, badge, variant = 'default' }) {
+  const Mark = variant === 'business' ? MapPin : Sparkles
+
   return (
-    <Link className="nav-logo" to={to} aria-label="LocalLink home">
+    <Link
+      className={`nav-logo${variant === 'business' ? ' business-nav-logo' : ''}`}
+      to={to}
+      aria-label="LocalLink home"
+    >
       <span className="nav-logo-mark" aria-hidden="true">
-        <Sparkles />
+        <Mark />
       </span>
       <span>LocalLink</span>
       {badge && <span className="nav-logo-badge">{badge}</span>}

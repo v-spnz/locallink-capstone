@@ -1,12 +1,11 @@
 export const BUSINESS_JOB_STATUS_OPTIONS = [
   { value: 'all', label: 'All' },
   { value: 'in_progress', label: 'Active' },
-  { value: 'completed', label: 'Completed' },
 ]
 
 export const BUSINESS_JOB_ORDER_OPTIONS = [
-  { value: 'active_first', label: 'Active first' },
-  { value: 'completed_first', label: 'Completed first' },
+  { value: 'active_first', label: 'Recently updated' },
+  { value: 'completed_first', label: 'Oldest updated' },
 ]
 
 export const JOB_PROGRESS_STAGES = [
@@ -103,18 +102,13 @@ export function filterBusinessJobs(
   })
 
   return matchingJobs.toSorted((first, second) => {
-    const firstIsActive = !isJobFullyCompleted(first.job_status)
-    const secondIsActive = !isJobFullyCompleted(second.job_status)
-    const wantsActiveFirst = order !== 'completed_first'
-
-    const statusDifference = wantsActiveFirst
-      ? Number(secondIsActive) - Number(firstIsActive)
-      : Number(firstIsActive) - Number(secondIsActive)
-    if (statusDifference !== 0) return statusDifference
-
-    return (
-      new Date(second.accepted_at).getTime() -
-      new Date(first.accepted_at).getTime()
-    )
+    const firstUpdatedAt = new Date(
+      first.status_updated_at ?? first.accepted_at ?? 0,
+    ).getTime()
+    const secondUpdatedAt = new Date(
+      second.status_updated_at ?? second.accepted_at ?? 0,
+    ).getTime()
+    const direction = order === 'completed_first' ? 1 : -1
+    return (firstUpdatedAt - secondUpdatedAt) * direction
   })
 }

@@ -97,8 +97,14 @@ export const MARKETPLACE_PAGE_CONTENT = {
   jobs: {
     eyebrow: 'Service Marketplace',
     title: 'Jobs',
-    description: 'Keep track of active and completed work.',
+    description: 'Keep track of accepted and active work.',
     empty: 'Accepted service jobs will appear here.',
+  },
+  history: {
+    eyebrow: 'Service Marketplace',
+    title: 'Job History',
+    description: 'Review work that has been completed.',
+    empty: 'Completed jobs will appear here.',
   },
 }
 
@@ -113,6 +119,10 @@ export function getMarketplaceEmptyMessage(type, totalItems) {
 
   if (type === 'jobs' && totalItems > 0) {
     return 'No jobs match this status.'
+  }
+
+  if (type === 'history' && totalItems > 0) {
+    return 'No completed jobs match your search.'
   }
 
   return MARKETPLACE_PAGE_CONTENT[type].empty

@@ -76,7 +76,7 @@ test('AC5-7: review supports quoting and confirmed provider-specific decline', a
     readFile(migrationUrl, 'utf8'),
   ])
 
-  assert.match(card, /Submit quote/)
+  assert.match(card, /Send quote/)
   assert.match(card, /View details/)
   assert.match(card, /Decline this opportunity\?/)
   assert.match(card, /Confirm decline/)

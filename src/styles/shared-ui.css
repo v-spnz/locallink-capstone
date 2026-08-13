@@ -65,7 +65,7 @@
   background: var(--blue);
   color: var(--white);
   border: none;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-ui);
   font-size: 14px;
   font-weight: 600;
   padding: 11px 24px;
@@ -84,7 +84,7 @@
   background: #c92a2a;
   color: var(--white);
   border: none;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-ui);
   font-size: 14px;
   font-weight: 600;
   padding: 11px 24px;
@@ -108,7 +108,7 @@
   background: transparent;
   color: var(--blue);
   border: 1.5px solid var(--blue);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-ui);
   font-size: 14px;
   font-weight: 600;
   padding: 11px 24px;
@@ -126,7 +126,7 @@
   background: var(--emerald);
   color: var(--white);
   border: none;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-ui);
   font-size: 14px;
   font-weight: 600;
   padding: 11px 24px;
@@ -156,7 +156,7 @@
   padding: 10px 14px;
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-ui);
   font-size: 14px;
   background: var(--white);
   color: var(--text);
@@ -249,7 +249,7 @@
 }
 
 .nav-logo {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-ui);
   font-weight: 700;
   font-size: 18px;
   color: #202a3a;
@@ -298,7 +298,7 @@
   background: none;
   border: none;
   color: #718096;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 500;
   padding: 9px 12px;
@@ -808,7 +808,7 @@
   border: none;
   background: transparent;
   border-radius: 6px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-ui);
   font-size: 13.5px;
   font-weight: 500;
   color: var(--text-muted);
@@ -923,7 +923,7 @@
   border-radius: 20px;
   cursor: pointer;
   transition: var(--transition);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-ui);
 }
 .pill:hover {
   border-color: var(--blue);
@@ -1136,7 +1136,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   font-size: 13px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-ui);
 }
 .home-search input:focus {
   outline: none;
@@ -1409,7 +1409,7 @@
   cursor: pointer;
   transition: var(--transition);
   margin-top: 16px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-ui);
 }
 .btn-outline:hover {
   border-color: var(--blue);

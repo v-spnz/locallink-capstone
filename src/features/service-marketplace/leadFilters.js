@@ -1,3 +1,5 @@
+import { parseBudgetRange } from './formatters.js'
+
 export const LEAD_URGENCY_FILTERS = {
   all: 'All',
   Urgent: 'Urgent',
@@ -6,15 +8,10 @@ export const LEAD_URGENCY_FILTERS = {
 }
 
 export const LEAD_ORDER_OPTIONS = {
-  urgent_first: 'Urgent first',
-  normal_first: 'Normal first',
-  flexible_first: 'Flexible first',
-}
-
-const LEAD_URGENCY_ORDER = {
-  urgent_first: ['urgent', 'normal', 'flexible'],
-  normal_first: ['normal', 'urgent', 'flexible'],
-  flexible_first: ['flexible', 'urgent', 'normal'],
+  newest: 'Newest',
+  oldest: 'Oldest',
+  highest_budget: 'Highest Budget',
+  lowest_budget: 'Lowest Budget',
 }
 
 const URGENT_DEADLINE_WINDOW_MS = 48 * 60 * 60 * 1000
@@ -23,6 +20,11 @@ function normalize(value) {
   return String(value ?? '')
     .trim()
     .toLocaleLowerCase('en-NZ')
+}
+
+function getBudgetSortValue(budget) {
+  const { minBudget, maxBudget } = parseBudgetRange(budget)
+  return maxBudget ?? minBudget
 }
 
 export function isAvailableLead(lead, now = new Date()) {
@@ -71,12 +73,7 @@ export function isUrgentLead(lead, now = new Date()) {
 
 export function filterAndSortLeads(
   leads,
-  {
-    search = '',
-    urgency = 'all',
-    order = 'urgent_first',
-    now = new Date(),
-  } = {},
+  { search = '', urgency = 'all', order = 'newest', now = new Date() } = {},
 ) {
   const normalizedSearch = normalize(search)
   const normalizedUrgency = normalize(urgency)
@@ -99,16 +96,26 @@ export function filterAndSortLeads(
   })
 
   return matchingLeads.toSorted((first, second) => {
-    const urgencyOrder =
-      LEAD_URGENCY_ORDER[order] ?? LEAD_URGENCY_ORDER.urgent_first
-    const urgencyDifference =
-      urgencyOrder.indexOf(normalize(first.urgency)) -
-      urgencyOrder.indexOf(normalize(second.urgency))
-    if (urgencyDifference !== 0) return urgencyDifference
+    if (order === 'highest_budget' || order === 'lowest_budget') {
+      const firstBudget = getBudgetSortValue(first.budget)
+      const secondBudget = getBudgetSortValue(second.budget)
+      const firstHasBudget = Number.isFinite(firstBudget)
+      const secondHasBudget = Number.isFinite(secondBudget)
 
-    return (
+      if (firstHasBudget !== secondHasBudget) {
+        return firstHasBudget ? -1 : 1
+      }
+
+      if (firstHasBudget && firstBudget !== secondBudget) {
+        return order === 'highest_budget'
+          ? secondBudget - firstBudget
+          : firstBudget - secondBudget
+      }
+    }
+
+    const dateDifference =
       new Date(second.created_at).getTime() -
       new Date(first.created_at).getTime()
-    )
+    return order === 'oldest' ? -dateDifference : dateDifference
   })
 }

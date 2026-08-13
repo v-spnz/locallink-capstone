@@ -24,24 +24,34 @@ export default function BusinessQuoteCard({
           <h3>{item.title}</h3>
         </div>
       </div>
-      {item.description && <p>{item.description}</p>}
+      {item.description && (
+        <p className="service-quote-description">{item.description}</p>
+      )}
       <div className="service-marketplace-meta">
         <span>
           <MapPin aria-hidden="true" />
           {item.suburb}, {item.city}
         </span>
         {item.created_at && (
-          <span>{new Date(item.created_at).toLocaleDateString('en-NZ')}</span>
+          <span className="service-marketplace-timestamp">
+            {new Date(item.created_at).toLocaleDateString('en-NZ')}
+          </span>
         )}
       </div>
       <BusinessQuoteTimeline quote={item} />
       <div className="service-quote-summary">
-        <strong>
+        <strong className="business-structured-data">
           {formatMoney(item.amount_cents)} {priceType && `· ${priceType}`}
         </strong>
-        <span>Available {item.availability_date}</span>
-        <span>Arrival: {item.arrival_window}</span>
-        <span>Duration: {item.expected_duration}</span>
+        <span className="business-structured-data">
+          Available {item.availability_date}
+        </span>
+        <span className="business-structured-data">
+          Arrival: {item.arrival_window}
+        </span>
+        <span className="business-structured-data">
+          Duration: {item.expected_duration}
+        </span>
         <span>Included: {item.included_work}</span>
         <span>Conditions: {item.conditions}</span>
         {item.message && <span>Message: {item.message}</span>}

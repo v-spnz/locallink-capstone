@@ -28,7 +28,7 @@ const CAPABILITY_OPTIONS = [
   {
     key: 'serviceMarketplace',
     label: 'Receive service requests',
-    description: 'Find local job leads and submit quotes.',
+    description: 'Find local job leads and send quotes.',
     icon: BriefcaseBusiness,
   },
 ]

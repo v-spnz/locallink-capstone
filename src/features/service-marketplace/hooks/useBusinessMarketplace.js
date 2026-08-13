@@ -60,7 +60,7 @@ export default function useBusinessMarketplace(type) {
   const [reloadKey, setReloadKey] = useState(0)
   const [search, setSearch] = useState('')
   const [urgencyFilter, setUrgencyFilter] = useState('all')
-  const [leadOrder, setLeadOrder] = useState('urgent_first')
+  const [leadOrder, setLeadOrder] = useState('newest')
   const [quoteStatus, setQuoteStatus] = useState('all')
   const [quoteOrder, setQuoteOrder] = useState('newest')
   const [jobStatus, setJobStatus] = useState('all')
@@ -83,7 +83,7 @@ export default function useBusinessMarketplace(type) {
             order: quoteOrder,
           })
         : filterBusinessJobs(items, {
-            status: jobStatus,
+            status: type === 'history' ? 'completed' : jobStatus,
             search,
             order: jobOrder,
           })
@@ -277,6 +277,7 @@ export default function useBusinessMarketplace(type) {
           ? 'Job marked as completed. Awaiting customer confirmation.'
           : `Job status updated to ${formatJobProgressStage(nextStatus)}.`,
       )
+      notifyBusinessMarketplaceChanged(business.id)
     } catch (updateError) {
       setError(
         formatRequestError(

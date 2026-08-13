@@ -1,10 +1,15 @@
-import { MapPin } from 'lucide-react'
+import { CheckCircle2, MapPin } from 'lucide-react'
 import Button from '../../../components/ui/Button'
 import ActiveJobProgressTimeline from './ActiveJobProgressTimeline'
 import { formatMoney } from '../formatters'
 import { formatJobProgressStage, getNextJobProgressStage } from '../jobTracking'
 
-export default function ActiveJobCard({ item, isUpdating, onAdvanceStatus }) {
+export default function ActiveJobCard({
+  item,
+  isHistory = false,
+  isUpdating,
+  onAdvanceStatus,
+}) {
   const nextStatus = getNextJobProgressStage(item.job_status)
 
   return (
@@ -13,6 +18,12 @@ export default function ActiveJobCard({ item, isUpdating, onAdvanceStatus }) {
         <div>
           <h3>{item.title}</h3>
         </div>
+        {isHistory && (
+          <span className="service-history-status">
+            <CheckCircle2 aria-hidden="true" />
+            Completed
+          </span>
+        )}
       </div>
       {item.description && <p>{item.description}</p>}
       <div className="service-marketplace-meta">
@@ -21,12 +32,26 @@ export default function ActiveJobCard({ item, isUpdating, onAdvanceStatus }) {
           {item.suburb}, {item.city}
         </span>
         {item.created_at && (
-          <span>{new Date(item.created_at).toLocaleDateString('en-NZ')}</span>
+          <span className="service-marketplace-timestamp">
+            {new Date(item.created_at).toLocaleDateString('en-NZ')}
+          </span>
         )}
       </div>
       <ActiveJobProgressTimeline job={item} />
+      {isHistory && item.status_updated_at && (
+        <p className="service-history-completed-at">
+          Completed{' '}
+          {new Date(item.status_updated_at).toLocaleDateString('en-NZ', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          })}
+        </p>
+      )}
       <div className="service-quote-summary">
-        <strong>{formatMoney(item.amount_cents)}</strong>
+        <strong className="business-structured-data">
+          {formatMoney(item.amount_cents)}
+        </strong>
         {item.message && <span>{item.message}</span>}
       </div>
       {nextStatus && (

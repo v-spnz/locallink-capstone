@@ -5,6 +5,18 @@ import {
   QUOTE_DURATION_OPTIONS,
   QUOTE_PRICE_TYPES,
 } from '../constants'
+import { sanitizeQuoteAmount } from '../validation'
+
+const AMOUNT_CONTROL_KEYS = new Set([
+  'Backspace',
+  'Delete',
+  'ArrowLeft',
+  'ArrowRight',
+  'Home',
+  'End',
+  'Tab',
+  'Enter',
+])
 
 function FieldError({ id, message }) {
   if (!message) return null
@@ -35,6 +47,13 @@ export default function QuoteForm({
     String(today.getDate()).padStart(2, '0'),
   ].join('-')
 
+  function handleAmountKeyDown(event) {
+    if (event.ctrlKey || event.metaKey || event.altKey) return
+    if (AMOUNT_CONTROL_KEYS.has(event.key) || /^\d$/.test(event.key)) return
+    if (event.key === '.' && !String(quote.amount ?? '').includes('.')) return
+    event.preventDefault()
+  }
+
   return (
     <form className="service-quote-form" onSubmit={onReview} noValidate>
       <div className="service-quote-form-grid">
@@ -62,18 +81,27 @@ export default function QuoteForm({
           <span>
             Price (NZD) <span className="service-required-mark">*</span>
           </span>
-          <input
-            required
-            type="number"
-            min="1"
-            max="1000000"
-            step="0.01"
-            value={quote.amount}
-            onChange={(event) => onChange('amount', event.target.value)}
-            placeholder="e.g. 185.00"
-            disabled={isSaving}
-            {...fieldErrorProps('amount', errors)}
-          />
+          <span className="service-price-input">
+            <span className="service-price-prefix" aria-hidden="true">
+              $
+            </span>
+            <input
+              required
+              type="text"
+              inputMode="decimal"
+              pattern="\d+(\.\d{1,2})?"
+              maxLength="10"
+              value={quote.amount}
+              onKeyDown={handleAmountKeyDown}
+              onChange={(event) =>
+                onChange('amount', sanitizeQuoteAmount(event.target.value))
+              }
+              placeholder="185.00"
+              autoComplete="off"
+              disabled={isSaving}
+              {...fieldErrorProps('amount', errors)}
+            />
+          </span>
           <FieldError id="quote-amount-error" message={errors.amount} />
         </label>
         <label>

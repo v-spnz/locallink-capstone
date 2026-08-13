@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
+
+test('business pages use Figtree for UI text and numeric data', async () => {
+  const [portal, typography] = await Promise.all([
+    readFile(
+      new URL('../src/pages/business/BusinessPortal.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/pages/business/BusinessTypography.css', import.meta.url),
+      'utf8',
+    ),
+  ])
+
+  assert.match(portal, /classList\.add\('business-surface'\)/)
+  assert.match(portal, /classList\.remove\('business-surface'\)/)
+  assert.match(typography, /body\.business-surface \*/)
+  assert.match(typography, /--font-ui: 'Figtree'/)
+  assert.doesNotMatch(typography, /DM Mono|font-data/)
+  assert.match(typography, /--business-copy-size: 14px/)
+  assert.match(typography, /--business-copy-leading: 1\.625/)
+  assert.match(typography, /--business-primary-gradient/)
+  assert.match(typography, /--business-hero-gradient/)
+  assert.match(typography, /\.service-marketplace-card > p/)
+  assert.match(typography, /\.service-lead-description/)
+})

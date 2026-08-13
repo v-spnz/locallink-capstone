@@ -8,6 +8,16 @@ import {
 } from './constants.js'
 import jobtypes from '../../data/jobtypes.js'
 
+export function sanitizeQuoteAmount(value) {
+  const numericValue = String(value ?? '').replace(/[^\d.]/g, '')
+  const hasDecimal = numericValue.includes('.')
+  const [whole = '', ...decimalParts] = numericValue.split('.')
+  const decimal = decimalParts.join('').slice(0, 2)
+  const limitedWhole = whole.slice(0, 7)
+
+  return hasDecimal ? `${limitedWhole}.${decimal}` : limitedWhole
+}
+
 export function validateJobWizardStep(step, draft, suburbOptions) {
   const errors = {}
 
@@ -81,7 +91,9 @@ export function validateJobWizardStep(step, draft, suburbOptions) {
 
 export function validateQuote(values, today = new Date()) {
   const errors = {}
-  const amount = Number(values.amount)
+  const amountText = String(values.amount ?? '')
+  const amount = Number(amountText)
+  const hasValidCurrencyFormat = /^\d+(\.\d{1,2})?$/.test(amountText)
   const todayValue = new Date(today)
   const localToday = [
     todayValue.getFullYear(),
@@ -91,7 +103,12 @@ export function validateQuote(values, today = new Date()) {
 
   if (!QUOTE_PRICE_TYPES.some(({ value }) => value === values.priceType))
     errors.priceType = 'Please select a price type.'
-  if (!Number.isFinite(amount) || amount < 1 || amount > 1000000)
+  if (
+    !hasValidCurrencyFormat ||
+    !Number.isFinite(amount) ||
+    amount < 1 ||
+    amount > 1000000
+  )
     errors.amount = 'Enter a valid quote price between $1 and $1,000,000.'
   if (!values.availability)
     errors.availability = 'Please select an available date.'
