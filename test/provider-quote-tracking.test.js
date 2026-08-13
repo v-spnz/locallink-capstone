@@ -21,7 +21,6 @@ test('AC1: every provider quote outcome has the required display status', () => 
     BUSINESS_QUOTE_STATUS_OPTIONS.slice(1).map(({ label }) => label),
     [
       'Awaiting response',
-      'Accepted',
       'Declined',
       'Expired',
       'Withdrawn',
@@ -194,6 +193,34 @@ test('AC5: an accepted quote links to the business active job', async () => {
   )
   assert.match(component, /item\.quote_status === 'accepted'/)
   assert.match(component, /to="\/business\/services\?tab=jobs"/)
+})
+
+test('accepted quotes leave quote tracking and completed jobs leave active jobs', async () => {
+  const [migration, api] = await Promise.all([
+    readFile(
+      new URL(
+        '../supabase/migrations/20260816000000_separate_job_history_and_add_business_notifications.sql',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/service-marketplace/api/businessJobs.js',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
+
+  assert.match(migration, /quote\.status <> 'accepted'/)
+  assert.match(
+    migration,
+    /create function public\.get_business_job_history[\s\S]+job\.status = 'completed'/,
+  )
+  assert.match(api, /item\.quote_status !== 'accepted'/)
+  assert.match(api, /item\.job_status !== 'completed'/)
+  assert.match(api, /item\.job_status === 'completed'/)
 })
 
 test('AC6: awaiting quote withdrawal requires explicit confirmation', async () => {

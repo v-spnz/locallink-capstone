@@ -4,6 +4,7 @@ const RPC_BY_TYPE = {
   leads: 'get_business_job_leads',
   quotes: 'get_business_quotes',
   jobs: 'get_business_active_jobs',
+  history: 'get_business_job_history',
 }
 
 const pendingMarketplaceRequests = new Map()
@@ -37,7 +38,17 @@ export function fetchBusinessMarketplaceItems(type, businessId) {
         })
       }
       const items = result.data ?? []
-      return type === 'leads' ? items.filter((item) => !item.has_quote) : items
+      if (type === 'leads') return items.filter((item) => !item.has_quote)
+      if (type === 'quotes') {
+        return items.filter((item) => item.quote_status !== 'accepted')
+      }
+      if (type === 'jobs') {
+        return items.filter((item) => item.job_status !== 'completed')
+      }
+      if (type === 'history') {
+        return items.filter((item) => item.job_status === 'completed')
+      }
+      return items
     } finally {
       pendingMarketplaceRequests.delete(requestKey)
     }

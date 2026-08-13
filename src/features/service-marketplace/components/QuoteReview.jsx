@@ -52,7 +52,7 @@ export default function QuoteReview({ quote, isSaving, onEdit, onSubmit }) {
           Edit quote
         </Button>
         <Button onClick={onSubmit} disabled={isSaving}>
-          {isSaving ? 'Submitting…' : 'Confirm and submit'}
+          {isSaving ? 'Sending…' : 'Confirm and send'}
           {!isSaving && <Check aria-hidden="true" />}
         </Button>
       </div>

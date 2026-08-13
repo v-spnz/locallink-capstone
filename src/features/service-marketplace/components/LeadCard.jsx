@@ -158,7 +158,7 @@ export default function LeadCard({
               {isReviewOpen ? 'Hide details' : 'View details'}
             </Button>
             <Button onClick={toggleQuoteForm} disabled={isSaving}>
-              {isSelected ? 'Close quote form' : 'Submit quote'}
+              {isSelected ? 'Close quote form' : 'Send quote'}
             </Button>
           </div>
           <button
@@ -251,7 +251,7 @@ export default function LeadCard({
           >
             <header>
               <div>
-                <span>Submit a quote</span>
+                <span>Send a quote</span>
                 <h2 id={`quote-modal-${item.job_request_id}`}>
                   {details.title}
                 </h2>

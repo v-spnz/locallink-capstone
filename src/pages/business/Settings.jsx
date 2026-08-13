@@ -1,6 +1,13 @@
+import { useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import useBusiness from '../../business/useBusiness'
+import { supabase } from '../../lib/supabase'
 
 export default function Settings() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [logoutError, setLogoutError] = useState('')
   const {
     business,
     membership,
@@ -16,13 +23,46 @@ export default function Settings() {
     capabilities.service_marketplace_enabled && 'Service Marketplace',
   ].filter(Boolean)
 
+  useEffect(() => {
+    if (!location.hash) return undefined
+
+    const sectionId = location.hash.slice(1)
+    const scrollFrame = window.requestAnimationFrame(() => {
+      document.getElementById(sectionId)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    })
+
+    return () => window.cancelAnimationFrame(scrollFrame)
+  }, [location.hash])
+
+  async function handleLogout() {
+    setIsLoggingOut(true)
+    setLogoutError('')
+
+    const { error } = await supabase.auth.signOut()
+
+    if (error) {
+      console.error('Logout failed:', error.message)
+      setLogoutError('Unable to log out. Please try again.')
+      setIsLoggingOut(false)
+      return
+    }
+
+    navigate('/login', { replace: true })
+  }
+
   return (
     <>
       <div className="page-header">
         <h2>Settings</h2>
         <p>Manage your business profile and notification preferences.</p>
       </div>
-      <div className="placeholder-section">
+      <div
+        className="placeholder-section business-settings-section"
+        id="profile-details"
+      >
         <div className="placeholder-section-title">Business Profile</div>
         <div className="form-group">
           <label className="form-label">Business Name</label>
@@ -101,6 +141,45 @@ export default function Settings() {
           </div>
         </div>
       )}
+
+      <div
+        className="placeholder-section business-settings-section"
+        id="notification-preferences"
+      >
+        <div className="placeholder-section-title">
+          Notification Preferences
+        </div>
+        <p>
+          Notification controls will be available here as the business account
+          settings are expanded.
+        </p>
+      </div>
+
+      <div className="placeholder-section business-settings-section">
+        <div className="placeholder-section-title">Account</div>
+        <p>
+          Switch to your consumer portal without signing out, or log out of
+          LocalLink on this device.
+        </p>
+        {logoutError && (
+          <div className="error" role="alert">
+            {logoutError}
+          </div>
+        )}
+        <div className="business-settings-actions">
+          <Link className="btn-secondary" to="/home">
+            Go to consumer portal
+          </Link>
+          <button
+            type="button"
+            className="btn-danger"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+          >
+            {isLoggingOut ? 'Logging out…' : 'Log Out'}
+          </button>
+        </div>
+      </div>
     </>
   )
 }

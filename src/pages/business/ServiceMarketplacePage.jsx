@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from 'react'
+import { Check, ChevronDown, Funnel } from 'lucide-react'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import ActiveJobCard from '../../features/service-marketplace/components/ActiveJobCard'
 import BusinessQuoteCard from '../../features/service-marketplace/components/BusinessQuoteCard'
@@ -17,6 +19,85 @@ import {
   BUSINESS_QUOTE_STATUS_OPTIONS,
 } from '../../features/service-marketplace/quoteTracking'
 import '../../features/service-marketplace/ServiceMarketplace.css'
+
+function MarketplaceSelect({
+  label,
+  value,
+  options,
+  onChange,
+  variant,
+  useLabelForAll = false,
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef(null)
+  const selectedLabel = options.find((option) => option.value === value)?.label
+  const displayLabel = useLabelForAll && value === 'all' ? label : selectedLabel
+
+  useEffect(() => {
+    if (!isOpen) return undefined
+
+    function closeOnOutsideClick(event) {
+      if (!dropdownRef.current?.contains(event.target)) setIsOpen(false)
+    }
+
+    function closeOnEscape(event) {
+      if (event.key === 'Escape') setIsOpen(false)
+    }
+
+    document.addEventListener('pointerdown', closeOnOutsideClick)
+    document.addEventListener('keydown', closeOnEscape)
+
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [isOpen])
+
+  return (
+    <div
+      className={`service-toolbar-select is-${variant}${isOpen ? ' is-open' : ''}`}
+      ref={dropdownRef}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setIsOpen(false)
+      }}
+    >
+      <button
+        type="button"
+        className="service-toolbar-select-trigger"
+        aria-label={label}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((current) => !current)}
+      >
+        {variant === 'filter' && <Funnel aria-hidden="true" />}
+        <span>{displayLabel || label}</span>
+        {variant !== 'filter' && (
+          <ChevronDown className="service-toolbar-chevron" aria-hidden="true" />
+        )}
+      </button>
+      {isOpen && (
+        <div className="service-toolbar-menu" role="listbox" aria-label={label}>
+          {options.map((option) => (
+            <button
+              type="button"
+              className={option.value === value ? 'is-selected' : ''}
+              role="option"
+              aria-selected={option.value === value}
+              key={option.value}
+              onClick={() => {
+                onChange(option.value)
+                setIsOpen(false)
+              }}
+            >
+              <span>{option.label}</span>
+              {option.value === value && <Check aria-hidden="true" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function ServiceMarketplacePage({ type }) {
   const marketplace = useBusinessMarketplace(type)
@@ -52,34 +133,27 @@ export function ServiceMarketplaceContent({ type, marketplace }) {
               placeholder="Search by keyword"
             />
           </label>
-          <label>
-            <span>Filter</span>
-            <select
+          <div className="service-toolbar-controls">
+            <MarketplaceSelect
+              label="Filter"
+              variant="filter"
               value={marketplace.urgencyFilter}
-              onChange={(event) =>
-                marketplace.setUrgencyFilter(event.target.value)
-              }
-            >
-              {Object.entries(LEAD_URGENCY_FILTERS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Order</span>
-            <select
+              options={Object.entries(LEAD_URGENCY_FILTERS).map(
+                ([value, label]) => ({ value, label }),
+              )}
+              onChange={marketplace.setUrgencyFilter}
+              useLabelForAll
+            />
+            <MarketplaceSelect
+              label="Order"
+              variant="order"
               value={marketplace.leadOrder}
-              onChange={(event) => marketplace.setLeadOrder(event.target.value)}
-            >
-              {Object.entries(LEAD_ORDER_OPTIONS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+              options={Object.entries(LEAD_ORDER_OPTIONS).map(
+                ([value, label]) => ({ value, label }),
+              )}
+              onChange={marketplace.setLeadOrder}
+            />
+          </div>
         </div>
       )}
 
@@ -97,36 +171,23 @@ export function ServiceMarketplaceContent({ type, marketplace }) {
               placeholder="Search by keyword"
             />
           </label>
-          <label>
-            <span>Status</span>
-            <select
+          <div className="service-toolbar-controls">
+            <MarketplaceSelect
+              label="Filter"
+              variant="filter"
               value={marketplace.quoteStatus}
-              onChange={(event) =>
-                marketplace.setQuoteStatus(event.target.value)
-              }
-            >
-              {BUSINESS_QUOTE_STATUS_OPTIONS.map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Order</span>
-            <select
+              options={BUSINESS_QUOTE_STATUS_OPTIONS}
+              onChange={marketplace.setQuoteStatus}
+              useLabelForAll
+            />
+            <MarketplaceSelect
+              label="Order"
+              variant="order"
               value={marketplace.quoteOrder}
-              onChange={(event) =>
-                marketplace.setQuoteOrder(event.target.value)
-              }
-            >
-              {BUSINESS_QUOTE_ORDER_OPTIONS.map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+              options={BUSINESS_QUOTE_ORDER_OPTIONS}
+              onChange={marketplace.setQuoteOrder}
+            />
+          </div>
         </div>
       )}
 
@@ -144,31 +205,39 @@ export function ServiceMarketplaceContent({ type, marketplace }) {
               placeholder="Search by keyword"
             />
           </label>
-          <label>
-            <span>Status</span>
-            <select
+          <div className="service-toolbar-controls">
+            <MarketplaceSelect
+              label="Filter"
+              variant="filter"
               value={marketplace.jobStatus}
-              onChange={(event) => marketplace.setJobStatus(event.target.value)}
-            >
-              {BUSINESS_JOB_STATUS_OPTIONS.map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Order</span>
-            <select
+              options={BUSINESS_JOB_STATUS_OPTIONS}
+              onChange={marketplace.setJobStatus}
+              useLabelForAll
+            />
+            <MarketplaceSelect
+              label="Order"
+              variant="order"
               value={marketplace.jobOrder}
-              onChange={(event) => marketplace.setJobOrder(event.target.value)}
-            >
-              {BUSINESS_JOB_ORDER_OPTIONS.map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+              options={BUSINESS_JOB_ORDER_OPTIONS}
+              onChange={marketplace.setJobOrder}
+            />
+          </div>
+        </div>
+      )}
+
+      {type === 'history' && !marketplace.isLoading && !marketplace.error && (
+        <div
+          className="service-marketplace-toolbar service-history-toolbar"
+          aria-label="Search completed job history"
+        >
+          <label className="service-marketplace-search">
+            <span>Search job history</span>
+            <input
+              type="search"
+              value={marketplace.search}
+              onChange={(event) => marketplace.setSearch(event.target.value)}
+              placeholder="Search completed jobs"
+            />
           </label>
         </div>
       )}
@@ -241,6 +310,7 @@ export function ServiceMarketplaceContent({ type, marketplace }) {
               <ActiveJobCard
                 key={item.quote_id ?? item.job_request_id}
                 item={item}
+                isHistory={type === 'history'}
                 isUpdating={marketplace.updatingJobId === item.job_request_id}
                 onAdvanceStatus={() =>
                   marketplace.handleAdvanceJobStatus(

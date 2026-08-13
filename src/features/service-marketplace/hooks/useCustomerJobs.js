@@ -7,6 +7,7 @@ import {
   saveCustomerJob,
 } from '../api/customerJobs'
 import { formatRequestError, getOverallJobStatus } from '../formatters'
+import { notifyBusinessMarketplaceChanged } from '../marketplaceEvents'
 
 function groupQuotesByJob(quotes) {
   return quotes.reduce((groupedQuotes, quote) => {
@@ -157,6 +158,12 @@ export default function useCustomerJobs() {
 
     try {
       await respondToCustomerQuote(quoteId, accept)
+      const updatedQuote = Object.values(quotesByJob)
+        .flat()
+        .find((quote) => quote.quote_id === quoteId)
+      if (updatedQuote?.business_id) {
+        notifyBusinessMarketplaceChanged(updatedQuote.business_id)
+      }
       setSuccessMessage(accept ? 'Quote accepted!' : 'Quote declined.')
       setReloadKey((current) => current + 1)
     } catch {
@@ -177,6 +184,12 @@ export default function useCustomerJobs() {
 
     try {
       const updatedJob = await confirmCustomerJobCompletion(jobRequestId)
+      const acceptedQuote = (quotesByJob[jobRequestId] ?? []).find(
+        (quote) => quote.quote_status === 'accepted',
+      )
+      if (acceptedQuote?.business_id) {
+        notifyBusinessMarketplaceChanged(acceptedQuote.business_id)
+      }
       setPostedJobs((current) =>
         current.map((job) =>
           job.id === jobRequestId

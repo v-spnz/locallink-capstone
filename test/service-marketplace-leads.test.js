@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { getMarketplaceEmptyMessage } from '../src/features/service-marketplace/constants.js'
 import {
@@ -20,6 +21,7 @@ function lead(overrides = {}) {
     suburb: 'Mount Eden',
     city: 'Auckland',
     urgency: 'Normal',
+    budget: '$100 - $250',
     job_status: 'open',
     quote_count: 1,
     max_quotes: 3,
@@ -148,23 +150,78 @@ test('AC9: urgency filters use the value stored with each job', () => {
   )
 })
 
-test('leads can be ordered with each urgency first', () => {
+test('leads can be ordered by age and budget without displaying budget', () => {
   const jobs = [
-    lead({ title: 'Normal job', urgency: 'Normal' }),
-    lead({ title: 'Flexible job', urgency: 'Flexible' }),
-    lead({ title: 'Urgent job', urgency: 'Urgent' }),
+    lead({
+      title: 'Middle budget',
+      budget: '$250 - $500',
+      created_at: '2026-08-07T00:00:00Z',
+    }),
+    lead({
+      title: 'Highest budget',
+      budget: '$1000+',
+      created_at: '2026-08-06T00:00:00Z',
+    }),
+    lead({
+      title: 'Newest and lowest budget',
+      budget: 'Up to $100',
+      created_at: '2026-08-08T00:00:00Z',
+    }),
   ]
 
   assert.equal(
-    filterAndSortLeads(jobs, { order: 'urgent_first', now: NOW })[0].title,
-    'Urgent job',
+    filterAndSortLeads(jobs, { order: 'newest', now: NOW })[0].title,
+    'Newest and lowest budget',
   )
   assert.equal(
-    filterAndSortLeads(jobs, { order: 'normal_first', now: NOW })[0].title,
-    'Normal job',
+    filterAndSortLeads(jobs, { order: 'oldest', now: NOW })[0].title,
+    'Highest budget',
   )
   assert.equal(
-    filterAndSortLeads(jobs, { order: 'flexible_first', now: NOW })[0].title,
-    'Flexible job',
+    filterAndSortLeads(jobs, { order: 'highest_budget', now: NOW })[0].title,
+    'Highest budget',
   )
+  assert.equal(
+    filterAndSortLeads(jobs, { order: 'lowest_budget', now: NOW })[0].title,
+    'Newest and lowest budget',
+  )
+})
+
+test('budget sorting keeps leads without a budget at the end', () => {
+  const jobs = [
+    lead({ title: 'No budget', budget: null }),
+    lead({ title: 'Has budget', budget: '$100 - $250' }),
+  ]
+
+  assert.equal(
+    filterAndSortLeads(jobs, { order: 'highest_budget', now: NOW })[0].title,
+    'Has budget',
+  )
+  assert.equal(
+    filterAndSortLeads(jobs, { order: 'lowest_budget', now: NOW })[0].title,
+    'Has budget',
+  )
+})
+
+test('lead budget is available for sorting but is not rendered on cards', async () => {
+  const [migration, leadCard] = await Promise.all([
+    readFile(
+      new URL(
+        '../supabase/migrations/20260817000000_expose_lead_budget_for_sorting.sql',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/service-marketplace/components/LeadCard.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
+
+  assert.match(migration, /budget text/)
+  assert.match(migration, /job\.budget::text/)
+  assert.doesNotMatch(leadCard, /item\.budget|details\.budget/i)
 })
