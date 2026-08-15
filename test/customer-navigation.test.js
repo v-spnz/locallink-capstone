@@ -19,7 +19,7 @@ test('consumer navigation uses the business navbar design and icon links', async
   }
 })
 
-test('consumer notification bell is present without notification behaviour', async () => {
+test('customer notifications include a dismiss action button', async () => {
   const navigation = await readFile(
     new URL(
       '../src/components/navigation/CustomerNavigation.jsx',
@@ -29,9 +29,10 @@ test('consumer notification bell is present without notification behaviour', asy
   )
 
   assert.match(navigation, /className="business-notification-button"/)
-  assert.match(navigation, /aria-label="Notifications coming soon"/)
-  assert.match(navigation, /aria-disabled="true"/)
-  assert.doesNotMatch(navigation, /onClick=/)
-  assert.doesNotMatch(navigation, /useBusinessNotifications/)
-  assert.doesNotMatch(navigation, /notification-dropdown/)
+  assert.match(
+    navigation,
+    /aria-label="Dismiss notification"|title="Dismiss notification"/,
+  )
+  assert.match(navigation, /event\.preventDefault\(\)/)
+  assert.match(navigation, /deleteNotification\(/)
 })

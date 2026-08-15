@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import useAuth from '../../../auth/useAuth'
 import {
   confirmCustomerJobCompletion,
@@ -8,7 +9,10 @@ import {
   saveCustomerJob,
 } from '../api/customerJobs'
 import { formatRequestError, getOverallJobStatus } from '../formatters'
-import { notifyBusinessMarketplaceChanged } from '../marketplaceEvents'
+import {
+  notifyBusinessMarketplaceChanged,
+  subscribeToCustomerMarketplaceChanges,
+} from '../marketplaceEvents'
 
 function groupQuotesByJob(quotes) {
   return quotes.reduce((groupedQuotes, quote) => {
@@ -20,8 +24,6 @@ function groupQuotesByJob(quotes) {
   }, {})
 }
 
-// Keeps status_history sorted oldest-first, which
-// ActiveJobProgressTimeline relies on.
 function normalizeJob(job) {
   const statusHistory = Array.isArray(job.status_history)
     ? job.status_history.toSorted(
@@ -40,6 +42,7 @@ function normalizeJob(job) {
 
 export default function useCustomerJobs() {
   const { user } = useAuth()
+  const [searchParams] = useSearchParams()
   const [postedJobs, setPostedJobs] = useState([])
   const [quotesByJob, setQuotesByJob] = useState({})
   const [successMessage, setSuccessMessage] = useState('')
@@ -58,7 +61,19 @@ export default function useCustomerJobs() {
   const [selectedJobId, setSelectedJobId] = useState(null)
   const [activeTab, setActiveTab] = useState('jobs')
   const [selectedQuoteJobId, setSelectedQuoteJobId] = useState(null)
+  const [selectedQuoteId, setSelectedQuoteId] = useState(null)
   const [confirmingJobId, setConfirmingJobId] = useState(null)
+
+  const jobIdFromUrl = searchParams.get('job')
+  const quoteIdFromUrl = searchParams.get('quote')
+  const effectiveSelectedJobId = quoteIdFromUrl
+    ? null
+    : (jobIdFromUrl ?? selectedJobId)
+  const effectiveSelectedQuoteJobId = quoteIdFromUrl
+    ? (jobIdFromUrl ?? selectedQuoteJobId)
+    : selectedQuoteJobId
+  const effectiveSelectedQuoteId = quoteIdFromUrl ?? selectedQuoteId
+  const effectiveActiveTab = quoteIdFromUrl ? 'quotes' : activeTab
 
   const jobStatus = getOverallJobStatus(postedJobs)
   const modalInitialJob = editingJob || repostSeed
@@ -90,6 +105,13 @@ export default function useCustomerJobs() {
     const timer = setTimeout(() => setSuccessMessage(''), 2000)
     return () => clearTimeout(timer)
   }, [successMessage])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToCustomerMarketplaceChanges(() => {
+      setReloadKey((current) => current + 1)
+    })
+    return unsubscribe
+  }, [])
 
   function openPostModal() {
     setEditingJob(null)
@@ -133,6 +155,7 @@ export default function useCustomerJobs() {
   function switchTab(tab) {
     setActiveTab(tab)
     setSelectedJobId(null)
+    setSelectedQuoteId(null)
     if (tab === 'quotes' && !selectedQuoteJobId && postedJobs.length > 0) {
       setSelectedQuoteJobId(postedJobs[0].id)
     }
@@ -140,12 +163,14 @@ export default function useCustomerJobs() {
 
   function viewQuotesForJob(jobId) {
     setSelectedQuoteJobId(jobId)
+    setSelectedQuoteId(null)
     setSelectedJobId(null)
     setActiveTab('quotes')
   }
 
   function selectQuoteJob(jobId) {
     setSelectedQuoteJobId(jobId)
+    setSelectedQuoteId(null)
   }
 
   async function handleSubmitJob(draft) {
@@ -270,9 +295,10 @@ export default function useCustomerJobs() {
     modalInitialStep,
     isSaving,
     modalError,
-    selectedJobId,
-    activeTab,
-    selectedQuoteJobId,
+    selectedJobId: effectiveSelectedJobId,
+    activeTab: effectiveActiveTab,
+    selectedQuoteJobId: effectiveSelectedQuoteJobId,
+    selectedQuoteId: effectiveSelectedQuoteId,
     confirmingJobId,
     openPostModal,
     openEditModal,
