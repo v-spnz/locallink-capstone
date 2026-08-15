@@ -5,7 +5,11 @@ create table public.customer_notifications (
     notification_type in (
       'new_quote',
       'quote_withdrawn',
-      'job_completed'
+      'job_completed',
+      'job_scheduled',
+      'on_the_way',
+      'in_progress',
+
     )
   ),
   title text not null,
