@@ -14,7 +14,7 @@ import {
 } from '../src/features/service-marketplace/quoteTracking.js'
 
 const migrationUrl = new URL(
-  '../supabase/migrations/20260814000000_track_provider_quote_outcomes.sql',
+  '../supabase/migrations/20260814005000_track_provider_quote_outcomes.sql',
   import.meta.url,
 )
 const quoteJobDetailsMigrationUrl = new URL(

@@ -1,6 +1,6 @@
 begin;
 
-select plan(25);
+select plan(27);
 
 select is(
   (select count(*)::integer from cron.job where jobname = 'create-due-quote-deadline-notifications-hourly'),
@@ -45,6 +45,46 @@ select is(
   true,
   'deadline reminder results expose the related quote for deep linking'
 );
+select is(
+  public.dismiss_business_notification(
+    '21000000-0000-0000-0000-000000000001',
+    (
+      select id
+      from public.business_notifications
+      where business_id = '21000000-0000-0000-0000-000000000001'
+        and notification_type = 'quote_deadline_reminder'
+      limit 1
+    )
+  ),
+  1,
+  'a seeded provider can dismiss one business notification'
+);
+select is(
+  (
+    select count(*)::integer
+    from public.business_notifications
+    where business_id = '21000000-0000-0000-0000-000000000001'
+      and notification_type = 'quote_deadline_reminder'
+  ),
+  0,
+  'dismissing one business notification removes only that row'
+);
+reset role;
+insert into public.business_notifications (
+  business_id,
+  notification_type,
+  title,
+  message,
+  destination
+)
+values (
+  '21000000-0000-0000-0000-000000000001',
+  'new_lead',
+  'Disposable notification',
+  'Created by the database test for dismiss all.',
+  '/business/services'
+);
+set local role authenticated;
 select cmp_ok(
   public.dismiss_business_notifications(
     '21000000-0000-0000-0000-000000000001'

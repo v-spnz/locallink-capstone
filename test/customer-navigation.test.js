@@ -28,7 +28,12 @@ test('customer notifications include a dismiss action button', async () => {
     'utf8',
   )
 
-  assert.match(navigation, /className="business-notification-button"/)
+  assert.match(navigation, /business-notification-button/)
+  assert.match(navigation, /business-notification-button.*has-unread/)
+  assert.match(
+    navigation,
+    /fill=\{unreadCount > 0 \? 'currentColor' : 'none'\}/,
+  )
   assert.match(
     navigation,
     /aria-label="Dismiss notification"|title="Dismiss notification"/,

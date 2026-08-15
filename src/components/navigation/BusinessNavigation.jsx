@@ -10,6 +10,7 @@ import {
   Gift,
   LayoutDashboard,
   UsersRound,
+  X,
   Zap,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -94,18 +95,16 @@ export default function BusinessNavigation() {
   const location = useLocation()
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
-  const [deadlineTestMessage, setDeadlineTestMessage] = useState('')
   const accountMenuRef = useRef(null)
   const notificationMenuRef = useRef(null)
   const {
     notifications,
     unreadCount,
     isLoading: areNotificationsLoading,
-    isCreatingDeadlineTest,
     isDismissing,
     refresh: refreshNotifications,
     markAllRead,
-    createDeadlineReminderTest,
+    dismissOne,
     dismissAll,
   } = useBusinessNotifications()
   const canManageBusiness = ['owner', 'admin'].includes(membership.role)
@@ -198,16 +197,6 @@ export default function BusinessNavigation() {
     await markAllRead(latestNotifications)
   }
 
-  async function runDeadlineNotificationTest() {
-    setDeadlineTestMessage('')
-    const wasCreated = await createDeadlineReminderTest()
-    setDeadlineTestMessage(
-      wasCreated
-        ? 'Deadline reminder created.'
-        : 'Unable to create the reminder. Use a seeded provider account.',
-    )
-  }
-
   return (
     <header className="portal-header business-portal-header">
       <nav className="nav business-nav" aria-label="Business navigation">
@@ -285,29 +274,6 @@ export default function BusinessNavigation() {
                   </div>
                 </div>
 
-                {import.meta.env.DEV &&
-                  capabilities.service_marketplace_enabled && (
-                    <div className="business-notification-test-panel">
-                      <button
-                        type="button"
-                        disabled={isCreatingDeadlineTest}
-                        onClick={runDeadlineNotificationTest}
-                      >
-                        <BellRing aria-hidden="true" />
-                        {isCreatingDeadlineTest
-                          ? 'Creating reminder…'
-                          : 'Generate deadline reminder'}
-                      </button>
-                      <span>
-                        Local test only. Uses an awaiting quote from the seeded
-                        provider account.
-                      </span>
-                      {deadlineTestMessage && (
-                        <output>{deadlineTestMessage}</output>
-                      )}
-                    </div>
-                  )}
-
                 {areNotificationsLoading && notifications.length === 0 && (
                   <p className="business-notification-empty">Loading…</p>
                 )}
@@ -322,24 +288,41 @@ export default function BusinessNavigation() {
                     NOTIFICATION_ICONS[notification.notification_type] ?? Bell
 
                   return (
-                    <Link
+                    <div
                       className={`business-notification-item${notification.read_at ? '' : ' is-unread'}`}
-                      to={getBusinessNotificationDestination(notification)}
-                      role="menuitem"
                       key={notification.notification_id}
-                      onClick={() => setIsNotificationMenuOpen(false)}
                     >
-                      <span className="business-notification-icon">
-                        <NotificationIcon aria-hidden="true" />
-                      </span>
-                      <span className="business-notification-copy">
-                        <strong>{notification.title}</strong>
-                        <span>{notification.message}</span>
-                        <time dateTime={notification.created_at}>
-                          {formatNotificationTime(notification.created_at)}
-                        </time>
-                      </span>
-                    </Link>
+                      <Link
+                        className="business-notification-link"
+                        to={getBusinessNotificationDestination(notification)}
+                        role="menuitem"
+                        onClick={() => setIsNotificationMenuOpen(false)}
+                      >
+                        <span className="business-notification-icon">
+                          <NotificationIcon aria-hidden="true" />
+                        </span>
+                        <span className="business-notification-copy">
+                          <strong>{notification.title}</strong>
+                          <span>{notification.message}</span>
+                          <time dateTime={notification.created_at}>
+                            {formatNotificationTime(notification.created_at)}
+                          </time>
+                        </span>
+                      </Link>
+                      <button
+                        type="button"
+                        className="business-notification-dismiss"
+                        aria-label="Dismiss notification"
+                        title="Dismiss notification"
+                        onClick={(event) => {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          void dismissOne(notification.notification_id)
+                        }}
+                      >
+                        <X aria-hidden="true" />
+                      </button>
+                    </div>
                   )
                 })}
               </div>

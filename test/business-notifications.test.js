@@ -18,21 +18,35 @@ const deepLinkMigrationUrl = new URL(
   '../supabase/migrations/20260818030000_make_business_notifications_deep_linkable.sql',
   import.meta.url,
 )
+const singleDismissMigrationUrl = new URL(
+  '../supabase/migrations/20260818040000_add_dismiss_single_business_notification.sql',
+  import.meta.url,
+)
 
 test('business notification bell replaces the personal home shortcut', async () => {
-  const navigation = await readFile(
-    new URL(
-      '../src/components/navigation/BusinessNavigation.jsx',
-      import.meta.url,
+  const [navigation, styles] = await Promise.all([
+    readFile(
+      new URL(
+        '../src/components/navigation/BusinessNavigation.jsx',
+        import.meta.url,
+      ),
+      'utf8',
     ),
-    'utf8',
-  )
+    readFile(
+      new URL(
+        '../src/components/navigation/BusinessNavigation.css',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
 
   assert.match(navigation, /business-notification-button/)
   assert.match(navigation, /has-unread/)
   assert.match(navigation, /fill=\{unreadCount > 0 \? 'currentColor' : 'none'\}/)
   assert.match(navigation, /aria-label={`Notifications/)
   assert.match(navigation, /business-notification-dropdown/)
+  assert.match(styles, /\.business-notification-link\s*\{[\s\S]+padding: 13px 36px 13px 16px/)
   assert.doesNotMatch(navigation, /Open personal LocalLink pages/)
   assert.doesNotMatch(navigation, /<House/)
 })
@@ -55,8 +69,8 @@ test('notifications cover new leads, quote updates, approvals, and job history m
   assert.match(migration, /mark_business_notifications_read/)
 })
 
-test('development builds can generate a real seeded deadline reminder from the bell', async () => {
-  const [navigation, hook, api, seed, deadlineMigration] = await Promise.all([
+test('deadline reminders remain production-driven without an in-app generator', async () => {
+  const [navigation, hook, api, deadlineMigration] = await Promise.all([
     readFile(
       new URL(
         '../src/components/navigation/BusinessNavigation.jsx',
@@ -78,21 +92,17 @@ test('development builds can generate a real seeded deadline reminder from the b
       ),
       'utf8',
     ),
-    readFile(new URL('../supabase/seed.sql', import.meta.url), 'utf8'),
     readFile(deadlineMigrationUrl, 'utf8'),
   ])
 
-  assert.match(navigation, /import\.meta\.env\.DEV/)
-  assert.match(navigation, /Generate deadline reminder/)
   assert.match(navigation, /quote_deadline_reminder: BellRing/)
-  assert.match(hook, /createDeadlineReminderTest/)
-  assert.match(api, /create_seed_quote_deadline_reminder/)
-  assert.match(
-    seed,
-    /create or replace function public\.create_seed_quote_deadline_reminder/,
-  )
-  assert.match(seed, /perform public\.create_due_quote_deadline_notifications\(now\(\)\)/)
+  assert.doesNotMatch(navigation, /Generate deadline reminder/)
+  assert.doesNotMatch(navigation, /business-notification-test-panel/)
+  assert.doesNotMatch(hook, /createDeadlineReminderTest/)
+  assert.doesNotMatch(api, /create_seed_quote_deadline_reminder/)
   assert.match(deadlineMigration, /quote_deadline_reminder/)
+  assert.match(deadlineMigration, /create_due_quote_deadline_notifications/)
+  assert.match(deadlineMigration, /cron\.schedule/)
 })
 
 test('business members can dismiss all notifications from the dropdown', async () => {
@@ -127,6 +137,41 @@ test('business members can dismiss all notifications from the dropdown', async (
   assert.match(api, /dismiss_business_notifications/)
   assert.match(migration, /public\.is_business_member\(p_business_id\)/)
   assert.match(migration, /delete from public\.business_notifications/)
+})
+
+test('business members can dismiss an individual notification', async () => {
+  const [navigation, hook, api, migration] = await Promise.all([
+    readFile(
+      new URL(
+        '../src/components/navigation/BusinessNavigation.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/service-marketplace/hooks/useBusinessNotifications.js',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/service-marketplace/api/businessNotifications.js',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(singleDismissMigrationUrl, 'utf8'),
+  ])
+
+  assert.match(navigation, /className="business-notification-link"/)
+  assert.match(navigation, /className="business-notification-dismiss"/)
+  assert.match(navigation, /dismissOne\(notification\.notification_id\)/)
+  assert.match(hook, /const dismissOne = useCallback/)
+  assert.match(api, /dismiss_business_notification/)
+  assert.match(migration, /public\.is_business_member\(p_business_id\)/)
+  assert.match(migration, /and id = p_notification_id/)
 })
 
 test('notification clicks open and highlight their related marketplace item', async () => {
