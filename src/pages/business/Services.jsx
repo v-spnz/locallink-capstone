@@ -1,4 +1,5 @@
 import { BriefcaseBusiness, FileText, History, UsersRound } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import useBusinessMarketplace from '../../features/service-marketplace/hooks/useBusinessMarketplace'
 import { ServiceMarketplaceContent } from './ServiceMarketplacePage'
@@ -12,6 +13,7 @@ const SERVICE_TABS = [
 
 export default function Services() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const handledNotificationTargetRef = useRef('')
   const leads = useBusinessMarketplace('leads')
   const quotes = useBusinessMarketplace('quotes')
   const jobs = useBusinessMarketplace('jobs')
@@ -21,6 +23,67 @@ export default function Services() {
     ? requestedTab
     : 'leads'
   const marketplaces = { leads, quotes, jobs, history }
+  const activeMarketplace = marketplaces[activeTab]
+  const focusedItemId = searchParams.get('focus')
+  const notificationId = searchParams.get('notification')
+
+  useEffect(() => {
+    if (!focusedItemId) {
+      handledNotificationTargetRef.current = ''
+      return
+    }
+    if (activeMarketplace.isLoading) return
+
+    const targetExists = activeMarketplace.allItems.some((item) => {
+      const itemId = activeTab === 'quotes' ? item.quote_id : item.job_request_id
+      return itemId === focusedItemId
+    })
+    if (!targetExists) return
+
+    const targetKey = `${activeTab}:${focusedItemId}:${notificationId ?? ''}`
+    if (handledNotificationTargetRef.current === targetKey) return
+    handledNotificationTargetRef.current = targetKey
+
+    activeMarketplace.setSearch('')
+    if (activeTab === 'leads') {
+      activeMarketplace.setUrgencyFilter('all')
+      activeMarketplace.showLeadReview(focusedItemId)
+    } else if (activeTab === 'quotes') {
+      activeMarketplace.setQuoteStatus('all')
+      activeMarketplace.showQuoteReview(focusedItemId)
+    } else if (activeTab === 'jobs') {
+      activeMarketplace.setJobStatus('all')
+    }
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        const target = document.getElementById(
+          `service-item-${activeTab}-${focusedItemId}`,
+        )
+        if (!target) return
+
+        const reduceMotion = window.matchMedia(
+          '(prefers-reduced-motion: reduce)',
+        ).matches
+        target.scrollIntoView({
+          behavior: reduceMotion ? 'auto' : 'smooth',
+          block: 'center',
+        })
+        target.classList.remove('is-notification-arrival')
+        void target.offsetWidth
+        target.classList.add('is-notification-arrival')
+        window.setTimeout(
+          () => target.classList.remove('is-notification-arrival'),
+          1800,
+        )
+      })
+    })
+  }, [
+    activeMarketplace,
+    activeTab,
+    focusedItemId,
+    notificationId,
+  ])
 
   const summaries = [
     {
@@ -101,11 +164,11 @@ export default function Services() {
 
       <section
         role="tabpanel"
-        aria-label={marketplaces[activeTab].content.title}
+        aria-label={activeMarketplace.content.title}
       >
         <ServiceMarketplaceContent
           type={activeTab}
-          marketplace={marketplaces[activeTab]}
+          marketplace={activeMarketplace}
         />
       </section>
     </div>

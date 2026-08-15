@@ -532,6 +532,31 @@
   border-radius: var(--radius-lg);
   background: var(--white);
   box-shadow: var(--shadow);
+  scroll-margin-top: 110px;
+}
+
+.service-marketplace-card.is-notification-arrival {
+  animation: service-notification-arrival 1.8s ease-out both;
+}
+
+@keyframes service-notification-arrival {
+  0% {
+    border-color: #5b7cfa;
+    outline: 0 solid rgb(91 124 250 / 32%);
+    box-shadow: 0 12px 32px rgb(49 73 168 / 18%);
+  }
+
+  32% {
+    border-color: #5b7cfa;
+    outline: 8px solid rgb(91 124 250 / 16%);
+    box-shadow: 0 16px 38px rgb(49 73 168 / 22%);
+  }
+
+  100% {
+    border-color: var(--border);
+    outline: 0 solid rgb(91 124 250 / 0%);
+    box-shadow: var(--shadow);
+  }
 }
 
 .service-history-toolbar {
@@ -581,6 +606,94 @@
 .service-lead-card.is-expanded .service-opportunity-review {
   transform-origin: top center;
   animation: service-lead-details-enter 240ms ease-out both;
+}
+
+.service-quote-card {
+  position: relative;
+  z-index: 0;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.service-quote-card.is-expanded {
+  z-index: 1;
+  border-color: #aebcff;
+  transform: translateY(-3px) scale(1.006);
+  box-shadow: 0 14px 34px rgb(35 55 100 / 15%);
+}
+
+.service-quote-card.is-expanded .service-quote-details {
+  transform-origin: top center;
+  animation: service-lead-details-enter 240ms ease-out both;
+}
+
+.service-quote-card-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 22px;
+}
+
+.service-quote-card-copy {
+  min-width: 0;
+}
+
+.service-quote-card-copy .service-marketplace-card-head,
+.service-quote-card-copy .service-marketplace-meta {
+  margin-bottom: 7px;
+}
+
+.service-quote-card-copy .service-marketplace-meta {
+  margin-top: 9px;
+}
+
+.service-quote-card-actions {
+  min-width: 124px;
+}
+
+.service-quote-card-actions .btn-secondary {
+  min-width: 124px;
+  border-color: var(--border);
+  background: var(--white);
+  color: var(--text);
+}
+
+.service-quote-details {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.service-quote-request-review,
+.service-submitted-quote-review {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.service-quote-request-review {
+  background: #fafbff;
+}
+
+.service-submitted-quote-review {
+  margin-top: 14px;
+  background: var(--white);
+}
+
+.service-quote-request-review > h4,
+.service-submitted-quote-review > h4 {
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+
+.service-quote-request-review .service-opportunity-facts {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.service-submitted-quote-review .service-quote-summary {
+  margin-bottom: 15px;
 }
 
 @keyframes service-lead-details-enter {
@@ -902,6 +1015,7 @@
 }
 
 .service-quote-timeline-marker {
+  position: relative;
   width: 25px;
   height: 25px;
   border-radius: 999px;
@@ -991,12 +1105,105 @@
   line-height: 1.35;
 }
 
+.service-quote-timeline-deadline.is-urgent {
+  color: #c2410c;
+  font-weight: 700;
+}
+
+.service-quote-timeline.is-progress
+  .service-quote-timeline-step.is-current
+  .service-quote-timeline-marker {
+  background: #facc15;
+  color: #713f12;
+}
+
+.service-quote-timeline.is-progress
+  .service-quote-timeline-step.is-current
+  .service-quote-timeline-label {
+  color: #a16207;
+}
+
+.service-quote-timeline.is-progress:not(.is-deadline-urgent)
+  .service-quote-timeline-step.is-complete:not(:last-child)::after {
+  background: linear-gradient(
+    to right,
+    var(--emerald) 0 50%,
+    #facc15 50% 100%
+  );
+}
+
+.service-quote-timeline.is-progress
+  .service-quote-timeline-step.is-current
+  .service-quote-timeline-marker::after {
+  position: absolute;
+  inset: -4px;
+  border: 2px solid #facc15;
+  border-radius: inherit;
+  content: '';
+  pointer-events: none;
+  animation: service-quote-timeline-pulse 2s ease-out infinite;
+}
+
+.service-quote-timeline.is-deadline-urgent
+  .service-quote-timeline-step.is-current
+  .service-quote-timeline-marker {
+  background: #f59f00;
+}
+
+.service-quote-timeline.is-deadline-urgent
+  .service-quote-timeline-step.is-current
+  .service-quote-timeline-marker::after {
+  border-color: #f59f00;
+}
+
+.service-quote-timeline.is-deadline-urgent
+  .service-quote-timeline-step.is-current
+  .service-quote-timeline-label {
+  color: #c2410c;
+}
+
+.service-quote-timeline.is-deadline-urgent
+  .service-quote-timeline-step.is-complete:not(:last-child)::after {
+  background: linear-gradient(
+    to right,
+    var(--emerald) 0 50%,
+    #f59f00 50% 100%
+  );
+}
+
 .service-marketplace-meta .service-marketplace-deadline.is-urgent {
   padding: 4px 7px;
   border-radius: 999px;
   background: #fff4e6;
   color: #c2410c;
   font-weight: 700;
+}
+
+@keyframes service-quote-timeline-pulse {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.82);
+  }
+
+  75%,
+  100% {
+    opacity: 0;
+    transform: scale(1.28);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .service-marketplace-card.is-notification-arrival {
+    animation: none;
+    outline: 3px solid rgb(91 124 250 / 24%);
+  }
+
+  .service-quote-timeline.is-progress
+    .service-quote-timeline-step.is-current
+    .service-quote-timeline-marker::after {
+    opacity: 0;
+    animation: none;
+  }
 }
 
 .service-quote-summary {
@@ -1642,6 +1849,24 @@
   .service-lead-summary {
     grid-template-columns: 1fr;
     gap: 14px;
+  }
+
+  .service-quote-card-summary {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .service-quote-card-actions {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .service-quote-card-actions .btn-secondary {
+    width: 100%;
+  }
+
+  .service-quote-request-review .service-opportunity-facts {
+    grid-template-columns: 1fr;
   }
 
   .service-lead-actions {

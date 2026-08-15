@@ -104,6 +104,7 @@ export default function LeadCard({
 
   return (
     <article
+      id={`service-item-leads-${item.job_request_id}`}
       className={`service-marketplace-card service-lead-card${
         isReviewOpen ? ' is-expanded' : ''
       }`}

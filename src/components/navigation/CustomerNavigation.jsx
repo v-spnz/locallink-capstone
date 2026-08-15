@@ -153,14 +153,17 @@ export default function CustomerNavigation() {
             >
               <button
                 type="button"
-                className="business-notification-button"
+                className={`business-notification-button${unreadCount > 0 ? ' has-unread' : ''}`}
                 aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}
                 aria-haspopup="menu"
                 aria-expanded={isNotificationMenuOpen}
                 title="Notifications"
                 onClick={toggleNotificationMenu}
               >
-                <Bell aria-hidden="true" />
+                <Bell
+                  aria-hidden="true"
+                  fill={unreadCount > 0 ? 'currentColor' : 'none'}
+                />
                 {unreadCount > 0 && (
                   <span
                     className="business-notification-count"

@@ -1,12 +1,15 @@
 import { Check } from 'lucide-react'
 import {
+  formatConsumerResponseCountdown,
   getBusinessQuoteResponseDeadline,
   getBusinessQuoteTimeline,
+  isBusinessQuoteResponseDeadlineUrgent,
 } from '../quoteTracking'
 
 export default function BusinessQuoteTimeline({ quote }) {
   const steps = getBusinessQuoteTimeline(quote)
   const responseDeadline = getBusinessQuoteResponseDeadline(quote)
+  const isDeadlineUrgent = isBusinessQuoteResponseDeadlineUrgent(quote)
   const timelineTone =
     quote.quote_status === 'accepted'
       ? 'success'
@@ -16,7 +19,7 @@ export default function BusinessQuoteTimeline({ quote }) {
 
   return (
     <ol
-      className={`service-quote-timeline is-${timelineTone}`}
+      className={`service-quote-timeline is-${timelineTone}${isDeadlineUrgent ? ' is-deadline-urgent' : ''}`}
       aria-label="Quote progress"
     >
       {steps.map((step, index) => (
@@ -32,7 +35,10 @@ export default function BusinessQuoteTimeline({ quote }) {
             <span className="service-quote-timeline-label">{step.label}</span>
             {quote.quote_status === 'awaiting_response' &&
               step.label === 'Awaiting response' && (
-                <span className="service-quote-timeline-deadline">
+                <span
+                  className={`service-quote-timeline-deadline${isDeadlineUrgent ? ' is-urgent' : ''}`}
+                  role={isDeadlineUrgent ? 'alert' : undefined}
+                >
                   {responseDeadline ? (
                     <>
                       Consumer deadline:{' '}
@@ -41,6 +47,7 @@ export default function BusinessQuoteTimeline({ quote }) {
                         month: 'short',
                         year: 'numeric',
                       })}
+                      , {formatConsumerResponseCountdown(responseDeadline)}
                     </>
                   ) : (
                     'Consumer deadline unavailable'

@@ -10,6 +10,7 @@ import {
   Gift,
   LayoutDashboard,
   UsersRound,
+  X,
   Zap,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -35,6 +36,7 @@ const NOTIFICATION_ICONS = {
   new_lead: UsersRound,
   quote_approved: FileCheck2,
   quote_updated: BellRing,
+  quote_deadline_reminder: BellRing,
   job_completed: BriefcaseBusiness,
 }
 
@@ -49,6 +51,45 @@ function formatNotificationTime(value) {
   })
 }
 
+function getBusinessNotificationDestination(notification) {
+  const jobRequestId = notification.related_job_request_id
+  const quoteId = notification.related_quote_id
+  const notificationId = notification.notification_id
+  let tab
+  let focusId
+
+  switch (notification.notification_type) {
+    case 'new_lead':
+      tab = 'leads'
+      focusId = jobRequestId
+      break
+    case 'quote_updated':
+    case 'quote_deadline_reminder':
+      tab = 'quotes'
+      focusId = quoteId
+      break
+    case 'quote_approved':
+      tab = 'jobs'
+      focusId = jobRequestId
+      break
+    case 'job_completed':
+      tab = 'history'
+      focusId = jobRequestId
+      break
+    default:
+      return notification.destination
+  }
+
+  if (!focusId) return notification.destination
+
+  const params = new URLSearchParams({
+    tab,
+    focus: focusId,
+    notification: String(notificationId),
+  })
+  return `/business/services?${params.toString()}`
+}
+
 export default function BusinessNavigation() {
   const { business, capabilities, membership } = useBusiness()
   const location = useLocation()
@@ -60,8 +101,11 @@ export default function BusinessNavigation() {
     notifications,
     unreadCount,
     isLoading: areNotificationsLoading,
+    isDismissing,
     refresh: refreshNotifications,
     markAllRead,
+    dismissOne,
+    dismissAll,
   } = useBusinessNotifications()
   const canManageBusiness = ['owner', 'admin'].includes(membership.role)
   const businessName = business?.business_name || 'Business account'
@@ -191,14 +235,17 @@ export default function BusinessNavigation() {
           >
             <button
               type="button"
-              className="business-notification-button"
+              className={`business-notification-button${unreadCount > 0 ? ' has-unread' : ''}`}
               aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}
               aria-haspopup="menu"
               aria-expanded={isNotificationMenuOpen}
               title="Notifications"
               onClick={toggleNotificationMenu}
             >
-              <Bell aria-hidden="true" />
+              <Bell
+                aria-hidden="true"
+                fill={unreadCount > 0 ? 'currentColor' : 'none'}
+              />
               {unreadCount > 0 && (
                 <span
                   className="business-notification-count"
@@ -213,9 +260,18 @@ export default function BusinessNavigation() {
               <div className="business-notification-dropdown" role="menu">
                 <div className="business-notification-heading">
                   <strong>Notifications</strong>
-                  {notifications.length > 0 && (
-                    <span>{notifications.length} recent</span>
-                  )}
+                  <div className="business-notification-heading-actions">
+                    {notifications.length > 0 && (
+                      <span>{notifications.length} recent</span>
+                    )}
+                    <button
+                      type="button"
+                      disabled={notifications.length === 0 || isDismissing}
+                      onClick={dismissAll}
+                    >
+                      {isDismissing ? 'Dismissing…' : 'Dismiss all'}
+                    </button>
+                  </div>
                 </div>
 
                 {areNotificationsLoading && notifications.length === 0 && (
@@ -232,24 +288,41 @@ export default function BusinessNavigation() {
                     NOTIFICATION_ICONS[notification.notification_type] ?? Bell
 
                   return (
-                    <Link
+                    <div
                       className={`business-notification-item${notification.read_at ? '' : ' is-unread'}`}
-                      to={notification.destination}
-                      role="menuitem"
                       key={notification.notification_id}
-                      onClick={() => setIsNotificationMenuOpen(false)}
                     >
-                      <span className="business-notification-icon">
-                        <NotificationIcon aria-hidden="true" />
-                      </span>
-                      <span className="business-notification-copy">
-                        <strong>{notification.title}</strong>
-                        <span>{notification.message}</span>
-                        <time dateTime={notification.created_at}>
-                          {formatNotificationTime(notification.created_at)}
-                        </time>
-                      </span>
-                    </Link>
+                      <Link
+                        className="business-notification-link"
+                        to={getBusinessNotificationDestination(notification)}
+                        role="menuitem"
+                        onClick={() => setIsNotificationMenuOpen(false)}
+                      >
+                        <span className="business-notification-icon">
+                          <NotificationIcon aria-hidden="true" />
+                        </span>
+                        <span className="business-notification-copy">
+                          <strong>{notification.title}</strong>
+                          <span>{notification.message}</span>
+                          <time dateTime={notification.created_at}>
+                            {formatNotificationTime(notification.created_at)}
+                          </time>
+                        </span>
+                      </Link>
+                      <button
+                        type="button"
+                        className="business-notification-dismiss"
+                        aria-label="Dismiss notification"
+                        title="Dismiss notification"
+                        onClick={(event) => {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          void dismissOne(notification.notification_id)
+                        }}
+                      >
+                        <X aria-hidden="true" />
+                      </button>
+                    </div>
                   )
                 })}
               </div>

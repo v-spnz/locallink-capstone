@@ -13,7 +13,10 @@ export default function ActiveJobCard({
   const nextStatus = getNextJobProgressStage(item.job_status)
 
   return (
-    <article className="service-marketplace-card">
+    <article
+      id={`service-item-${isHistory ? 'history' : 'jobs'}-${item.job_request_id}`}
+      className="service-marketplace-card"
+    >
       <div className="service-marketplace-card-head">
         <div>
           <h3>{item.title}</h3>
