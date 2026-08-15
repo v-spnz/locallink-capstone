@@ -64,6 +64,17 @@ export default function useCustomerJobs() {
   const [selectedQuoteId, setSelectedQuoteId] = useState(null)
   const [confirmingJobId, setConfirmingJobId] = useState(null)
 
+  const jobIdFromUrl = searchParams.get('job')
+  const quoteIdFromUrl = searchParams.get('quote')
+  const effectiveSelectedJobId = quoteIdFromUrl
+    ? null
+    : (jobIdFromUrl ?? selectedJobId)
+  const effectiveSelectedQuoteJobId = quoteIdFromUrl
+    ? (jobIdFromUrl ?? selectedQuoteJobId)
+    : selectedQuoteJobId
+  const effectiveSelectedQuoteId = quoteIdFromUrl ?? selectedQuoteId
+  const effectiveActiveTab = quoteIdFromUrl ? 'quotes' : activeTab
+
   const jobStatus = getOverallJobStatus(postedJobs)
   const modalInitialJob = editingJob || repostSeed
 
@@ -94,30 +105,6 @@ export default function useCustomerJobs() {
     const timer = setTimeout(() => setSuccessMessage(''), 2000)
     return () => clearTimeout(timer)
   }, [successMessage])
-
-  useEffect(() => {
-    const jobIdFromUrl = searchParams.get('job')
-    const quoteIdFromUrl = searchParams.get('quote')
-
-    if (quoteIdFromUrl && jobIdFromUrl) {
-      setSelectedJobId(null)
-      setSelectedQuoteJobId(jobIdFromUrl)
-      setSelectedQuoteId(quoteIdFromUrl)
-      setActiveTab('quotes')
-      return
-    }
-
-    if (jobIdFromUrl) {
-      setSelectedQuoteJobId(null)
-      setSelectedQuoteId(null)
-      setSelectedJobId(jobIdFromUrl)
-      return
-    }
-
-    setSelectedQuoteJobId(null)
-    setSelectedQuoteId(null)
-    setSelectedJobId(null)
-  }, [searchParams])
 
   useEffect(() => {
     const unsubscribe = subscribeToCustomerMarketplaceChanges(() => {
@@ -308,10 +295,10 @@ export default function useCustomerJobs() {
     modalInitialStep,
     isSaving,
     modalError,
-    selectedJobId,
-    activeTab,
-    selectedQuoteJobId,
-    selectedQuoteId,
+    selectedJobId: effectiveSelectedJobId,
+    activeTab: effectiveActiveTab,
+    selectedQuoteJobId: effectiveSelectedQuoteJobId,
+    selectedQuoteId: effectiveSelectedQuoteId,
     confirmingJobId,
     openPostModal,
     openEditModal,
