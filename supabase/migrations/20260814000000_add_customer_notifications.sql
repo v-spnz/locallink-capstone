@@ -9,6 +9,7 @@ create table public.customer_notifications (
       'job_scheduled',
       'on_the_way',
       'in_progress',
+      'quote_deadline_reminder',
 
     )
   ),
@@ -267,6 +268,46 @@ $$;
 create trigger job_requests_notify_customer_completed
   after update of status on public.job_requests
   for each row execute function public.notify_customer_about_completed_job();
+
+create or replace function public.notify_customers_about_upcoming_deadlines()
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  insert into public.customer_notifications (
+    customer_id,
+    notification_type,
+    title,
+    message,
+    destination,
+    related_job_request_id
+  )
+  select
+    job.customer_id,
+    'quote_deadline_reminder',
+    'Quote deadline approaching',
+    'Quotes for ' || coalesce(job.title, 'your job') || ' close soon.',
+    '/jobs',
+    job.id
+  from public.job_requests as job
+  where job.quote_deadline between now() and now() + interval '2 days'
+    and job.status = 'open'
+    and not exists (
+      select 1
+      from public.customer_notifications as existing
+      where existing.related_job_request_id = job.id
+        and existing.notification_type = 'quote_deadline_reminder'
+        and existing.created_at::date = current_date
+    );
+end;
+$$;
+select cron.schedule(
+  'quote-deadline-reminders',
+  '0 21 * * *',  -- every day at 9am
+  $$select public.notify_customers_about_upcoming_deadlines()$$
+);
 
 drop function if exists public.get_customer_notifications(uuid, integer);
 create function public.get_customer_notifications(

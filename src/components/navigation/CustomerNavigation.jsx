@@ -10,6 +10,7 @@ import {
   LoaderCircle,
   Car,
   ClipboardClock,
+  Clock,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
@@ -44,6 +45,7 @@ const NOTIFICATION_ICONS = {
   job_scheduled: ClipboardClock,
   on_the_way: Car,
   in_progress: LoaderCircle,
+  quote_deadline_reminder: Clock,
 }
 
 function getConsumerInitials(user) {
