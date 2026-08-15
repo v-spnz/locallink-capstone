@@ -26,5 +26,14 @@ jobs:
       - name: Run linting
         run: npm run lint
 
+      - name: Run application tests
+        run: npm test
+
+      - name: Start local Supabase
+        run: npx supabase start
+
+      - name: Run database tests
+        run: npm run test:db
+
       - name: Build application
         run: npm run build

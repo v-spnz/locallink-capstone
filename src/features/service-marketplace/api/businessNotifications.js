@@ -27,3 +27,23 @@ export async function markBusinessNotificationsRead(
   if (error) throw error
   return data ?? 0
 }
+
+export async function createSeedQuoteDeadlineReminder(businessId) {
+  const { data, error } = await supabase.rpc(
+    'create_seed_quote_deadline_reminder',
+    { p_business_id: businessId },
+  )
+
+  if (error) throw error
+  return Boolean(data)
+}
+
+export async function dismissBusinessNotifications(businessId) {
+  const { data, error } = await supabase.rpc(
+    'dismiss_business_notifications',
+    { p_business_id: businessId },
+  )
+
+  if (error) throw error
+  return data ?? 0
+}

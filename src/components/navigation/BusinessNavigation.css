@@ -108,8 +108,12 @@
 }
 
 .business-nav .business-notification-button > svg {
-  width: 17px;
-  height: 17px;
+  width: 21px;
+  height: 21px;
+}
+
+.business-nav .business-notification-button.has-unread {
+  color: #4361df;
 }
 
 .business-notification-count {
@@ -165,6 +169,88 @@
 .business-notification-heading span {
   color: #8a93a4;
   font-size: 10px;
+  font-weight: 600;
+}
+
+.business-notification-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.business-notification-heading-actions button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #4361df;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.business-notification-heading-actions button:hover,
+.business-notification-heading-actions button:focus-visible {
+  outline: 0;
+  color: #2948c4;
+  text-decoration: underline;
+}
+
+.business-notification-heading-actions button:disabled {
+  color: #b2b8c4;
+  cursor: default;
+  text-decoration: none;
+}
+
+.business-notification-test-panel {
+  padding: 12px 16px;
+  border-bottom: 1px solid #edf0f5;
+  display: grid;
+  gap: 6px;
+  background: #fafbff;
+}
+
+.business-notification-test-panel button {
+  width: fit-content;
+  padding: 7px 10px;
+  border: 1px solid #cfd7fa;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  color: #3556cf;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.business-notification-test-panel button:hover,
+.business-notification-test-panel button:focus-visible {
+  outline: 0;
+  background: #eef2ff;
+}
+
+.business-notification-test-panel button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.business-notification-test-panel button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.business-notification-test-panel span,
+.business-notification-test-panel output {
+  color: #7b8495;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.business-notification-test-panel output {
+  color: #3556cf;
   font-weight: 600;
 }
 

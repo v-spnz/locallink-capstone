@@ -35,6 +35,7 @@ const NOTIFICATION_ICONS = {
   new_lead: UsersRound,
   quote_approved: FileCheck2,
   quote_updated: BellRing,
+  quote_deadline_reminder: BellRing,
   job_completed: BriefcaseBusiness,
 }
 
@@ -49,19 +50,63 @@ function formatNotificationTime(value) {
   })
 }
 
+function getBusinessNotificationDestination(notification) {
+  const jobRequestId = notification.related_job_request_id
+  const quoteId = notification.related_quote_id
+  const notificationId = notification.notification_id
+  let tab
+  let focusId
+
+  switch (notification.notification_type) {
+    case 'new_lead':
+      tab = 'leads'
+      focusId = jobRequestId
+      break
+    case 'quote_updated':
+    case 'quote_deadline_reminder':
+      tab = 'quotes'
+      focusId = quoteId
+      break
+    case 'quote_approved':
+      tab = 'jobs'
+      focusId = jobRequestId
+      break
+    case 'job_completed':
+      tab = 'history'
+      focusId = jobRequestId
+      break
+    default:
+      return notification.destination
+  }
+
+  if (!focusId) return notification.destination
+
+  const params = new URLSearchParams({
+    tab,
+    focus: focusId,
+    notification: String(notificationId),
+  })
+  return `/business/services?${params.toString()}`
+}
+
 export default function BusinessNavigation() {
   const { business, capabilities, membership } = useBusiness()
   const location = useLocation()
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
+  const [deadlineTestMessage, setDeadlineTestMessage] = useState('')
   const accountMenuRef = useRef(null)
   const notificationMenuRef = useRef(null)
   const {
     notifications,
     unreadCount,
     isLoading: areNotificationsLoading,
+    isCreatingDeadlineTest,
+    isDismissing,
     refresh: refreshNotifications,
     markAllRead,
+    createDeadlineReminderTest,
+    dismissAll,
   } = useBusinessNotifications()
   const canManageBusiness = ['owner', 'admin'].includes(membership.role)
   const businessName = business?.business_name || 'Business account'
@@ -153,6 +198,16 @@ export default function BusinessNavigation() {
     await markAllRead(latestNotifications)
   }
 
+  async function runDeadlineNotificationTest() {
+    setDeadlineTestMessage('')
+    const wasCreated = await createDeadlineReminderTest()
+    setDeadlineTestMessage(
+      wasCreated
+        ? 'Deadline reminder created.'
+        : 'Unable to create the reminder. Use a seeded provider account.',
+    )
+  }
+
   return (
     <header className="portal-header business-portal-header">
       <nav className="nav business-nav" aria-label="Business navigation">
@@ -191,14 +246,17 @@ export default function BusinessNavigation() {
           >
             <button
               type="button"
-              className="business-notification-button"
+              className={`business-notification-button${unreadCount > 0 ? ' has-unread' : ''}`}
               aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}
               aria-haspopup="menu"
               aria-expanded={isNotificationMenuOpen}
               title="Notifications"
               onClick={toggleNotificationMenu}
             >
-              <Bell aria-hidden="true" />
+              <Bell
+                aria-hidden="true"
+                fill={unreadCount > 0 ? 'currentColor' : 'none'}
+              />
               {unreadCount > 0 && (
                 <span
                   className="business-notification-count"
@@ -213,10 +271,42 @@ export default function BusinessNavigation() {
               <div className="business-notification-dropdown" role="menu">
                 <div className="business-notification-heading">
                   <strong>Notifications</strong>
-                  {notifications.length > 0 && (
-                    <span>{notifications.length} recent</span>
-                  )}
+                  <div className="business-notification-heading-actions">
+                    {notifications.length > 0 && (
+                      <span>{notifications.length} recent</span>
+                    )}
+                    <button
+                      type="button"
+                      disabled={notifications.length === 0 || isDismissing}
+                      onClick={dismissAll}
+                    >
+                      {isDismissing ? 'Dismissing…' : 'Dismiss all'}
+                    </button>
+                  </div>
                 </div>
+
+                {import.meta.env.DEV &&
+                  capabilities.service_marketplace_enabled && (
+                    <div className="business-notification-test-panel">
+                      <button
+                        type="button"
+                        disabled={isCreatingDeadlineTest}
+                        onClick={runDeadlineNotificationTest}
+                      >
+                        <BellRing aria-hidden="true" />
+                        {isCreatingDeadlineTest
+                          ? 'Creating reminder…'
+                          : 'Generate deadline reminder'}
+                      </button>
+                      <span>
+                        Local test only. Uses an awaiting quote from the seeded
+                        provider account.
+                      </span>
+                      {deadlineTestMessage && (
+                        <output>{deadlineTestMessage}</output>
+                      )}
+                    </div>
+                  )}
 
                 {areNotificationsLoading && notifications.length === 0 && (
                   <p className="business-notification-empty">Loading…</p>
@@ -234,7 +324,7 @@ export default function BusinessNavigation() {
                   return (
                     <Link
                       className={`business-notification-item${notification.read_at ? '' : ' is-unread'}`}
-                      to={notification.destination}
+                      to={getBusinessNotificationDestination(notification)}
                       role="menuitem"
                       key={notification.notification_id}
                       onClick={() => setIsNotificationMenuOpen(false)}

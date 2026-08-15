@@ -79,6 +79,76 @@ export function getBusinessQuoteResponseDeadline(quote) {
   return deadline
 }
 
+export function getBusinessQuoteResponseReminderThreshold(quote) {
+  const deadline = getBusinessQuoteResponseDeadline(quote)
+  if (!deadline) return null
+
+  const threshold = new Date(deadline)
+  let workingDaysSubtracted = 0
+  while (workingDaysSubtracted < 3) {
+    threshold.setDate(threshold.getDate() - 1)
+    const day = threshold.getDay()
+    if (day !== 0 && day !== 6) workingDaysSubtracted += 1
+  }
+
+  return threshold
+}
+
+export function isBusinessQuoteResponseDeadlineUrgent(
+  quote,
+  now = new Date(),
+) {
+  const deadline = getBusinessQuoteResponseDeadline(quote)
+  const threshold = getBusinessQuoteResponseReminderThreshold(quote)
+  const currentTime = new Date(now)
+
+  if (
+    !deadline ||
+    !threshold ||
+    Number.isNaN(currentTime.getTime()) ||
+    quote.quote_status !== 'awaiting_response'
+  ) {
+    return false
+  }
+
+  return currentTime >= threshold && currentTime <= deadline
+}
+
+export function formatConsumerResponseCountdown(deadline, now = new Date()) {
+  const deadlineDate = new Date(deadline)
+  const currentTime = new Date(now)
+  const remaining = deadlineDate.getTime() - currentTime.getTime()
+
+  if (
+    !deadline ||
+    Number.isNaN(deadlineDate.getTime()) ||
+    Number.isNaN(currentTime.getTime()) ||
+    remaining <= 0
+  ) {
+    return 'response period ended'
+  }
+
+  const hour = 60 * 60 * 1000
+  if (remaining <= 24 * hour) {
+    const hours = Math.max(1, Math.ceil(remaining / hour))
+    return `${hours} hour${hours === 1 ? '' : 's'}`
+  }
+
+  const cursor = new Date(currentTime)
+  const deadlineDay = new Date(deadlineDate)
+  cursor.setHours(0, 0, 0, 0)
+  deadlineDay.setHours(0, 0, 0, 0)
+  let workingDaysRemaining = 0
+  while (cursor < deadlineDay) {
+    cursor.setDate(cursor.getDate() + 1)
+    const day = cursor.getDay()
+    if (day !== 0 && day !== 6) workingDaysRemaining += 1
+  }
+
+  const days = Math.max(1, workingDaysRemaining)
+  return `${days} day${days === 1 ? '' : 's'}`
+}
+
 export function getBusinessQuoteTimeline(quote) {
   const submittedStep = { label: 'Submitted', state: 'complete' }
 
@@ -86,7 +156,6 @@ export function getBusinessQuoteTimeline(quote) {
     return [
       submittedStep,
       { label: 'Awaiting response', state: 'current' },
-      { label: 'Active Job', state: 'upcoming' },
     ]
   }
 
@@ -94,7 +163,6 @@ export function getBusinessQuoteTimeline(quote) {
     return [
       submittedStep,
       { label: 'Awaiting response', state: 'complete' },
-      { label: 'Active Job', state: 'current' },
     ]
   }
 

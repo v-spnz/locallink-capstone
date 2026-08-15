@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import useBusiness from '../../../business/useBusiness'
 import { supabase } from '../../../lib/supabase'
 import {
+  createSeedQuoteDeadlineReminder,
+  dismissBusinessNotifications,
   fetchBusinessNotifications,
   markBusinessNotificationsRead,
 } from '../api/businessNotifications'
@@ -16,6 +18,8 @@ export default function useBusinessNotifications() {
   const { business, capabilities } = useBusiness()
   const [notifications, setNotifications] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isCreatingDeadlineTest, setIsCreatingDeadlineTest] = useState(false)
+  const [isDismissing, setIsDismissing] = useState(false)
   const businessId = business?.id
   const isEnabled = Boolean(
     businessId && capabilities.service_marketplace_enabled,
@@ -112,5 +116,49 @@ export default function useBusinessNotifications() {
     [businessId, notifications, refresh],
   )
 
-  return { notifications, unreadCount, isLoading, refresh, markAllRead }
+  const createDeadlineReminderTest = useCallback(async () => {
+    if (!isEnabled || !import.meta.env.DEV) return false
+
+    setIsCreatingDeadlineTest(true)
+    try {
+      const wasCreated = await createSeedQuoteDeadlineReminder(businessId)
+      if (wasCreated) notifyBusinessMarketplaceChanged(businessId)
+      await refresh()
+      return wasCreated
+    } catch (error) {
+      console.error('Unable to create the deadline reminder test.', error)
+      return false
+    } finally {
+      setIsCreatingDeadlineTest(false)
+    }
+  }, [businessId, isEnabled, refresh])
+
+  const dismissAll = useCallback(async () => {
+    if (!businessId || notifications.length === 0) return false
+
+    setIsDismissing(true)
+    setNotifications([])
+    try {
+      await dismissBusinessNotifications(businessId)
+      return true
+    } catch (error) {
+      console.error('Unable to dismiss business notifications.', error)
+      await refresh()
+      return false
+    } finally {
+      setIsDismissing(false)
+    }
+  }, [businessId, notifications.length, refresh])
+
+  return {
+    notifications,
+    unreadCount,
+    isLoading,
+    isCreatingDeadlineTest,
+    isDismissing,
+    refresh,
+    markAllRead,
+    createDeadlineReminderTest,
+    dismissAll,
+  }
 }

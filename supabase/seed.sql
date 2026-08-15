@@ -757,4 +757,77 @@ values
     now() - interval '1 day'
   );
 
+-- Local-development helper for exercising the real deadline reminder flow
+-- from the notification dropdown. Seed files are not deployed by db push.
+create or replace function public.create_seed_quote_deadline_reminder(
+  p_business_id uuid
+)
+returns boolean
+language plpgsql
+volatile
+security definer
+set search_path = ''
+set timezone = 'Pacific/Auckland'
+as $$
+declare
+  v_quote_id uuid;
+  v_threshold timestamptz := now();
+  v_submitted_at timestamptz;
+  v_days_subtracted integer := 0;
+begin
+  if p_business_id not in (
+    '21000000-0000-0000-0000-000000000001'::uuid,
+    '31000000-0000-0000-0000-000000000001'::uuid
+  ) or not public.is_business_member(p_business_id) then
+    raise exception 'Deadline notification testing is limited to seeded businesses'
+      using errcode = '42501';
+  end if;
+
+  select quote.id into v_quote_id
+  from public.job_quotes as quote
+  join public.job_requests as job on job.id = quote.job_request_id
+  where quote.business_id = p_business_id
+    and quote.status = 'awaiting_response'
+    and job.status = 'open'
+  order by quote.created_at
+  limit 1;
+
+  if v_quote_id is null then
+    raise exception 'No awaiting-response seed quote is available';
+  end if;
+
+  while not (extract(isodow from v_threshold) between 1 and 5) loop
+    v_threshold := v_threshold - interval '1 day';
+  end loop;
+
+  v_submitted_at := v_threshold;
+  while v_days_subtracted < 2 loop
+    v_submitted_at := v_submitted_at - interval '1 day';
+    if extract(isodow from v_submitted_at) between 1 and 5 then
+      v_days_subtracted := v_days_subtracted + 1;
+    end if;
+  end loop;
+
+  delete from public.business_notifications
+  where related_quote_id = v_quote_id
+    and notification_type = 'quote_deadline_reminder';
+
+  update public.job_quotes
+  set created_at = v_submitted_at
+  where id = v_quote_id;
+
+  perform public.create_due_quote_deadline_notifications(now());
+
+  return exists (
+    select 1
+    from public.business_notifications
+    where related_quote_id = v_quote_id
+      and notification_type = 'quote_deadline_reminder'
+  );
+end;
+$$;
+
+revoke all on function public.create_seed_quote_deadline_reminder(uuid) from public;
+grant execute on function public.create_seed_quote_deadline_reminder(uuid) to authenticated;
+
 commit;

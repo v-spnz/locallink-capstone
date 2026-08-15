@@ -53,6 +53,7 @@ export default function useBusinessMarketplace(type) {
   const [success, setSuccess] = useState('')
   const [selectedLead, setSelectedLead] = useState(null)
   const [reviewedLead, setReviewedLead] = useState(null)
+  const [reviewedQuote, setReviewedQuote] = useState(null)
   const [quote, setQuote] = useState(EMPTY_QUOTE)
   const [quoteErrors, setQuoteErrors] = useState({})
   const [quoteStep, setQuoteStep] = useState('form')
@@ -105,6 +106,7 @@ export default function useBusinessMarketplace(type) {
           setItems(nextItems)
           setError('')
           setWithdrawConfirmationId(null)
+          setReviewedQuote(null)
         }
       } catch (loadError) {
         if (active) {
@@ -175,6 +177,20 @@ export default function useBusinessMarketplace(type) {
     setQuote(EMPTY_QUOTE)
     setQuoteErrors({})
     setQuoteStep('form')
+  }
+
+  function toggleQuoteReview(quoteId) {
+    setReviewedQuote((current) => (current === quoteId ? null : quoteId))
+    setWithdrawConfirmationId(null)
+    setError('')
+    setSuccess('')
+  }
+
+  function showQuoteReview(quoteId) {
+    setReviewedQuote(quoteId)
+    setWithdrawConfirmationId(null)
+    setError('')
+    setSuccess('')
   }
 
   function setQuoteField(field, value) {
@@ -360,6 +376,7 @@ export default function useBusinessMarketplace(type) {
     success,
     selectedLead,
     reviewedLead,
+    reviewedQuote,
     quote,
     quoteErrors,
     quoteStep,
@@ -378,6 +395,8 @@ export default function useBusinessMarketplace(type) {
     setWithdrawConfirmationId,
     toggleLead,
     toggleLeadReview,
+    toggleQuoteReview,
+    showQuoteReview,
     showLeadReview,
     handleQuoteReview,
     handleQuoteSubmit,
