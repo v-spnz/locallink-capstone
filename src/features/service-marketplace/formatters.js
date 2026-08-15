@@ -104,4 +104,9 @@ export function getRepeatBusinessIds(quotesByJob, currentJobId) {
   }
 
   return repeatBusinessIds
+
+// only count quotes still awaiting a response, so a job doesn't look "Quotes Received" once every quote's been rejected.
+export function getActiveQuoteCount(quotes) {
+  return quotes.filter((quote) => quote.quote_status === 'awaiting_response').length
+}
 }
