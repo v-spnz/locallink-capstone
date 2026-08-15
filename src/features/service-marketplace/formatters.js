@@ -89,3 +89,19 @@ export function parseBudgetRange(budget) {
 
   return { minBudget: null, maxBudget: null }
 }
+
+// businesses the consumer already had an accepted quote from on a different job.
+export function getRepeatBusinessIds(quotesByJob, currentJobId) {
+  const repeatBusinessIds = new Set()
+
+  for (const [jobId, quotes] of Object.entries(quotesByJob)) {
+    if (jobId === String(currentJobId)) continue
+    for (const quote of quotes) {
+      if (quote.quote_status === 'accepted') {
+        repeatBusinessIds.add(quote.business_id)
+      }
+    }
+  }
+
+  return repeatBusinessIds
+}

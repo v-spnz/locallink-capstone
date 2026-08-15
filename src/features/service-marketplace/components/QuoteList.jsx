@@ -9,6 +9,8 @@ export default function QuoteList({
   quotes,
   respondingQuoteId,
   onRespond,
+  repeatBusinessIds = new Set(),
+
 }) {
   // Quote pending the accept confirmation step, if any.
   const [pendingAccept, setPendingAccept] = useState(null)
@@ -48,6 +50,9 @@ export default function QuoteList({
             <div className="customer-quote-head">
               <div>
                 <strong>{quote.business_name}</strong>
+                {repeatBusinessIds.has(quote.business_id) && (
+                  <span className="sm-repeat-tag">You've used them before</span>
+                )}
                 <span>
                   {formatMoney(quote.amount_cents)}{' '}
                   {priceType && `· ${priceType}`}

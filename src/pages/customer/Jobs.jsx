@@ -6,6 +6,7 @@ import QuoteJobSidebar from '../../features/service-marketplace/components/Quote
 import QuoteList from '../../features/service-marketplace/components/QuoteList'
 import useCustomerJobs from '../../features/service-marketplace/hooks/useCustomerJobs'
 import '../../features/service-marketplace/ServiceMarketplace.css'
+import { getRepeatBusinessIds } from '../../features/service-marketplace/formatters'
 
 export default function Jobs() {
   const marketplace = useCustomerJobs()
@@ -20,6 +21,10 @@ export default function Jobs() {
     (total, list) => total + list.length,
     0,
   )
+
+  const repeatBusinessIds = selectedQuoteJob
+  ? getRepeatBusinessIds(marketplace.quotesByJob, selectedQuoteJob.id)
+  : new Set()
 
   return (
     <>
@@ -134,6 +139,7 @@ export default function Jobs() {
                     respondingQuoteId={marketplace.respondingQuoteId}
                     onRespond={marketplace.handleQuoteResponse}
                     onViewJob={marketplace.openJobDetail}
+                    repeatBusinessIds={repeatBusinessIds}
                   />
                 ) : (
                   <p className="sm-empty-sub">
