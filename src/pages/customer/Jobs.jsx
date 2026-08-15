@@ -20,6 +20,12 @@ export default function Jobs() {
     (total, list) => total + list.length,
     0,
   )
+  const selectedQuoteList =
+    selectedQuoteJob && marketplace.selectedQuoteId
+      ? (marketplace.quotesByJob[selectedQuoteJob.id] ?? []).filter(
+          (quote) => quote.quote_id === marketplace.selectedQuoteId,
+        )
+      : (marketplace.quotesByJob[selectedQuoteJob?.id ?? ''] ?? [])
 
   return (
     <>
@@ -130,7 +136,7 @@ export default function Jobs() {
                   <QuoteList
                     jobId={selectedQuoteJob.id}
                     jobStatus={selectedQuoteJob.status}
-                    quotes={marketplace.quotesByJob[selectedQuoteJob.id] ?? []}
+                    quotes={selectedQuoteList}
                     respondingQuoteId={marketplace.respondingQuoteId}
                     onRespond={marketplace.handleQuoteResponse}
                     onViewJob={marketplace.openJobDetail}

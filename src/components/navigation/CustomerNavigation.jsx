@@ -11,6 +11,7 @@ import {
   Car,
   ClipboardClock,
   Clock,
+  X,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
@@ -18,6 +19,7 @@ import useAuth from '../../auth/useAuth'
 import useCustomerNotifications from '../../features/service-marketplace/hooks/useCustomerNotifications'
 import BrandLogo from './BrandLogo'
 import './BusinessNavigation.css'
+import { notifyCustomerMarketplaceChanged } from '../../features/service-marketplace/marketplaceEvents'
 
 const navigationItems = [
   { to: '/home', label: 'Home', icon: <House aria-hidden="true" /> },
@@ -77,6 +79,7 @@ export default function CustomerNavigation() {
     isLoading: areNotificationsLoading,
     refresh: refreshNotifications,
     markAllRead,
+    deleteNotification,
   } = useCustomerNotifications()
 
   useEffect(() => {
@@ -191,24 +194,47 @@ export default function CustomerNavigation() {
                       NOTIFICATION_ICONS[notification.notification_type] ?? Bell
 
                     return (
-                      <Link
+                      <div
                         className={`business-notification-item${notification.read_at ? '' : ' is-unread'}`}
-                        to={notification.destination}
-                        role="menuitem"
                         key={notification.notification_id}
-                        onClick={() => setIsNotificationMenuOpen(false)}
                       >
-                        <span className="business-notification-icon">
-                          <NotificationIcon aria-hidden="true" />
-                        </span>
-                        <span className="business-notification-copy">
-                          <strong>{notification.title}</strong>
-                          <span>{notification.message}</span>
-                          <time dateTime={notification.created_at}>
-                            {formatNotificationTime(notification.created_at)}
-                          </time>
-                        </span>
-                      </Link>
+                        <Link
+                          className="business-notification-link"
+                          to={notification.destination}
+                          role="menuitem"
+                          onClick={() => {
+                            setIsNotificationMenuOpen(false)
+                            notifyCustomerMarketplaceChanged(user.id)
+                          }}
+                        >
+                          <span className="business-notification-icon">
+                            <NotificationIcon aria-hidden="true" />
+                          </span>
+                          <span className="business-notification-copy">
+                            <strong>{notification.title}</strong>
+                            <span>{notification.message}</span>
+                            <time dateTime={notification.created_at}>
+                              {formatNotificationTime(notification.created_at)}
+                            </time>
+                          </span>
+                        </Link>
+
+                        <button
+                          type="button"
+                          className="business-notification-dismiss"
+                          aria-label="Dismiss notification"
+                          title="Dismiss notification"
+                          onClick={(event) => {
+                            event.preventDefault()
+                            event.stopPropagation()
+                            void deleteNotification(
+                              notification.notification_id,
+                            )
+                          }}
+                        >
+                          <X aria-hidden="true" />
+                        </button>
+                      </div>
                     )
                   })}
                 </div>

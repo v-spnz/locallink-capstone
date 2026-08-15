@@ -27,3 +27,15 @@ export async function markCustomerNotificationsRead(
   if (error) throw error
   return data ?? 0
 }
+
+export async function deleteCustomerNotification(customerId, notificationId) {
+  if (!customerId || !notificationId) return 0
+
+  const { data, error } = await supabase.rpc('delete_customer_notification', {
+    p_customer_id: customerId,
+    p_notification_id: notificationId,
+  })
+
+  if (error) throw error
+  return Number(data ?? 0)
+}

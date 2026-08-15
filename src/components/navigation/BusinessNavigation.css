@@ -179,8 +179,18 @@
 
 .business-notification-item {
   position: relative;
-  padding: 13px 16px;
   border-bottom: 1px solid #f0f2f6;
+  display: flex;
+  align-items: stretch;
+}
+
+.business-notification-item:last-child {
+  border-bottom: 0;
+}
+
+.business-notification-link {
+  flex: 1 1 auto;
+  padding: 13px 36px 13px 16px;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: 11px;
@@ -188,12 +198,8 @@
   text-decoration: none;
 }
 
-.business-notification-item:last-child {
-  border-bottom: 0;
-}
-
-.business-notification-item:hover,
-.business-notification-item:focus-visible {
+.business-notification-item:hover .business-notification-link,
+.business-notification-item:focus-within .business-notification-link {
   outline: 0;
   background: #f7f8ff;
 }
@@ -202,7 +208,7 @@
   background: #f3f5ff;
 }
 
-.business-notification-item.is-unread::after {
+.business-notification-item.is-unread .business-notification-link::after {
   position: absolute;
   top: 18px;
   right: 13px;
@@ -211,6 +217,34 @@
   border-radius: 999px;
   background: #4361df;
   content: '';
+}
+
+.business-notification-dismiss {
+  position: absolute;
+  top: 10px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: #8a93a4;
+  cursor: pointer;
+}
+
+.business-notification-dismiss:hover,
+.business-notification-dismiss:focus-visible {
+  background: #eef1ff;
+  color: #2b3548;
+  outline: 0;
+}
+
+.business-notification-dismiss svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2;
 }
 
 .business-notification-icon {

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import useAuth from '../../../auth/useAuth'
 import { supabase } from '../../../lib/supabase'
 import {
+  deleteCustomerNotification,
   fetchCustomerNotifications,
   markCustomerNotificationsRead,
 } from '../api/customerNotifications'
@@ -11,6 +12,7 @@ const NOTIFICATION_REFRESH_INTERVAL = 60_000
 export default function useCustomerNotifications() {
   const { user } = useAuth()
   const [notifications, setNotifications] = useState([])
+  const [deletedIds, setDeletedIds] = useState(new Set())
   const [isLoading, setIsLoading] = useState(false)
   const customerId = user?.id
   const isEnabled = Boolean(customerId)
@@ -18,21 +20,25 @@ export default function useCustomerNotifications() {
   const refresh = useCallback(async () => {
     if (!isEnabled) {
       setNotifications([])
+      setDeletedIds(new Set())
       return []
     }
 
     setIsLoading(true)
     try {
       const nextNotifications = await fetchCustomerNotifications(customerId)
-      setNotifications(nextNotifications)
-      return nextNotifications
+      const filteredNotifications = nextNotifications.filter(
+        (notification) => !deletedIds.has(notification.notification_id),
+      )
+      setNotifications(filteredNotifications)
+      return filteredNotifications
     } catch (error) {
       console.error('Unable to load customer notifications.', error)
       return []
     } finally {
       setIsLoading(false)
     }
-  }, [customerId, isEnabled])
+  }, [customerId, deletedIds, isEnabled])
 
   useEffect(() => {
     const initialRefreshTimer = window.setTimeout(refresh, 0)
@@ -99,5 +105,58 @@ export default function useCustomerNotifications() {
     [customerId, notifications, refresh],
   )
 
-  return { notifications, unreadCount, isLoading, refresh, markAllRead }
+  const deleteNotification = useCallback(
+    async (notificationId) => {
+      if (!customerId || !notificationId) return false
+
+      setDeletedIds((current) => {
+        const next = new Set(current)
+        next.add(notificationId)
+        return next
+      })
+
+      setNotifications((current) =>
+        current.filter(
+          (notification) => notification.notification_id !== notificationId,
+        ),
+      )
+
+      try {
+        const deleted = await deleteCustomerNotification(
+          customerId,
+          notificationId,
+        )
+        if (!deleted) {
+          setDeletedIds((current) => {
+            const next = new Set(current)
+            next.delete(notificationId)
+            return next
+          })
+          await refresh()
+          return false
+        }
+
+        return true
+      } catch (error) {
+        console.error('Unable to delete customer notification.', error)
+        setDeletedIds((current) => {
+          const next = new Set(current)
+          next.delete(notificationId)
+          return next
+        })
+        await refresh()
+        return false
+      }
+    },
+    [customerId, refresh],
+  )
+
+  return {
+    notifications,
+    unreadCount,
+    isLoading,
+    refresh,
+    markAllRead,
+    deleteNotification,
+  }
 }
