@@ -10,7 +10,6 @@ export default function QuoteList({
   respondingQuoteId,
   onRespond,
   repeatBusinessIds = new Set(),
-
 }) {
   // Quote pending the accept confirmation step, if any.
   const [pendingAccept, setPendingAccept] = useState(null)

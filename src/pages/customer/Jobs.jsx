@@ -6,7 +6,10 @@ import QuoteJobSidebar from '../../features/service-marketplace/components/Quote
 import QuoteList from '../../features/service-marketplace/components/QuoteList'
 import useCustomerJobs from '../../features/service-marketplace/hooks/useCustomerJobs'
 import '../../features/service-marketplace/ServiceMarketplace.css'
-import { getRepeatBusinessIds, getActiveQuoteCount } from '../../features/service-marketplace/formatters'
+import {
+  getRepeatBusinessIds,
+  getActiveQuoteCount,
+} from '../../features/service-marketplace/formatters'
 
 export default function Jobs() {
   const marketplace = useCustomerJobs()
@@ -29,8 +32,8 @@ export default function Jobs() {
       : (marketplace.quotesByJob[selectedQuoteJob?.id ?? ''] ?? [])
 
   const repeatBusinessIds = selectedQuoteJob
-  ? getRepeatBusinessIds(marketplace.quotesByJob, selectedQuoteJob.id)
-  : new Set()
+    ? getRepeatBusinessIds(marketplace.quotesByJob, selectedQuoteJob.id)
+    : new Set()
 
   return (
     <>
@@ -119,7 +122,9 @@ export default function Jobs() {
                   <CustomerJobCard
                     key={job.id}
                     job={job}
-                    quoteCount={getActiveQuoteCount(marketplace.quotesByJob[job.id] ?? [])}
+                    quoteCount={getActiveQuoteCount(
+                      marketplace.quotesByJob[job.id] ?? [],
+                    )}
                     onSelect={(selected) =>
                       marketplace.openJobDetail(selected.id)
                     }

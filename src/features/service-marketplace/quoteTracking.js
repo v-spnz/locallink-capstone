@@ -94,10 +94,7 @@ export function getBusinessQuoteResponseReminderThreshold(quote) {
   return threshold
 }
 
-export function isBusinessQuoteResponseDeadlineUrgent(
-  quote,
-  now = new Date(),
-) {
+export function isBusinessQuoteResponseDeadlineUrgent(quote, now = new Date()) {
   const deadline = getBusinessQuoteResponseDeadline(quote)
   const threshold = getBusinessQuoteResponseReminderThreshold(quote)
   const currentTime = new Date(now)
@@ -153,17 +150,11 @@ export function getBusinessQuoteTimeline(quote) {
   const submittedStep = { label: 'Submitted', state: 'complete' }
 
   if (quote.quote_status === 'awaiting_response') {
-    return [
-      submittedStep,
-      { label: 'Awaiting response', state: 'current' },
-    ]
+    return [submittedStep, { label: 'Awaiting response', state: 'current' }]
   }
 
   if (quote.quote_status === 'accepted') {
-    return [
-      submittedStep,
-      { label: 'Awaiting response', state: 'complete' },
-    ]
+    return [submittedStep, { label: 'Awaiting response', state: 'complete' }]
   }
 
   return [

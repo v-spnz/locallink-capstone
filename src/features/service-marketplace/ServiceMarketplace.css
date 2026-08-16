@@ -1125,11 +1125,7 @@
 
 .service-quote-timeline.is-progress:not(.is-deadline-urgent)
   .service-quote-timeline-step.is-complete:not(:last-child)::after {
-  background: linear-gradient(
-    to right,
-    var(--emerald) 0 50%,
-    #facc15 50% 100%
-  );
+  background: linear-gradient(to right, var(--emerald) 0 50%, #facc15 50% 100%);
 }
 
 .service-quote-timeline.is-progress
@@ -1164,11 +1160,7 @@
 
 .service-quote-timeline.is-deadline-urgent
   .service-quote-timeline-step.is-complete:not(:last-child)::after {
-  background: linear-gradient(
-    to right,
-    var(--emerald) 0 50%,
-    #f59f00 50% 100%
-  );
+  background: linear-gradient(to right, var(--emerald) 0 50%, #f59f00 50% 100%);
 }
 
 .service-marketplace-meta .service-marketplace-deadline.is-urgent {
