@@ -173,13 +173,20 @@ export default function useCustomerJobs() {
     clearSelectedJobRoute()
   }
 
-  function switchTab(tab) {
+function switchTab(tab) {
     setActiveTab(tab)
     setSelectedJobId(null)
     setSelectedQuoteId(null)
     clearSelectedJobRoute()
-    if (tab === 'quotes' && !selectedQuoteJobId && postedJobs.length > 0) {
-      setSelectedQuoteJobId(postedJobs[0].id)
+    if (tab === 'quotes' && !selectedQuoteJobId) {
+      const firstActiveJob = postedJobs.find(
+        (job) => job.status !== 'completed',
+      )
+      if (firstActiveJob) {
+        setSelectedQuoteJobId(firstActiveJob.id)
+      } else if (postedJobs.length > 0) {
+        setSelectedQuoteJobId(postedJobs[0].id)
+      }
     }
   }
 

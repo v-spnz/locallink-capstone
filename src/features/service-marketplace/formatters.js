@@ -111,3 +111,22 @@ export function getActiveQuoteCount(quotes) {
   return quotes.filter((quote) => quote.quote_status === 'awaiting_response')
     .length
 }
+
+// initials shown on a quote's avatar, e.g. "Justine's Carpentry" -> "JC"
+export function getInitials(name = '') {
+  const words = name.trim().split(/\s+/).filter(Boolean)
+  if (words.length === 0) return '?'
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase()
+  return (words[0][0] + words[1][0]).toUpperCase()
+}
+
+const AVATAR_PALETTE = ['#5f3dc4', '#3153d8', '#087f5b', '#c2410c', '#a3690c', '#0f6674']
+
+// deterministic avatar colour so the same business always gets the same one
+export function getAvatarColor(businessId = '') {
+  let hash = 0
+  for (const char of String(businessId)) {
+    hash = (hash + char.charCodeAt(0)) % AVATAR_PALETTE.length
+  }
+  return AVATAR_PALETTE[hash]
+}
