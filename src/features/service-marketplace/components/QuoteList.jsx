@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import Button from '../../../components/ui/Button'
-import { formatMoney, formatStatus } from '../formatters'
+import {
+  formatMoney,
+  formatStatus,
+  getInitials,
+  getAvatarColor,
+} from '../formatters'
 import { QUOTE_PRICE_TYPES } from '../constants'
 import QuoteActionModal from './QuoteActionModal'
 
@@ -12,12 +17,12 @@ export default function QuoteList({
   repeatBusinessIds = new Set(),
 }) {
   // Quote pending the accept confirmation step, if any.
-  const [pendingAccept, setPendingAccept] = useState(null)
+const [pendingAction, setPendingAction] = useState(null) // { quote, type: 'accept' | 'decline' }
 
-  async function confirmAccept() {
-    await onRespond(pendingAccept.quote_id, true)
-    setPendingAccept(null)
-  }
+async function confirmPendingAction() {
+  await onRespond(pendingAction.quote.quote_id, pendingAction.type === 'accept')
+  setPendingAction(null)
+}
 
   if (quotes.length === 0) {
     return (
@@ -45,74 +50,109 @@ export default function QuoteList({
           ['awaiting_response', 'submitted'].includes(quote.quote_status)
 
         return (
-          <div className="customer-quote" key={quote.quote_id}>
-            <div className="customer-quote-head">
-              <div>
-                <strong>{quote.business_name}</strong>
-                {repeatBusinessIds.has(quote.business_id) && (
-                  <span className="sm-repeat-tag">You've used them before</span>
-                )}
-                <span>
-                  {formatMoney(quote.amount_cents)}{' '}
-                  {priceType && `· ${priceType}`}
+          <div className="sm-quote-card" key={quote.quote_id}>
+            <div className="sm-quote-card-head">
+              <div className="sm-quote-biz">
+                <span
+                  className="sm-quote-avatar"
+                  style={{ background: getAvatarColor(quote.business_id) }}
+                >
+                  {getInitials(quote.business_name)}
                 </span>
+                <div>
+                  <div className="sm-quote-biz-name">{quote.business_name}</div>
+                  {repeatBusinessIds.has(quote.business_id) && (
+                    <span className="sm-repeat-tag">Previously Hired</span>
+                  )}
+                </div>
               </div>
-              <span className={`customer-quote-status ${quote.quote_status}`}>
-                {formatStatus(quote.quote_status)}
-              </span>
+              <div className="sm-quote-price-block">
+                <span className="sm-quote-price">
+                  {formatMoney(quote.amount_cents)}
+                </span>
+                {priceType && (
+                  <span className="sm-quote-price-type">{priceType}</span>
+                )}
+                <div>
+                  <span className={`customer-quote-status ${quote.quote_status}`}>
+                    {formatStatus(quote.quote_status)}
+                  </span>
+                </div>
+              </div>
             </div>
-            <dl className="customer-quote-details">
+
+            <div className="sm-quote-facts">
               <div>
-                <dt>Available</dt>
-                <dd>{quote.availability_date}</dd>
+                <div className="sm-quote-fact-label">Available</div>
+                <div className="sm-quote-fact-value">
+                  {quote.availability_date}
+                </div>
               </div>
               <div>
-                <dt>Arrival</dt>
-                <dd>{quote.arrival_window}</dd>
+                <div className="sm-quote-fact-label">Arrival</div>
+                <div className="sm-quote-fact-value">{quote.arrival_window}</div>
               </div>
               <div>
-                <dt>Duration</dt>
-                <dd>{quote.expected_duration}</dd>
+                <div className="sm-quote-fact-label">Duration</div>
+                <div className="sm-quote-fact-value">
+                  {quote.expected_duration}
+                </div>
               </div>
               <div>
-                <dt>Included work</dt>
-                <dd>{quote.included_work}</dd>
+                <div className="sm-quote-fact-label">Included work</div>
+                <div className="sm-quote-fact-value">{quote.included_work}</div>
               </div>
-              <div>
-                <dt>Conditions</dt>
-                <dd>{quote.conditions}</dd>
+              <div className="sm-quote-fact-full">
+                <div className="sm-quote-fact-label">Conditions</div>
+                <div className="sm-quote-fact-value">{quote.conditions}</div>
               </div>
-            </dl>
-            {quote.message && <p>{quote.message}</p>}
+            </div>
+
+            {quote.message && <p className="sm-quote-message">{quote.message}</p>}
+
             {canAct && (
-              <div className="customer-quote-actions">
-                <Button
-                  onClick={() => setPendingAccept(quote)}
-                  disabled={respondingQuoteId !== null}
-                >
-                  Accept quote
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => onRespond(quote.quote_id, false)}
-                  disabled={respondingQuoteId !== null}
-                >
-                  Decline
-                </Button>
-              </div>
+              <>
+                <hr className="sm-quote-divider" />
+                <div className="sm-quote-actions">
+                  <Button
+                    className="sm-quote-accept-btn"
+onClick={() => setPendingAction({ quote, type: 'accept' })}
+                    disabled={respondingQuoteId !== null}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Accept quote
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="sm-quote-decline-btn"
+onClick={() => setPendingAction({ quote, type: 'decline' })}
+                    disabled={respondingQuoteId !== null}
+                  >
+                    Decline
+                  </Button>
+                </div>
+              </>
             )}
           </div>
         )
       })}
 
-      {pendingAccept && (
-        <QuoteActionModal
-          businessName={pendingAccept.business_name}
-          onCancel={() => setPendingAccept(null)}
-          onConfirm={confirmAccept}
-          isSaving={respondingQuoteId === pendingAccept.quote_id}
-        />
-      )}
+{pendingAction && (
+  <QuoteActionModal
+    action={pendingAction.type}
+    businessName={pendingAction.quote.business_name}
+    onCancel={() => setPendingAction(null)}
+    onConfirm={confirmPendingAction}
+    isSaving={respondingQuoteId === pendingAction.quote.quote_id}
+  />
+)}
     </section>
   )
 }
