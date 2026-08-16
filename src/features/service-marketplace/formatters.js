@@ -120,7 +120,14 @@ export function getInitials(name = '') {
   return (words[0][0] + words[1][0]).toUpperCase()
 }
 
-const AVATAR_PALETTE = ['#5f3dc4', '#3153d8', '#087f5b', '#c2410c', '#a3690c', '#0f6674']
+const AVATAR_PALETTE = [
+  '#5f3dc4',
+  '#3153d8',
+  '#087f5b',
+  '#c2410c',
+  '#a3690c',
+  '#0f6674',
+]
 
 // deterministic avatar colour so the same business always gets the same one
 export function getAvatarColor(businessId = '') {

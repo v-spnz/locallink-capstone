@@ -22,15 +22,15 @@ export default function Jobs() {
   const selectedQuoteJob = marketplace.postedJobs.find(
     (job) => job.id === marketplace.selectedQuoteJobId,
   )
-const totalQuoteCount = Object.values(marketplace.quotesByJob).reduce(
-  (total, list) => total + getActiveQuoteCount(list),
-  0,
-)
+  const totalQuoteCount = Object.values(marketplace.quotesByJob).reduce(
+    (total, list) => total + getActiveQuoteCount(list),
+    0,
+  )
   const activeJobs = marketplace.postedJobs.filter(
     (job) => job.status !== 'completed',
   )
   const pastJobs = marketplace.postedJobs.filter(
-  (job) => job.status === 'completed',
+    (job) => job.status === 'completed',
   )
   const selectedQuoteList =
     selectedQuoteJob && marketplace.selectedQuoteId
@@ -109,9 +109,7 @@ const totalQuoteCount = Object.values(marketplace.quotesByJob).reduce(
               onClick={() => marketplace.switchTab('jobs')}
             >
               My Jobs
-<span className="sm-tab-count">
-  {activeJobs.length}
-</span>
+              <span className="sm-tab-count">{activeJobs.length}</span>
             </button>
             <button
               type="button"
@@ -123,55 +121,55 @@ const totalQuoteCount = Object.values(marketplace.quotesByJob).reduce(
             </button>
           </div>
 
-{marketplace.activeTab === 'jobs' && (
-  <>
-    {activeJobs.length > 0 && (
-      <div className="customer-job-list sm-job-grid">
-        {activeJobs.map((job) => (
-          <CustomerJobCard
-            key={job.id}
-            job={job}
-            quoteCount={getActiveQuoteCount(
-              marketplace.quotesByJob[job.id] ?? [],
-            )}
-            onSelect={(selected) =>
-              marketplace.openJobDetail(selected.id)
-            }
-          />
-        ))}
-      </div>
-    )}
+          {marketplace.activeTab === 'jobs' && (
+            <>
+              {activeJobs.length > 0 && (
+                <div className="customer-job-list sm-job-grid">
+                  {activeJobs.map((job) => (
+                    <CustomerJobCard
+                      key={job.id}
+                      job={job}
+                      quoteCount={getActiveQuoteCount(
+                        marketplace.quotesByJob[job.id] ?? [],
+                      )}
+                      onSelect={(selected) =>
+                        marketplace.openJobDetail(selected.id)
+                      }
+                    />
+                  ))}
+                </div>
+              )}
 
-    {pastJobs.length > 0 && (
-      <details className="sm-past-jobs">
-        <summary>
-          <span className="sm-past-chev">▶</span> Past jobs
-        </summary>
-        <div className="sm-past-jobs-body">
-          {pastJobs.map((job) => (
-            <PastJobRow
-              key={job.id}
-              job={job}
-              onSelect={(selected) =>
-                marketplace.openJobDetail(selected.id)
-              }
-            />
-          ))}
-        </div>
-      </details>
-    )}
-  </>
-)}
+              {pastJobs.length > 0 && (
+                <details className="sm-past-jobs">
+                  <summary>
+                    <span className="sm-past-chev">▶</span> Past jobs
+                  </summary>
+                  <div className="sm-past-jobs-body">
+                    {pastJobs.map((job) => (
+                      <PastJobRow
+                        key={job.id}
+                        job={job}
+                        onSelect={(selected) =>
+                          marketplace.openJobDetail(selected.id)
+                        }
+                      />
+                    ))}
+                  </div>
+                </details>
+              )}
+            </>
+          )}
 
           {marketplace.activeTab === 'quotes' && (
             <div className="sm-quotes-layout">
-<QuoteJobSidebar
-  jobs={activeJobs}
-  pastJobs={pastJobs}
-  quotesByJob={marketplace.quotesByJob}
-  selectedJobId={marketplace.selectedQuoteJobId}
-  onSelect={marketplace.selectQuoteJob}
-/>
+              <QuoteJobSidebar
+                jobs={activeJobs}
+                pastJobs={pastJobs}
+                quotesByJob={marketplace.quotesByJob}
+                selectedJobId={marketplace.selectedQuoteJobId}
+                onSelect={marketplace.selectQuoteJob}
+              />
               <div>
                 {selectedQuoteJob ? (
                   <QuoteList

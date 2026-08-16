@@ -17,12 +17,15 @@ export default function QuoteList({
   repeatBusinessIds = new Set(),
 }) {
   // Quote pending the accept confirmation step, if any.
-const [pendingAction, setPendingAction] = useState(null) // { quote, type: 'accept' | 'decline' }
+  const [pendingAction, setPendingAction] = useState(null) // { quote, type: 'accept' | 'decline' }
 
-async function confirmPendingAction() {
-  await onRespond(pendingAction.quote.quote_id, pendingAction.type === 'accept')
-  setPendingAction(null)
-}
+  async function confirmPendingAction() {
+    await onRespond(
+      pendingAction.quote.quote_id,
+      pendingAction.type === 'accept',
+    )
+    setPendingAction(null)
+  }
 
   if (quotes.length === 0) {
     return (
@@ -74,7 +77,9 @@ async function confirmPendingAction() {
                   <span className="sm-quote-price-type">{priceType}</span>
                 )}
                 <div>
-                  <span className={`customer-quote-status ${quote.quote_status}`}>
+                  <span
+                    className={`customer-quote-status ${quote.quote_status}`}
+                  >
                     {formatStatus(quote.quote_status)}
                   </span>
                 </div>
@@ -90,7 +95,9 @@ async function confirmPendingAction() {
               </div>
               <div>
                 <div className="sm-quote-fact-label">Arrival</div>
-                <div className="sm-quote-fact-value">{quote.arrival_window}</div>
+                <div className="sm-quote-fact-value">
+                  {quote.arrival_window}
+                </div>
               </div>
               <div>
                 <div className="sm-quote-fact-label">Duration</div>
@@ -108,7 +115,9 @@ async function confirmPendingAction() {
               </div>
             </div>
 
-            {quote.message && <p className="sm-quote-message">{quote.message}</p>}
+            {quote.message && (
+              <p className="sm-quote-message">{quote.message}</p>
+            )}
 
             {canAct && (
               <>
@@ -116,7 +125,7 @@ async function confirmPendingAction() {
                 <div className="sm-quote-actions">
                   <Button
                     className="sm-quote-accept-btn"
-onClick={() => setPendingAction({ quote, type: 'accept' })}
+                    onClick={() => setPendingAction({ quote, type: 'accept' })}
                     disabled={respondingQuoteId !== null}
                   >
                     <svg
@@ -132,7 +141,7 @@ onClick={() => setPendingAction({ quote, type: 'accept' })}
                   <Button
                     variant="secondary"
                     className="sm-quote-decline-btn"
-onClick={() => setPendingAction({ quote, type: 'decline' })}
+                    onClick={() => setPendingAction({ quote, type: 'decline' })}
                     disabled={respondingQuoteId !== null}
                   >
                     Decline
@@ -144,15 +153,15 @@ onClick={() => setPendingAction({ quote, type: 'decline' })}
         )
       })}
 
-{pendingAction && (
-  <QuoteActionModal
-    action={pendingAction.type}
-    businessName={pendingAction.quote.business_name}
-    onCancel={() => setPendingAction(null)}
-    onConfirm={confirmPendingAction}
-    isSaving={respondingQuoteId === pendingAction.quote.quote_id}
-  />
-)}
+      {pendingAction && (
+        <QuoteActionModal
+          action={pendingAction.type}
+          businessName={pendingAction.quote.business_name}
+          onCancel={() => setPendingAction(null)}
+          onConfirm={confirmPendingAction}
+          isSaving={respondingQuoteId === pendingAction.quote.quote_id}
+        />
+      )}
     </section>
   )
 }

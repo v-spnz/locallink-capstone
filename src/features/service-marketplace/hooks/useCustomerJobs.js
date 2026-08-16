@@ -173,7 +173,7 @@ export default function useCustomerJobs() {
     clearSelectedJobRoute()
   }
 
-function switchTab(tab) {
+  function switchTab(tab) {
     setActiveTab(tab)
     setSelectedJobId(null)
     setSelectedQuoteId(null)
@@ -201,6 +201,7 @@ function switchTab(tab) {
   function selectQuoteJob(jobId) {
     setSelectedQuoteJobId(jobId)
     setSelectedQuoteId(null)
+    clearSelectedJobRoute()
   }
 
   async function handleSubmitJob(draft) {
