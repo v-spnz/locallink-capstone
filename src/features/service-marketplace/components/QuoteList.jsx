@@ -25,8 +25,8 @@ export default function QuoteList({
       <div className="sm-empty-state">
         <p className="sm-empty-title">No quotes yet</p>
         <p className="sm-empty-sub">
-          Providers usually respond within 24-48 hours. We'll notify you as
-          soon as the first quote arrives.
+          Providers usually respond within 24-48 hours. We'll notify you as soon
+          as the first quote arrives.
         </p>
       </div>
     )

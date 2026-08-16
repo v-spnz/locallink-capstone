@@ -288,6 +288,7 @@ export function ServiceMarketplaceContent({ type, marketplace }) {
                 <BusinessQuoteCard
                   key={item.quote_id}
                   item={item}
+                  isDetailsOpen={marketplace.reviewedQuote === item.quote_id}
                   isWithdrawalConfirming={
                     marketplace.withdrawConfirmationId === item.quote_id
                   }
@@ -302,6 +303,9 @@ export function ServiceMarketplaceContent({ type, marketplace }) {
                   }
                   onConfirmWithdraw={() =>
                     marketplace.handleWithdrawQuote(item.quote_id)
+                  }
+                  onToggleDetails={() =>
+                    marketplace.toggleQuoteReview(item.quote_id)
                   }
                 />
               )

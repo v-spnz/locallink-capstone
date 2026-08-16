@@ -10,6 +10,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "node --test",
+    "test:db": "supabase test db",
     "preview": "vite preview"
   },
   "dependencies": {

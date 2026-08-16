@@ -2,7 +2,12 @@ import { getJobBadge } from '../formatters'
 
 // Left column on the Quotes tab (US0054) -- lets the customer switch
 // which job's quotes they're comparing.
-export default function QuoteJobSidebar({ jobs, quotesByJob, selectedJobId, onSelect }) {
+export default function QuoteJobSidebar({
+  jobs,
+  quotesByJob,
+  selectedJobId,
+  onSelect,
+}) {
   return (
     <div>
       <div className="sm-field-label" style={{ marginBottom: 8 }}>
@@ -20,7 +25,8 @@ export default function QuoteJobSidebar({ jobs, quotesByJob, selectedJobId, onSe
           >
             <div className="sm-quote-sidebar-title">{job.title}</div>
             <div className="sm-quote-sidebar-sub">
-              {badge.label} &middot; {quotes.length} quote{quotes.length === 1 ? '' : 's'}
+              {badge.label} &middot; {quotes.length} quote
+              {quotes.length === 1 ? '' : 's'}
             </div>
           </div>
         )

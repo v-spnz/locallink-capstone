@@ -110,7 +110,6 @@ export async function confirmCustomerJobCompletion(jobRequestId) {
   }
 }
 
-// Testing-only utility, not tied to a user story yet.
 export async function deleteCustomerJob(jobId, customerId) {
   const { error } = await supabase
     .from('job_requests')
