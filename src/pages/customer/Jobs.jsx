@@ -6,6 +6,12 @@ import QuoteJobSidebar from '../../features/service-marketplace/components/Quote
 import QuoteList from '../../features/service-marketplace/components/QuoteList'
 import useCustomerJobs from '../../features/service-marketplace/hooks/useCustomerJobs'
 import '../../features/service-marketplace/ServiceMarketplace.css'
+import PastJobRow from '../../features/service-marketplace/components/PastJobRow'
+
+import {
+  getRepeatBusinessIds,
+  getActiveQuoteCount,
+} from '../../features/service-marketplace/formatters'
 
 export default function Jobs() {
   const marketplace = useCustomerJobs()
@@ -17,8 +23,14 @@ export default function Jobs() {
     (job) => job.id === marketplace.selectedQuoteJobId,
   )
   const totalQuoteCount = Object.values(marketplace.quotesByJob).reduce(
-    (total, list) => total + list.length,
+    (total, list) => total + getActiveQuoteCount(list),
     0,
+  )
+  const activeJobs = marketplace.postedJobs.filter(
+    (job) => job.status !== 'completed',
+  )
+  const pastJobs = marketplace.postedJobs.filter(
+    (job) => job.status === 'completed',
   )
   const selectedQuoteList =
     selectedQuoteJob && marketplace.selectedQuoteId
@@ -26,6 +38,10 @@ export default function Jobs() {
           (quote) => quote.quote_id === marketplace.selectedQuoteId,
         )
       : (marketplace.quotesByJob[selectedQuoteJob?.id ?? ''] ?? [])
+
+  const repeatBusinessIds = selectedQuoteJob
+    ? getRepeatBusinessIds(marketplace.quotesByJob, selectedQuoteJob.id)
+    : new Set()
 
   return (
     <>
@@ -93,9 +109,7 @@ export default function Jobs() {
               onClick={() => marketplace.switchTab('jobs')}
             >
               My Jobs
-              <span className="sm-tab-count">
-                {marketplace.postedJobs.length}
-              </span>
+              <span className="sm-tab-count">{activeJobs.length}</span>
             </button>
             <button
               type="button"
@@ -107,26 +121,51 @@ export default function Jobs() {
             </button>
           </div>
 
-          {marketplace.activeTab === 'jobs' &&
-            marketplace.postedJobs.length > 0 && (
-              <div className="customer-job-list sm-job-grid">
-                {marketplace.postedJobs.map((job) => (
-                  <CustomerJobCard
-                    key={job.id}
-                    job={job}
-                    quoteCount={(marketplace.quotesByJob[job.id] ?? []).length}
-                    onSelect={(selected) =>
-                      marketplace.openJobDetail(selected.id)
-                    }
-                  />
-                ))}
-              </div>
-            )}
+          {marketplace.activeTab === 'jobs' && (
+            <>
+              {activeJobs.length > 0 && (
+                <div className="customer-job-list sm-job-grid">
+                  {activeJobs.map((job) => (
+                    <CustomerJobCard
+                      key={job.id}
+                      job={job}
+                      quoteCount={getActiveQuoteCount(
+                        marketplace.quotesByJob[job.id] ?? [],
+                      )}
+                      onSelect={(selected) =>
+                        marketplace.openJobDetail(selected.id)
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+
+              {pastJobs.length > 0 && (
+                <details className="sm-past-jobs">
+                  <summary>
+                    <span className="sm-past-chev">▶</span> Past jobs
+                  </summary>
+                  <div className="sm-past-jobs-body">
+                    {pastJobs.map((job) => (
+                      <PastJobRow
+                        key={job.id}
+                        job={job}
+                        onSelect={(selected) =>
+                          marketplace.openJobDetail(selected.id)
+                        }
+                      />
+                    ))}
+                  </div>
+                </details>
+              )}
+            </>
+          )}
 
           {marketplace.activeTab === 'quotes' && (
             <div className="sm-quotes-layout">
               <QuoteJobSidebar
-                jobs={marketplace.postedJobs}
+                jobs={activeJobs}
+                pastJobs={pastJobs}
                 quotesByJob={marketplace.quotesByJob}
                 selectedJobId={marketplace.selectedQuoteJobId}
                 onSelect={marketplace.selectQuoteJob}
@@ -140,6 +179,7 @@ export default function Jobs() {
                     respondingQuoteId={marketplace.respondingQuoteId}
                     onRespond={marketplace.handleQuoteResponse}
                     onViewJob={marketplace.openJobDetail}
+                    repeatBusinessIds={repeatBusinessIds}
                   />
                 ) : (
                   <p className="sm-empty-sub">

@@ -43,10 +43,16 @@ test('business notification bell replaces the personal home shortcut', async () 
 
   assert.match(navigation, /business-notification-button/)
   assert.match(navigation, /has-unread/)
-  assert.match(navigation, /fill=\{unreadCount > 0 \? 'currentColor' : 'none'\}/)
+  assert.match(
+    navigation,
+    /fill=\{unreadCount > 0 \? 'currentColor' : 'none'\}/,
+  )
   assert.match(navigation, /aria-label={`Notifications/)
   assert.match(navigation, /business-notification-dropdown/)
-  assert.match(styles, /\.business-notification-link\s*\{[\s\S]+padding: 13px 36px 13px 16px/)
+  assert.match(
+    styles,
+    /\.business-notification-link\s*\{[\s\S]+padding: 13px 36px 13px 16px/,
+  )
   assert.doesNotMatch(navigation, /Open personal LocalLink pages/)
   assert.doesNotMatch(navigation, /<House/)
 })
@@ -175,49 +181,56 @@ test('business members can dismiss an individual notification', async () => {
 })
 
 test('notification clicks open and highlight their related marketplace item', async () => {
-  const [navigation, services, leadCard, quoteCard, jobCard, styles, migration] =
-    await Promise.all([
-      readFile(
-        new URL(
-          '../src/components/navigation/BusinessNavigation.jsx',
-          import.meta.url,
-        ),
-        'utf8',
+  const [
+    navigation,
+    services,
+    leadCard,
+    quoteCard,
+    jobCard,
+    styles,
+    migration,
+  ] = await Promise.all([
+    readFile(
+      new URL(
+        '../src/components/navigation/BusinessNavigation.jsx',
+        import.meta.url,
       ),
-      readFile(
-        new URL('../src/pages/business/Services.jsx', import.meta.url),
-        'utf8',
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/pages/business/Services.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/service-marketplace/components/LeadCard.jsx',
+        import.meta.url,
       ),
-      readFile(
-        new URL(
-          '../src/features/service-marketplace/components/LeadCard.jsx',
-          import.meta.url,
-        ),
-        'utf8',
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/service-marketplace/components/BusinessQuoteCard.jsx',
+        import.meta.url,
       ),
-      readFile(
-        new URL(
-          '../src/features/service-marketplace/components/BusinessQuoteCard.jsx',
-          import.meta.url,
-        ),
-        'utf8',
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/service-marketplace/components/ActiveJobCard.jsx',
+        import.meta.url,
       ),
-      readFile(
-        new URL(
-          '../src/features/service-marketplace/components/ActiveJobCard.jsx',
-          import.meta.url,
-        ),
-        'utf8',
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/service-marketplace/ServiceMarketplace.css',
+        import.meta.url,
       ),
-      readFile(
-        new URL(
-          '../src/features/service-marketplace/ServiceMarketplace.css',
-          import.meta.url,
-        ),
-        'utf8',
-      ),
-      readFile(deepLinkMigrationUrl, 'utf8'),
-    ])
+      'utf8',
+    ),
+    readFile(deepLinkMigrationUrl, 'utf8'),
+  ])
 
   assert.match(navigation, /getBusinessNotificationDestination/)
   assert.match(navigation, /case 'new_lead'/)

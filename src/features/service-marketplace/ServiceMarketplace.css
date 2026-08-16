@@ -1125,11 +1125,7 @@
 
 .service-quote-timeline.is-progress:not(.is-deadline-urgent)
   .service-quote-timeline-step.is-complete:not(:last-child)::after {
-  background: linear-gradient(
-    to right,
-    var(--emerald) 0 50%,
-    #facc15 50% 100%
-  );
+  background: linear-gradient(to right, var(--emerald) 0 50%, #facc15 50% 100%);
 }
 
 .service-quote-timeline.is-progress
@@ -1164,11 +1160,7 @@
 
 .service-quote-timeline.is-deadline-urgent
   .service-quote-timeline-step.is-complete:not(:last-child)::after {
-  background: linear-gradient(
-    to right,
-    var(--emerald) 0 50%,
-    #f59f00 50% 100%
-  );
+  background: linear-gradient(to right, var(--emerald) 0 50%, #f59f00 50% 100%);
 }
 
 .service-marketplace-meta .service-marketplace-deadline.is-urgent {
@@ -2269,4 +2261,296 @@
     transition: none;
     animation: none;
   }
+}
+
+/* repeat-business tag on quotes */
+.sm-repeat-tag {
+  width: fit-content;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #f3f0ff;
+  color: #5f3dc4;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Past jobs dropdown: completed jobs collapsed below active ones */
+details.sm-past-jobs {
+  margin-top: 14px;
+}
+
+details.sm-past-jobs summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 2px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+details.sm-past-jobs summary::-webkit-details-marker {
+  display: none;
+}
+
+.sm-past-chev {
+  display: inline-flex;
+  transition: transform 150ms ease;
+}
+
+details.sm-past-jobs[open] .sm-past-chev {
+  transform: rotate(90deg);
+}
+
+.sm-past-jobs-body {
+  margin-top: 8px;
+}
+
+.sm-past-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 6px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 150ms ease;
+}
+
+.sm-past-row:hover {
+  opacity: 1;
+}
+
+.sm-past-row:last-child {
+  border-bottom: 0;
+}
+
+.sm-past-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.sm-past-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.sm-past-icon--carpentry {
+  background: #fdf3e0;
+  color: #a3690c;
+}
+
+.sm-past-icon--electrical {
+  background: #fff4e6;
+  color: #c2410c;
+}
+
+.sm-past-icon--landscaping {
+  background: #e6fcf5;
+  color: #087f5b;
+}
+
+.sm-past-icon--plumbing {
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.sm-past-icon--painting {
+  background: #f3f0ff;
+  color: #5f3dc4;
+}
+
+.sm-past-icon--roofing,
+.sm-past-icon--default {
+  background: #f1f3f5;
+  color: var(--text-muted);
+}
+
+.sm-past-row-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.sm-past-row-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.sm-past-row-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.sm-past-row-cat {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: #eceef1;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* Card 1 quote redesign: avatar, price header, fact-tile grid */
+.sm-quote-card {
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+}
+
+.sm-quote-card:last-of-type {
+  margin-bottom: 0;
+}
+
+.sm-quote-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sm-quote-biz {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+}
+
+.sm-quote-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 800;
+}
+
+.sm-quote-biz-name {
+  margin-bottom: 4px;
+  font-size: 14.5px;
+  font-weight: 800;
+}
+
+.sm-quote-price-block {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.sm-quote-price {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.sm-quote-price-type {
+  margin-left: 4px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.sm-quote-price-block .customer-quote-status {
+  margin-top: 5px;
+  display: inline-block;
+}
+
+.sm-quote-facts {
+  margin: 14px 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+}
+
+.sm-quote-fact-full {
+  grid-column: 1 / -1;
+}
+
+.sm-quote-fact-label {
+  margin-bottom: 2px;
+  color: var(--text-muted);
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.sm-quote-fact-value {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.sm-quote-message {
+  margin: 0 0 14px;
+  color: #3c4250;
+  font-size: 12.5px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.sm-quote-divider {
+  margin: 0 0 14px;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.sm-quote-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.sm-quote-accept-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sm-quote-accept-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.sm-quote-decline-btn.btn-secondary {
+  color: var(--danger);
+  border-color: #f3c6c6;
+}
+
+@media (max-width: 560px) {
+  .sm-quote-card-head {
+    flex-direction: column;
+  }
+
+  .sm-quote-price-block {
+    text-align: left;
+  }
+
+  .sm-quote-facts {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Faded treatment for past jobs inside the Quotes sidebar dropdown */
+.sm-quote-sidebar-item--past {
+  opacity: 0.7;
+}
+
+.sm-quote-sidebar-item--past:hover {
+  opacity: 1;
+}
+
+/* Solid red confirm button for the decline confirmation modal */
+.sm-decline-confirm-btn.btn-primary {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.sm-decline-confirm-btn.btn-primary:hover {
+  background: #a61e1e;
 }

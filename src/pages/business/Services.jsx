@@ -35,7 +35,8 @@ export default function Services() {
     if (activeMarketplace.isLoading) return
 
     const targetExists = activeMarketplace.allItems.some((item) => {
-      const itemId = activeTab === 'quotes' ? item.quote_id : item.job_request_id
+      const itemId =
+        activeTab === 'quotes' ? item.quote_id : item.job_request_id
       return itemId === focusedItemId
     })
     if (!targetExists) return
@@ -78,12 +79,7 @@ export default function Services() {
         )
       })
     })
-  }, [
-    activeMarketplace,
-    activeTab,
-    focusedItemId,
-    notificationId,
-  ])
+  }, [activeMarketplace, activeTab, focusedItemId, notificationId])
 
   const summaries = [
     {
@@ -162,10 +158,7 @@ export default function Services() {
         ))}
       </div>
 
-      <section
-        role="tabpanel"
-        aria-label={activeMarketplace.content.title}
-      >
+      <section role="tabpanel" aria-label={activeMarketplace.content.title}>
         <ServiceMarketplaceContent
           type={activeTab}
           marketplace={activeMarketplace}

@@ -42,7 +42,7 @@ function normalizeJob(job) {
 
 export default function useCustomerJobs() {
   const { user } = useAuth()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [postedJobs, setPostedJobs] = useState([])
   const [quotesByJob, setQuotesByJob] = useState({})
   const [successMessage, setSuccessMessage] = useState('')
@@ -144,20 +144,49 @@ export default function useCustomerJobs() {
     setModalError('')
   }
 
+  function syncSelectedJobUrl(jobId) {
+    const nextParams = new URLSearchParams(searchParams)
+
+    if (jobId == null) {
+      nextParams.delete('job')
+    } else {
+      nextParams.set('job', String(jobId))
+    }
+
+    setSearchParams(nextParams, { replace: true })
+  }
+
   function openJobDetail(jobId) {
     setSelectedJobId(jobId)
+    syncSelectedJobUrl(jobId)
+  }
+
+  function clearSelectedJobRoute() {
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.delete('job')
+    nextParams.delete('quote')
+    setSearchParams(nextParams, { replace: true })
   }
 
   function closeJobDetail() {
     setSelectedJobId(null)
+    clearSelectedJobRoute()
   }
 
   function switchTab(tab) {
     setActiveTab(tab)
     setSelectedJobId(null)
     setSelectedQuoteId(null)
-    if (tab === 'quotes' && !selectedQuoteJobId && postedJobs.length > 0) {
-      setSelectedQuoteJobId(postedJobs[0].id)
+    clearSelectedJobRoute()
+    if (tab === 'quotes' && !selectedQuoteJobId) {
+      const firstActiveJob = postedJobs.find(
+        (job) => job.status !== 'completed',
+      )
+      if (firstActiveJob) {
+        setSelectedQuoteJobId(firstActiveJob.id)
+      } else if (postedJobs.length > 0) {
+        setSelectedQuoteJobId(postedJobs[0].id)
+      }
     }
   }
 
@@ -166,11 +195,13 @@ export default function useCustomerJobs() {
     setSelectedQuoteId(null)
     setSelectedJobId(null)
     setActiveTab('quotes')
+    clearSelectedJobRoute()
   }
 
   function selectQuoteJob(jobId) {
     setSelectedQuoteJobId(jobId)
     setSelectedQuoteId(null)
+    clearSelectedJobRoute()
   }
 
   async function handleSubmitJob(draft) {
@@ -263,8 +294,6 @@ export default function useCustomerJobs() {
       setConfirmingJobId(null)
     }
   }
-
-  // Testing-only utility, not tied to a user story yet.
   async function handleDeleteJob(jobId) {
     setRequestError('')
     try {

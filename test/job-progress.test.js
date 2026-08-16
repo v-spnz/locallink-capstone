@@ -12,6 +12,14 @@ const migrationUrl = new URL(
   '../supabase/migrations/20260815000000_track_job_progress.sql',
   import.meta.url,
 )
+const quoteAcceptanceRepairMigrationUrl = new URL(
+  '../supabase/migrations/20260818050000_fix_quote_acceptance_start_stage.sql',
+  import.meta.url,
+)
+const skippedStageRepairMigrationUrl = new URL(
+  '../supabase/migrations/20260818060000_repair_skipped_quote_acceptance_stages.sql',
+  import.meta.url,
+)
 
 test('AC1: the five visible stages are defined in order', () => {
   assert.deepEqual(
@@ -42,6 +50,31 @@ test('AC2 and AC4: the database locks the job and enforces the same order', asyn
   assert.match(migration, /when 'on_the_way' then 'in_progress'/)
   assert.match(migration, /when 'in_progress' then 'pending_completion'/)
   assert.match(migration, /Invalid job status transition/)
+})
+
+test('accepting a quote starts at Accepted instead of skipping to In progress', async () => {
+  const migration = await readFile(quoteAcceptanceRepairMigrationUrl, 'utf8')
+
+  assert.match(
+    migration,
+    /update public\.job_requests[\s\S]+set status = 'accepted'/,
+  )
+  assert.doesNotMatch(
+    migration,
+    /update public\.job_requests[\s\S]+set status = 'in_progress'/,
+  )
+})
+
+test('existing auto-skipped jobs are rewound without changing valid progress', async () => {
+  const migration = await readFile(skippedStageRepairMigrationUrl, 'utf8')
+
+  assert.match(migration, /job\.status = 'in_progress'/)
+  assert.match(migration, /history\.status = 'in_progress'/)
+  assert.match(
+    migration,
+    /history\.status in \('accepted', 'scheduled', 'on_the_way'\)/,
+  )
+  assert.match(migration, /set status = 'accepted'/)
 })
 
 test('AC3: every change is timestamped and returned to both parties', async () => {

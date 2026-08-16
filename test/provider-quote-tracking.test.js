@@ -112,10 +112,7 @@ test('awaiting quotes become urgent when three working days remain', () => {
     '2026-08-12T09:00:00.000Z',
   )
   assert.equal(
-    isBusinessQuoteResponseDeadlineUrgent(
-      quote,
-      '2026-08-12T08:59:59Z',
-    ),
+    isBusinessQuoteResponseDeadlineUrgent(quote, '2026-08-12T08:59:59Z'),
     false,
   )
   assert.equal(
@@ -247,7 +244,10 @@ test('quote details reveal the timeline and withdrawal controls on demand', asyn
   )
   assert.match(page, /marketplace\.reviewedQuote === item\.quote_id/)
   assert.match(page, /marketplace\.toggleQuoteReview\(item\.quote_id\)/)
-  assert.match(hook, /const \[reviewedQuote, setReviewedQuote\] = useState\(null\)/)
+  assert.match(
+    hook,
+    /const \[reviewedQuote, setReviewedQuote\] = useState\(null\)/,
+  )
   assert.match(
     hook,
     /setReviewedQuote\(\(current\) => \(current === quoteId \? null : quoteId\)\)/,

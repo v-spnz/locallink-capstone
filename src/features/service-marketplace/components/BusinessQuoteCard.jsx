@@ -96,7 +96,8 @@ export default function BusinessQuoteCard({
             </span>
             {item.created_at && (
               <span className="service-marketplace-timestamp">
-                Submitted {new Date(item.created_at).toLocaleDateString('en-NZ')}
+                Submitted{' '}
+                {new Date(item.created_at).toLocaleDateString('en-NZ')}
               </span>
             )}
           </div>
