@@ -167,6 +167,12 @@ export default function useCustomerJobs() {
     nextParams.delete('quote')
     setSearchParams(nextParams, { replace: true })
   }
+  function clearSelectedQuoteRoute() {
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.delete('job')
+    nextParams.delete('quote')
+    setSearchParams(nextParams, { replace: true })
+  }
 
   function closeJobDetail() {
     setSelectedJobId(null)
@@ -199,9 +205,10 @@ export default function useCustomerJobs() {
   }
 
   function selectQuoteJob(jobId) {
+    setActiveTab('quotes')
     setSelectedQuoteJobId(jobId)
     setSelectedQuoteId(null)
-    clearSelectedJobRoute()
+    clearSelectedQuoteRoute()
   }
 
   async function handleSubmitJob(draft) {
