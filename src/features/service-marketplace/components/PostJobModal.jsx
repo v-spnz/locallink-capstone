@@ -623,31 +623,52 @@ function StepLocation({ draft, update, errors, suburbOptions }) {
 
 function StepReview({ draft, error }) {
   const displayType = draft.type === 'Other' ? draft.otherType : draft.type
+
   return (
     <div>
-      <ReviewRow label="Trade Category" value={draft.category} />
-      <ReviewRow label="Job Type" value={displayType} />
-      <ReviewRow
-        label="Photos/Videos"
-        value={
-          draft.imgs.length > 0
-            ? `${draft.imgs.length} file(s) attached`
-            : 'None'
-        }
-      />
-      <ReviewRow label="Description" value={draft.description} />
-      <ReviewRow
-        label="Job Date"
-        value={draft.jobDate ? draft.jobDate.toLocaleDateString() : '—'}
-      />
-      <ReviewRow
-        label="Budget"
-        value={`${draft.minBudget !== null ? `$${draft.minBudget}` : '—'} – ${draft.maxBudget !== null ? `$${draft.maxBudget}` : '—'}`}
-      />
-      <ReviewRow label="Urgency" value={draft.urgency} />
-      <ReviewRow label="City" value={draft.city} />
-      <ReviewRow label="Suburb" value={draft.suburb} />
-      <ReviewRow label="Posted Distance" value={`${draft.postedDistance} km`} />
+      <p className="mb-3 text-sm text-[var(--text-muted)]">
+        Please review your job posting before submitting.
+      </p>
+
+      <div className="divide-y divide-[var(--border)] overflow-hidden rounded-md border border-[var(--border)]">
+        <ReviewRow label="Category" value={draft.category} />
+        <ReviewRow label="Type" value={displayType} />
+        <ReviewRow
+          label="Photos/Videos"
+          value={
+            draft.imgs.length > 0
+              ? `${draft.imgs.length} file(s) attached`
+              : 'None'
+          }
+        />
+        <ReviewRow
+          label="Preferred date"
+          value={
+            draft.jobDate ? draft.jobDate.toLocaleDateString('en-NZ') : '—'
+          }
+        />
+        <ReviewRow label="Budget" value={`${draft.minBudget !== null ? `$${draft.minBudget}` : '—'} – ${draft.maxBudget !== null ? `$${draft.maxBudget}` : '—'}`} />
+        <ReviewRow label="Urgency" value={draft.urgency} />
+        <ReviewRow label="City" value={draft.city} />
+        <ReviewRow label="Suburb" value={draft.suburb} />
+        <ReviewRow
+          label="Search distance"
+          value={`${draft.postedDistance} km`}
+        />
+      </div>
+
+      <p className="mb-1.5 mt-4 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+        Additional comments
+      </p>
+      <div className="rounded-md bg-[var(--bg)] px-3 py-2.5 text-sm text-[var(--text)]">
+        {draft.description || '—'}
+      </div>
+
+      <p className="mt-4 text-xs text-[var(--text-muted)]">
+        Once posted, providers nearby will be notified and can submit quotes
+        within 24–48 hours.
+      </p>
+
       {error && <p className="mt-3 text-sm text-[var(--danger)]">{error}</p>}
     </div>
   )
@@ -655,11 +676,11 @@ function StepReview({ draft, error }) {
 
 function ReviewRow({ label, value }) {
   return (
-    <div className="border-b border-[var(--border)] py-2.5">
-      <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)]">
-        {label}
-      </div>
-      <div className="text-sm text-[var(--text)]">{value || '—'}</div>
+    <div className="flex items-center justify-between gap-4 px-3.5 py-2.5">
+      <span className="text-sm text-[var(--text-muted)]">{label}</span>
+      <span className="text-sm font-semibold text-[var(--text)]">
+        {value || '—'}
+      </span>
     </div>
   )
 }
