@@ -51,7 +51,7 @@ const EMPTY_DRAFT = {
   urgency: '',
   city: '',
   suburb: '',
-  postedDistance: '',
+  postedDistance: 4.5,
 }
 
 const getTodayDateString = () => {
@@ -480,6 +480,7 @@ function StepJobDetails({
               width="120px"
               maxHeight="100px"
               overflowY="auto"
+              prefix="$"
               options={MIN_BUDGET}
               placeholder="Min"
               value={draft.minBudget}
@@ -492,6 +493,7 @@ function StepJobDetails({
               width="120px"
               maxHeight="100px"
               overflowY="auto"
+              prefix="$"
               options={MAX_BUDGET}
               placeholder="Max"
               value={draft.maxBudget}
@@ -596,6 +598,7 @@ function StepLocation({ draft, update, errors, suburbOptions }) {
           min={1}
           max={8}
           step={0.1}
+          defaultValue={4.5}
           value={draft.postedDistance}
           onChange={(event) =>
             update({ postedDistance: Number(event.target.value) })
