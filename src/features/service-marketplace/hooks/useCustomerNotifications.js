@@ -151,6 +151,12 @@ export default function useCustomerNotifications() {
     [customerId, refresh],
   )
 
+  const dismissAll = useCallback(() => {
+    notifications.forEach((notification) => {
+      deleteNotification(notification.notification_id)
+    })
+  }, [notifications, deleteNotification])
+
   return {
     notifications,
     unreadCount,
@@ -158,5 +164,6 @@ export default function useCustomerNotifications() {
     refresh,
     markAllRead,
     deleteNotification,
+    dismissAll,
   }
 }

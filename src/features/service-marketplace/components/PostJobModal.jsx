@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Plus,
   Video,
+  HelpCircle,
 } from 'lucide-react'
 import Modal from '../../../components/ui/Modal'
 import Button from '../../../components/ui/Button'
@@ -51,6 +52,14 @@ const EMPTY_DRAFT = {
   city: '',
   suburb: '',
   postedDistance: '',
+}
+
+const getTodayDateString = () => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 function buildInitialDraft(initialJob) {
@@ -419,55 +428,78 @@ function StepJobDetails({
           {errors.description}
         </p>
       )}
-
-      <div className="mt-4">
-        <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
-          Job Date *
-        </label>
-        <input
-          type="date"
-          className="w-35 rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
-          value={draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : ''}
-          onChange={(e) =>
-            update({
-              jobDate: e.target.value ? new Date(e.target.value) : null,
-            })
-          }
-        />
-        {errors.jobDate && (
-          <p className="mt-1 text-xs text-[var(--danger)]">{errors.jobDate}</p>
-        )}
-      </div>
-
-      <div className="mt-4">
-        <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
-          Budget{' '}
-          <span className="font-normal text-[var(--text-muted)]">
-            (optional)
-          </span>
-        </label>
-        <div className="flex items-center gap-2">
-          <ComboBox
-            maxHeight="200px"
-            overflowY="auto"
-            options={MIN_BUDGET}
-            placeholder="Min"
-            value={draft.minBudget}
-            onChange={(value) =>
-              update({ minBudget: value === '' ? null : Number(value) })
+      <div className="date&budget flex flex-row gap-10">
+        <div className="mt-4">
+          <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
+            Job Date *
+          </label>
+          <input
+            type="date"
+            className="w-35 rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--blue)] focus:outline-none"
+            value={
+              draft.jobDate ? draft.jobDate.toISOString().split('T')[0] : ''
+            }
+            min={getTodayDateString()}
+            onChange={(e) =>
+              update({
+                jobDate: e.target.value ? new Date(e.target.value) : null,
+              })
             }
           />
-          <span className="shrink-0 text-sm text-[var(--text-muted)]">–</span>
-          <ComboBox
-            maxHeight="200px"
-            overflowY="auto"
-            options={MAX_BUDGET}
-            placeholder="Max"
-            value={draft.maxBudget}
-            onChange={(value) =>
-              update({ maxBudget: value === '' ? null : Number(value) })
-            }
-          />
+          {errors.jobDate && (
+            <p className="mt-1 text-xs text-[var(--danger)]">
+              {errors.jobDate}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-4">
+          <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-[var(--text)]">
+            Budget{' '}
+            <span className="font-normal text-[var(--text-muted)]">
+              (optional)
+            </span>
+            <span className="group relative inline-flex">
+              <HelpCircle
+                color="#000000"
+                size={15}
+                className="cursor-help text-[var(--text-muted)] "
+                aria-hidden="true"
+              />
+              <span
+                role="tooltip"
+                className="pointer-events-none absolute left-1/2 top-full z-10 mt-2 w-56 -translate-x-1/2 rounded-md bg-[var(--text)] px-2.5 py-1.5 text-xs font-normal leading-snug text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+              >
+                Setting a budget range may reduce the amount of quotes you will
+                end up receiving
+              </span>
+            </span>
+          </label>
+          <div className="flex items-center gap-2">
+            <ComboBox
+              width="120px"
+              maxHeight="100px"
+              overflowY="auto"
+              options={MIN_BUDGET}
+              placeholder="Min"
+              value={draft.minBudget}
+              onChange={(value) =>
+                update({ minBudget: value === '' ? null : Number(value) })
+              }
+            />
+            <span className="shrink-0 text-sm text-[var(--text-muted)]">–</span>
+            <ComboBox
+              width="120px"
+              maxHeight="100px"
+              overflowY="auto"
+              options={MAX_BUDGET}
+              placeholder="Max"
+              value={draft.maxBudget}
+              onChange={(value) =>
+                update({ maxBudget: value === '' ? null : Number(value) })
+              }
+            />
+          </div>
         </div>
         {errors.minBudget && (
           <p className="mt-1 text-xs text-[var(--danger)]">

@@ -9,6 +9,7 @@ export default function ComboBox({
   onChange,
   maxHeight = 'auto',
   overflowY = 'visible',
+  width = '250px',
 }) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -43,9 +44,7 @@ export default function ComboBox({
   }
 
   return (
-    <div
-      style={{ position: 'relative', width: '250px', fontFamily: 'sans-serif' }}
-    >
+    <div style={{ position: 'relative', width, fontFamily: 'sans-serif' }}>
       <input
         type="text"
         value={inputText}

@@ -79,6 +79,7 @@ export default function CustomerNavigation() {
     isLoading: areNotificationsLoading,
     refresh: refreshNotifications,
     markAllRead,
+    dismissAll,
     deleteNotification,
   } = useCustomerNotifications()
 
@@ -178,9 +179,18 @@ export default function CustomerNavigation() {
                 <div className="business-notification-dropdown" role="menu">
                   <div className="business-notification-heading">
                     <strong>Notifications</strong>
-                    {notifications.length > 0 && (
-                      <span>{notifications.length} recent</span>
-                    )}
+                    <div className="business-notification-heading-actions">
+                      {notifications.length > 0 && (
+                        <span>{notifications.length} recent</span>
+                      )}
+                      <button
+                        type="button"
+                        disabled={notifications.length === 0}
+                        onClick={dismissAll}
+                      >
+                        Dismiss all
+                      </button>
+                    </div>
                   </div>
 
                   {areNotificationsLoading && notifications.length === 0 && (
