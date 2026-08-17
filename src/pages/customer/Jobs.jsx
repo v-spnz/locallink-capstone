@@ -22,10 +22,7 @@ export default function Jobs() {
   const selectedQuoteJob = marketplace.postedJobs.find(
     (job) => job.id === marketplace.selectedQuoteJobId,
   )
-  const totalQuoteCount = Object.values(marketplace.quotesByJob).reduce(
-    (total, list) => total + getActiveQuoteCount(list),
-    0,
-  )
+
   const activeJobs = marketplace.postedJobs.filter(
     (job) => job.status !== 'completed',
   )
@@ -87,8 +84,7 @@ export default function Jobs() {
       {!marketplace.isLoading && selectedJob && (
         <JobDetailPanel
           job={selectedJob}
-          quoteCount={(marketplace.quotesByJob[selectedJob.id] ?? []).length}
-          isConfirmingCompletion={
+          quoteCount={getActiveQuoteCount(marketplace.quotesByJob[selectedJob.id] ?? [])}          isConfirmingCompletion={
             marketplace.confirmingJobId === selectedJob.id
           }
           onBack={marketplace.closeJobDetail}
@@ -117,7 +113,6 @@ export default function Jobs() {
               onClick={() => marketplace.switchTab('quotes')}
             >
               Quotes
-              <span className="sm-tab-count">{totalQuoteCount}</span>
             </button>
           </div>
 
