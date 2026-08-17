@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, FileText, History, UsersRound } from 'lucide-react'
+import { BriefcaseBusiness, FileText, UsersRound } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import useBusinessMarketplace from '../../features/service-marketplace/hooks/useBusinessMarketplace'
@@ -8,8 +8,9 @@ const SERVICE_TABS = [
   { value: 'leads', label: 'Leads' },
   { value: 'quotes', label: 'Quotes' },
   { value: 'jobs', label: 'Jobs' },
-  { value: 'history', label: 'View Job History', icon: History },
 ]
+
+const VALID_TAB_VALUES = [...SERVICE_TABS.map(({ value }) => value), 'history']
 
 export default function Services() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -19,7 +20,7 @@ export default function Services() {
   const jobs = useBusinessMarketplace('jobs')
   const history = useBusinessMarketplace('history')
   const requestedTab = searchParams.get('tab')
-  const activeTab = SERVICE_TABS.some(({ value }) => value === requestedTab)
+  const activeTab = VALID_TAB_VALUES.includes(requestedTab)
     ? requestedTab
     : 'leads'
   const marketplaces = { leads, quotes, jobs, history }
@@ -145,7 +146,7 @@ export default function Services() {
       <div className="service-tabs" role="tablist" aria-label="Services">
         {SERVICE_TABS.map(({ value, label, icon: Icon }) => (
           <button
-            className={`${activeTab === value ? 'active' : ''}${value === 'history' ? ' service-history-tab' : ''}`}
+            className={activeTab === value ? 'active' : ''}
             type="button"
             role="tab"
             aria-selected={activeTab === value}
@@ -162,6 +163,7 @@ export default function Services() {
         <ServiceMarketplaceContent
           type={activeTab}
           marketplace={activeMarketplace}
+          onViewHistory={() => selectTab('history')}
         />
       </section>
     </div>

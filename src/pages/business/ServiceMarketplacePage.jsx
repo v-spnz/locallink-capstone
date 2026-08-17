@@ -105,7 +105,11 @@ export default function ServiceMarketplacePage({ type }) {
   return <ServiceMarketplaceContent type={type} marketplace={marketplace} />
 }
 
-export function ServiceMarketplaceContent({ type, marketplace }) {
+export function ServiceMarketplaceContent({
+  type,
+  marketplace,
+  onViewHistory,
+}) {
   return (
     <>
       {marketplace.error && (
@@ -225,6 +229,18 @@ export function ServiceMarketplaceContent({ type, marketplace }) {
         </div>
       )}
 
+      {type === 'jobs' && (
+        <div className="service-history-link-row">
+          <button
+            type="button"
+            className="service-history-link"
+            onClick={onViewHistory}
+          >
+            View Job History
+          </button>
+        </div>
+      )}
+
       {type === 'history' && !marketplace.isLoading && !marketplace.error && (
         <div
           className="service-marketplace-toolbar service-history-toolbar"
@@ -309,21 +325,22 @@ export function ServiceMarketplaceContent({ type, marketplace }) {
                   }
                 />
               )
+            } else {
+              return (
+                <ActiveJobCard
+                  key={item.quote_id ?? item.job_request_id}
+                  item={item}
+                  isHistory={type === 'history'}
+                  isUpdating={marketplace.updatingJobId === item.job_request_id}
+                  onAdvanceStatus={() =>
+                    marketplace.handleAdvanceJobStatus(
+                      item.job_request_id,
+                      item.job_status,
+                    )
+                  }
+                />
+              )
             }
-            return (
-              <ActiveJobCard
-                key={item.quote_id ?? item.job_request_id}
-                item={item}
-                isHistory={type === 'history'}
-                isUpdating={marketplace.updatingJobId === item.job_request_id}
-                onAdvanceStatus={() =>
-                  marketplace.handleAdvanceJobStatus(
-                    item.job_request_id,
-                    item.job_status,
-                  )
-                }
-              />
-            )
           })}
       </div>
     </>
