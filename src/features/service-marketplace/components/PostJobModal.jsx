@@ -650,7 +650,10 @@ function StepReview({ draft, error }) {
             draft.jobDate ? draft.jobDate.toLocaleDateString('en-NZ') : '—'
           }
         />
-        <ReviewRow label="Budget" value={`${draft.minBudget !== null ? `$${draft.minBudget}` : '—'} – ${draft.maxBudget !== null ? `$${draft.maxBudget}` : '—'}`} />
+        <ReviewRow
+          label="Budget"
+          value={`${draft.minBudget !== null ? `$${draft.minBudget}` : '—'} – ${draft.maxBudget !== null ? `$${draft.maxBudget}` : '—'}`}
+        />
         <ReviewRow label="Urgency" value={draft.urgency} />
         <ReviewRow label="City" value={draft.city} />
         <ReviewRow label="Suburb" value={draft.suburb} />

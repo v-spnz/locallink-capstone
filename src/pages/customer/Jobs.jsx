@@ -84,7 +84,10 @@ export default function Jobs() {
       {!marketplace.isLoading && selectedJob && (
         <JobDetailPanel
           job={selectedJob}
-          quoteCount={getActiveQuoteCount(marketplace.quotesByJob[selectedJob.id] ?? [])}          isConfirmingCompletion={
+          quoteCount={getActiveQuoteCount(
+            marketplace.quotesByJob[selectedJob.id] ?? [],
+          )}
+          isConfirmingCompletion={
             marketplace.confirmingJobId === selectedJob.id
           }
           onBack={marketplace.closeJobDetail}
