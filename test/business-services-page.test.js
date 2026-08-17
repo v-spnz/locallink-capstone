@@ -32,9 +32,10 @@ test('business services separates leads, quotes, active jobs, and job history', 
     ),
   ])
 
-  for (const label of ['Leads', 'Quotes', 'Jobs', 'View Job History']) {
+  for (const label of ['Leads', 'Quotes', 'Jobs']) {
     assert.match(page, new RegExp(label))
   }
+  assert.match(marketplacePage, /type === 'jobs'[\s\S]+View Job History/)
   assert.match(page, /value: quotes\.allItems\.length/)
   assert.match(page, /value: jobs\.allItems\.length/)
   assert.match(page, /Accepted and active jobs/)
