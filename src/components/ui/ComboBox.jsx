@@ -1,7 +1,5 @@
 import { useState } from 'react'
 
-const toText = (v) => (v === null || v === undefined ? '' : String(v))
-
 export default function ComboBox({
   options = [],
   placeholder = 'Select an option...',
@@ -9,52 +7,56 @@ export default function ComboBox({
   onChange,
   maxHeight = 'auto',
   overflowY = 'visible',
-  width = '250px',
+  prefix,
 }) {
   const [isOpen, setIsOpen] = useState(false)
-
-  const [inputText, setInputText] = useState(toText(value))
+  const query = value ?? ''
 
   const filteredOptions =
-    inputText === ''
+    query === ''
       ? options
       : options.filter((option) =>
-          String(option).toLowerCase().includes(inputText.toLowerCase()),
+          String(option).toLowerCase().includes(String(query).toLowerCase()),
         )
 
   const handleSelect = (option) => {
     setIsOpen(false)
-    setInputText(toText(option))
     onChange?.(option)
   }
 
-  const handleInputChange = (e) => {
-    const newText = e.target.value
-    setInputText(newText)
-    setIsOpen(true)
-    onChange?.(newText)
-  }
-
-  const handleBlur = () => {
-    setTimeout(() => setIsOpen(false), 200)
-    const isInvalidNumber = typeof value === 'number' && Number.isNaN(value)
-    if (!isInvalidNumber) {
-      setInputText(toText(value))
-    }
-  }
-
   return (
-    <div style={{ position: 'relative', width, fontFamily: 'sans-serif' }}>
+    <div
+      style={{ position: 'relative', width: '250px', fontFamily: 'sans-serif' }}
+    >
+      {prefix && (
+        <span
+          style={{
+            position: 'absolute',
+            left: '8px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: '#6b7280',
+            pointerEvents: 'none',
+          }}
+        >
+          {prefix}
+        </span>
+      )}
       <input
         type="text"
-        value={inputText}
-        onChange={handleInputChange}
+        value={query}
+        onChange={(e) => {
+          const newValue = e.target.value
+          onChange?.(newValue)
+          setIsOpen(true)
+        }}
         onFocus={() => setIsOpen(true)}
-        onBlur={handleBlur}
+        onBlur={() => setTimeout(() => setIsOpen(false), 200)}
         placeholder={placeholder}
         style={{
           width: '100%',
           padding: '8px',
+          paddingLeft: prefix ? '20px' : '8px',
           boxSizing: 'border-box',
           border: '1px solid #ccc',
           borderRadius: '4px',
@@ -71,8 +73,8 @@ export default function ComboBox({
             border: '1px solid #ccc',
             borderRadius: '4px',
             zIndex: 1000,
-            maxHeight: maxHeight,
-            overflowY: overflowY,
+            maxHeight,
+            overflowY,
           }}
         >
           {filteredOptions.map((option) => (
