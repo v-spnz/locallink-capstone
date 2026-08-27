@@ -3,12 +3,12 @@ import DealDetails from './DealDetails'
 
 export default function DealList({
   deals,
+  locations,
   selectedDealId,
   successMessage,
   onCreate,
   onSelect,
   onClose,
-  onPublish,
   onEdit,
 }) {
   return (
@@ -31,22 +31,24 @@ export default function DealList({
             onClick={() => onSelect(deal.id)}
           >
             <span>
-              <strong>{deal.title}</strong> - {deal.discount}
-              <small>Expires: {deal.expiryDate}</small>
+              <strong>{deal.title || 'Untitled deal draft'}</strong>
+              <small>
+                {deal.endDate ? `Ends: ${deal.endDate}` : 'Dates not set'}
+              </small>
             </span>
             <span
               className={`deal-status ${
-                deal.status === 'Draft' ? 'is-draft' : ''
+                deal.status === 'draft' ? 'is-draft' : ''
               }`}
             >
-              {deal.status || 'Active'}
+              {deal.status === 'published' ? 'Published' : 'Draft'}
             </span>
           </button>
           {selectedDealId === deal.id && (
             <DealDetails
               deal={deal}
+              locations={locations}
               onClose={onClose}
-              onPublish={() => onPublish(deal.id)}
               onEdit={() => onEdit(deal.id)}
             />
           )}

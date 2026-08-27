@@ -159,7 +159,7 @@ insert into public.business_capabilities (
 values
   (
     '21000000-0000-0000-0000-000000000001',
-    false,
+    true,
     false,
     true
   ),
@@ -168,6 +168,23 @@ values
     false,
     false,
     true
+  );
+
+insert into public.business_locations (
+  id,
+  business_id,
+  name
+)
+values
+  (
+    '21100000-0000-0000-0000-000000000001',
+    '21000000-0000-0000-0000-000000000001',
+    'Ponsonby workshop'
+  ),
+  (
+    '21100000-0000-0000-0000-000000000002',
+    '21000000-0000-0000-0000-000000000001',
+    'Auckland CBD'
   );
 
 insert into public.business_service_profiles (
