@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import useAuth from '../../auth/useAuth'
+import AddressAutocomplete from '../../features/location/components/AddressAutocomplete'
+import {
+  fetchCustomerLocation,
+  saveCustomerLocation,
+} from '../../features/location/api/locations'
 
 export default function Profile() {
   const navigate = useNavigate()
@@ -10,28 +15,33 @@ export default function Profile() {
   const [logoutError, setLogoutError] = useState('')
   const [profile, setProfile] = useState(null)
   const [hasBusinessAccess, setHasBusinessAccess] = useState(false)
+  const [customerLocation, setCustomerLocation] = useState(null)
+  const [locationStatus, setLocationStatus] = useState('')
 
   useEffect(() => {
     let active = true
 
     async function loadProfile() {
-      const [profileResult, membershipResult] = await Promise.all([
-        supabase
-          .from('profiles')
-          .select('first_name, last_name')
-          .eq('id', user.id)
-          .maybeSingle(),
-        supabase
-          .from('business_members')
-          .select('business_id')
-          .eq('profile_id', user.id)
-          .limit(1)
-          .maybeSingle(),
-      ])
+      const [profileResult, membershipResult, savedLocation] =
+        await Promise.all([
+          supabase
+            .from('profiles')
+            .select('first_name, last_name')
+            .eq('id', user.id)
+            .maybeSingle(),
+          supabase
+            .from('business_members')
+            .select('business_id')
+            .eq('profile_id', user.id)
+            .limit(1)
+            .maybeSingle(),
+          fetchCustomerLocation().catch(() => null),
+        ])
 
       if (active) {
         setProfile(profileResult.data)
         setHasBusinessAccess(Boolean(membershipResult.data))
+        setCustomerLocation(savedLocation)
       }
     }
 
@@ -55,6 +65,18 @@ export default function Profile() {
     }
 
     navigate('/login', { replace: true })
+  }
+
+  async function handleLocationSelect(address) {
+    setLocationStatus('Saving location…')
+    try {
+      await saveCustomerLocation(address)
+      setCustomerLocation(address)
+      setLocationStatus('Location saved successfully.')
+    } catch (error) {
+      console.error('Unable to save profile location.', error)
+      setLocationStatus('Unable to save this location. Please try again.')
+    }
   }
 
   return (
@@ -105,10 +127,26 @@ export default function Profile() {
         </div>
       </div>
       <div className="placeholder-section">
-        <div className="placeholder-section-title">Location Range Filter</div>
-        <div className="placeholder-box">
-          Range filter slider — component TBD
+        <div className="placeholder-section-title is-complete">
+          Location Preferences
         </div>
+        <p className="account-section-copy">
+          Your saved address is used as the starting point for nearby business
+          and deal searches.
+        </p>
+        <AddressAutocomplete
+          key={customerLocation?.formattedAddress || 'profile-location'}
+          id="profile-address"
+          label="Home or preferred search address"
+          value={customerLocation?.formattedAddress || ''}
+          bias={customerLocation}
+          onSelect={handleLocationSelect}
+        />
+        {locationStatus && (
+          <p className="account-section-copy" role="status">
+            {locationStatus}
+          </p>
+        )}
       </div>
 
       <div className="placeholder-section">

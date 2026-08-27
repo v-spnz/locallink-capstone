@@ -246,6 +246,42 @@
   border-top: 1px solid #e8edf5;
 }
 
+.business-onboarding-locations {
+  margin-top: 20px;
+}
+
+.business-onboarding-locations > small {
+  color: #718096;
+  font-size: 10px;
+}
+
+.business-onboarding-location-list {
+  margin-bottom: 10px;
+  display: grid;
+  gap: 7px;
+}
+
+.business-onboarding-location-list > div {
+  padding: 9px 11px;
+  border: 1px solid #dbe3ef;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: #344054;
+  font-size: 11px;
+}
+
+.business-onboarding-location-list button {
+  border: 0;
+  background: transparent;
+  color: #c92a2a;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
 .business-verification-note {
   padding: 11px 13px;
   border-radius: 11px;

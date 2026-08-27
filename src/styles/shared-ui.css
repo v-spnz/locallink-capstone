@@ -871,41 +871,6 @@
 }
 
 /* ─── Map placeholder ───────────────────────────────────────────── */
-.map-placeholder {
-  background: #e8f4f8;
-  border: 1.5px dashed var(--border);
-  border-radius: var(--radius-lg);
-  height: 240px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 16px;
-}
-.map-placeholder::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 20px,
-    rgba(255, 255, 255, 0.4) 20px,
-    rgba(255, 255, 255, 0.4) 21px
-  );
-}
-.map-placeholder-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--blue);
-  z-index: 1;
-  background: white;
-  padding: 8px 18px;
-  border-radius: 20px;
-  border: 1.5px solid var(--blue-light);
-}
-
 /* ─── Pill filter ───────────────────────────────────────────────── */
 .pill-filter-row {
   display: flex;
@@ -1102,6 +1067,48 @@
   color: var(--emerald);
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+.business-location-settings-list {
+  margin-bottom: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.business-location-settings-list > div {
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--bg);
+}
+
+.business-location-settings-list span,
+.business-location-settings-list small {
+  display: block;
+}
+
+.business-location-settings-list strong {
+  font-size: 13px;
+}
+
+.business-location-settings-list small {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.business-location-settings-list button {
+  border: 0;
+  background: transparent;
+  color: #c92a2a;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 /* ─── US009: Empty State ────────────────────────────────────────── */

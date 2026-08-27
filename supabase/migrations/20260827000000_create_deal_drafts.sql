@@ -1,10 +1,20 @@
 -- US0090: persist complete and incomplete business deal drafts while keeping
 -- every draft private to the business that created it.
 
+create extension if not exists postgis with schema extensions;
+
 create table public.business_locations (
   id uuid primary key default gen_random_uuid(),
   business_id uuid not null references public.businesses(id) on delete cascade,
   name text not null check (char_length(trim(name)) between 2 and 120),
+  formatted_address text,
+  address_line1 text,
+  suburb text,
+  city text,
+  postcode text,
+  country_code text not null default 'nz',
+  location extensions.geography(POINT, 4326),
+  is_primary boolean not null default false,
   created_at timestamptz not null default now(),
   unique (business_id, name)
 );
@@ -367,7 +377,7 @@ create function public.create_business_with_owner(
   p_availability text default null,
   p_categories text[] default '{}'::text[],
   p_areas text[] default '{}'::text[],
-  p_locations text[] default '{}'::text[]
+  p_locations jsonb default '[]'::jsonb
 )
 returns uuid
 language plpgsql
@@ -390,7 +400,7 @@ begin
     raise exception 'Select at least one LocalLink capability';
   end if;
 
-  if p_deals_enabled and coalesce(array_length(p_locations, 1), 0) = 0 then
+  if p_deals_enabled and jsonb_array_length(coalesce(p_locations, '[]'::jsonb)) = 0 then
     raise exception 'Enter at least one business location';
   end if;
 
@@ -433,11 +443,63 @@ begin
     p_service_marketplace_enabled
   );
 
-  insert into public.business_locations (business_id, name)
-  select v_business_id, trim(location_name)
-  from unnest(p_locations) as location_name
-  where char_length(trim(location_name)) >= 2
+  insert into public.business_locations (
+    business_id,
+    name,
+    formatted_address,
+    address_line1,
+    suburb,
+    city,
+    postcode,
+    country_code,
+    location,
+    is_primary
+  )
+  select
+    v_business_id,
+    left(trim(coalesce(location_record.name, location_record.address_line1)), 120),
+    trim(location_record.formatted_address),
+    nullif(trim(location_record.address_line1), ''),
+    nullif(trim(location_record.suburb), ''),
+    nullif(trim(location_record.city), ''),
+    nullif(trim(location_record.postcode), ''),
+    lower(coalesce(nullif(trim(location_record.country_code), ''), 'nz')),
+    extensions.st_setsrid(
+      extensions.st_makepoint(location_record.longitude, location_record.latitude),
+      4326
+    )::extensions.geography,
+    false
+  from jsonb_to_recordset(coalesce(p_locations, '[]'::jsonb)) as location_record(
+    name text,
+    formatted_address text,
+    address_line1 text,
+    suburb text,
+    city text,
+    postcode text,
+    country_code text,
+    latitude double precision,
+    longitude double precision
+  )
+  where char_length(trim(location_record.formatted_address)) >= 2
+    and location_record.latitude between -90 and 90
+    and location_record.longitude between -180 and 180
   on conflict (business_id, name) do nothing;
+
+  update public.business_locations
+  set is_primary = id = (
+    select location.id
+    from public.business_locations as location
+    where location.business_id = v_business_id
+    order by location.created_at, location.id
+    limit 1
+  )
+  where business_id = v_business_id;
+
+  if p_deals_enabled and not exists (
+    select 1 from public.business_locations where business_id = v_business_id
+  ) then
+    raise exception 'Enter at least one valid business location';
+  end if;
 
   if p_service_marketplace_enabled then
     insert into public.business_service_profiles (
@@ -478,7 +540,7 @@ revoke all on function public.create_business_with_owner(
   text,
   text[],
   text[],
-  text[]
+  jsonb
 ) from public;
 grant execute on function public.create_business_with_owner(
   text,
@@ -490,5 +552,5 @@ grant execute on function public.create_business_with_owner(
   text,
   text[],
   text[],
-  text[]
+  jsonb
 ) to authenticated;
