@@ -16,9 +16,11 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.110.7",
     "@tailwindcss/vite": "^4.3.3",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.28.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.15.1",
     "tailwindcss": "^4.3.3"
   },

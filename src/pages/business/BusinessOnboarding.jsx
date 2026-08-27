@@ -10,6 +10,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import AuthPageHeader from '../../components/auth/AuthPageHeader'
 import useBusiness from '../../business/useBusiness'
 import { supabase } from '../../lib/supabase'
+import AddressAutocomplete from '../../features/location/components/AddressAutocomplete'
 import './BusinessOnboarding.css'
 
 const CAPABILITY_OPTIONS = [
@@ -57,7 +58,7 @@ export default function BusinessOnboarding() {
     availability: '',
     categories: '',
     areas: '',
-    locations: '',
+    locations: [],
   })
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -87,7 +88,7 @@ export default function BusinessOnboarding() {
 
     const categories = listFromInput(form.categories)
     const areas = listFromInput(form.areas)
-    const locations = listFromInput(form.locations)
+    const locations = form.locations
 
     if (form.deals && locations.length === 0) {
       setError('Enter at least one location that can participate in deals.')
@@ -123,7 +124,19 @@ export default function BusinessOnboarding() {
           : null,
         p_categories: form.serviceMarketplace ? categories : [],
         p_areas: form.serviceMarketplace ? areas : [],
-        p_locations: form.deals ? locations : [],
+        p_locations: form.deals
+          ? locations.map((businessLocation) => ({
+              name: businessLocation.name,
+              formatted_address: businessLocation.formattedAddress,
+              address_line1: businessLocation.addressLine1,
+              suburb: businessLocation.suburb,
+              city: businessLocation.city,
+              postcode: businessLocation.postcode,
+              country_code: businessLocation.countryCode,
+              latitude: businessLocation.latitude,
+              longitude: businessLocation.longitude,
+            }))
+          : [],
       },
     )
 
@@ -135,6 +148,26 @@ export default function BusinessOnboarding() {
 
     await refreshBusiness()
     navigate('/business/analytics', { replace: true })
+  }
+
+  function addLocation(address) {
+    setForm((current) => ({
+      ...current,
+      locations: current.locations.some(
+        (location) => location.formattedAddress === address.formattedAddress,
+      )
+        ? current.locations
+        : [...current.locations, address],
+    }))
+  }
+
+  function removeLocation(formattedAddress) {
+    setForm((current) => ({
+      ...current,
+      locations: current.locations.filter(
+        (location) => location.formattedAddress !== formattedAddress,
+      ),
+    }))
   }
 
   if (isLoading) {
@@ -234,21 +267,36 @@ export default function BusinessOnboarding() {
             </div>
 
             {form.deals && (
-              <label className="business-onboarding-field">
-                <span>Business locations</span>
-                <input
-                  name="locations"
-                  value={form.locations}
-                  onChange={updateField}
-                  placeholder="Ponsonby store, Newmarket store"
+              <div className="business-onboarding-locations">
+                <AddressAutocomplete
+                  id="business-location"
+                  label="Business location"
+                  placeholder="Search for your shop, office, or service address"
                   disabled={isSubmitting}
-                  required
+                  onSelect={addLocation}
                 />
+                {form.locations.length > 0 && (
+                  <div className="business-onboarding-location-list">
+                    {form.locations.map((businessLocation) => (
+                      <div key={businessLocation.formattedAddress}>
+                        <span>{businessLocation.formattedAddress}</span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeLocation(businessLocation.formattedAddress)
+                          }
+                          disabled={isSubmitting}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <small>
-                  Separate locations with commas. You can choose from these when
-                  preparing a deal.
+                  Add every physical location that may participate in a deal.
                 </small>
-              </label>
+              </div>
             )}
 
             {form.serviceMarketplace && (

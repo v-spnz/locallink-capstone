@@ -1,0 +1,115 @@
+.address-autocomplete {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.address-autocomplete-input-wrap {
+  position: relative;
+}
+
+.address-autocomplete-input-wrap > svg {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  z-index: 1;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+.address-autocomplete-input-wrap .form-input {
+  padding-left: 38px;
+  padding-right: 38px;
+}
+
+.address-autocomplete-spinner {
+  position: absolute;
+  top: calc(50% - 8px);
+  right: 13px;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: loading-spinner-rotate 0.75s linear infinite;
+}
+
+.address-autocomplete-results {
+  position: absolute;
+  z-index: 1000;
+  top: calc(100% - 38px);
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: var(--shadow-md);
+}
+
+.address-autocomplete-results button {
+  width: 100%;
+  padding: 11px 13px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--white);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.address-autocomplete-results button:hover {
+  background: var(--blue-light);
+}
+
+.address-autocomplete-results svg {
+  margin-top: 2px;
+  flex: 0 0 auto;
+  color: var(--blue);
+}
+
+.address-autocomplete-results span,
+.address-autocomplete-results small {
+  display: block;
+}
+
+.address-autocomplete-results strong {
+  font-size: 13px;
+}
+
+.address-autocomplete-results small {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.address-autocomplete-footer {
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.address-current-location {
+  padding: 6px 0;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  color: var(--blue);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.address-current-location:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}

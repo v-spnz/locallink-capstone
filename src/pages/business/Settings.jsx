@@ -2,12 +2,20 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import useBusiness from '../../business/useBusiness'
 import { supabase } from '../../lib/supabase'
+import AddressAutocomplete from '../../features/location/components/AddressAutocomplete'
+import {
+  addManagedBusinessLocation,
+  deleteManagedBusinessLocation,
+  fetchManagedBusinessLocations,
+} from '../../features/location/api/locations'
 
 export default function Settings() {
   const location = useLocation()
   const navigate = useNavigate()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState('')
+  const [businessLocations, setBusinessLocations] = useState([])
+  const [locationStatus, setLocationStatus] = useState('')
   const {
     business,
     membership,
@@ -37,6 +45,23 @@ export default function Settings() {
     return () => window.cancelAnimationFrame(scrollFrame)
   }, [location.hash])
 
+  useEffect(() => {
+    let active = true
+    async function loadLocations() {
+      try {
+        const locations = await fetchManagedBusinessLocations(business.id)
+        if (active) setBusinessLocations(locations)
+      } catch (error) {
+        console.error('Unable to load business locations.', error)
+        if (active) setLocationStatus('Unable to load business locations.')
+      }
+    }
+    loadLocations()
+    return () => {
+      active = false
+    }
+  }, [business.id])
+
   async function handleLogout() {
     setIsLoggingOut(true)
     setLogoutError('')
@@ -51,6 +76,37 @@ export default function Settings() {
     }
 
     navigate('/login', { replace: true })
+  }
+
+  async function addBusinessLocation(address) {
+    setLocationStatus('Adding location…')
+    try {
+      await addManagedBusinessLocation(business.id, address)
+      const locations = await fetchManagedBusinessLocations(business.id)
+      setBusinessLocations(locations)
+      setLocationStatus('Business location added.')
+    } catch (error) {
+      console.error('Unable to add business location.', error)
+      setLocationStatus('Unable to add this location. Please try again.')
+    }
+  }
+
+  async function removeBusinessLocation(locationId) {
+    setLocationStatus('Removing location…')
+    try {
+      await deleteManagedBusinessLocation(business.id, locationId)
+      setBusinessLocations((current) =>
+        current.filter(
+          (businessLocation) => businessLocation.id !== locationId,
+        ),
+      )
+      setLocationStatus('Business location removed.')
+    } catch (error) {
+      console.error('Unable to remove business location.', error)
+      setLocationStatus(
+        'Unable to remove this location. It may be used by an existing deal.',
+      )
+    }
   }
 
   return (
@@ -92,6 +148,45 @@ export default function Settings() {
             value={enabledCapabilities.join(', ')}
           />
         </div>
+      </div>
+
+      <div className="placeholder-section business-settings-section">
+        <div className="placeholder-section-title is-complete">
+          Business Locations
+        </div>
+        <p className="account-section-copy">
+          These verified map locations can participate in deals and appear in
+          nearby customer searches.
+        </p>
+        <AddressAutocomplete
+          id="business-settings-address"
+          label="Add a business address"
+          onSelect={addBusinessLocation}
+        />
+        <div className="business-location-settings-list">
+          {businessLocations.map((businessLocation) => (
+            <div key={businessLocation.id}>
+              <span>
+                <strong>{businessLocation.name}</strong>
+                <small>
+                  {businessLocation.formatted_address ||
+                    'Address needs updating'}
+                </small>
+              </span>
+              <button
+                type="button"
+                onClick={() => removeBusinessLocation(businessLocation.id)}
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+        {locationStatus && (
+          <p className="account-section-copy" role="status">
+            {locationStatus}
+          </p>
+        )}
       </div>
 
       {capabilities.service_marketplace_enabled && (
