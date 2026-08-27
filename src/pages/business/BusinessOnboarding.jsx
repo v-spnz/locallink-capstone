@@ -57,6 +57,7 @@ export default function BusinessOnboarding() {
     availability: '',
     categories: '',
     areas: '',
+    locations: '',
   })
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -86,6 +87,12 @@ export default function BusinessOnboarding() {
 
     const categories = listFromInput(form.categories)
     const areas = listFromInput(form.areas)
+    const locations = listFromInput(form.locations)
+
+    if (form.deals && locations.length === 0) {
+      setError('Enter at least one location that can participate in deals.')
+      return
+    }
 
     if (
       form.serviceMarketplace &&
@@ -116,6 +123,7 @@ export default function BusinessOnboarding() {
           : null,
         p_categories: form.serviceMarketplace ? categories : [],
         p_areas: form.serviceMarketplace ? areas : [],
+        p_locations: form.deals ? locations : [],
       },
     )
 
@@ -224,6 +232,24 @@ export default function BusinessOnboarding() {
                 )
               })}
             </div>
+
+            {form.deals && (
+              <label className="business-onboarding-field">
+                <span>Business locations</span>
+                <input
+                  name="locations"
+                  value={form.locations}
+                  onChange={updateField}
+                  placeholder="Ponsonby store, Newmarket store"
+                  disabled={isSubmitting}
+                  required
+                />
+                <small>
+                  Separate locations with commas. You can choose from these when
+                  preparing a deal.
+                </small>
+              </label>
+            )}
 
             {form.serviceMarketplace && (
               <div className="business-service-setup">
