@@ -24,3 +24,31 @@ test('business settings can return to the consumer portal without logging out', 
   assert.match(settings, /<Link className="btn-secondary" to="\/home">/)
   assert.match(settings, /Go to consumer portal/)
 })
+
+test('business settings uses separate pages without a sidebar account name', async () => {
+  const [settings, portal] = await Promise.all([
+    readFile(
+      new URL('../src/pages/business/Settings.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/pages/business/BusinessPortal.jsx', import.meta.url),
+      'utf8',
+    ),
+  ])
+
+  assert.match(portal, /path="settings\/\*"/)
+  assert.match(settings, /to=\{`\/business\/settings\/\$\{page\.path\}`\}/)
+  for (const page of [
+    'overview',
+    'profile',
+    'services',
+    'notifications',
+    'access',
+  ]) {
+    assert.match(settings, new RegExp(`path: '${page}'`))
+  }
+  assert.doesNotMatch(settings, /path: 'locations'|path="locations"/)
+  assert.doesNotMatch(settings, /AddressAutocomplete/)
+  assert.doesNotMatch(settings, /business-settings-identity|businessInitials/)
+})

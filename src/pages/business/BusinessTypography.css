@@ -11,7 +11,7 @@ body.business-surface {
     #4b69e8 100%
   );
   font-family: var(--font-ui);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
 }
 
@@ -26,7 +26,6 @@ body.business-surface *::after {
 }
 
 /* Supporting and descriptive copy uses the business body-copy scale. */
-body.business-surface .page-header > p,
 body.business-surface .business-module-card > p,
 body.business-surface
   .placeholder-section
@@ -45,7 +44,6 @@ body.business-surface .service-quote-review > p,
 body.business-surface .service-withdraw-confirmation p,
 body.business-surface .service-decline-confirmation p,
 body.business-surface .account-section-copy,
-body.business-surface .business-onboarding-intro p,
 body.business-surface .business-onboarding-section p,
 body.business-surface .business-capability-options small {
   color: var(--business-copy);
@@ -66,8 +64,4 @@ body.business-surface .btn-primary:hover,
 body.business-surface .business-onboarding-submit:hover:not(:disabled) {
   background: linear-gradient(135deg, #263fae, #405ed7);
   box-shadow: 0 7px 16px rgb(47 74 196 / 28%);
-}
-
-body.business-surface .business-services-hero .page-header > p {
-  color: rgb(255 255 255 / 78%);
 }

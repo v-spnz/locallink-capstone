@@ -57,7 +57,7 @@ test('discovery uses Supabase results and a react-leaflet map instead of mocks',
   assert.match(map, /CircleMarker/)
 })
 
-test('customer and business addresses are persisted and business locations feed deals', async () => {
+test('customer and business signup addresses are persisted and business locations feed deals', async () => {
   const [profile, onboarding, settings, dealsApi] = await Promise.all([
     read('../src/pages/customer/Profile.jsx'),
     read('../src/pages/business/BusinessOnboarding.jsx'),
@@ -67,6 +67,9 @@ test('customer and business addresses are persisted and business locations feed 
   assert.match(profile, /saveCustomerLocation/)
   assert.match(onboarding, /AddressAutocomplete/)
   assert.match(onboarding, /p_locations/)
-  assert.match(settings, /addManagedBusinessLocation/)
+  assert.doesNotMatch(
+    settings,
+    /addManagedBusinessLocation|AddressAutocomplete/,
+  )
   assert.match(dealsApi, /from\('business_locations'\)/)
 })

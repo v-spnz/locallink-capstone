@@ -340,7 +340,7 @@ export default function BusinessNavigation() {
             >
               <button
                 type="button"
-                className={`business-account-link${location.pathname === '/business/settings' ? ' active' : ''}`}
+                className={`business-account-link${location.pathname.startsWith('/business/settings') ? ' active' : ''}`}
                 aria-label="Open business account menu"
                 aria-haspopup="menu"
                 aria-expanded={isAccountMenuOpen}
@@ -363,7 +363,7 @@ export default function BusinessNavigation() {
                 <div className="business-account-dropdown" role="menu">
                   <p>Account</p>
                   <NavLink
-                    to="/business/settings#profile-details"
+                    to="/business/settings/profile"
                     role="menuitem"
                     onClick={() => setIsAccountMenuOpen(false)}
                   >
@@ -371,7 +371,7 @@ export default function BusinessNavigation() {
                     <span>Profile &amp; business details</span>
                   </NavLink>
                   <NavLink
-                    to="/business/settings#notification-preferences"
+                    to="/business/settings/notifications"
                     role="menuitem"
                     onClick={() => setIsAccountMenuOpen(false)}
                   >

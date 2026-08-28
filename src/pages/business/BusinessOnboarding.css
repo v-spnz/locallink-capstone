@@ -36,27 +36,12 @@
   height: 21px;
 }
 
-.business-onboarding-eyebrow {
-  margin-bottom: 14px;
-  color: #3153d8;
-  font-size: 11px;
-  text-transform: uppercase;
-}
-
 .business-onboarding-intro h1 {
   max-width: 390px;
   margin-bottom: 18px;
   font-size: clamp(38px, 4.2vw, 52px);
   line-height: 1.06;
   letter-spacing: -0.04em;
-}
-
-.business-onboarding-intro p {
-  max-width: 360px;
-  margin-bottom: 22px;
-  color: #718096;
-  font-size: 14px;
-  line-height: 1.65;
 }
 
 .business-onboarding-intro a {
@@ -347,10 +332,6 @@
   .business-onboarding-intro {
     position: static;
     padding-top: 0;
-  }
-
-  .business-onboarding-intro p {
-    max-width: 580px;
   }
 }
 

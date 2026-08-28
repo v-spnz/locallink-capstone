@@ -9,15 +9,9 @@ export default function CreateDeal() {
   const deals = useBusinessDeals()
 
   return (
-    <>
+    <div className="business-deals-page">
       <div className="page-header">
-        <div className="page-header-eyebrow">Manage → Deals</div>
-        <h2>{deals.step === 'list' ? 'Your Deals' : 'Create Deal'}</h2>
-        <p>
-          {deals.step === 'list'
-            ? 'View and manage all your promotional deals.'
-            : 'Prepare an offer privately, then publish it when every detail is ready.'}
-        </p>
+        <h1>{deals.step === 'list' ? 'Your deals' : 'Create a deal'}</h1>
       </div>
       {deals.isLoading && <LoadingSpinner label="Loading deals…" />}
       {!deals.isLoading && deals.requestError && deals.step === 'list' && (
@@ -66,6 +60,6 @@ export default function CreateDeal() {
           onSubmit={deals.handleReview}
         />
       )}
-    </>
+    </div>
   )
 }
