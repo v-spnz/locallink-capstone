@@ -8,7 +8,12 @@ import {
   respondToCustomerQuote,
   saveCustomerJob,
 } from '../api/customerJobs'
-import { formatRequestError, getOverallJobStatus } from '../formatters'
+import {
+  formatRequestError,
+  getActiveQuoteCount,
+  getOverallJobStatus,
+  isJobDateInPast,
+} from '../formatters'
 import {
   notifyBusinessMarketplaceChanged,
   subscribeToCustomerMarketplaceChanges,
@@ -63,6 +68,8 @@ export default function useCustomerJobs() {
   const [selectedQuoteJobId, setSelectedQuoteJobId] = useState(null)
   const [selectedQuoteId, setSelectedQuoteId] = useState(null)
   const [confirmingJobId, setConfirmingJobId] = useState(null)
+  const [repostPrompt, setRepostPrompt] = useState(null)
+  const [deletePrompt, setDeletePrompt] = useState(null)
 
   const jobIdFromUrl = searchParams.get('job')
   const quoteIdFromUrl = searchParams.get('quote')
@@ -318,6 +325,47 @@ export default function useCustomerJobs() {
     }
   }
 
+  // Repost is blocked until the job's preferred date has passed and no quotes are still waiting on a response.
+  function handleRepostClick(job) {
+    const activeQuotes = getActiveQuoteCount(quotesByJob[job.id] ?? [])
+
+    if (!isJobDateInPast(job.job_date)) {
+      setRepostPrompt({ job, mode: 'blocked-date' })
+      return
+    }
+    if (activeQuotes > 0) {
+      setRepostPrompt({ job, mode: 'blocked-quotes' })
+      return
+    }
+    setRepostPrompt({ job, mode: 'confirm' })
+  }
+
+  function confirmRepost() {
+    const job = repostPrompt.job
+    setRepostPrompt(null)
+    openRepostModal(job)
+  }
+
+  function dismissRepostPrompt() {
+    setRepostPrompt(null)
+  }
+
+  // Delete always asks first; the message changes if quotes are attached.
+  function handleDeleteClick(job) {
+    const activeQuotes = getActiveQuoteCount(quotesByJob[job.id] ?? [])
+    setDeletePrompt({ job, mode: activeQuotes > 0 ? 'warn' : 'simple' })
+  }
+
+  function confirmDeletePrompt() {
+    const jobId = deletePrompt.job.id
+    setDeletePrompt(null)
+    handleDeleteJob(jobId)
+  }
+
+  function dismissDeletePrompt() {
+    setDeletePrompt(null)
+  }
+
   return {
     postedJobs,
     quotesByJob,
@@ -349,5 +397,13 @@ export default function useCustomerJobs() {
     handleQuoteResponse,
     handleConfirmCompletion,
     handleDeleteJob,
+    repostPrompt,
+    handleRepostClick,
+    confirmRepost,
+    dismissRepostPrompt,
+    deletePrompt,
+    handleDeleteClick,
+    confirmDeletePrompt,
+    dismissDeletePrompt,
   }
 }
