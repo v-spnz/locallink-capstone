@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react'
+import { ArrowLeft } from 'lucide-react'
 import Button from '../../../components/ui/Button'
 import { DEAL_CATEGORIES, DEAL_OFFER_TYPES } from '../constants'
 import {
@@ -217,13 +218,14 @@ export default function DealForm({
       noValidate
     >
       <Button variant="secondary" className="deal-back" onClick={onBack}>
-        ← Back to Deals
+        <ArrowLeft aria-hidden="true" />
+        Back to deals
       </Button>
 
       <div className="deal-form-heading">
         <div>
           <div className="placeholder-section-title is-complete">
-            {isEditing ? 'Edit Deal' : 'Prepare Deal Draft'}
+            {isEditing ? 'Edit deal' : 'Prepare deal draft'}
           </div>
           <p>
             Save at any time. Drafts stay private until every required field is
@@ -338,8 +340,8 @@ export default function DealForm({
           </legend>
           {locations.length === 0 ? (
             <p className="deal-location-empty">
-              No business locations are configured. Add a location in your
-              business account before publishing.
+              No business location was added during registration. A location is
+              required before publishing.
             </p>
           ) : (
             <div className="deal-location-options">
@@ -430,7 +432,7 @@ export default function DealForm({
           {isSaving ? 'Saving…' : 'Save Draft'}
         </Button>
         <Button type="submit" disabled={isSaving}>
-          Review &amp; Publish
+          Review and publish
         </Button>
       </div>
     </form>

@@ -1,21 +1,204 @@
+import {
+  Bell,
+  BriefcaseBusiness,
+  Building2,
+  CheckCircle2,
+  ChevronRight,
+  LayoutDashboard,
+  LogOut,
+  MapPin,
+  ShieldCheck,
+  Tags,
+  UserCog,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import {
+  Link,
+  Navigate,
+  NavLink,
+  Route,
+  Routes,
+  useNavigate,
+} from 'react-router-dom'
 import useBusiness from '../../business/useBusiness'
 import { supabase } from '../../lib/supabase'
-import AddressAutocomplete from '../../features/location/components/AddressAutocomplete'
-import {
-  addManagedBusinessLocation,
-  deleteManagedBusinessLocation,
-  fetchManagedBusinessLocations,
-} from '../../features/location/api/locations'
+import { fetchManagedBusinessLocations } from '../../features/location/api/locations'
+
+function SettingsHeading({ icon: Icon, title }) {
+  return (
+    <div className="business-settings-section-heading">
+      {Icon && (
+        <span aria-hidden="true">
+          <Icon />
+        </span>
+      )}
+      <h2>{title}</h2>
+    </div>
+  )
+}
+
+function AccountOverview({
+  business,
+  businessLocations,
+  serviceCategories,
+  enabledCapabilities,
+}) {
+  return (
+    <section className="business-settings-section business-settings-overview">
+      <SettingsHeading title="Account overview" />
+
+      <dl className="business-settings-summary" aria-label="Account summary">
+        <div>
+          <dt>
+            <ShieldCheck aria-hidden="true" />
+            Verification
+          </dt>
+          <dd>{business.verification_status.replaceAll('_', ' ')}</dd>
+        </div>
+        <div>
+          <dt>
+            <MapPin aria-hidden="true" />
+            Locations
+          </dt>
+          <dd>{businessLocations.length}</dd>
+        </div>
+        <div>
+          <dt>
+            <Tags aria-hidden="true" />
+            Service categories
+          </dt>
+          <dd>{serviceCategories.length}</dd>
+        </div>
+        <div>
+          <dt>
+            <CheckCircle2 aria-hidden="true" />
+            Enabled tools
+          </dt>
+          <dd>{enabledCapabilities.length}</dd>
+        </div>
+      </dl>
+    </section>
+  )
+}
+
+function BusinessProfile({ business, membership, enabledCapabilities }) {
+  return (
+    <section className="business-settings-section">
+      <SettingsHeading icon={Building2} title="Business profile" />
+
+      <dl className="business-settings-detail-list">
+        <div>
+          <dt>Business name</dt>
+          <dd>{business.business_name}</dd>
+        </div>
+        <div>
+          <dt>Your access</dt>
+          <dd>{membership.role}</dd>
+        </div>
+        <div>
+          <dt>Description</dt>
+          <dd>{business.description || 'No description added'}</dd>
+        </div>
+        <div>
+          <dt>Enabled capabilities</dt>
+          <dd>{enabledCapabilities.join(', ') || 'None enabled'}</dd>
+        </div>
+      </dl>
+    </section>
+  )
+}
+
+function ServiceProfile({
+  business,
+  serviceProfile,
+  serviceCategories,
+  serviceAreas,
+}) {
+  return (
+    <section className="business-settings-section">
+      <SettingsHeading icon={BriefcaseBusiness} title="Service profile" />
+
+      <dl className="business-settings-detail-list">
+        <div>
+          <dt>Verification status</dt>
+          <dd>{business.verification_status.replace('_', ' ')}</dd>
+        </div>
+        <div>
+          <dt>Availability</dt>
+          <dd>{serviceProfile?.availability || 'Not set'}</dd>
+        </div>
+        <div>
+          <dt>Service description</dt>
+          <dd>{serviceProfile?.service_description || 'Not set'}</dd>
+        </div>
+        <div>
+          <dt>Categories</dt>
+          <dd>
+            {serviceCategories
+              .map((category) => category.service_category)
+              .join(', ') || 'Not set'}
+          </dd>
+        </div>
+        <div>
+          <dt>Service areas</dt>
+          <dd>
+            {serviceAreas.map((area) => area.service_area).join(', ') ||
+              'Not set'}
+          </dd>
+        </div>
+      </dl>
+    </section>
+  )
+}
+
+function NotificationPreferences() {
+  return (
+    <section className="business-settings-section">
+      <SettingsHeading icon={Bell} title="Notification preferences" />
+      <div className="business-settings-callout">
+        <Bell aria-hidden="true" />
+        <span>
+          <strong>Important notifications are on</strong>
+          Lead and job updates remain enabled while preference controls are
+          being developed.
+        </span>
+      </div>
+    </section>
+  )
+}
+
+function AccountAccess({ logoutError, isLoggingOut, handleLogout }) {
+  return (
+    <section className="business-settings-section">
+      <SettingsHeading icon={UserCog} title="Account access" />
+      {logoutError && (
+        <div className="error" role="alert">
+          {logoutError}
+        </div>
+      )}
+      <div className="business-settings-actions">
+        <Link className="btn-secondary" to="/home">
+          Go to consumer portal
+        </Link>
+        <button
+          type="button"
+          className="btn-danger"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+        >
+          <LogOut aria-hidden="true" />
+          {isLoggingOut ? 'Logging out…' : 'Log Out'}
+        </button>
+      </div>
+    </section>
+  )
+}
 
 export default function Settings() {
-  const location = useLocation()
   const navigate = useNavigate()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState('')
   const [businessLocations, setBusinessLocations] = useState([])
-  const [locationStatus, setLocationStatus] = useState('')
   const {
     business,
     membership,
@@ -31,19 +214,37 @@ export default function Settings() {
     capabilities.service_marketplace_enabled && 'Service Marketplace',
   ].filter(Boolean)
 
-  useEffect(() => {
-    if (!location.hash) return undefined
-
-    const sectionId = location.hash.slice(1)
-    const scrollFrame = window.requestAnimationFrame(() => {
-      document.getElementById(sectionId)?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      })
-    })
-
-    return () => window.cancelAnimationFrame(scrollFrame)
-  }, [location.hash])
+  const settingsPages = [
+    {
+      path: 'overview',
+      label: 'Overview',
+      icon: LayoutDashboard,
+    },
+    {
+      path: 'profile',
+      label: 'Business profile',
+      icon: Building2,
+    },
+    ...(capabilities.service_marketplace_enabled
+      ? [
+          {
+            path: 'services',
+            label: 'Service profile',
+            icon: BriefcaseBusiness,
+          },
+        ]
+      : []),
+    {
+      path: 'notifications',
+      label: 'Notifications',
+      icon: Bell,
+    },
+    {
+      path: 'access',
+      label: 'Account access',
+      icon: UserCog,
+    },
+  ]
 
   useEffect(() => {
     let active = true
@@ -53,7 +254,6 @@ export default function Settings() {
         if (active) setBusinessLocations(locations)
       } catch (error) {
         console.error('Unable to load business locations.', error)
-        if (active) setLocationStatus('Unable to load business locations.')
       }
     }
     loadLocations()
@@ -78,203 +278,101 @@ export default function Settings() {
     navigate('/login', { replace: true })
   }
 
-  async function addBusinessLocation(address) {
-    setLocationStatus('Adding location…')
-    try {
-      await addManagedBusinessLocation(business.id, address)
-      const locations = await fetchManagedBusinessLocations(business.id)
-      setBusinessLocations(locations)
-      setLocationStatus('Business location added.')
-    } catch (error) {
-      console.error('Unable to add business location.', error)
-      setLocationStatus('Unable to add this location. Please try again.')
-    }
-  }
-
-  async function removeBusinessLocation(locationId) {
-    setLocationStatus('Removing location…')
-    try {
-      await deleteManagedBusinessLocation(business.id, locationId)
-      setBusinessLocations((current) =>
-        current.filter(
-          (businessLocation) => businessLocation.id !== locationId,
-        ),
-      )
-      setLocationStatus('Business location removed.')
-    } catch (error) {
-      console.error('Unable to remove business location.', error)
-      setLocationStatus(
-        'Unable to remove this location. It may be used by an existing deal.',
-      )
-    }
-  }
-
   return (
-    <>
-      <div className="page-header">
-        <h2>Settings</h2>
-        <p>Manage your business profile and notification preferences.</p>
-      </div>
-      <div
-        className="placeholder-section business-settings-section"
-        id="profile-details"
-      >
-        <div className="placeholder-section-title">Business Profile</div>
-        <div className="form-group">
-          <label className="form-label">Business Name</label>
-          <input
-            className="form-input"
-            disabled
-            value={business.business_name}
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Description</label>
-          <input
-            className="form-input"
-            disabled
-            value={business.description || 'No description added'}
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Your access</label>
-          <input className="form-input" disabled value={membership.role} />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Enabled capabilities</label>
-          <input
-            className="form-input"
-            disabled
-            value={enabledCapabilities.join(', ')}
-          />
-        </div>
-      </div>
+    <div className="business-settings-page">
+      <div className="business-settings-shell">
+        <aside className="business-settings-sidebar">
+          <nav aria-label="Business settings pages">
+            <p>Settings</p>
+            <div className="business-settings-nav-list">
+              {settingsPages.map((page) => {
+                const Icon = page.icon
 
-      <div className="placeholder-section business-settings-section">
-        <div className="placeholder-section-title is-complete">
-          Business Locations
-        </div>
-        <p className="account-section-copy">
-          These verified map locations can participate in deals and appear in
-          nearby customer searches.
-        </p>
-        <AddressAutocomplete
-          id="business-settings-address"
-          label="Add a business address"
-          onSelect={addBusinessLocation}
-        />
-        <div className="business-location-settings-list">
-          {businessLocations.map((businessLocation) => (
-            <div key={businessLocation.id}>
-              <span>
-                <strong>{businessLocation.name}</strong>
-                <small>
-                  {businessLocation.formatted_address ||
-                    'Address needs updating'}
-                </small>
-              </span>
-              <button
-                type="button"
-                onClick={() => removeBusinessLocation(businessLocation.id)}
-              >
-                Remove
-              </button>
+                return (
+                  <NavLink
+                    key={page.path}
+                    to={`/business/settings/${page.path}`}
+                    className={({ isActive }) =>
+                      isActive ? 'is-active' : undefined
+                    }
+                  >
+                    <Icon aria-hidden="true" />
+                    <span>{page.label}</span>
+                    <ChevronRight aria-hidden="true" />
+                  </NavLink>
+                )
+              })}
             </div>
-          ))}
-        </div>
-        {locationStatus && (
-          <p className="account-section-copy" role="status">
-            {locationStatus}
-          </p>
-        )}
-      </div>
+          </nav>
 
-      {capabilities.service_marketplace_enabled && (
-        <div className="placeholder-section">
-          <div className="placeholder-section-title">Service Profile</div>
-          <div className="form-group">
-            <label className="form-label">Verification status</label>
-            <input
-              className="form-input"
-              disabled
-              value={business.verification_status.replace('_', ' ')}
-            />
+          <div className="business-settings-sidebar-status">
+            <ShieldCheck aria-hidden="true" />
+            <span>
+              <small>Business status</small>
+              <strong>
+                {business.verification_status.replaceAll('_', ' ')}
+              </strong>
+            </span>
           </div>
-          <div className="form-group">
-            <label className="form-label">Service description</label>
-            <input
-              className="form-input"
-              disabled
-              value={serviceProfile?.service_description ?? ''}
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Availability</label>
-            <input
-              className="form-input"
-              disabled
-              value={serviceProfile?.availability ?? ''}
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Categories</label>
-            <input
-              className="form-input"
-              disabled
-              value={serviceCategories
-                .map((category) => category.service_category)
-                .join(', ')}
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Service areas</label>
-            <input
-              className="form-input"
-              disabled
-              value={serviceAreas.map((area) => area.service_area).join(', ')}
-            />
-          </div>
-        </div>
-      )}
+        </aside>
 
-      <div
-        className="placeholder-section business-settings-section"
-        id="notification-preferences"
-      >
-        <div className="placeholder-section-title">
-          Notification Preferences
-        </div>
-        <p>
-          Notification controls will be available here as the business account
-          settings are expanded.
-        </p>
-      </div>
-
-      <div className="placeholder-section business-settings-section">
-        <div className="placeholder-section-title">Account</div>
-        <p>
-          Switch to your consumer portal without signing out, or log out of
-          LocalLink on this device.
-        </p>
-        {logoutError && (
-          <div className="error" role="alert">
-            {logoutError}
-          </div>
-        )}
-        <div className="business-settings-actions">
-          <Link className="btn-secondary" to="/home">
-            Go to consumer portal
-          </Link>
-          <button
-            type="button"
-            className="btn-danger"
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-          >
-            {isLoggingOut ? 'Logging out…' : 'Log Out'}
-          </button>
+        <div className="business-settings-content">
+          <Routes>
+            <Route index element={<Navigate to="overview" replace />} />
+            <Route
+              path="overview"
+              element={
+                <AccountOverview
+                  business={business}
+                  businessLocations={businessLocations}
+                  serviceCategories={serviceCategories}
+                  enabledCapabilities={enabledCapabilities}
+                />
+              }
+            />
+            <Route
+              path="profile"
+              element={
+                <BusinessProfile
+                  business={business}
+                  membership={membership}
+                  enabledCapabilities={enabledCapabilities}
+                />
+              }
+            />
+            <Route
+              path="services"
+              element={
+                capabilities.service_marketplace_enabled ? (
+                  <ServiceProfile
+                    business={business}
+                    serviceProfile={serviceProfile}
+                    serviceCategories={serviceCategories}
+                    serviceAreas={serviceAreas}
+                  />
+                ) : (
+                  <Navigate to="/business/settings/overview" replace />
+                )
+              }
+            />
+            <Route path="notifications" element={<NotificationPreferences />} />
+            <Route
+              path="access"
+              element={
+                <AccountAccess
+                  logoutError={logoutError}
+                  isLoggingOut={isLoggingOut}
+                  handleLogout={handleLogout}
+                />
+              }
+            />
+            <Route
+              path="*"
+              element={<Navigate to="/business/settings/overview" replace />}
+            />
+          </Routes>
         </div>
       </div>
-    </>
+    </div>
   )
 }

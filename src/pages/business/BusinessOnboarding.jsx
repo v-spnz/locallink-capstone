@@ -4,6 +4,8 @@ import {
   BadgePercent,
   BriefcaseBusiness,
   Check,
+  CheckCircle2,
+  Circle,
   Gift,
 } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
@@ -62,6 +64,9 @@ export default function BusinessOnboarding() {
   })
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const selectedCapabilityCount = CAPABILITY_OPTIONS.filter(
+    ({ key }) => form[key],
+  ).length
 
   function updateField(event) {
     const { name, value } = event.target
@@ -187,12 +192,43 @@ export default function BusinessOnboarding() {
           <div className="business-onboarding-mark" aria-hidden="true">
             <BriefcaseBusiness />
           </div>
-          <div className="business-onboarding-eyebrow">Business setup</div>
           <h1>Bring your business to LocalLink.</h1>
-          <p>
-            Choose the tools you need now. Your personal LocalLink access stays
-            available, and more business capabilities can be added later.
-          </p>
+          <div className="business-onboarding-summary" aria-live="polite">
+            <strong>Setup summary</strong>
+            <span className={form.businessName.trim() ? 'is-complete' : ''}>
+              {form.businessName.trim() ? (
+                <CheckCircle2 aria-hidden="true" />
+              ) : (
+                <Circle aria-hidden="true" />
+              )}
+              {form.businessName.trim()
+                ? 'Business name added'
+                : 'Business name required'}
+            </span>
+            <span className={selectedCapabilityCount > 0 ? 'is-complete' : ''}>
+              {selectedCapabilityCount > 0 ? (
+                <CheckCircle2 aria-hidden="true" />
+              ) : (
+                <Circle aria-hidden="true" />
+              )}
+              {selectedCapabilityCount}{' '}
+              {selectedCapabilityCount === 1
+                ? 'tool selected'
+                : 'tools selected'}
+            </span>
+            {form.deals && (
+              <span className={form.locations.length > 0 ? 'is-complete' : ''}>
+                {form.locations.length > 0 ? (
+                  <CheckCircle2 aria-hidden="true" />
+                ) : (
+                  <Circle aria-hidden="true" />
+                )}
+                {form.locations.length > 0
+                  ? `${form.locations.length} deal ${form.locations.length === 1 ? 'location' : 'locations'} added`
+                  : 'Deal location required'}
+              </span>
+            )}
+          </div>
           <Link to="/home">Continue with personal access instead</Link>
         </section>
 
@@ -229,6 +265,7 @@ export default function BusinessOnboarding() {
                 maxLength="1000"
                 disabled={isSubmitting}
               />
+              <small>{form.description.length} of 1,000 characters</small>
             </label>
 
             <div className="business-onboarding-section capability-heading">
@@ -265,6 +302,12 @@ export default function BusinessOnboarding() {
                 )
               })}
             </div>
+            <p className="business-capability-selection-count" role="status">
+              {selectedCapabilityCount}{' '}
+              {selectedCapabilityCount === 1
+                ? 'tool selected'
+                : 'tools selected'}
+            </p>
 
             {form.deals && (
               <div className="business-onboarding-locations">
@@ -358,7 +401,7 @@ export default function BusinessOnboarding() {
                     name="availability"
                     value={form.availability}
                     onChange={updateField}
-                    placeholder="e.g. Monday–Friday, 8am–5pm"
+                    placeholder="e.g. Monday-Friday, 8am-5pm"
                     disabled={isSubmitting}
                     required
                   />
