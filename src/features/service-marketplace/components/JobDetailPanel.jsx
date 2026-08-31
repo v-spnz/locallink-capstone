@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import Button from '../../../components/ui/Button'
 import { getJobBadge } from '../formatters'
 import ActiveJobProgressTimeline from './ActiveJobProgressTimeline'
 import RepostJobModal from './RepostJobModal'
 import DeleteJobModal from './DeleteJobModal'
+import EditLockedModal from './EditLockedModal'
 
 export default function JobDetailPanel({
   job,
@@ -24,6 +26,15 @@ export default function JobDetailPanel({
   const badge = getJobBadge(job, quoteCount)
   const canEdit = ['open', 'closed', 'cancelled'].includes(job.status)
   const editLocked = canEdit && quoteCount > 0
+  const [showEditLockedNotice, setShowEditLockedNotice] = useState(false)
+
+  function handleEditClick() {
+    if (editLocked) {
+      setShowEditLockedNotice(true)
+      return
+    }
+    onEdit(job)
+  }
 
   return (
     <div>
@@ -118,16 +129,7 @@ export default function JobDetailPanel({
 
         {canEdit && (
           <div className="sm-detail-actions-right">
-            <Button
-              variant="secondary"
-              onClick={() => onEdit(job)}
-              disabled={editLocked}
-              title={
-                editLocked
-                  ? "You can't edit a job while quotes are awaiting a response."
-                  : undefined
-              }
-            >
+            <Button variant="secondary" onClick={handleEditClick}>
               Edit Job
             </Button>
             <Button variant="secondary" onClick={() => onRepost(job)}>
@@ -159,6 +161,10 @@ export default function JobDetailPanel({
           onCancel={onDeleteDismiss}
           onConfirm={onDeleteConfirm}
         />
+      )}
+
+      {showEditLockedNotice && (
+        <EditLockedModal onCancel={() => setShowEditLockedNotice(false)} />
       )}
     </div>
   )

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   X,
   Wrench,
@@ -99,6 +99,13 @@ export default function PostJobModal({
   const [step, setStep] = useState(initialStep)
   const [draft, setDraft] = useState(() => buildInitialDraft(initialJob))
   const [errors, setErrors] = useState({})
+
+  // Snapshot of the job's original values, used on the Review step to show
+  // what's changed. Only set when editing/reposting an existing job.
+  const originalDraft = useMemo(
+    () => (initialJob ? buildInitialDraft(initialJob) : null),
+    [initialJob],
+  )
 
   const update = (fields) => setDraft((prev) => ({ ...prev, ...fields }))
 
@@ -227,7 +234,13 @@ export default function PostJobModal({
             suburbOptions={suburbOptions}
           />
         )}
-        {step === 5 && <StepReview draft={draft} error={submitError} />}
+        {step === 5 && (
+          <StepReview
+            draft={draft}
+            originalDraft={originalDraft}
+            error={submitError}
+          />
+        )}
       </div>
 
       <div className="flex items-center justify-between px-6 py-5">
@@ -624,18 +637,55 @@ function StepLocation({ draft, update, errors, suburbOptions }) {
   )
 }
 
-function StepReview({ draft, error }) {
+// pulls the numeric part out of a distance value, since saved jobs store
+// postedDistance as "5km" while the slider stores a plain number.
+function formatDistance(distance) {
+  const numeric = String(distance).replace(/[^0-9.]/g, '')
+  return `${numeric} km`
+}
+
+function StepReview({ draft, originalDraft, error }) {
+  const isEditing = Boolean(originalDraft)
   const displayType = draft.type === 'Other' ? draft.otherType : draft.type
+  const originalDisplayType = originalDraft
+    ? originalDraft.type === 'Other'
+      ? originalDraft.otherType
+      : originalDraft.type
+    : undefined
+
+  const budgetValue = `${draft.minBudget !== null ? `$${draft.minBudget}` : '—'} – ${draft.maxBudget !== null ? `$${draft.maxBudget}` : '—'}`
+  const originalBudgetValue = originalDraft
+    ? `${originalDraft.minBudget !== null ? `$${originalDraft.minBudget}` : '—'} – ${originalDraft.maxBudget !== null ? `$${originalDraft.maxBudget}` : '—'}`
+    : undefined
+
+  const preferredDateValue = draft.jobDate
+    ? draft.jobDate.toLocaleDateString('en-NZ')
+    : '—'
+  const originalPreferredDateValue = originalDraft
+    ? originalDraft.jobDate
+      ? originalDraft.jobDate.toLocaleDateString('en-NZ')
+      : '—'
+    : undefined
 
   return (
     <div>
       <p className="mb-3 text-sm text-[var(--text-muted)]">
-        Please review your job posting before submitting.
+        {isEditing
+          ? 'Check your changes before saving. Edited fields are marked in gold below.'
+          : 'Please review your job posting before submitting.'}
       </p>
 
       <div className="divide-y divide-[var(--border)] overflow-hidden rounded-md border border-[var(--border)]">
-        <ReviewRow label="Category" value={draft.category} />
-        <ReviewRow label="Type" value={displayType} />
+        <ReviewRow
+          label="Category"
+          value={draft.category}
+          oldValue={originalDraft?.category}
+        />
+        <ReviewRow
+          label="Type"
+          value={displayType}
+          oldValue={originalDisplayType}
+        />
         <ReviewRow
           label="Photos/Videos"
           value={
@@ -646,20 +696,37 @@ function StepReview({ draft, error }) {
         />
         <ReviewRow
           label="Preferred date"
-          value={
-            draft.jobDate ? draft.jobDate.toLocaleDateString('en-NZ') : '—'
-          }
+          value={preferredDateValue}
+          oldValue={originalPreferredDateValue}
         />
         <ReviewRow
           label="Budget"
-          value={`${draft.minBudget !== null ? `$${draft.minBudget}` : '—'} – ${draft.maxBudget !== null ? `$${draft.maxBudget}` : '—'}`}
+          value={budgetValue}
+          oldValue={originalBudgetValue}
         />
-        <ReviewRow label="Urgency" value={draft.urgency} />
-        <ReviewRow label="City" value={draft.city} />
-        <ReviewRow label="Suburb" value={draft.suburb} />
+        <ReviewRow
+          label="Urgency"
+          value={draft.urgency}
+          oldValue={originalDraft?.urgency}
+        />
+        <ReviewRow
+          label="City"
+          value={draft.city}
+          oldValue={originalDraft?.city}
+        />
+        <ReviewRow
+          label="Suburb"
+          value={draft.suburb}
+          oldValue={originalDraft?.suburb}
+        />
         <ReviewRow
           label="Search distance"
-          value={`${draft.postedDistance} km`}
+          value={formatDistance(draft.postedDistance)}
+          oldValue={
+            originalDraft
+              ? formatDistance(originalDraft.postedDistance)
+              : undefined
+          }
         />
       </div>
 
@@ -680,12 +747,25 @@ function StepReview({ draft, error }) {
   )
 }
 
-function ReviewRow({ label, value }) {
+function ReviewRow({ label, value, oldValue }) {
+  const hasChanged =
+    oldValue !== undefined && oldValue !== null && oldValue !== value
+
   return (
-    <div className="flex items-center justify-between gap-4 px-3.5 py-2.5">
+    <div
+      className={
+        'flex items-center justify-between gap-4 px-3.5 py-2.5' +
+        (hasChanged ? ' border-l-4 border-l-[#a3690c] pl-3' : '')
+      }
+    >
       <span className="text-sm text-[var(--text-muted)]">{label}</span>
       <span className="text-sm font-semibold text-[var(--text)]">
         {value || '—'}
+        {hasChanged && (
+          <span className="ml-2 font-normal text-[var(--text-muted)] line-through">
+            {oldValue || '—'}
+          </span>
+        )}
       </span>
     </div>
   )
