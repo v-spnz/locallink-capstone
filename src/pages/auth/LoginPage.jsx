@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import AuthPageHeader from '../../components/auth/AuthPageHeader'
 import loginLocalStreet from '../../assets/images/login-local-street.jpg'
@@ -21,6 +21,7 @@ export default function LoginPage() {
   const [success, setSuccess] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [authenticatedDestination, setAuthenticatedDestination] = useState('')
 
   useEffect(() => {
@@ -132,17 +133,13 @@ export default function LoginPage() {
             alt="Rainy city laneway lined with local restaurants and businesses"
           />
           <div className="login-photo-overlay" />
-          <div className="login-photo-heading">
-            Welcome
-            <br />
-            back to
-            <br />
-            <span>LocalLink</span>
+          <div className="login-photo-copy">
+            <h2>Welcome back to LocalLink.</h2>
+            <p>
+              Pick up where you left, with your requests, nearby choices, and
+              local rewards kept together.
+            </p>
           </div>
-          <p>
-            Pick up where you left, with your requests, nearby choices, and
-            local rewards kept together.
-          </p>
         </section>
 
         <section className="login-form-panel">
@@ -170,16 +167,33 @@ export default function LoginPage() {
 
               <div className="login-field">
                 <label htmlFor="login-password">Password</label>
-                <input
-                  id="login-password"
-                  type="password"
-                  placeholder="At least 8 characters"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  autoComplete="current-password"
-                  disabled={isSubmitting || isResetting}
-                  required
-                />
+                <div className="login-password-wrap">
+                  <input
+                    id="login-password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="At least 8 characters"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    autoComplete="current-password"
+                    disabled={isSubmitting || isResetting}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((current) => !current)}
+                    disabled={isSubmitting || isResetting}
+                    aria-label={
+                      showPassword ? 'Hide Password' : 'Show Password'
+                    }
+                    title={showPassword ? 'Hide Password' : 'Show Password'}
+                  >
+                    {showPassword ? (
+                      <EyeOff aria-hidden="true" />
+                    ) : (
+                      <Eye aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               <button
