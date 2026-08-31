@@ -137,10 +137,7 @@ export default function RegisterPage() {
           />
           <div className="register-photo-overlay" />
           <div className="register-photo-copy">
-            <h2>
-              Make local feel
-              <br />a little closer.
-            </h2>
+            <h2>Make local feel a little closer.</h2>
             <p>
               Create an account to save your requests, discover nearby
               businesses, and keep local rewards in one place.
