@@ -20,6 +20,7 @@ function normalizeAddress(result) {
     suburb: result.suburb || '',
     district: result.district || '',
     city: result.city || result.county || '',
+    county: result.county || '',
     resultType: result.result_type || '',
     postcode: result.postcode || '',
     countryCode: result.country_code || 'nz',

@@ -31,7 +31,7 @@ export default function BusinessProtectedRoute({
       <Navigate
         to="/register"
         replace
-        state={{ from: location, startAt: 'choice', intent: 'business' }}
+        state={{ from: location, startAt: 'account', intent: 'business' }}
       />
     )
   }

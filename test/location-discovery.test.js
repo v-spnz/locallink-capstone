@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
+import {
+  getLocalSuburbSuggestions,
+  mergeSuburbSuggestions,
+  preferKnownEnglishPlaceName,
+} from '../src/features/location/localSuburbs.js'
+import { toSuburbLocation } from '../src/features/location/suburb.js'
 
 const read = (path) => readFile(new URL(path, import.meta.url), 'utf8')
 
@@ -18,6 +24,10 @@ test('Geoapify autocomplete and geocoding are used for selected addresses', asyn
   assert.match(api, /VITE_GEOAPIFY_API_KEY/)
   assert.match(component, /geocodeAddress\(suggestion\.formattedAddress\)/)
   assert.match(component, /searchType === 'suburb'\s+\? suggestion/)
+  assert.match(component, /suburb: \{ minimumCharacters: 1, delay: 120 \}/)
+  assert.match(component, /aria-autocomplete="list"/)
+  assert.match(component, /event\.key === 'ArrowDown'/)
+  assert.match(component, /setSuggestions\(\[\]\)/)
   assert.match(component, /onBlur={closeResultsOnBlur}/)
   assert.match(component, /currentTarget\.contains\(event\.relatedTarget\)/)
   assert.match(component, /Addresses by Geoapify/)
@@ -37,6 +47,56 @@ test('browser geolocation supports Use my current location', async () => {
   assert.match(api, /navigator\.geolocation\.getCurrentPosition/)
   assert.match(component, /Use my current location/)
   assert.match(component, /reverseGeocode/)
+  assert.doesNotMatch(component, /geocodeSuburb\(suburb\.formattedAddress\)/)
+})
+
+test('suburb suggestions appear on the first character and narrow as typing continues', () => {
+  const firstCharacter = getLocalSuburbSuggestions('m')
+  const narrowed = getLocalSuburbSuggestions('miss')
+
+  assert.ok(firstCharacter.length > 0)
+  assert.ok(firstCharacter.some(({ suburb }) => suburb === 'Mission Bay'))
+  assert.deepEqual(
+    narrowed.map(({ suburb }) => suburb),
+    ['Mission Bay'],
+  )
+})
+
+test('remote suburb results enrich matching immediate suggestions', () => {
+  const local = getLocalSuburbSuggestions('mission')
+  const remote = [{ ...local[0], latitude: -36.85, isLocalSuggestion: false }]
+  const merged = mergeSuburbSuggestions(local, remote)
+
+  assert.equal(merged[0].latitude, -36.85)
+  assert.equal(merged[0].isLocalSuggestion, false)
+})
+
+test('current location prefers a known English name without replacing genuine Maori place names', () => {
+  const location = toSuburbLocation({
+    suburb: 'Vinetown',
+    city: 'Whangārei',
+    latitude: -35.72,
+    longitude: 174.32,
+  })
+
+  assert.equal(location.city, 'Whangarei')
+  assert.equal(location.formattedAddress, 'Vinetown, Whangarei')
+  assert.equal(preferKnownEnglishPlaceName('Te Aro'), 'Te Aro')
+})
+
+test('Mount Wellington GPS results do not collapse to the local-board district', () => {
+  const location = toSuburbLocation({
+    suburb: 'Mount Wellington',
+    district: 'Auckland',
+    city: 'Maungakiekie-Tāmaki',
+    county: 'Auckland',
+    latitude: -36.8999,
+    longitude: 174.8402,
+  })
+
+  assert.equal(location.suburb, 'Mount Wellington')
+  assert.equal(location.city, 'Auckland')
+  assert.equal(location.formattedAddress, 'Mount Wellington, Auckland')
 })
 
 test('PostGIS performs indexed radius filtering and distance ordering', async () => {

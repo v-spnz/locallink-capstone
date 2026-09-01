@@ -27,13 +27,12 @@ import { supabase } from '../../lib/supabase'
 import useAuth from '../../auth/useAuth'
 import './RegisterPage.css'
 
-const INTRO_STEPS = ['welcome', 'location', 'how', 'choice', 'account']
+const INTRO_STEPS = ['welcome', 'location', 'how', 'account']
 
 const STEP_LABELS = {
   welcome: 'Welcome',
   location: 'Your area',
   how: 'How it works',
-  choice: 'Your next move',
   account: 'Your account',
   verify: 'Check your email',
   confirm: 'Confirm your area',
@@ -85,8 +84,10 @@ export default function RegisterPage() {
     }
   })
   const [step, setStep] = useState(() => {
-    if (location.state?.startAt === 'choice') return 'choice'
-    if (location.state?.startAt === 'account' || incomingDestination) {
+    if (
+      ['choice', 'account'].includes(location.state?.startAt) ||
+      incomingDestination
+    ) {
       return 'account'
     }
     return 'welcome'
@@ -200,8 +201,7 @@ export default function RegisterPage() {
     const previousSteps = {
       location: 'welcome',
       how: 'location',
-      choice: 'how',
-      account: incomingDestination ? null : 'choice',
+      account: incomingDestination ? null : 'how',
       confirm: 'account',
     }
     const previous = previousSteps[step]
@@ -355,7 +355,12 @@ export default function RegisterPage() {
           </div>
         </section>
 
-        <section className="register-form-panel" aria-live="polite">
+        <section
+          className={`register-form-panel${
+            step === 'account' ? '' : ' register-form-panel--slide'
+          }`}
+          aria-live="polite"
+        >
           <RegistrationProgress step={step} />
 
           {step !== 'welcome' && step !== 'verify' && (
@@ -381,14 +386,7 @@ export default function RegisterPage() {
           )}
 
           {step === 'how' && (
-            <HowItWorksStep onContinue={() => setStep('choice')} />
-          )}
-
-          {step === 'choice' && (
-            <ChoiceStep
-              onCreateAccount={() => setStep('account')}
-              destination={flow.destination}
-            />
+            <HowItWorksStep onContinue={() => setStep('account')} />
           )}
 
           {step === 'account' && (
@@ -456,10 +454,7 @@ function RegistrationProgress({ step }) {
 
 function WelcomeStep({ onContinue, onExplore }) {
   return (
-    <div className="register-step-content">
-      <div className="register-step-icon" aria-hidden="true">
-        <Compass />
-      </div>
+    <div className="register-step-content register-step-content--anchored">
       <h1>Welcome to LocalLink.</h1>
       <p className="register-intro">
         Find useful deals, local rewards, and trusted services around you.
@@ -478,27 +473,26 @@ function WelcomeStep({ onContinue, onExplore }) {
           Manage your business in the same account
         </span>
       </div>
-      <button className="register-submit" type="button" onClick={onContinue}>
-        Choose your location
-        <ArrowRight aria-hidden="true" />
-      </button>
-      <button
-        className="register-text-action"
-        type="button"
-        onClick={onExplore}
-      >
-        Explore without an account
-      </button>
+      <div className="register-step-actions">
+        <button className="register-submit" type="button" onClick={onContinue}>
+          Choose your location
+          <ArrowRight aria-hidden="true" />
+        </button>
+        <button
+          className="register-text-action"
+          type="button"
+          onClick={onExplore}
+        >
+          Explore without an account
+        </button>
+      </div>
     </div>
   )
 }
 
 function LocationStep({ location, onSelect, onContinue }) {
   return (
-    <div className="register-step-content">
-      <div className="register-step-icon" aria-hidden="true">
-        <MapPin />
-      </div>
+    <div className="register-step-content register-step-content--anchored">
       <h1>Start with your area.</h1>
       <p className="register-intro">
         Use your location or search for a suburb. We do not need your street
@@ -525,34 +519,33 @@ function LocationStep({ location, onSelect, onContinue }) {
         placeholder="Start typing a New Zealand suburb"
         onSelect={onSelect}
       />
-      <button
-        className="register-submit"
-        type="button"
-        onClick={onContinue}
-        disabled={!location}
-      >
-        Continue
-        <ArrowRight aria-hidden="true" />
-      </button>
-      {!location && (
+      <div className="register-step-actions">
         <button
-          className="register-text-action"
+          className="register-submit"
           type="button"
           onClick={onContinue}
+          disabled={!location}
         >
-          Choose later
+          Continue
+          <ArrowRight aria-hidden="true" />
         </button>
-      )}
+        {!location && (
+          <button
+            className="register-text-action"
+            type="button"
+            onClick={onContinue}
+          >
+            Choose later
+          </button>
+        )}
+      </div>
     </div>
   )
 }
 
 function HowItWorksStep({ onContinue }) {
   return (
-    <div className="register-step-content">
-      <div className="register-step-icon" aria-hidden="true">
-        <Compass />
-      </div>
+    <div className="register-step-content register-step-content--anchored">
       <h1>LocalLink follows your goal.</h1>
       <p className="register-intro">
         Browse freely, then create an account only when an action needs one.
@@ -580,50 +573,11 @@ function HowItWorksStep({ onContinue }) {
           </span>
         </div>
       </div>
-      <button className="register-submit" type="button" onClick={onContinue}>
-        Continue
-        <ArrowRight aria-hidden="true" />
-      </button>
-    </div>
-  )
-}
-
-function ChoiceStep({ onCreateAccount, destination }) {
-  return (
-    <div className="register-step-content">
-      <div className="register-step-icon" aria-hidden="true">
-        <Compass />
-      </div>
-      <h1>Choose your next move.</h1>
-      <p className="register-intro">
-        Explore as a visitor, log in, or create one identity for personal and
-        business access.
-      </p>
-      <div className="register-choice-actions">
-        <Link to="/deals">
-          <Compass aria-hidden="true" />
-          <span>
-            <strong>Explore LocalLink</strong>
-            <small>Browse nearby without creating an account.</small>
-          </span>
-          <ArrowRight aria-hidden="true" />
-        </Link>
-        <button type="button" onClick={onCreateAccount}>
-          <UserRound aria-hidden="true" />
-          <span>
-            <strong>Create an account</strong>
-            <small>Save activity or set up a business.</small>
-          </span>
+      <div className="register-step-actions">
+        <button className="register-submit" type="button" onClick={onContinue}>
+          Continue
           <ArrowRight aria-hidden="true" />
         </button>
-        <Link to="/login" state={{ from: destination || undefined }}>
-          <CheckCircle2 aria-hidden="true" />
-          <span>
-            <strong>Log in</strong>
-            <small>Continue with an existing LocalLink identity.</small>
-          </span>
-          <ArrowRight aria-hidden="true" />
-        </Link>
       </div>
     </div>
   )
@@ -772,23 +726,22 @@ function AccountStep({
 
 function VerifyStep({ flow, email }) {
   return (
-    <div className="register-step-content register-completion">
-      <div className="register-step-icon" aria-hidden="true">
-        <CheckCircle2 />
-      </div>
+    <div className="register-step-content register-step-content--anchored register-completion">
       <h1>Check your email.</h1>
       <p className="register-intro">
         We sent a confirmation link to <strong>{email}</strong>. Confirm it,
         then log in to continue where you left off.
       </p>
-      <Link
-        className="register-submit"
-        to="/login"
-        state={{ from: flow.destination || undefined }}
-      >
-        Go to login
-        <ArrowRight aria-hidden="true" />
-      </Link>
+      <div className="register-step-actions">
+        <Link
+          className="register-submit"
+          to="/login"
+          state={{ from: flow.destination || undefined }}
+        >
+          Go to login
+          <ArrowRight aria-hidden="true" />
+        </Link>
+      </div>
     </div>
   )
 }
@@ -801,10 +754,7 @@ function ConfirmLocationStep({
   onContinue,
 }) {
   return (
-    <div className="register-step-content">
-      <div className="register-step-icon" aria-hidden="true">
-        <MapPin />
-      </div>
+    <div className="register-step-content register-step-content--anchored">
       <h1>Confirm your location.</h1>
       <p className="register-intro">
         Keep the suburb you chose earlier or change it before continuing.
@@ -836,17 +786,19 @@ function ConfirmLocationStep({
           {error}
         </div>
       )}
-      <button
-        className="register-submit"
-        type="button"
-        onClick={onContinue}
-        disabled={isSubmitting}
-      >
-        {isSubmitting
-          ? 'Saving your location…'
-          : `Continue to ${destinationLabel(flow.destination)}`}
-        {!isSubmitting && <ArrowRight aria-hidden="true" />}
-      </button>
+      <div className="register-step-actions">
+        <button
+          className="register-submit"
+          type="button"
+          onClick={onContinue}
+          disabled={isSubmitting}
+        >
+          {isSubmitting
+            ? 'Saving your location…'
+            : `Continue to ${destinationLabel(flow.destination)}`}
+          {!isSubmitting && <ArrowRight aria-hidden="true" />}
+        </button>
+      </div>
     </div>
   )
 }

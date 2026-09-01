@@ -166,20 +166,29 @@
   width: 100%;
 }
 
-.register-step-icon {
-  width: 44px;
-  height: 44px;
-  margin-bottom: 22px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  background: var(--auth-accent-soft);
-  color: var(--auth-accent-strong);
-}
+@media (min-width: 501px) {
+  .register-form-panel {
+    display: flex;
+    flex-direction: column;
+  }
 
-.register-step-icon svg {
-  width: 20px;
-  height: 20px;
+  .register-form-panel--slide {
+    height: 690px;
+  }
+
+  .register-step-content--anchored {
+    min-height: 0;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+
+  .register-step-actions {
+    min-height: 120px;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 .register-eyebrow {
@@ -313,13 +322,13 @@
 }
 
 .register-outcomes {
-  margin: 28px 0 8px;
+  margin: 0 0 8px;
   display: grid;
   gap: 12px;
 }
 
 .register-outcomes > div {
-  padding: 14px 0;
+  padding: 8px 0;
   border-bottom: 1px solid var(--auth-border);
   display: flex;
   align-items: flex-start;
@@ -352,74 +361,6 @@
   color: var(--auth-muted);
   font-size: 12px;
   line-height: 1.45;
-}
-
-.register-choice-actions {
-  margin-top: 28px;
-  display: grid;
-  gap: 10px;
-}
-
-.register-choice-actions > a,
-.register-choice-actions > button {
-  width: 100%;
-  min-height: 74px;
-  padding: 13px 14px;
-  border: 1px solid var(--auth-border);
-  border-radius: 10px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 12px;
-  text-align: left;
-  text-decoration: none;
-  background: var(--auth-surface-soft);
-  color: var(--auth-ink);
-  cursor: pointer;
-  transition:
-    border-color 180ms ease,
-    background-color 180ms ease,
-    transform 180ms ease;
-}
-
-.register-choice-actions > a:hover,
-.register-choice-actions > button:hover {
-  border-color: #aeb9d9;
-  background: var(--auth-accent-soft);
-}
-
-.register-choice-actions > a:active,
-.register-choice-actions > button:active {
-  transform: translateY(1px);
-}
-
-.register-choice-actions > a > svg:first-child,
-.register-choice-actions > button > svg:first-child {
-  width: 20px;
-  height: 20px;
-  color: var(--auth-accent-strong);
-}
-
-.register-choice-actions > a > svg:last-child,
-.register-choice-actions > button > svg:last-child {
-  width: 16px;
-  height: 16px;
-  color: var(--auth-muted);
-}
-
-.register-choice-actions span {
-  display: grid;
-  gap: 4px;
-}
-
-.register-choice-actions strong {
-  font-size: 14px;
-}
-
-.register-choice-actions small {
-  color: var(--auth-muted);
-  font-size: 11px;
-  line-height: 1.4;
 }
 
 .register-intent {
@@ -647,8 +588,6 @@
 .register-intent-options button:focus-visible,
 .register-back:focus-visible,
 .register-text-action:focus-visible,
-.register-choice-actions > a:focus-visible,
-.register-choice-actions > button:focus-visible,
 .register-google:focus-visible,
 .register-password-wrap button:focus-visible,
 .register-submit:focus-visible,
@@ -811,6 +750,10 @@ a.register-submit {
 }
 
 @media (max-width: 500px) {
+  .register-form-panel--slide {
+    height: auto;
+  }
+
   .register-intent-options {
     grid-template-columns: 1fr;
   }

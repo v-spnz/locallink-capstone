@@ -108,8 +108,9 @@ test('suburb names take priority over broader local board districts', () => {
 })
 
 test('registration progressively introduces value before identity creation', async () => {
-  const [register, protectedRoute] = await Promise.all([
+  const [register, registerStyles, protectedRoute] = await Promise.all([
     read('../src/pages/auth/RegisterPage.jsx'),
+    read('../src/pages/auth/RegisterPage.css'),
     read('../src/auth/ProtectedRoute.jsx'),
   ])
 
@@ -117,7 +118,6 @@ test('registration progressively introduces value before identity creation', asy
     'WelcomeStep',
     'LocationStep',
     'HowItWorksStep',
-    'ChoiceStep',
     'AccountStep',
     'ConfirmLocationStep',
   ]) {
@@ -128,13 +128,30 @@ test('registration progressively introduces value before identity creation', asy
   assert.match(register, /provider: 'google'/)
   assert.match(register, /saveCustomerLocation/)
   assert.equal(register.match(/searchType="suburb"/g)?.length, 2)
+  assert.doesNotMatch(register, /register-step-icon/)
+  assert.equal(register.match(/className="register-step-actions"/g)?.length, 5)
+  assert.match(register, /register-step-content--anchored/)
+  assert.match(registerStyles, /@media \(min-width: 501px\)/)
+  assert.match(
+    registerStyles,
+    /\.register-form-panel--slide\s*{\s*height: 690px/,
+  )
+  assert.match(registerStyles, /\.register-outcomes\s*{\s*margin: 0 0 8px/)
+  assert.doesNotMatch(register, /function ChoiceStep/)
+  assert.match(
+    register,
+    /HowItWorksStep onContinue=\{\(\) => setStep\('account'\)\}/,
+  )
   assert.match(register, /flow\.destination \|\| '\/home'/)
   assert.match(protectedRoute, /to="\/register"/)
-  assert.match(protectedRoute, /startAt: 'choice'/)
+  assert.match(protectedRoute, /startAt: 'account'/)
 })
 
 test('business onboarding separates basics, tools, conditional setup, and review', async () => {
-  const onboarding = await read('../src/pages/business/BusinessOnboarding.jsx')
+  const [onboarding, onboardingStyles] = await Promise.all([
+    read('../src/pages/business/BusinessOnboarding.jsx'),
+    read('../src/pages/business/BusinessOnboarding.css'),
+  ])
 
   for (const stage of [
     'BusinessBasicsStep',
@@ -147,5 +164,12 @@ test('business onboarding separates basics, tools, conditional setup, and review
 
   assert.match(onboarding, /p_locations/)
   assert.match(onboarding, /locations: \[\]/)
+  assert.match(onboarding, /locations: \[address\]/)
+  assert.doesNotMatch(onboarding, /\[\.\.\.current\.locations, address\]/)
+  assert.match(onboarding, /function continueSetup\(event\)/)
+  assert.match(onboarding, /event\?\.preventDefault\(\)/)
+  assert.match(onboarding, /if \(step !== 'review'\)/)
+  assert.match(onboarding, /key="finish-business-setup"/)
+  assert.match(onboardingStyles, /padding-left: 44px/)
   assert.match(onboarding, /clearRegistrationFlow/)
 })
