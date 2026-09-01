@@ -1,4 +1,9 @@
 import { supabase } from '../../../lib/supabase'
+import {
+  getStoredGuestLocation,
+  storeGuestLocation,
+} from '../../onboarding/registrationFlow'
+import { toSuburbLocation } from '../suburb'
 
 function addressParams(address) {
   return {
@@ -14,7 +19,7 @@ function addressParams(address) {
 }
 
 function mapDatabaseLocation(location) {
-  return {
+  return toSuburbLocation({
     name: location.address_line1 || location.formatted_address,
     formattedAddress: location.formatted_address,
     addressLine1: location.address_line1 || location.formatted_address,
@@ -24,10 +29,16 @@ function mapDatabaseLocation(location) {
     countryCode: location.country_code || 'nz',
     latitude: Number(location.latitude),
     longitude: Number(location.longitude),
-  }
+  })
 }
 
 export async function fetchCustomerLocation() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (!session) return getStoredGuestLocation()
+
   const { data, error } = await supabase.rpc('get_my_location')
   if (error) throw error
   const location = data?.[0]
@@ -35,9 +46,19 @@ export async function fetchCustomerLocation() {
 }
 
 export async function saveCustomerLocation(address) {
+  const suburb = storeGuestLocation(address)
+
+  if (!suburb) throw new Error('Choose a New Zealand suburb.')
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (!session) return
+
   const { error } = await supabase.rpc(
     'set_customer_location',
-    addressParams(address),
+    addressParams(suburb),
   )
   if (error) throw error
 }

@@ -2,10 +2,13 @@ import { LocateFixed, MapPin, Search } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import {
   autocompleteAddresses,
+  autocompleteSuburbs,
   geocodeAddress,
+  geocodeSuburb,
   getCurrentBrowserLocation,
   reverseGeocode,
 } from '../api/geoapify'
+import { toSuburbLocation } from '../suburb'
 import '../location.css'
 
 export default function AddressAutocomplete({
@@ -16,6 +19,7 @@ export default function AddressAutocomplete({
   bias,
   disabled = false,
   showCurrentLocation = true,
+  searchType = 'address',
   onSelect,
 }) {
   const [query, setQuery] = useState(value)
@@ -33,7 +37,9 @@ export default function AddressAutocomplete({
       setIsSearching(true)
       setError('')
       try {
-        const results = await autocompleteAddresses(query.trim(), {
+        const search =
+          searchType === 'suburb' ? autocompleteSuburbs : autocompleteAddresses
+        const results = await search(query.trim(), {
           signal: controller.signal,
           bias,
         })
@@ -51,17 +57,20 @@ export default function AddressAutocomplete({
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [bias, query, value])
+  }, [bias, query, searchType, value])
 
   async function selectSuggestion(suggestion) {
     setIsSearching(true)
     setError('')
     try {
-      const address = await geocodeAddress(suggestion.formattedAddress)
-      setQuery(address.formattedAddress)
+      const location =
+        searchType === 'suburb'
+          ? suggestion
+          : await geocodeAddress(suggestion.formattedAddress)
+      setQuery(location.formattedAddress)
       setSuggestions([])
       setIsOpen(false)
-      onSelect(address)
+      onSelect(location)
     } catch (selectionError) {
       setError(selectionError.message)
     } finally {
@@ -76,11 +85,22 @@ export default function AddressAutocomplete({
       const coordinates = await getCurrentBrowserLocation()
       let address
       try {
-        address = await reverseGeocode(
+        const reverseGeocoded = await reverseGeocode(
           coordinates.latitude,
           coordinates.longitude,
         )
+        if (searchType === 'suburb') {
+          const suburb = toSuburbLocation(reverseGeocoded)
+          address = await geocodeSuburb(suburb.formattedAddress)
+        } else {
+          address = reverseGeocoded
+        }
       } catch {
+        if (searchType === 'suburb') {
+          throw new Error(
+            'We could not identify your suburb. Search for it instead.',
+          )
+        }
         address = {
           ...coordinates,
           name: 'Current location',
@@ -103,12 +123,21 @@ export default function AddressAutocomplete({
     }
   }
 
+  function closeResultsOnBlur(event) {
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      setIsOpen(false)
+    }
+  }
+
   return (
     <div className="address-autocomplete">
       <label className="form-label" htmlFor={id}>
         {label}
       </label>
-      <div className="address-autocomplete-input-wrap">
+      <div
+        className="address-autocomplete-input-wrap"
+        onBlur={closeResultsOnBlur}
+      >
         <Search aria-hidden="true" size={17} />
         <input
           autoComplete="off"
@@ -124,27 +153,35 @@ export default function AddressAutocomplete({
           placeholder={placeholder}
         />
         {isSearching && <span className="address-autocomplete-spinner" />}
+        {isOpen && suggestions.length > 0 && (
+          <div className="address-autocomplete-results" role="listbox">
+            {suggestions.map((suggestion) => (
+              <button
+                key={`${suggestion.placeId}-${suggestion.formattedAddress}`}
+                type="button"
+                role="option"
+                aria-selected="false"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => selectSuggestion(suggestion)}
+              >
+                <MapPin aria-hidden="true" size={17} />
+                <span>
+                  <strong>
+                    {searchType === 'suburb'
+                      ? suggestion.suburb || suggestion.city
+                      : suggestion.addressLine1}
+                  </strong>
+                  <small>
+                    {searchType === 'suburb'
+                      ? suggestion.city || 'New Zealand'
+                      : suggestion.formattedAddress}
+                  </small>
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-      {isOpen && suggestions.length > 0 && (
-        <div className="address-autocomplete-results" role="listbox">
-          {suggestions.map((suggestion) => (
-            <button
-              key={`${suggestion.placeId}-${suggestion.formattedAddress}`}
-              type="button"
-              role="option"
-              aria-selected="false"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => selectSuggestion(suggestion)}
-            >
-              <MapPin aria-hidden="true" size={17} />
-              <span>
-                <strong>{suggestion.addressLine1}</strong>
-                <small>{suggestion.formattedAddress}</small>
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
       <div className="address-autocomplete-footer">
         {showCurrentLocation && (
           <button
@@ -157,7 +194,11 @@ export default function AddressAutocomplete({
             Use my current location
           </button>
         )}
-        <span>Addresses by Geoapify</span>
+        <span>
+          {searchType === 'suburb'
+            ? 'Suburbs by Geoapify'
+            : 'Addresses by Geoapify'}
+        </span>
       </div>
       {error && (
         <div className="form-error" role="alert">

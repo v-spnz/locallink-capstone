@@ -1,18 +1,24 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
+  ArrowLeft,
   ArrowRight,
   BadgePercent,
   BriefcaseBusiness,
   Check,
   CheckCircle2,
-  Circle,
   Gift,
+  MapPin,
 } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import AuthPageHeader from '../../components/auth/AuthPageHeader'
 import useBusiness from '../../business/useBusiness'
 import { supabase } from '../../lib/supabase'
 import AddressAutocomplete from '../../features/location/components/AddressAutocomplete'
+import { saveCustomerLocation } from '../../features/location/api/locations'
+import {
+  clearRegistrationFlow,
+  readRegistrationFlow,
+} from '../../features/onboarding/registrationFlow'
 import './BusinessOnboarding.css'
 
 const CAPABILITY_OPTIONS = [
@@ -36,6 +42,13 @@ const CAPABILITY_OPTIONS = [
   },
 ]
 
+const SETUP_STEPS = [
+  { key: 'basics', label: 'Business basics' },
+  { key: 'capabilities', label: 'Select tools' },
+  { key: 'setup', label: 'Conditional setup' },
+  { key: 'review', label: 'Review and finish' },
+]
+
 function listFromInput(value) {
   return [
     ...new Set(
@@ -50,7 +63,9 @@ function listFromInput(value) {
 export default function BusinessOnboarding() {
   const navigate = useNavigate()
   const { membership, isLoading, refreshBusiness } = useBusiness()
-  const [form, setForm] = useState({
+  const [registrationFlow] = useState(() => readRegistrationFlow())
+  const [step, setStep] = useState('basics')
+  const [form, setForm] = useState(() => ({
     businessName: '',
     description: '',
     deals: true,
@@ -61,12 +76,21 @@ export default function BusinessOnboarding() {
     categories: '',
     areas: '',
     locations: [],
-  })
+  }))
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const selectedCapabilityCount = CAPABILITY_OPTIONS.filter(
     ({ key }) => form[key],
   ).length
+  const currentStepIndex = SETUP_STEPS.findIndex((item) => item.key === step)
+
+  useEffect(() => {
+    if (!registrationFlow.location) return
+
+    void saveCustomerLocation(registrationFlow.location).catch(() => {
+      // Business setup keeps the location even if profile syncing is delayed.
+    })
+  }, [registrationFlow.location])
 
   function updateField(event) {
     const { name, value } = event.target
@@ -77,40 +101,66 @@ export default function BusinessOnboarding() {
     setForm((current) => ({ ...current, [key]: !current[key] }))
   }
 
+  function validateStep(stepToValidate) {
+    if (stepToValidate === 'basics' && form.businessName.trim().length < 2) {
+      return 'Enter your business name.'
+    }
+
+    if (stepToValidate === 'capabilities' && selectedCapabilityCount === 0) {
+      return 'Select at least one way to use LocalLink.'
+    }
+
+    if (stepToValidate === 'setup') {
+      if (form.deals && form.locations.length === 0) {
+        return 'Enter at least one location that can participate in deals.'
+      }
+
+      if (
+        form.serviceMarketplace &&
+        (form.serviceDescription.trim().length < 10 ||
+          !form.availability.trim() ||
+          listFromInput(form.categories).length === 0 ||
+          listFromInput(form.areas).length === 0)
+      ) {
+        return 'Complete all Service Marketplace details.'
+      }
+    }
+
+    return ''
+  }
+
+  function continueSetup() {
+    const validationError = validateStep(step)
+    setError(validationError)
+    if (validationError) return
+
+    const nextStep = SETUP_STEPS[currentStepIndex + 1]
+    if (nextStep) setStep(nextStep.key)
+  }
+
+  function goBack() {
+    setError('')
+    const previousStep = SETUP_STEPS[currentStepIndex - 1]
+    if (previousStep) setStep(previousStep.key)
+  }
+
   async function handleSubmit(event) {
     event.preventDefault()
     setError('')
 
-    if (form.businessName.trim().length < 2) {
-      setError('Enter your business name.')
-      return
-    }
+    const validationError =
+      validateStep('basics') ||
+      validateStep('capabilities') ||
+      validateStep('setup')
 
-    if (!form.deals && !form.loyalty && !form.serviceMarketplace) {
-      setError('Select at least one way to use LocalLink.')
+    if (validationError) {
+      setError(validationError)
       return
     }
 
     const categories = listFromInput(form.categories)
     const areas = listFromInput(form.areas)
     const locations = form.locations
-
-    if (form.deals && locations.length === 0) {
-      setError('Enter at least one location that can participate in deals.')
-      return
-    }
-
-    if (
-      form.serviceMarketplace &&
-      (form.serviceDescription.trim().length < 10 ||
-        !form.availability.trim() ||
-        categories.length === 0 ||
-        areas.length === 0)
-    ) {
-      setError('Complete all Service Marketplace details.')
-      return
-    }
-
     setIsSubmitting(true)
 
     const { error: createError } = await supabase.rpc(
@@ -152,6 +202,7 @@ export default function BusinessOnboarding() {
     }
 
     await refreshBusiness()
+    clearRegistrationFlow()
     navigate('/business/analytics', { replace: true })
   }
 
@@ -192,226 +243,71 @@ export default function BusinessOnboarding() {
           <div className="business-onboarding-mark" aria-hidden="true">
             <BriefcaseBusiness />
           </div>
-          <h1>Bring your business to LocalLink.</h1>
-          <div className="business-onboarding-summary" aria-live="polite">
-            <strong>Setup summary</strong>
-            <span className={form.businessName.trim() ? 'is-complete' : ''}>
-              {form.businessName.trim() ? (
-                <CheckCircle2 aria-hidden="true" />
-              ) : (
-                <Circle aria-hidden="true" />
-              )}
-              {form.businessName.trim()
-                ? 'Business name added'
-                : 'Business name required'}
-            </span>
-            <span className={selectedCapabilityCount > 0 ? 'is-complete' : ''}>
-              {selectedCapabilityCount > 0 ? (
-                <CheckCircle2 aria-hidden="true" />
-              ) : (
-                <Circle aria-hidden="true" />
-              )}
-              {selectedCapabilityCount}{' '}
-              {selectedCapabilityCount === 1
-                ? 'tool selected'
-                : 'tools selected'}
-            </span>
-            {form.deals && (
-              <span className={form.locations.length > 0 ? 'is-complete' : ''}>
-                {form.locations.length > 0 ? (
-                  <CheckCircle2 aria-hidden="true" />
-                ) : (
-                  <Circle aria-hidden="true" />
-                )}
-                {form.locations.length > 0
-                  ? `${form.locations.length} deal ${form.locations.length === 1 ? 'location' : 'locations'} added`
-                  : 'Deal location required'}
-              </span>
-            )}
-          </div>
-          <Link to="/home">Continue with personal access instead</Link>
+          <h1>Set up your business.</h1>
+          <p className="business-onboarding-intro-copy">
+            Add only the details needed for the LocalLink tools you choose.
+          </p>
+          <nav
+            className="business-onboarding-progress"
+            aria-label="Business setup progress"
+          >
+            {SETUP_STEPS.map((setupStep, index) => (
+              <button
+                type="button"
+                className={
+                  index < currentStepIndex
+                    ? 'is-complete'
+                    : index === currentStepIndex
+                      ? 'is-current'
+                      : ''
+                }
+                onClick={() =>
+                  index < currentStepIndex && setStep(setupStep.key)
+                }
+                disabled={index > currentStepIndex}
+                key={setupStep.key}
+              >
+                <span aria-hidden="true">
+                  {index < currentStepIndex ? <Check /> : index + 1}
+                </span>
+                {setupStep.label}
+              </button>
+            ))}
+          </nav>
+          <Link to="/home" onClick={clearRegistrationFlow}>
+            Continue with personal access instead
+          </Link>
         </section>
 
         <section className="business-onboarding-card">
           <form onSubmit={handleSubmit} noValidate>
-            <div className="business-onboarding-section">
-              <span className="business-step">01</span>
-              <div>
-                <h2>Business details</h2>
-                <p>Tell customers who they will be dealing with.</p>
-              </div>
-            </div>
-
-            <label className="business-onboarding-field">
-              <span>Business name</span>
-              <input
-                name="businessName"
-                value={form.businessName}
-                onChange={updateField}
-                placeholder="e.g. Morgan Plumbing"
-                disabled={isSubmitting}
-                required
-              />
-            </label>
-
-            <label className="business-onboarding-field">
-              <span>Business description</span>
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={updateField}
-                placeholder="A short introduction to your business"
-                rows="3"
-                maxLength="1000"
-                disabled={isSubmitting}
-              />
-              <small>{form.description.length} of 1,000 characters</small>
-            </label>
-
-            <div className="business-onboarding-section capability-heading">
-              <span className="business-step">02</span>
-              <div>
-                <h2>How will you use LocalLink?</h2>
-                <p>Select one or more capabilities.</p>
-              </div>
-            </div>
-
-            <div className="business-capability-options">
-              {CAPABILITY_OPTIONS.map((option) => {
-                const Icon = option.icon
-                const selected = form[option.key]
-
-                return (
-                  <button
-                    key={option.key}
-                    type="button"
-                    className={selected ? 'selected' : ''}
-                    onClick={() => toggleCapability(option.key)}
-                    aria-pressed={selected}
-                    disabled={isSubmitting}
-                  >
-                    <span className="business-capability-icon">
-                      <Icon aria-hidden="true" />
-                    </span>
-                    <span>
-                      <strong>{option.label}</strong>
-                      <small>{option.description}</small>
-                    </span>
-                    <Check className="business-capability-check" />
-                  </button>
-                )
-              })}
-            </div>
-            <p className="business-capability-selection-count" role="status">
-              {selectedCapabilityCount}{' '}
-              {selectedCapabilityCount === 1
-                ? 'tool selected'
-                : 'tools selected'}
-            </p>
-
-            {form.deals && (
-              <div className="business-onboarding-locations">
-                <AddressAutocomplete
-                  id="business-location"
-                  label="Business location"
-                  placeholder="Search for your shop, office, or service address"
-                  disabled={isSubmitting}
-                  onSelect={addLocation}
-                />
-                {form.locations.length > 0 && (
-                  <div className="business-onboarding-location-list">
-                    {form.locations.map((businessLocation) => (
-                      <div key={businessLocation.formattedAddress}>
-                        <span>{businessLocation.formattedAddress}</span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            removeLocation(businessLocation.formattedAddress)
-                          }
-                          disabled={isSubmitting}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <small>
-                  Add every physical location that may participate in a deal.
-                </small>
-              </div>
+            {step === 'basics' && (
+              <BusinessBasicsStep form={form} onChange={updateField} />
             )}
 
-            {form.serviceMarketplace && (
-              <div className="business-service-setup">
-                <div className="business-onboarding-section">
-                  <span className="business-step">03</span>
-                  <div>
-                    <h2>Service Marketplace details</h2>
-                    <p>
-                      Used to match your business with suitable local leads.
-                    </p>
-                  </div>
-                </div>
+            {step === 'capabilities' && (
+              <CapabilitiesStep
+                form={form}
+                selectedCount={selectedCapabilityCount}
+                onToggle={toggleCapability}
+              />
+            )}
 
-                <label className="business-onboarding-field">
-                  <span>Service description</span>
-                  <textarea
-                    name="serviceDescription"
-                    value={form.serviceDescription}
-                    onChange={updateField}
-                    placeholder="Describe the services you provide"
-                    rows="3"
-                    disabled={isSubmitting}
-                    required
-                  />
-                </label>
+            {step === 'setup' && (
+              <ConditionalSetupStep
+                form={form}
+                onChange={updateField}
+                onAddLocation={addLocation}
+                onRemoveLocation={removeLocation}
+              />
+            )}
 
-                <div className="business-onboarding-field-grid">
-                  <label className="business-onboarding-field">
-                    <span>Service categories</span>
-                    <input
-                      name="categories"
-                      value={form.categories}
-                      onChange={updateField}
-                      placeholder="Plumbing, Roofing"
-                      disabled={isSubmitting}
-                      required
-                    />
-                    <small>Separate multiple categories with commas.</small>
-                  </label>
-
-                  <label className="business-onboarding-field">
-                    <span>Service areas</span>
-                    <input
-                      name="areas"
-                      value={form.areas}
-                      onChange={updateField}
-                      placeholder="Takapuna, Albany"
-                      disabled={isSubmitting}
-                      required
-                    />
-                    <small>Separate multiple areas with commas.</small>
-                  </label>
-                </div>
-
-                <label className="business-onboarding-field">
-                  <span>Availability</span>
-                  <input
-                    name="availability"
-                    value={form.availability}
-                    onChange={updateField}
-                    placeholder="e.g. Monday-Friday, 8am-5pm"
-                    disabled={isSubmitting}
-                    required
-                  />
-                </label>
-
-                <p className="business-verification-note">
-                  Service Marketplace verification starts as pending. Required
-                  evidence and approval steps can be added once confirmed.
-                </p>
-              </div>
+            {step === 'review' && (
+              <ReviewStep
+                form={form}
+                onEdit={setStep}
+                selectedCount={selectedCapabilityCount}
+              />
             )}
 
             {error && (
@@ -423,17 +319,316 @@ export default function BusinessOnboarding() {
               </div>
             )}
 
-            <button
-              className="business-onboarding-submit"
-              type="submit"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Creating business…' : 'Open business dashboard'}
-              {!isSubmitting && <ArrowRight aria-hidden="true" />}
-            </button>
+            <div className="business-onboarding-actions">
+              {currentStepIndex > 0 && (
+                <button
+                  className="business-onboarding-back"
+                  type="button"
+                  onClick={goBack}
+                  disabled={isSubmitting}
+                >
+                  <ArrowLeft aria-hidden="true" />
+                  Back
+                </button>
+              )}
+
+              {step === 'review' ? (
+                <button
+                  className="business-onboarding-submit"
+                  type="submit"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Creating business…' : 'Finish setup'}
+                  {!isSubmitting && <ArrowRight aria-hidden="true" />}
+                </button>
+              ) : (
+                <button
+                  className="business-onboarding-submit"
+                  type="button"
+                  onClick={continueSetup}
+                >
+                  Continue
+                  <ArrowRight aria-hidden="true" />
+                </button>
+              )}
+            </div>
           </form>
         </section>
       </main>
+    </div>
+  )
+}
+
+function BusinessBasicsStep({ form, onChange }) {
+  return (
+    <div className="business-onboarding-stage">
+      <header>
+        <h2>Business basics</h2>
+        <p>Tell customers who they will be dealing with.</p>
+      </header>
+
+      <label className="business-onboarding-field">
+        <span>Business name</span>
+        <input
+          name="businessName"
+          value={form.businessName}
+          onChange={onChange}
+          placeholder="e.g. Morgan Plumbing"
+          required
+        />
+      </label>
+
+      <label className="business-onboarding-field">
+        <span>Short description</span>
+        <textarea
+          name="description"
+          value={form.description}
+          onChange={onChange}
+          placeholder="What does your business help people with?"
+          rows="5"
+          maxLength="1000"
+        />
+        <small>{form.description.length} of 1,000 characters</small>
+      </label>
+    </div>
+  )
+}
+
+function CapabilitiesStep({ form, selectedCount, onToggle }) {
+  return (
+    <div className="business-onboarding-stage">
+      <header>
+        <h2>Select your LocalLink tools</h2>
+        <p>Choose one or more. You can change these later.</p>
+      </header>
+
+      <div className="business-capability-options">
+        {CAPABILITY_OPTIONS.map((option) => {
+          const Icon = option.icon
+          const selected = form[option.key]
+
+          return (
+            <button
+              key={option.key}
+              type="button"
+              className={selected ? 'selected' : ''}
+              onClick={() => onToggle(option.key)}
+              aria-pressed={selected}
+            >
+              <span className="business-capability-icon">
+                <Icon aria-hidden="true" />
+              </span>
+              <span>
+                <strong>{option.label}</strong>
+                <small>{option.description}</small>
+              </span>
+              <Check className="business-capability-check" />
+            </button>
+          )
+        })}
+      </div>
+      <p className="business-capability-selection-count" role="status">
+        {selectedCount}{' '}
+        {selectedCount === 1 ? 'tool selected' : 'tools selected'}
+      </p>
+    </div>
+  )
+}
+
+function ConditionalSetupStep({
+  form,
+  onChange,
+  onAddLocation,
+  onRemoveLocation,
+}) {
+  const needsExtraSetup = form.deals || form.serviceMarketplace
+
+  return (
+    <div className="business-onboarding-stage">
+      <header>
+        <h2>Complete the required setup</h2>
+        <p>Only the tools you selected ask for additional information.</p>
+      </header>
+
+      {!needsExtraSetup && (
+        <div className="business-onboarding-no-setup">
+          <CheckCircle2 aria-hidden="true" />
+          <div>
+            <strong>No extra setup needed</strong>
+            <p>Your selected tools are ready for review.</p>
+          </div>
+        </div>
+      )}
+
+      {form.deals && (
+        <section className="business-conditional-section">
+          <div className="business-conditional-heading">
+            <BadgePercent aria-hidden="true" />
+            <div>
+              <h3>Deal locations</h3>
+              <p>Add each shop, office, or service address using deals.</p>
+            </div>
+          </div>
+          <AddressAutocomplete
+            id="business-location"
+            label="Business location"
+            placeholder="Search for your shop, office, or service address"
+            onSelect={onAddLocation}
+          />
+          {form.locations.length > 0 && (
+            <div className="business-onboarding-location-list">
+              {form.locations.map((businessLocation) => (
+                <div key={businessLocation.formattedAddress}>
+                  <MapPin aria-hidden="true" />
+                  <span>{businessLocation.formattedAddress}</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onRemoveLocation(businessLocation.formattedAddress)
+                    }
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {form.serviceMarketplace && (
+        <section className="business-conditional-section">
+          <div className="business-conditional-heading">
+            <BriefcaseBusiness aria-hidden="true" />
+            <div>
+              <h3>Service Marketplace</h3>
+              <p>These details match your business with suitable leads.</p>
+            </div>
+          </div>
+
+          <label className="business-onboarding-field">
+            <span>Service description</span>
+            <textarea
+              name="serviceDescription"
+              value={form.serviceDescription}
+              onChange={onChange}
+              placeholder="Describe the services you provide"
+              rows="4"
+              required
+            />
+          </label>
+
+          <div className="business-onboarding-field-grid">
+            <label className="business-onboarding-field">
+              <span>Service categories</span>
+              <input
+                name="categories"
+                value={form.categories}
+                onChange={onChange}
+                placeholder="Plumbing, Roofing"
+                required
+              />
+              <small>Separate categories with commas.</small>
+            </label>
+
+            <label className="business-onboarding-field">
+              <span>Service areas</span>
+              <input
+                name="areas"
+                value={form.areas}
+                onChange={onChange}
+                placeholder="Takapuna, Albany"
+                required
+              />
+              <small>Separate areas with commas.</small>
+            </label>
+          </div>
+
+          <label className="business-onboarding-field">
+            <span>Availability</span>
+            <input
+              name="availability"
+              value={form.availability}
+              onChange={onChange}
+              placeholder="e.g. Monday-Friday, 8am-5pm"
+              required
+            />
+          </label>
+
+          <p className="business-verification-note">
+            Service Marketplace verification starts as pending. Evidence can be
+            supplied when the review process is confirmed.
+          </p>
+        </section>
+      )}
+    </div>
+  )
+}
+
+function ReviewStep({ form, onEdit, selectedCount }) {
+  const capabilities = CAPABILITY_OPTIONS.filter(({ key }) => form[key])
+
+  return (
+    <div className="business-onboarding-stage">
+      <header>
+        <h2>Review your business setup</h2>
+        <p>Check the details below before opening your dashboard.</p>
+      </header>
+
+      <div className="business-onboarding-review">
+        <section>
+          <div>
+            <h3>Business basics</h3>
+            <button type="button" onClick={() => onEdit('basics')}>
+              Edit
+            </button>
+          </div>
+          <strong>{form.businessName}</strong>
+          <p>{form.description || 'No description added.'}</p>
+        </section>
+
+        <section>
+          <div>
+            <h3>Enabled tools</h3>
+            <button type="button" onClick={() => onEdit('capabilities')}>
+              Edit
+            </button>
+          </div>
+          <p>
+            {selectedCount} {selectedCount === 1 ? 'tool' : 'tools'} selected
+          </p>
+          <div className="business-review-tools">
+            {capabilities.map((capability) => (
+              <span key={capability.key}>{capability.label}</span>
+            ))}
+          </div>
+        </section>
+
+        {(form.deals || form.serviceMarketplace) && (
+          <section>
+            <div>
+              <h3>Additional setup</h3>
+              <button type="button" onClick={() => onEdit('setup')}>
+                Edit
+              </button>
+            </div>
+            {form.deals && (
+              <p>
+                {form.locations.length} deal{' '}
+                {form.locations.length === 1 ? 'location' : 'locations'}
+              </p>
+            )}
+            {form.serviceMarketplace && (
+              <p>
+                {listFromInput(form.categories).length} service{' '}
+                {listFromInput(form.categories).length === 1
+                  ? 'category'
+                  : 'categories'}
+              </p>
+            )}
+          </section>
+        )}
+      </div>
     </div>
   )
 }

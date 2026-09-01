@@ -177,7 +177,7 @@
 }
 
 .login-field input::placeholder {
-  color: #778398;
+  color: var(--auth-muted);
 }
 
 .login-field input:disabled {
