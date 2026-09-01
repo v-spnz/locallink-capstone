@@ -1,10 +1,12 @@
+import { toSuburbLocation } from '../suburb.js'
+
 const GEOAPIFY_BASE_URL = 'https://api.geoapify.com/v1/geocode'
 
 function apiKey() {
   const key = import.meta.env.VITE_GEOAPIFY_API_KEY
   if (!key) {
     throw new Error(
-      'Address search is not configured. Add VITE_GEOAPIFY_API_KEY to your environment.',
+      'Location search is not configured. Add VITE_GEOAPIFY_API_KEY to your environment.',
     )
   }
   return key
@@ -15,8 +17,10 @@ function normalizeAddress(result) {
     name: result.name || result.address_line1 || result.formatted,
     formattedAddress: result.formatted,
     addressLine1: result.address_line1 || result.formatted,
-    suburb: result.suburb || result.district || '',
+    suburb: result.suburb || '',
+    district: result.district || '',
     city: result.city || result.county || '',
+    resultType: result.result_type || '',
     postcode: result.postcode || '',
     countryCode: result.country_code || 'nz',
     latitude: Number(result.lat),
@@ -34,7 +38,7 @@ async function requestGeoapify(path, params, signal) {
   const response = await fetch(`${GEOAPIFY_BASE_URL}/${path}?${query}`, {
     signal,
   })
-  if (!response.ok) throw new Error('Unable to search for this address.')
+  if (!response.ok) throw new Error('Unable to search for this location.')
   return response.json()
 }
 
@@ -53,6 +57,37 @@ export async function autocompleteAddresses(text, { signal, bias } = {}) {
   return (data.results || []).map(normalizeAddress)
 }
 
+export async function autocompleteSuburbs(text, options = {}) {
+  const data = await requestGeoapify(
+    'autocomplete',
+    {
+      text,
+      type: 'city',
+      filter: 'countrycode:nz',
+      lang: 'en',
+      limit: '8',
+      ...(options.bias
+        ? {
+            bias: `proximity:${options.bias.longitude},${options.bias.latitude}`,
+          }
+        : {}),
+    },
+    options.signal,
+  )
+  const seen = new Set()
+
+  return (data.results || []).reduce((suburbs, result) => {
+    const suburb = toSuburbLocation(normalizeAddress(result))
+    const key = suburb?.formattedAddress.toLocaleLowerCase()
+
+    if (!suburb || seen.has(key)) return suburbs
+
+    seen.add(key)
+    suburbs.push(suburb)
+    return suburbs
+  }, [])
+}
+
 export async function geocodeAddress(formattedAddress, { signal } = {}) {
   const data = await requestGeoapify(
     'search',
@@ -67,6 +102,25 @@ export async function geocodeAddress(formattedAddress, { signal } = {}) {
   const result = data.results?.[0]
   if (!result) throw new Error('Choose a complete New Zealand address.')
   return normalizeAddress(result)
+}
+
+export async function geocodeSuburb(formattedSuburb, { signal } = {}) {
+  const data = await requestGeoapify(
+    'search',
+    {
+      text: formattedSuburb,
+      type: 'city',
+      filter: 'countrycode:nz',
+      lang: 'en',
+      limit: '1',
+    },
+    signal,
+  )
+  const result = data.results?.[0]
+  const suburb = result ? toSuburbLocation(normalizeAddress(result)) : null
+
+  if (!suburb) throw new Error('Choose a New Zealand suburb.')
+  return suburb
 }
 
 export async function reverseGeocode(latitude, longitude) {
@@ -95,7 +149,7 @@ export function getCurrentBrowserLocation() {
         }),
       (error) => {
         const messages = {
-          1: 'Location permission was denied. You can search for an address instead.',
+          1: 'Location permission was denied. You can search manually instead.',
           2: 'Your current location is unavailable.',
           3: 'Finding your current location timed out.',
         }

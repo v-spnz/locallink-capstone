@@ -5,9 +5,10 @@ import test from 'node:test'
 const read = (path) => readFile(new URL(path, import.meta.url), 'utf8')
 
 test('Geoapify autocomplete and geocoding are used for selected addresses', async () => {
-  const [api, component] = await Promise.all([
+  const [api, component, styles] = await Promise.all([
     read('../src/features/location/api/geoapify.js'),
     read('../src/features/location/components/AddressAutocomplete.jsx'),
+    read('../src/features/location/location.css'),
   ])
 
   assert.match(api, /v1\/geocode/)
@@ -16,7 +17,16 @@ test('Geoapify autocomplete and geocoding are used for selected addresses', asyn
   assert.match(api, /filter: 'countrycode:nz'/)
   assert.match(api, /VITE_GEOAPIFY_API_KEY/)
   assert.match(component, /geocodeAddress\(suggestion\.formattedAddress\)/)
+  assert.match(component, /searchType === 'suburb'\s+\? suggestion/)
+  assert.match(component, /onBlur={closeResultsOnBlur}/)
+  assert.match(component, /currentTarget\.contains\(event\.relatedTarget\)/)
   assert.match(component, /Addresses by Geoapify/)
+  assert.match(
+    styles,
+    /\.address-autocomplete-results\s*{[^}]*position:\s*absolute/s,
+  )
+  assert.match(styles, /top:\s*calc\(100% \+ 8px\)/)
+  assert.match(styles, /max-height:\s*min\(280px, 40vh\)/)
 })
 
 test('browser geolocation supports Use my current location', async () => {

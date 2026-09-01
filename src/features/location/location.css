@@ -35,15 +35,18 @@
 
 .address-autocomplete-results {
   position: absolute;
-  z-index: 1000;
-  top: calc(100% - 38px);
+  z-index: 10;
+  top: calc(100% + 8px);
   right: 0;
   left: 0;
-  overflow: hidden;
+  max-height: min(280px, 40vh);
+  overflow-x: hidden;
+  overflow-y: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--white);
   box-shadow: var(--shadow-md);
+  overscroll-behavior: contain;
 }
 
 .address-autocomplete-results button {
@@ -62,6 +65,17 @@
 
 .address-autocomplete-results button:hover {
   background: var(--blue-light);
+}
+
+.address-autocomplete-results button:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 3px solid color-mix(in srgb, var(--blue) 28%, transparent);
+  outline-offset: -3px;
+}
+
+.address-autocomplete-results button:last-child {
+  border-bottom: 0;
 }
 
 .address-autocomplete-results svg {

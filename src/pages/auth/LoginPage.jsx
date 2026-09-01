@@ -6,6 +6,10 @@ import loginLocalStreet from '../../assets/images/login-local-street.jpg'
 import { supabase } from '../../lib/supabase'
 import useAuth from '../../auth/useAuth'
 import { getDefaultAuthenticatedPath } from '../../business/businessAccess'
+import {
+  getRegistrationResumePath,
+  normaliseDestination,
+} from '../../features/onboarding/registrationFlow'
 import './LoginPage.css'
 
 export default function LoginPage() {
@@ -13,7 +17,7 @@ export default function LoginPage() {
   const location = useLocation()
   const { user, isLoading: isSessionLoading } = useAuth()
 
-  const requestedDestination = location.state?.from?.pathname ?? null
+  const requestedDestination = normaliseDestination(location.state?.from)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -30,6 +34,12 @@ export default function LoginPage() {
     async function resolveDestination() {
       if (!user) {
         setAuthenticatedDestination('')
+        return
+      }
+
+      const registrationResumePath = getRegistrationResumePath()
+      if (registrationResumePath) {
+        setAuthenticatedDestination(registrationResumePath)
         return
       }
 
@@ -71,7 +81,7 @@ export default function LoginPage() {
         return
       }
 
-      let nextPath = requestedDestination
+      let nextPath = getRegistrationResumePath() || requestedDestination
 
       if (!nextPath) {
         try {
@@ -228,7 +238,11 @@ export default function LoginPage() {
 
             <div className="login-register-row">
               <span>New to LocalLink?</span>
-              <Link to="/register" viewTransition>
+              <Link
+                to="/register"
+                state={{ from: location.state?.from, startAt: 'account' }}
+                viewTransition
+              >
                 Create an account
               </Link>
             </div>
