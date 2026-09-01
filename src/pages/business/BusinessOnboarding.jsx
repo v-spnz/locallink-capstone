@@ -129,7 +129,8 @@ export default function BusinessOnboarding() {
     return ''
   }
 
-  function continueSetup() {
+  function continueSetup(event) {
+    event?.preventDefault()
     const validationError = validateStep(step)
     setError(validationError)
     if (validationError) return
@@ -146,6 +147,12 @@ export default function BusinessOnboarding() {
 
   async function handleSubmit(event) {
     event.preventDefault()
+
+    if (step !== 'review') {
+      continueSetup()
+      return
+    }
+
     setError('')
 
     const validationError =
@@ -206,23 +213,17 @@ export default function BusinessOnboarding() {
     navigate('/business/analytics', { replace: true })
   }
 
-  function addLocation(address) {
+  function setBusinessLocation(address) {
     setForm((current) => ({
       ...current,
-      locations: current.locations.some(
-        (location) => location.formattedAddress === address.formattedAddress,
-      )
-        ? current.locations
-        : [...current.locations, address],
+      locations: [address],
     }))
   }
 
-  function removeLocation(formattedAddress) {
+  function clearBusinessLocation() {
     setForm((current) => ({
       ...current,
-      locations: current.locations.filter(
-        (location) => location.formattedAddress !== formattedAddress,
-      ),
+      locations: [],
     }))
   }
 
@@ -297,8 +298,8 @@ export default function BusinessOnboarding() {
               <ConditionalSetupStep
                 form={form}
                 onChange={updateField}
-                onAddLocation={addLocation}
-                onRemoveLocation={removeLocation}
+                onSetLocation={setBusinessLocation}
+                onClearLocation={clearBusinessLocation}
               />
             )}
 
@@ -334,6 +335,7 @@ export default function BusinessOnboarding() {
 
               {step === 'review' ? (
                 <button
+                  key="finish-business-setup"
                   className="business-onboarding-submit"
                   type="submit"
                   disabled={isSubmitting}
@@ -343,6 +345,7 @@ export default function BusinessOnboarding() {
                 </button>
               ) : (
                 <button
+                  key={`continue-business-setup-${step}`}
                   className="business-onboarding-submit"
                   type="button"
                   onClick={continueSetup}
@@ -438,10 +441,11 @@ function CapabilitiesStep({ form, selectedCount, onToggle }) {
 function ConditionalSetupStep({
   form,
   onChange,
-  onAddLocation,
-  onRemoveLocation,
+  onSetLocation,
+  onClearLocation,
 }) {
   const needsExtraSetup = form.deals || form.serviceMarketplace
+  const businessLocation = form.locations[0] || null
 
   return (
     <div className="business-onboarding-stage">
@@ -466,31 +470,30 @@ function ConditionalSetupStep({
             <BadgePercent aria-hidden="true" />
             <div>
               <h3>Deal locations</h3>
-              <p>Add each shop, office, or service address using deals.</p>
+              <p>Add the shop, office, or service address for this business.</p>
             </div>
           </div>
           <AddressAutocomplete
+            key={businessLocation?.formattedAddress || 'business-location'}
             id="business-location"
-            label="Business location"
+            label={
+              businessLocation
+                ? 'Change business location'
+                : 'Business location'
+            }
+            value={businessLocation?.formattedAddress || ''}
             placeholder="Search for your shop, office, or service address"
-            onSelect={onAddLocation}
+            onSelect={onSetLocation}
           />
-          {form.locations.length > 0 && (
+          {businessLocation && (
             <div className="business-onboarding-location-list">
-              {form.locations.map((businessLocation) => (
-                <div key={businessLocation.formattedAddress}>
-                  <MapPin aria-hidden="true" />
-                  <span>{businessLocation.formattedAddress}</span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onRemoveLocation(businessLocation.formattedAddress)
-                    }
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
+              <div>
+                <MapPin aria-hidden="true" />
+                <span>{businessLocation.formattedAddress}</span>
+                <button type="button" onClick={onClearLocation}>
+                  Remove
+                </button>
+              </div>
             </div>
           )}
         </section>
@@ -612,12 +615,7 @@ function ReviewStep({ form, onEdit, selectedCount }) {
                 Edit
               </button>
             </div>
-            {form.deals && (
-              <p>
-                {form.locations.length} deal{' '}
-                {form.locations.length === 1 ? 'location' : 'locations'}
-              </p>
-            )}
+            {form.deals && <p>{form.locations[0]?.formattedAddress}</p>}
             {form.serviceMarketplace && (
               <p>
                 {listFromInput(form.categories).length} service{' '}

@@ -423,11 +423,18 @@
 
 .business-onboarding-card .address-autocomplete .form-input {
   min-height: 48px;
+  padding-right: 44px;
+  padding-left: 44px;
   border-color: var(--onboarding-border-strong);
   border-radius: 10px;
   background: var(--onboarding-surface-soft);
   color: var(--onboarding-ink);
   font-size: 14px;
+}
+
+.business-onboarding-card .address-autocomplete-input-wrap > svg {
+  left: 14px;
+  pointer-events: none;
 }
 
 .business-onboarding-card .address-autocomplete .form-input:focus {

@@ -10,6 +10,7 @@ const suburbs = {
     'Grey Lynn',
     'Mt Roskill',
     'Mt Albert',
+    'Mount Wellington',
     'Onehunga',
     'Ellerslie',
     'Glen Innes',

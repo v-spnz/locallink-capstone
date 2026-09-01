@@ -1,18 +1,26 @@
+import {
+  findKnownEnglishCity,
+  preferKnownEnglishPlaceName,
+} from './localSuburbs.js'
+
 export function toSuburbLocation(location) {
   if (!location) return null
 
   const localityName = ['suburb', 'city'].includes(location.resultType)
     ? location.name
     : ''
-  const suburb =
+  const suburb = preferKnownEnglishPlaceName(
     location.suburb ||
-    localityName ||
-    location.city ||
-    location.name ||
-    location.district ||
-    location.county ||
-    ''
-  const city = location.city || location.county || ''
+      localityName ||
+      location.city ||
+      location.name ||
+      location.district ||
+      location.county ||
+      '',
+  )
+  const city =
+    findKnownEnglishCity(location.district, location.county, location.city) ||
+    preferKnownEnglishPlaceName(location.city || location.county || '')
   const label = [...new Set([suburb, city].filter(Boolean))].join(', ')
 
   if (!suburb || !label) return null

@@ -18,7 +18,7 @@ export default function ProtectedRoute({ children }) {
         replace
         state={{
           from: location,
-          startAt: 'choice',
+          startAt: 'account',
           intent: location.pathname.startsWith('/business')
             ? 'business'
             : 'personal',

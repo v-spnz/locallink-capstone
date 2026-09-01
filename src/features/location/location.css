@@ -63,7 +63,8 @@
   text-align: left;
 }
 
-.address-autocomplete-results button:hover {
+.address-autocomplete-results button:hover,
+.address-autocomplete-results button.is-active {
   background: var(--blue-light);
 }
 

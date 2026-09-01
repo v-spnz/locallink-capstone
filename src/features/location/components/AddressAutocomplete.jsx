@@ -8,8 +8,17 @@ import {
   getCurrentBrowserLocation,
   reverseGeocode,
 } from '../api/geoapify'
+import {
+  getLocalSuburbSuggestions,
+  mergeSuburbSuggestions,
+} from '../localSuburbs'
 import { toSuburbLocation } from '../suburb'
 import '../location.css'
+
+const SEARCH_SETTINGS = {
+  address: { minimumCharacters: 3, delay: 350 },
+  suburb: { minimumCharacters: 1, delay: 120 },
+}
 
 export default function AddressAutocomplete({
   id,
@@ -27,10 +36,21 @@ export default function AddressAutocomplete({
   const [isSearching, setIsSearching] = useState(false)
   const [error, setError] = useState('')
   const [isOpen, setIsOpen] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(-1)
   const requestNumber = useRef(0)
+  const resultsId = `${id}-results`
+  const searchSettings = SEARCH_SETTINGS[searchType]
 
   useEffect(() => {
-    if (query.trim().length < 3 || query === value) return undefined
+    const trimmedQuery = query.trim()
+    if (
+      trimmedQuery.length < searchSettings.minimumCharacters ||
+      query === value
+    ) {
+      return undefined
+    }
+    const localSuggestions =
+      searchType === 'suburb' ? getLocalSuburbSuggestions(trimmedQuery) : []
     const controller = new AbortController()
     const currentRequest = ++requestNumber.current
     const timer = window.setTimeout(async () => {
@@ -39,25 +59,35 @@ export default function AddressAutocomplete({
       try {
         const search =
           searchType === 'suburb' ? autocompleteSuburbs : autocompleteAddresses
-        const results = await search(query.trim(), {
+        const results = await search(trimmedQuery, {
           signal: controller.signal,
           bias,
         })
         if (currentRequest === requestNumber.current) {
-          setSuggestions(results)
+          const nextSuggestions =
+            searchType === 'suburb'
+              ? mergeSuburbSuggestions(localSuggestions, results)
+              : results
+          setSuggestions(nextSuggestions)
+          setActiveIndex(nextSuggestions.length > 0 ? 0 : -1)
           setIsOpen(true)
         }
       } catch (searchError) {
-        if (searchError.name !== 'AbortError') setError(searchError.message)
+        if (
+          searchError.name !== 'AbortError' &&
+          localSuggestions.length === 0
+        ) {
+          setError(searchError.message)
+        }
       } finally {
         if (currentRequest === requestNumber.current) setIsSearching(false)
       }
-    }, 350)
+    }, searchSettings.delay)
     return () => {
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [bias, query, searchType, value])
+  }, [bias, query, searchSettings, searchType, value])
 
   async function selectSuggestion(suggestion) {
     setIsSearching(true)
@@ -65,10 +95,13 @@ export default function AddressAutocomplete({
     try {
       const location =
         searchType === 'suburb'
-          ? suggestion
+          ? suggestion.isLocalSuggestion
+            ? await geocodeSuburb(suggestion.formattedAddress)
+            : suggestion
           : await geocodeAddress(suggestion.formattedAddress)
       setQuery(location.formattedAddress)
       setSuggestions([])
+      setActiveIndex(-1)
       setIsOpen(false)
       onSelect(location)
     } catch (selectionError) {
@@ -90,8 +123,8 @@ export default function AddressAutocomplete({
           coordinates.longitude,
         )
         if (searchType === 'suburb') {
-          const suburb = toSuburbLocation(reverseGeocoded)
-          address = await geocodeSuburb(suburb.formattedAddress)
+          address = toSuburbLocation(reverseGeocoded)
+          if (!address) throw new Error('Unable to identify your suburb.')
         } else {
           address = reverseGeocoded
         }
@@ -114,6 +147,7 @@ export default function AddressAutocomplete({
       }
       setQuery(address.formattedAddress)
       setSuggestions([])
+      setActiveIndex(-1)
       setIsOpen(false)
       onSelect(address)
     } catch (locationError) {
@@ -126,6 +160,28 @@ export default function AddressAutocomplete({
   function closeResultsOnBlur(event) {
     if (!event.currentTarget.contains(event.relatedTarget)) {
       setIsOpen(false)
+      setActiveIndex(-1)
+    }
+  }
+
+  function handleKeyDown(event) {
+    if (!isOpen || suggestions.length === 0) return
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setActiveIndex((current) => (current + 1) % suggestions.length)
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setActiveIndex((current) =>
+        current <= 0 ? suggestions.length - 1 : current - 1,
+      )
+    } else if (event.key === 'Enter' && activeIndex >= 0) {
+      event.preventDefault()
+      void selectSuggestion(suggestions[activeIndex])
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      setIsOpen(false)
+      setActiveIndex(-1)
     }
   }
 
@@ -140,28 +196,55 @@ export default function AddressAutocomplete({
       >
         <Search aria-hidden="true" size={17} />
         <input
+          aria-activedescendant={
+            isOpen && activeIndex >= 0
+              ? `${resultsId}-option-${activeIndex}`
+              : undefined
+          }
+          aria-autocomplete="list"
+          aria-controls={resultsId}
+          aria-expanded={isOpen && suggestions.length > 0}
           autoComplete="off"
           className="form-input"
           disabled={disabled}
           id={id}
+          role="combobox"
           value={query}
           onChange={(event) => {
-            setQuery(event.target.value)
-            setIsOpen(true)
+            const nextQuery = event.target.value
+            const immediateSuggestions =
+              searchType === 'suburb'
+                ? getLocalSuburbSuggestions(nextQuery)
+                : []
+            setQuery(nextQuery)
+            setSuggestions(immediateSuggestions)
+            setActiveIndex(immediateSuggestions.length > 0 ? 0 : -1)
+            setError('')
+            setIsOpen(
+              nextQuery.trim().length >= searchSettings.minimumCharacters,
+            )
           }}
           onFocus={() => suggestions.length > 0 && setIsOpen(true)}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder}
         />
         {isSearching && <span className="address-autocomplete-spinner" />}
         {isOpen && suggestions.length > 0 && (
-          <div className="address-autocomplete-results" role="listbox">
-            {suggestions.map((suggestion) => (
+          <div
+            className="address-autocomplete-results"
+            id={resultsId}
+            role="listbox"
+          >
+            {suggestions.map((suggestion, index) => (
               <button
+                className={index === activeIndex ? 'is-active' : undefined}
+                id={`${resultsId}-option-${index}`}
                 key={`${suggestion.placeId}-${suggestion.formattedAddress}`}
                 type="button"
                 role="option"
-                aria-selected="false"
+                aria-selected={index === activeIndex}
                 onMouseDown={(event) => event.preventDefault()}
+                onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => selectSuggestion(suggestion)}
               >
                 <MapPin aria-hidden="true" size={17} />
