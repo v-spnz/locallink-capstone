@@ -2,10 +2,13 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import {
+  findKnownCityForSuburb,
   getLocalSuburbSuggestions,
   mergeSuburbSuggestions,
   preferKnownEnglishPlaceName,
 } from '../src/features/location/localSuburbs.js'
+import { formatGeoapifyAddress } from '../src/features/location/api/geoapify.js'
+import { formatSavedAddress } from '../src/features/location/addressFormatting.js'
 import { toSuburbLocation } from '../src/features/location/suburb.js'
 
 const read = (path) => readFile(new URL(path, import.meta.url), 'utf8')
@@ -37,6 +40,49 @@ test('Geoapify autocomplete and geocoding are used for selected addresses', asyn
   )
   assert.match(styles, /top:\s*calc\(100% \+ 8px\)/)
   assert.match(styles, /max-height:\s*min\(280px, 40vh\)/)
+})
+
+test('full address labels omit Geoapify administrative districts', () => {
+  assert.equal(
+    formatGeoapifyAddress({
+      address_line1: '24 Mount Eden Road',
+      suburb: 'Mount Eden',
+      district: 'Albert-Eden',
+      city: 'Auckland',
+      postcode: '1024',
+      country: 'New Zealand',
+      formatted:
+        '24 Mount Eden Road, Mount Eden, Albert-Eden, Auckland 1024, New Zealand',
+    }),
+    '24 Mount Eden Road, Mount Eden, Auckland 1024, New Zealand',
+  )
+
+  assert.equal(
+    formatGeoapifyAddress({
+      address_line1: '93 Panama Road',
+      suburb: 'Mount Wellington',
+      district: 'Auckland',
+      city: 'Maungakiekie-Tamaki',
+      county: 'Auckland',
+      postcode: '1062',
+      country: 'New Zealand',
+    }),
+    '93 Panama Road, Mount Wellington, Auckland 1062, New Zealand',
+  )
+})
+
+test('legacy saved addresses replace local-board districts with the city', () => {
+  assert.equal(findKnownCityForSuburb('Mount Wellington'), 'Auckland')
+  assert.equal(
+    formatSavedAddress(
+      '93 Panama Road, Mount Wellington, Maungakiekie-Tamaki 1062, New Zealand',
+    ),
+    '93 Panama Road, Mount Wellington, Auckland 1062, New Zealand',
+  )
+  assert.equal(
+    formatSavedAddress('An address outside the known suburb list'),
+    'An address outside the known suburb list',
+  )
 })
 
 test('browser geolocation supports Use my current location', async () => {
@@ -99,26 +145,44 @@ test('Mount Wellington GPS results do not collapse to the local-board district',
   assert.equal(location.formattedAddress, 'Mount Wellington, Auckland')
 })
 
-test('PostGIS performs indexed radius filtering and distance ordering', async () => {
+test('consumer discovery is derived from the authenticated saved suburb', async () => {
   const migration = await read(
-    '../supabase/migrations/20260828000000_add_postgis_location_discovery.sql',
+    '../supabase/migrations/20260902020000_lock_deal_discovery_to_saved_suburb.sql',
   )
-  assert.match(migration, /create extension if not exists postgis/i)
-  assert.match(migration, /using gist \(location\)/i)
-  assert.match(migration, /extensions\.st_dwithin/i)
-  assert.match(migration, /operator\(extensions\.<->\)/i)
+  assert.match(migration, /v_user_id uuid := auth\.uid\(\)/)
+  assert.match(migration, /profile\.id = v_user_id/)
+  assert.match(
+    migration,
+    /lower\(trim\(location\.suburb\)\) = lower\(origin\.suburb\)/,
+  )
+  assert.doesNotMatch(migration, /p_latitude|p_longitude|p_radius_km/)
   assert.match(migration, /order by candidate\.distance_km/i)
 })
 
 test('discovery uses Supabase results and a react-leaflet map instead of mocks', async () => {
-  const [deals, home, map] = await Promise.all([
+  const [deals, home, map, locationsApi, profile, portal] = await Promise.all([
     read('../src/pages/customer/Deals.jsx'),
     read('../src/pages/customer/Home.jsx'),
     read('../src/features/location/components/DiscoveryMap.jsx'),
+    read('../src/features/location/api/locations.js'),
+    read('../src/pages/customer/Profile.jsx'),
+    read('../src/pages/customer/CustomerPortal.jsx'),
   ])
 
-  assert.match(deals, /fetchNearbyBusinesses/)
-  assert.match(home, /fetchNearbyBusinesses/)
+  assert.match(deals, /fetchBusinessesInSavedSuburb/)
+  assert.match(home, /fetchBusinessesInSavedSuburb/)
+  assert.doesNotMatch(deals, /Where should we search|AddressAutocomplete/)
+  assert.doesNotMatch(deals, /Search Radius|radius-slider|setRadius/)
+  assert.doesNotMatch(deals, /saveCustomerLocation/)
+  assert.doesNotMatch(home, /NEARBY_RADIUS_KM/)
+  assert.match(
+    locationsApi,
+    /fetchBusinessesInSavedSuburb[\s\S]+businesses_in_my_suburb/,
+  )
+  assert.match(profile, /searchType="suburb"/)
+  assert.match(profile, /showCurrentLocation=\{false\}/)
+  assert.match(portal, /path="home"[\s\S]+<ProtectedRoute>[\s\S]+<Home \/>/)
+  assert.match(portal, /path="deals"[\s\S]+<ProtectedRoute>[\s\S]+<Deals \/>/)
   assert.doesNotMatch(deals, /USER_LOCATION|mockBusinesses|getDistanceKm/)
   assert.doesNotMatch(home, /USER_LOCATION|mockBusinesses|getDistanceKm/)
   assert.doesNotMatch(deals, /Map Preview|map-placeholder/)

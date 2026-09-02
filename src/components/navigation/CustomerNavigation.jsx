@@ -25,7 +25,7 @@ const navigationItems = [
   { to: '/home', label: 'Home', icon: <House aria-hidden="true" /> },
   {
     to: '/deals',
-    label: 'Nearby deals',
+    label: 'Local deals',
     icon: <BadgePercent aria-hidden="true" />,
   },
   {

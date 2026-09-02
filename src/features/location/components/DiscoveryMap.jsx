@@ -1,7 +1,6 @@
 import L from 'leaflet'
 import { useEffect } from 'react'
 import {
-  Circle,
   CircleMarker,
   MapContainer,
   Popup,
@@ -27,7 +26,7 @@ function MapViewport({ location, businesses }) {
   return null
 }
 
-export default function DiscoveryMap({ location, radiusKm, businesses }) {
+export default function DiscoveryMap({ location, businesses }) {
   return (
     <div className="discovery-map" aria-label="Nearby businesses map">
       <MapContainer
@@ -39,15 +38,6 @@ export default function DiscoveryMap({ location, radiusKm, businesses }) {
           attribution='Powered by <a href="https://www.geoapify.com/" target="_blank">Geoapify</a> | <a href="https://openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap</a> contributors'
           url={`https://maps.geoapify.com/v1/tile/osm-bright-grey/{z}/{x}/{y}.png?apiKey=${import.meta.env.VITE_GEOAPIFY_API_KEY}`}
         />
-        <Circle
-          center={[location.latitude, location.longitude]}
-          radius={radiusKm * 1000}
-          pathOptions={{
-            color: '#3b5bdb',
-            fillColor: '#3b5bdb',
-            fillOpacity: 0.06,
-          }}
-        />
         <CircleMarker
           center={[location.latitude, location.longitude]}
           radius={8}
@@ -58,7 +48,7 @@ export default function DiscoveryMap({ location, radiusKm, businesses }) {
             fillOpacity: 1,
           }}
         >
-          <Popup>Your search location</Popup>
+          <Popup>Your registered suburb</Popup>
         </CircleMarker>
         {businesses.map((business) => (
           <CircleMarker

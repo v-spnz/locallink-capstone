@@ -29,6 +29,19 @@ const englishPlaceNames = new Map(
 const englishCityNames = new Map(
   Object.keys(suburbsByCity).map((city) => [foldPlaceName(city), city]),
 )
+const knownCityBySuburb = new Map()
+
+for (const [city, suburbs] of Object.entries(suburbsByCity)) {
+  for (const suburb of suburbs) {
+    const key = foldPlaceName(suburb)
+    const existingCity = knownCityBySuburb.get(key)
+
+    knownCityBySuburb.set(
+      key,
+      existingCity && existingCity !== city ? '' : city,
+    )
+  }
+}
 
 export function preferKnownEnglishPlaceName(placeName) {
   if (!placeName) return ''
@@ -54,6 +67,11 @@ export function findKnownEnglishCity(...placeNames) {
   }
 
   return ''
+}
+
+export function findKnownCityForSuburb(suburb) {
+  if (!suburb) return ''
+  return knownCityBySuburb.get(foldPlaceName(suburb)) || ''
 }
 
 export function getLocalSuburbSuggestions(query) {

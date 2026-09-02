@@ -63,16 +63,8 @@ export async function saveCustomerLocation(address) {
   if (error) throw error
 }
 
-export async function fetchNearbyBusinesses({
-  latitude,
-  longitude,
-  radiusKm,
-  category,
-}) {
-  const { data, error } = await supabase.rpc('nearby_businesses', {
-    p_latitude: latitude,
-    p_longitude: longitude,
-    p_radius_km: radiusKm,
+export async function fetchBusinessesInSavedSuburb(category = 'All') {
+  const { data, error } = await supabase.rpc('businesses_in_my_suburb', {
     p_category: category === 'All' ? null : category,
   })
   if (error) throw error

@@ -83,7 +83,7 @@ export default function Profile() {
     <>
       <div className="page-header">
         <h2>Profile</h2>
-        <p>Manage your personal details and location preferences.</p>
+        <p>Manage your personal details and registered suburb.</p>
       </div>
       <div className="placeholder-section">
         <div className="placeholder-section-title is-complete">
@@ -131,18 +131,20 @@ export default function Profile() {
       </div>
       <div className="placeholder-section">
         <div className="placeholder-section-title is-complete">
-          Location Preferences
+          Registered Suburb
         </div>
         <p className="account-section-copy">
-          Your saved address is used as the starting point for nearby business
-          and deal searches.
+          LocalLink uses this suburb for all business and deal discovery. You
+          can update it here if you move.
         </p>
         <AddressAutocomplete
           key={customerLocation?.formattedAddress || 'profile-location'}
           id="profile-address"
-          label="Home or preferred search address"
+          label="Registered suburb"
           value={customerLocation?.formattedAddress || ''}
           bias={customerLocation}
+          showCurrentLocation={false}
+          searchType="suburb"
           onSelect={handleLocationSelect}
         />
         {locationStatus && (

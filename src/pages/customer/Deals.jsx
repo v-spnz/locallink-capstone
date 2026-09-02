@@ -1,10 +1,8 @@
 import { MapPin } from 'lucide-react'
 import { lazy, Suspense, useEffect, useState } from 'react'
-import AddressAutocomplete from '../../features/location/components/AddressAutocomplete'
 import {
+  fetchBusinessesInSavedSuburb,
   fetchCustomerLocation,
-  fetchNearbyBusinesses,
-  saveCustomerLocation,
 } from '../../features/location/api/locations'
 import '../../features/location/discovery.css'
 
@@ -25,7 +23,6 @@ const FILTERS = [
 
 export default function Deals() {
   const [activeFilter, setActiveFilter] = useState('All')
-  const [radius, setRadius] = useState(5)
   const [location, setLocation] = useState(null)
   const [businesses, setBusinesses] = useState([])
   const [isLoadingLocation, setIsLoadingLocation] = useState(true)
@@ -58,17 +55,14 @@ export default function Deals() {
       setIsSearching(true)
       setError('')
       try {
-        const results = await fetchNearbyBusinesses({
-          latitude: location.latitude,
-          longitude: location.longitude,
-          radiusKm: radius,
-          category: activeFilter,
-        })
+        const results = await fetchBusinessesInSavedSuburb(activeFilter)
         if (active) setBusinesses(results)
       } catch (searchError) {
-        console.error('Unable to search nearby businesses.', searchError)
+        console.error('Unable to load businesses in your suburb.', searchError)
         if (active)
-          setError('Unable to search nearby businesses. Please try again.')
+          setError(
+            'Unable to load businesses in your suburb. Please try again.',
+          )
       } finally {
         if (active) setIsSearching(false)
       }
@@ -77,20 +71,7 @@ export default function Deals() {
       active = false
       window.clearTimeout(timer)
     }
-  }, [activeFilter, location, radius])
-
-  async function selectLocation(address) {
-    setLocation(address)
-    setError('')
-    try {
-      await saveCustomerLocation(address)
-    } catch (saveError) {
-      console.error('Unable to save customer location.', saveError)
-      setError(
-        'This location can be used for this search, but could not be saved to your profile.',
-      )
-    }
-  }
+  }, [activeFilter, location])
 
   return (
     <>
@@ -101,27 +82,12 @@ export default function Deals() {
           Deals &amp; Discovery
         </p>
         <h2>Discover Local</h2>
-        <p>Find real businesses and published deals near your location.</p>
-      </div>
-
-      <div className="discovery-location-card">
-        <h3>Where should we search?</h3>
-        <p>Select an address or securely use your browser location.</p>
+        <p>Find businesses and published deals in your registered suburb.</p>
         {location && (
           <div className="discovery-selected-location">
             <MapPin aria-hidden="true" size={17} />
-            {location.formattedAddress}
+            Showing {location.suburb}
           </div>
-        )}
-        {!isLoadingLocation && (
-          <AddressAutocomplete
-            key={location?.formattedAddress || 'new-location'}
-            id="discovery-address"
-            label={location ? 'Change search location' : 'Search location'}
-            value={location?.formattedAddress || ''}
-            bias={location}
-            onSelect={selectLocation}
-          />
         )}
       </div>
 
@@ -138,28 +104,6 @@ export default function Deals() {
         ))}
       </div>
 
-      <div className="radius-control">
-        <div className="radius-header">
-          <span className="radius-label">Search Radius</span>
-          <span className="radius-value">{radius} km</span>
-        </div>
-        <input
-          aria-label="Search radius in kilometres"
-          type="range"
-          className="radius-slider"
-          min={1}
-          max={50}
-          step={1}
-          value={radius}
-          onChange={(event) => setRadius(Number(event.target.value))}
-        />
-        <div className="radius-ticks">
-          <span>1 km</span>
-          <span>25 km</span>
-          <span>50 km</span>
-        </div>
-      </div>
-
       {error && (
         <div className="auth-error" role="alert">
           {error}
@@ -170,15 +114,13 @@ export default function Deals() {
         <Suspense
           fallback={<div className="discovery-map-empty">Loading map…</div>}
         >
-          <DiscoveryMap
-            location={location}
-            radiusKm={radius}
-            businesses={businesses}
-          />
+          <DiscoveryMap location={location} businesses={businesses} />
         </Suspense>
       ) : (
         <div className="discovery-map-empty">
-          Choose an address or use your current location to view the map.
+          {isLoadingLocation
+            ? 'Loading your registered suburb...'
+            : 'Add your suburb in Profile to discover local businesses.'}
         </div>
       )}
 
@@ -187,7 +129,9 @@ export default function Deals() {
           className="placeholder-section-title is-complete"
           style={{ justifyContent: 'space-between' }}
         >
-          <span>Businesses Near You</span>
+          <span>
+            {location ? `Businesses in ${location.suburb}` : 'Local businesses'}
+          </span>
           <span style={resultCountStyles}>
             {isSearching
               ? 'Searching…'
@@ -195,10 +139,12 @@ export default function Deals() {
           </span>
         </div>
         {!location ? (
-          <div className="empty-state">Select a search location above.</div>
+          <div className="empty-state">
+            Add your suburb in Profile to discover local businesses.
+          </div>
         ) : !isSearching && businesses.length === 0 ? (
           <div className="empty-state">
-            No businesses found within {radius} km. Try increasing your radius.
+            No businesses or deals are available in {location.suburb} right now.
           </div>
         ) : (
           <div className="business-grid">
