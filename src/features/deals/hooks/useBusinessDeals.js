@@ -16,7 +16,7 @@ export const EMPTY_DEAL = {
   originalPrice: '',
   dealPrice: '',
   offerDetails: '',
-  gstIncluded: '',
+  gstIncluded: 'included',
   locationIds: [],
   startDate: '',
   endDate: '',

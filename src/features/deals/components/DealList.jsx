@@ -1,4 +1,5 @@
 import Button from '../../../components/ui/Button'
+import GstIncluded from '../../../components/ui/GstIncluded'
 import localBusinessNeighbourhood from '../../../assets/images/local-business-neighbourhood.jpg'
 import {
   BadgePercent,
@@ -172,6 +173,7 @@ export default function DealList({
 
                     <span className="deal-card-offer">
                       {formatDealOffer(deal) || 'Offer details not set'}
+                      <GstIncluded />
                     </span>
                     <span className="deal-card-description">
                       {deal.description ||

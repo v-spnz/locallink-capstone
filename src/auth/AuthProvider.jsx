@@ -26,7 +26,13 @@ export default function AuthProvider({ children }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       if (isActive) {
-        setSession(nextSession)
+        setSession((currentSession) => {
+          const isSameSession =
+            currentSession?.access_token === nextSession?.access_token &&
+            currentSession?.user?.id === nextSession?.user?.id
+
+          return isSameSession ? currentSession : nextSession
+        })
         setIsLoading(false)
       }
     })

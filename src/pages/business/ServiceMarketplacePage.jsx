@@ -187,15 +187,16 @@ export function ServiceMarketplaceContent({
           className="service-marketplace-toolbar"
           aria-label="Job lead search and ordering"
         >
-          <label className="service-marketplace-search">
-            <span>Search</span>
+          <div className="service-marketplace-search">
+            <span id="service-leads-search-label">Search</span>
             <input
+              aria-labelledby="service-leads-search-label"
               type="search"
               value={marketplace.search}
               onChange={(event) => marketplace.setSearch(event.target.value)}
               placeholder="Search by keyword"
             />
-          </label>
+          </div>
           <div className="service-toolbar-controls">
             <MarketplaceSelect
               label="Filter"
@@ -225,15 +226,16 @@ export function ServiceMarketplaceContent({
           className="service-marketplace-toolbar service-quote-toolbar"
           aria-label="Search, filter, and order submitted quotes"
         >
-          <label className="service-marketplace-search">
-            <span>Search</span>
+          <div className="service-marketplace-search">
+            <span id="service-quotes-search-label">Search</span>
             <input
+              aria-labelledby="service-quotes-search-label"
               type="search"
               value={marketplace.search}
               onChange={(event) => marketplace.setSearch(event.target.value)}
               placeholder="Search by keyword"
             />
-          </label>
+          </div>
           <div className="service-toolbar-controls">
             <MarketplaceSelect
               label="Filter"
@@ -259,15 +261,16 @@ export function ServiceMarketplaceContent({
           className="service-marketplace-toolbar service-quote-toolbar"
           aria-label="Search, filter, and order jobs"
         >
-          <label className="service-marketplace-search">
-            <span>Search</span>
+          <div className="service-marketplace-search">
+            <span id="service-jobs-search-label">Search</span>
             <input
+              aria-labelledby="service-jobs-search-label"
               type="search"
               value={marketplace.search}
               onChange={(event) => marketplace.setSearch(event.target.value)}
               placeholder="Search by keyword"
             />
-          </label>
+          </div>
           <div className="service-toolbar-controls">
             <MarketplaceSelect
               label="Filter"
@@ -305,15 +308,16 @@ export function ServiceMarketplaceContent({
           className="service-marketplace-toolbar service-history-toolbar"
           aria-label="Search completed job history"
         >
-          <label className="service-marketplace-search">
-            <span>Search job history</span>
+          <div className="service-marketplace-search">
+            <span id="service-history-search-label">Search job history</span>
             <input
+              aria-labelledby="service-history-search-label"
               type="search"
               value={marketplace.search}
               onChange={(event) => marketplace.setSearch(event.target.value)}
               placeholder="Search completed jobs"
             />
-          </label>
+          </div>
         </div>
       )}
 

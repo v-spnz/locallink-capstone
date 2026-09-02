@@ -1,5 +1,6 @@
 import { Check } from 'lucide-react'
 import Button from '../../../components/ui/Button'
+import GstIncluded from '../../../components/ui/GstIncluded'
 import { QUOTE_PRICE_TYPES } from '../constants'
 import { formatMoney } from '../formatters'
 
@@ -20,6 +21,7 @@ export default function QuoteReview({ quote, isSaving, onEdit, onSubmit }) {
           <dt>Price</dt>
           <dd>
             {priceType} · {formatMoney(Math.round(Number(quote.amount) * 100))}
+            <GstIncluded />
           </dd>
         </div>
         <div>

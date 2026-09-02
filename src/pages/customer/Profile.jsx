@@ -90,10 +90,11 @@ export default function Profile() {
           Profile Details
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="profile-first-name">
+          <span className="form-label" id="profile-first-name-label">
             First Name
-          </label>
+          </span>
           <input
+            aria-labelledby="profile-first-name-label"
             id="profile-first-name"
             className="form-input"
             disabled
@@ -102,10 +103,11 @@ export default function Profile() {
           />
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="profile-last-name">
+          <span className="form-label" id="profile-last-name-label">
             Last Name
-          </label>
+          </span>
           <input
+            aria-labelledby="profile-last-name-label"
             id="profile-last-name"
             className="form-input"
             disabled
@@ -114,10 +116,11 @@ export default function Profile() {
           />
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="profile-email">
+          <span className="form-label" id="profile-email-label">
             Email
-          </label>
+          </span>
           <input
+            aria-labelledby="profile-email-label"
             id="profile-email"
             className="form-input"
             disabled

@@ -451,7 +451,7 @@
   margin-bottom: 15px;
 }
 
-.register-field label {
+.register-field-label {
   display: block;
   margin-bottom: 7px;
   color: var(--auth-ink-soft);

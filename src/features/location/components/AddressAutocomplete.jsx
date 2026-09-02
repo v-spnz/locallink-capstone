@@ -187,15 +187,16 @@ export default function AddressAutocomplete({
 
   return (
     <div className="address-autocomplete">
-      <label className="form-label" htmlFor={id}>
+      <span className="form-label" id={`${id}-label`}>
         {label}
-      </label>
+      </span>
       <div
         className="address-autocomplete-input-wrap"
         onBlur={closeResultsOnBlur}
       >
         <Search aria-hidden="true" size={17} />
         <input
+          aria-labelledby={`${id}-label`}
           aria-activedescendant={
             isOpen && activeIndex >= 0
               ? `${resultsId}-option-${activeIndex}`

@@ -141,7 +141,7 @@
   margin-bottom: 18px;
 }
 
-.login-field label {
+.login-field-label {
   display: block;
   margin-bottom: 8px;
   color: var(--auth-ink-soft);

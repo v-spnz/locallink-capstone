@@ -162,8 +162,11 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit}>
               <div className="login-field">
-                <label htmlFor="login-email">Email address</label>
+                <span className="login-field-label" id="login-email-label">
+                  Email address
+                </span>
                 <input
+                  aria-labelledby="login-email-label"
                   id="login-email"
                   type="email"
                   placeholder="you@example.com"
@@ -176,9 +179,12 @@ export default function LoginPage() {
               </div>
 
               <div className="login-field">
-                <label htmlFor="login-password">Password</label>
+                <span className="login-field-label" id="login-password-label">
+                  Password
+                </span>
                 <div className="login-password-wrap">
                   <input
+                    aria-labelledby="login-password-label"
                     id="login-password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="At least 8 characters"
