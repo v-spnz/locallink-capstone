@@ -1,4 +1,5 @@
 import Button from '../../../components/ui/Button'
+import GstIncluded from '../../../components/ui/GstIncluded'
 import { CalendarDays, CheckCircle2, MapPin, ReceiptText } from 'lucide-react'
 import { formatDealOffer, getOfferTypeLabel } from '../constants'
 
@@ -41,6 +42,7 @@ export default function DealReview({
         <span className="deal-review-offer">
           <small>{getOfferTypeLabel(deal.offerType)}</small>
           <strong>{formatDealOffer(deal)}</strong>
+          <GstIncluded block />
         </span>
       </div>
       {requestError && (
@@ -78,12 +80,7 @@ export default function DealReview({
             value={getOfferTypeLabel(deal.offerType)}
           />
           <ReviewRow label="Offer" value={formatDealOffer(deal)} />
-          <ReviewRow
-            label="GST"
-            value={
-              deal.gstIncluded === 'included' ? 'GST included' : 'GST excluded'
-            }
-          />
+          <ReviewRow label="GST" value="GST Included" />
         </div>
       </section>
 

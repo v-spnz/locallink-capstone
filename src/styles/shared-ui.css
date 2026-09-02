@@ -1437,3 +1437,19 @@
 .section-link-btn:hover {
   text-decoration: underline;
 }
+.gst-included-note {
+  margin-left: 0.45em;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.gst-included-note--block {
+  display: block;
+  margin-top: 5px;
+  margin-left: 0;
+}

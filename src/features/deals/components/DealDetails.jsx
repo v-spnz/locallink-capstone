@@ -1,4 +1,5 @@
 import Button from '../../../components/ui/Button'
+import GstIncluded from '../../../components/ui/GstIncluded'
 import { CalendarDays, MapPin, ReceiptText, Tag } from 'lucide-react'
 import { formatDealOffer, getOfferTypeLabel } from '../constants'
 
@@ -32,6 +33,7 @@ export default function DealDetails({ deal, locations, onClose, onEdit }) {
             {getOfferTypeLabel(deal.offerType) || 'Offer type not set'}
           </span>
           <strong>{formatDealOffer(deal) || 'Offer details not set'}</strong>
+          <GstIncluded block />
           <p>{deal.description || 'No customer-facing description added.'}</p>
         </div>
       </div>
@@ -42,10 +44,7 @@ export default function DealDetails({ deal, locations, onClose, onEdit }) {
       </div>
       <dl className="deal-detail-grid">
         <DetailRow label="Category" value={deal.category} />
-        <DetailRow
-          label="GST treatment"
-          value={deal.gstIncluded ? `GST ${deal.gstIncluded}` : 'Not set'}
-        />
+        <DetailRow label="GST treatment" value="GST Included" />
         <DetailRow
           label="Claim limit"
           value={deal.claimLimit ? `${deal.claimLimit} total claims` : ''}

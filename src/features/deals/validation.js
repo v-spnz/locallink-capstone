@@ -117,14 +117,6 @@ export function validateDeal(deal, { forPublication = false } = {}) {
         'Offer details must be between 2 and 300 characters.'
   }
 
-  if (forPublication && deal.gstIncluded === '')
-    errors.gstIncluded = 'State whether GST is included.'
-  else if (
-    deal.gstIncluded !== '' &&
-    !['included', 'excluded'].includes(deal.gstIncluded)
-  )
-    errors.gstIncluded = 'Select a valid GST option.'
-
   if (forPublication && (!deal.locationIds || deal.locationIds.length === 0))
     errors.locationIds = 'Select at least one participating location.'
 

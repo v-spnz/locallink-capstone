@@ -113,6 +113,13 @@
   font-size: 15px;
 }
 
+.deal-gst-policy {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .deal-field-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

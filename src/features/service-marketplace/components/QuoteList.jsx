@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Button from '../../../components/ui/Button'
+import GstIncluded from '../../../components/ui/GstIncluded'
 import {
   formatMoney,
   formatStatus,
@@ -73,6 +74,7 @@ export default function QuoteList({
                 <span className="sm-quote-price">
                   {formatMoney(quote.amount_cents)}
                 </span>
+                <GstIncluded block />
                 {priceType && (
                   <span className="sm-quote-price-type">{priceType}</span>
                 )}

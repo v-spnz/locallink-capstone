@@ -277,6 +277,19 @@ values
     'Auckland'
   );
 
+-- Give the seeded consumer an approved full address so accepted-job contact
+-- sharing can be exercised in both portals. It is never returned for leads or
+-- unaccepted quotes.
+update public.profiles
+set
+  formatted_address = '12 Franklin Road, Ponsonby, Auckland 1011, New Zealand',
+  address_line1 = '12 Franklin Road',
+  suburb = 'Ponsonby',
+  city = 'Auckland',
+  postcode = '1011',
+  country_code = 'nz'
+where id = '10000000-0000-0000-0000-000000000001';
+
 -- ============================================================
 -- Consumer job requests
 -- ============================================================

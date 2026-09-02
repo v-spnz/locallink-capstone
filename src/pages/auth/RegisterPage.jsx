@@ -806,8 +806,10 @@ function ConfirmLocationStep({
 function RegisterField({ label, id, ...inputProps }) {
   return (
     <div className="register-field">
-      <label htmlFor={id}>{label}</label>
-      <input id={id} required {...inputProps} />
+      <span className="register-field-label" id={`${id}-label`}>
+        {label}
+      </span>
+      <input aria-labelledby={`${id}-label`} id={id} required {...inputProps} />
     </div>
   )
 }
@@ -822,9 +824,12 @@ function PasswordField({
 }) {
   return (
     <div className="register-field">
-      <label htmlFor={id}>{label}</label>
+      <span className="register-field-label" id={`${id}-label`}>
+        {label}
+      </span>
       <div className="register-password-wrap">
         <input
+          aria-labelledby={`${id}-label`}
           id={id}
           type={visible ? 'text' : 'password'}
           autoComplete="new-password"

@@ -43,6 +43,9 @@ export function validateJobWizardStep(step, draft, suburbOptions) {
   }
 
   if (step === 3) {
+    if ((draft.imgs || []).length > 20)
+      errors.imgs = 'A job can include a maximum of 20 photos or videos.'
+
     const description = draft.description.trim()
     if (!description) errors.description = 'Please enter a job description.'
     else if (description.length < 10)

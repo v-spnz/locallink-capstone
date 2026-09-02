@@ -98,7 +98,6 @@ test('AC1-6 and AC8-9: the form exposes every deal draft field', async () => {
     'Category',
     'Agreed deal image',
     'Offer type',
-    'GST treatment',
     'Locations',
     'Start date',
     'End date',
@@ -109,6 +108,30 @@ test('AC1-6 and AC8-9: the form exposes every deal draft field', async () => {
   ]) {
     assert.match(form, new RegExp(expected, 'i'))
   }
+
+  assert.match(form, /include GST/i)
+  assert.doesNotMatch(form, /GST excluded/i)
+})
+
+test('all deals persist as GST included', async () => {
+  const [api, migration] = await Promise.all([
+    readFile(
+      new URL('../src/features/deals/api/businessDeals.js', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../supabase/migrations/20260902000000_standardise_gst_and_job_attachment_limit.sql',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
+
+  assert.match(api, /gst_included: true/)
+  assert.doesNotMatch(api, /gstIncluded === 'included'/)
+  assert.match(migration, /set gst_included = true/)
+  assert.match(migration, /check \(gst_included = true\)/)
 })
 
 test('AC11-12: draft saving and unsaved-change protection are wired into the flow', async () => {

@@ -1,5 +1,9 @@
 import { Check } from 'lucide-react'
-import { JOB_PROGRESS_STAGES, formatJobStatusTimestamp } from '../jobTracking'
+import {
+  JOB_PROGRESS_STAGES,
+  JOB_PROGRESS_TIMELINE_STAGES,
+  formatJobStatusTimestamp,
+} from '../jobTracking'
 
 export default function ActiveJobProgressTimeline({ job }) {
   const currentStatus = job.job_status ?? job.status
@@ -17,20 +21,33 @@ export default function ActiveJobProgressTimeline({ job }) {
   const currentIndex = JOB_PROGRESS_STAGES.findIndex(
     (stage) => stage.value === currentStatus,
   )
+  const currentTimelinePosition =
+    currentStatus === 'accepted' ? 0.5 : currentIndex
 
   if (currentIndex === -1 && !isPendingCompletion) return null
 
   return (
     <ol className="service-job-progress-timeline" aria-label="Job progress">
-      {JOB_PROGRESS_STAGES.map((stage, index) => {
+      {JOB_PROGRESS_TIMELINE_STAGES.map((stage, index) => {
         const isFinalStage = stage.value === 'completed'
+        const stagePosition = stage.timelineOnly
+          ? 0.5
+          : JOB_PROGRESS_STAGES.findIndex(
+              (progressStage) => progressStage.value === stage.value,
+            )
         const isComplete = isFinalStage
           ? isPendingCompletion || currentStatus === 'completed'
-          : index < currentIndex || isPendingCompletion
+          : stagePosition < currentTimelinePosition || isPendingCompletion
         const isCurrent =
-          stage.value === currentStatus || (isFinalStage && isPendingCompletion)
+          stage.value === currentStatus ||
+          (stage.timelineOnly && currentStatus === 'accepted') ||
+          (isFinalStage && isPendingCompletion)
         const updatedAt =
-          timestampByStatus[stage.value] ??
+          (stage.timelineOnly
+            ? (job.contact_details?.shared_at ??
+              timestampByStatus.accepted ??
+              job.accepted_at)
+            : timestampByStatus[stage.value]) ??
           (isFinalStage ? timestampByStatus.pending_completion : undefined)
 
         return (

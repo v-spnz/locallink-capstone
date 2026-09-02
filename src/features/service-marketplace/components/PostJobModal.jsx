@@ -16,6 +16,7 @@ import {
 import Modal from '../../../components/ui/Modal'
 import Button from '../../../components/ui/Button'
 import ComboBox from '../../../components/ui/ComboBox'
+import GstIncluded from '../../../components/ui/GstIncluded'
 import suburbsData from '../../../data/suburbs'
 import jobtypes from '../../../data/jobtypes'
 import {
@@ -109,7 +110,15 @@ export default function PostJobModal({
 
   function handleFileChange(event) {
     const files = Array.from(event.target.files)
-    update({ imgs: [...draft.imgs, ...files] })
+    const availableSlots = Math.max(0, 20 - draft.imgs.length)
+    update({ imgs: [...draft.imgs, ...files.slice(0, availableSlots)] })
+    setErrors((current) => ({
+      ...current,
+      imgs:
+        files.length > availableSlots
+          ? 'A job can include a maximum of 20 photos or videos.'
+          : '',
+    }))
     event.target.value = ''
   }
 
@@ -410,8 +419,12 @@ function StepJobDetails({
         />
       </div>
       <p className="mb-4 text-xs text-[var(--text-muted)]">
-        Helps providers judge the job before quoting.
+        Maximum 20 photos or videos. Helps providers judge the job before
+        quoting.
       </p>
+      {errors.imgs && (
+        <p className="-mt-3 mb-4 text-xs text-[var(--danger)]">{errors.imgs}</p>
+      )}
 
       <label className="mb-1.5 block text-sm font-semibold text-[var(--text)]">
         Description *
@@ -502,6 +515,7 @@ function StepJobDetails({
               }
             />
           </div>
+          <GstIncluded block />
         </div>
         {errors.minBudget && (
           <p className="mt-1 text-xs text-[var(--danger)]">
@@ -652,7 +666,12 @@ function StepReview({ draft, error }) {
         />
         <ReviewRow
           label="Budget"
-          value={`${draft.minBudget !== null ? `$${draft.minBudget}` : '—'} – ${draft.maxBudget !== null ? `$${draft.maxBudget}` : '—'}`}
+          value={
+            <>
+              {`${draft.minBudget !== null ? `$${draft.minBudget}` : '—'} – ${draft.maxBudget !== null ? `$${draft.maxBudget}` : '—'}`}
+              <GstIncluded />
+            </>
+          }
         />
         <ReviewRow label="Urgency" value={draft.urgency} />
         <ReviewRow label="City" value={draft.city} />

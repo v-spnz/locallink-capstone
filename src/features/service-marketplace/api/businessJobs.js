@@ -1,4 +1,6 @@
 import { supabase } from '../../../lib/supabase'
+import { isAcceptedJobContactsRpcMissing } from './acceptedJobContactErrors'
+import { fetchAcceptedJobContacts } from './acceptedJobContacts'
 
 const RPC_BY_TYPE = {
   leads: 'get_business_job_leads',
@@ -37,7 +39,33 @@ export function fetchBusinessMarketplaceItems(type, businessId) {
           status: result.status,
         })
       }
-      const items = result.data ?? []
+      let items = result.data ?? []
+
+      if (type === 'jobs' || type === 'history') {
+        const contactsResult = await fetchAcceptedJobContacts(businessId)
+        if (
+          contactsResult.error &&
+          !isAcceptedJobContactsRpcMissing(contactsResult.error)
+        ) {
+          throw Object.assign(
+            new Error(contactsResult.error.message),
+            contactsResult.error,
+            { status: contactsResult.status },
+          )
+        }
+
+        const contactsByJob = new Map(
+          (contactsResult.data ?? []).map((contact) => [
+            contact.job_request_id,
+            contact,
+          ]),
+        )
+        items = items.map((item) => ({
+          ...item,
+          contact_details: contactsByJob.get(item.job_request_id) ?? null,
+        }))
+      }
+
       if (type === 'leads') return items.filter((item) => !item.has_quote)
       if (type === 'quotes') {
         return items.filter((item) => item.quote_status !== 'accepted')

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { MapPin, Play, ShieldCheck, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Button from '../../../components/ui/Button'
+import GstIncluded from '../../../components/ui/GstIncluded'
 import Modal from '../../../components/ui/Modal'
 import BusinessQuoteTimeline from './BusinessQuoteTimeline'
 import { formatMoney } from '../formatters'
@@ -167,6 +168,7 @@ export default function BusinessQuoteCard({
               <strong className="business-structured-data">
                 {formatMoney(item.amount_cents)} {priceType && `· ${priceType}`}
               </strong>
+              <GstIncluded block />
               <span className="business-structured-data">
                 Available {item.availability_date}
               </span>

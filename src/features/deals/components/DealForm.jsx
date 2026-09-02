@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import Button from '../../../components/ui/Button'
+import GstIncluded from '../../../components/ui/GstIncluded'
 import { DEAL_CATEGORIES, DEAL_OFFER_TYPES } from '../constants'
 import {
   sanitizeClaimLimit,
@@ -24,16 +25,18 @@ function FormField({
   onChange,
   placeholder,
   error,
+  helper,
   required = false,
   ...inputProps
 }) {
   return (
     <div className="form-group">
-      <label className="form-label" htmlFor={id}>
+      <span className="form-label" id={`${id}-label`}>
         {label} {required && <span className="deal-required">Required</span>}
-      </label>
+      </span>
       <input
         {...inputProps}
+        aria-labelledby={`${id}-label`}
         aria-describedby={error ? `${id}-error` : undefined}
         aria-invalid={Boolean(error)}
         className="form-input"
@@ -43,6 +46,7 @@ function FormField({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
       />
+      {helper}
       <FieldError id={`${id}-error`}>{error}</FieldError>
     </div>
   )
@@ -59,10 +63,11 @@ function TextAreaField({
 }) {
   return (
     <div className="form-group">
-      <label className="form-label" htmlFor={id}>
+      <span className="form-label" id={`${id}-label`}>
         {label} {required && <span className="deal-required">Required</span>}
-      </label>
+      </span>
       <textarea
+        aria-labelledby={`${id}-label`}
         aria-describedby={error ? `${id}-error` : undefined}
         aria-invalid={Boolean(error)}
         className="form-input deal-textarea"
@@ -91,9 +96,9 @@ function DealImageField({ deal, error, onChange }) {
 
   return (
     <div className="form-group">
-      <label className="form-label" htmlFor="deal-image">
+      <span className="form-label" id="deal-image-label">
         Agreed deal image <span className="deal-required">Required</span>
-      </label>
+      </span>
       <label className="deal-image-picker" htmlFor="deal-image">
         {previewUrl ? (
           <img src={previewUrl} alt="Deal preview" />
@@ -106,6 +111,7 @@ function DealImageField({ deal, error, onChange }) {
       </label>
       <input
         accept="image/jpeg,image/png,image/webp"
+        aria-labelledby="deal-image-label"
         className="deal-file-input"
         id="deal-image"
         type="file"
@@ -145,6 +151,7 @@ function OfferFields({ deal, errors, onChange }) {
         }
         placeholder="10.00"
         error={errors.discountAmount}
+        helper={<GstIncluded block />}
         inputMode="decimal"
         required
       />
@@ -163,6 +170,7 @@ function OfferFields({ deal, errors, onChange }) {
           }
           placeholder="80.00"
           error={errors.originalPrice}
+          helper={<GstIncluded block />}
           inputMode="decimal"
           required
         />
@@ -173,6 +181,7 @@ function OfferFields({ deal, errors, onChange }) {
           onChange={(value) => onChange('dealPrice', sanitizeDealMoney(value))}
           placeholder="60.00"
           error={errors.dealPrice}
+          helper={<GstIncluded block />}
           inputMode="decimal"
           required
         />
@@ -254,10 +263,11 @@ export default function DealForm({
             required
           />
           <div className="form-group">
-            <label className="form-label" htmlFor="deal-category">
+            <span className="form-label" id="deal-category-label">
               Category <span className="deal-required">Required</span>
-            </label>
+            </span>
             <select
+              aria-labelledby="deal-category-label"
               aria-invalid={Boolean(errors.category)}
               className="form-input"
               id="deal-category"
@@ -293,10 +303,11 @@ export default function DealForm({
       <section className="deal-form-section">
         <h3>Offer and pricing</h3>
         <div className="form-group">
-          <label className="form-label" htmlFor="deal-offer-type">
+          <span className="form-label" id="deal-offer-type-label">
             Offer type <span className="deal-required">Required</span>
-          </label>
+          </span>
           <select
+            aria-labelledby="deal-offer-type-label"
             aria-invalid={Boolean(errors.offerType)}
             className="form-input"
             id="deal-offer-type"
@@ -313,23 +324,9 @@ export default function DealForm({
           <FieldError id="deal-offer-type-error">{errors.offerType}</FieldError>
         </div>
         <OfferFields deal={deal} errors={errors} onChange={onChange} />
-        <div className="form-group">
-          <label className="form-label" htmlFor="deal-gst">
-            GST treatment <span className="deal-required">Required</span>
-          </label>
-          <select
-            aria-invalid={Boolean(errors.gstIncluded)}
-            className="form-input"
-            id="deal-gst"
-            value={deal.gstIncluded}
-            onChange={(event) => onChange('gstIncluded', event.target.value)}
-          >
-            <option value="">Select GST treatment</option>
-            <option value="included">GST included</option>
-            <option value="excluded">GST excluded</option>
-          </select>
-          <FieldError id="deal-gst-error">{errors.gstIncluded}</FieldError>
-        </div>
+        <p className="deal-gst-policy">
+          All prices and dollar discounts are in NZD and include GST.
+        </p>
       </section>
 
       <section className="deal-form-section">

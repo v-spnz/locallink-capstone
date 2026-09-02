@@ -370,20 +370,22 @@ function BusinessBasicsStep({ form, onChange }) {
         <p>Tell customers who they will be dealing with.</p>
       </header>
 
-      <label className="business-onboarding-field">
-        <span>Business name</span>
+      <div className="business-onboarding-field">
+        <span id="business-name-label">Business name</span>
         <input
+          aria-labelledby="business-name-label"
           name="businessName"
           value={form.businessName}
           onChange={onChange}
           placeholder="e.g. Morgan Plumbing"
           required
         />
-      </label>
+      </div>
 
-      <label className="business-onboarding-field">
-        <span>Short description</span>
+      <div className="business-onboarding-field">
+        <span id="business-description-label">Short description</span>
         <textarea
+          aria-labelledby="business-description-label"
           name="description"
           value={form.description}
           onChange={onChange}
@@ -392,7 +394,7 @@ function BusinessBasicsStep({ form, onChange }) {
           maxLength="1000"
         />
         <small>{form.description.length} of 1,000 characters</small>
-      </label>
+      </div>
     </div>
   )
 }
@@ -509,9 +511,12 @@ function ConditionalSetupStep({
             </div>
           </div>
 
-          <label className="business-onboarding-field">
-            <span>Service description</span>
+          <div className="business-onboarding-field">
+            <span id="business-service-description-label">
+              Service description
+            </span>
             <textarea
+              aria-labelledby="business-service-description-label"
               name="serviceDescription"
               value={form.serviceDescription}
               onChange={onChange}
@@ -519,12 +524,15 @@ function ConditionalSetupStep({
               rows="4"
               required
             />
-          </label>
+          </div>
 
           <div className="business-onboarding-field-grid">
-            <label className="business-onboarding-field">
-              <span>Service categories</span>
+            <div className="business-onboarding-field">
+              <span id="business-service-categories-label">
+                Service categories
+              </span>
               <input
+                aria-labelledby="business-service-categories-label"
                 name="categories"
                 value={form.categories}
                 onChange={onChange}
@@ -532,11 +540,12 @@ function ConditionalSetupStep({
                 required
               />
               <small>Separate categories with commas.</small>
-            </label>
+            </div>
 
-            <label className="business-onboarding-field">
-              <span>Service areas</span>
+            <div className="business-onboarding-field">
+              <span id="business-service-areas-label">Service areas</span>
               <input
+                aria-labelledby="business-service-areas-label"
                 name="areas"
                 value={form.areas}
                 onChange={onChange}
@@ -544,19 +553,20 @@ function ConditionalSetupStep({
                 required
               />
               <small>Separate areas with commas.</small>
-            </label>
+            </div>
           </div>
 
-          <label className="business-onboarding-field">
-            <span>Availability</span>
+          <div className="business-onboarding-field">
+            <span id="business-availability-label">Availability</span>
             <input
+              aria-labelledby="business-availability-label"
               name="availability"
               value={form.availability}
               onChange={onChange}
               placeholder="e.g. Monday-Friday, 8am-5pm"
               required
             />
-          </label>
+          </div>
 
           <p className="business-verification-note">
             Service Marketplace verification starts as pending. Evidence can be

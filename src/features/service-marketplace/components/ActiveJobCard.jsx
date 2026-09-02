@@ -1,5 +1,7 @@
 import { CheckCircle2, MapPin } from 'lucide-react'
 import Button from '../../../components/ui/Button'
+import GstIncluded from '../../../components/ui/GstIncluded'
+import AcceptedJobContactDetails from './AcceptedJobContactDetails'
 import ActiveJobProgressTimeline from './ActiveJobProgressTimeline'
 import { formatMoney } from '../formatters'
 import { formatJobProgressStage, getNextJobProgressStage } from '../jobTracking'
@@ -41,6 +43,10 @@ export default function ActiveJobCard({
         )}
       </div>
       <ActiveJobProgressTimeline job={item} />
+      <AcceptedJobContactDetails
+        contactDetails={item.contact_details}
+        viewer="provider"
+      />
       {isHistory && item.status_updated_at && (
         <p className="service-history-completed-at">
           Completed{' '}
@@ -55,6 +61,7 @@ export default function ActiveJobCard({
         <strong className="business-structured-data">
           {formatMoney(item.amount_cents)}
         </strong>
+        <GstIncluded block />
         {item.message && <span>{item.message}</span>}
       </div>
       {nextStatus && (

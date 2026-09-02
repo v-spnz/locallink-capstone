@@ -15,8 +15,8 @@ export default function QuoteActionModal({
       <div style={{ padding: 24 }}>
         <h3 style={{ margin: '0 0 10px' }}>Accept this quote?</h3>
         <p style={{ margin: '0 0 22px', color: 'var(--text-muted)' }}>
-          {businessName} will receive your full address and can start the job.
-          Your other quotes will be declined.
+          You and {businessName} will be able to see each other’s account
+          contact details and saved address. Your other quotes will be declined.
         </p>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
           <Button variant="secondary" onClick={onCancel} disabled={isSaving}>

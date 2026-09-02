@@ -53,12 +53,7 @@ export function mapBusinessDeal(record) {
     originalPrice: fromCents(record.original_price_cents),
     dealPrice: fromCents(record.deal_price_cents),
     offerDetails: record.offer_details || '',
-    gstIncluded:
-      record.gst_included == null
-        ? ''
-        : record.gst_included
-          ? 'included'
-          : 'excluded',
+    gstIncluded: 'included',
     locationIds: (record.locations || []).map(({ location_id }) => location_id),
     startDate: record.start_date || '',
     endDate: record.end_date || '',
@@ -138,8 +133,7 @@ export async function saveBusinessDeal({ businessId, deal, status = 'draft' }) {
     offer_details: ['buy_one_get_one', 'other'].includes(deal.offerType)
       ? nullableText(deal.offerDetails)
       : null,
-    gst_included:
-      deal.gstIncluded === '' ? null : deal.gstIncluded === 'included',
+    gst_included: true,
     start_date: deal.startDate || null,
     end_date: deal.endDate || null,
     conditions: nullableText(deal.conditions),
