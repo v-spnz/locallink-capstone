@@ -1,3 +1,8 @@
+import {
+  findKnownCityForSuburb,
+  findKnownEnglishCity,
+} from '../localSuburbs.js'
+
 import { toSuburbLocation } from '../suburb.js'
 
 const GEOAPIFY_BASE_URL = 'https://api.geoapify.com/v1/geocode'
@@ -12,11 +17,55 @@ function apiKey() {
   return key
 }
 
+function uniqueAddressParts(parts) {
+  const seen = new Set()
+
+  return parts.filter((part) => {
+    const value = String(part || '').trim()
+    const key = value.toLocaleLowerCase()
+
+    if (!value || seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
+export function formatGeoapifyAddress(result) {
+  const street = result.address_line1 || result.name || ''
+  const suburb = result.suburb || ''
+  const city =
+    findKnownCityForSuburb(suburb) ||
+    findKnownEnglishCity(result.county, result.city, result.district) ||
+    result.city ||
+    result.county ||
+    ''
+  const cityAndPostcode = [
+    city && city.toLocaleLowerCase() !== suburb.toLocaleLowerCase() ? city : '',
+    result.postcode || '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+  const country =
+    result.country ||
+    (String(result.country_code || '').toLocaleLowerCase() === 'nz'
+      ? 'New Zealand'
+      : '')
+
+  return (
+    uniqueAddressParts([street, suburb, cityAndPostcode, country]).join(', ') ||
+    result.formatted ||
+    ''
+  )
+}
+
 function normalizeAddress(result) {
+  const formattedAddress = formatGeoapifyAddress(result)
+
   return {
     name: result.name || result.address_line1 || result.formatted,
-    formattedAddress: result.formatted,
-    addressLine1: result.address_line1 || result.formatted,
+    formattedAddress,
+    addressLine1: result.address_line1 || formattedAddress,
+
     suburb: result.suburb || '',
     district: result.district || '',
     city: result.city || result.county || '',

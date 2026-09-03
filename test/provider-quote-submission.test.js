@@ -91,7 +91,10 @@ test('quote price, date, and arrival controls use consistent interactions and sp
     ),
   ])
 
-  assert.match(form, /className="service-quote-availability-field"/)
+  assert.match(
+    form,
+    /className="service-quote-field service-quote-availability-field"/,
+  )
   assert.match(form, /event\.currentTarget\.showPicker\(\)/)
   assert.match(form, /onClick=\{openAvailabilityPicker\}/)
   assert.match(

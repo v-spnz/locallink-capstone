@@ -3,14 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import useAuth from '../../auth/useAuth'
 import { supabase } from '../../lib/supabase'
 import {
+  fetchBusinessesInSavedSuburb,
   fetchCustomerLocation,
-  fetchNearbyBusinesses,
 } from '../../features/location/api/locations'
 
-// Keeping this small on purpose - 5km still feels "local", 20km (the old
-// slider's max) doesn't really. Radius isn't a homepage control anymore
-// per Jim's feedback so this is just a fixed number now, not state.
-const NEARBY_RADIUS_KM = 5
 const DEAL_DISPLAY_COUNT = 4 // 1 featured + 3 in the list, matches the wireframe
 
 // Loyalty remains preview data until the loyalty catalogue is connected.
@@ -52,7 +48,7 @@ export default function Home() {
   const [search, setSearch] = useState('')
   const [accountJobs, setAccountJobs] = useState([])
   const [customerLocation, setCustomerLocation] = useState(null)
-  const [nearbyResults, setNearbyResults] = useState([])
+  const [suburbResults, setSuburbResults] = useState([])
 
   useEffect(() => {
     let active = true
@@ -102,25 +98,21 @@ export default function Home() {
 
   useEffect(() => {
     let active = true
-    async function loadNearbyBusinesses() {
+    async function loadSuburbBusinesses() {
       try {
         const savedLocation = await fetchCustomerLocation()
         if (!savedLocation) return
-        const results = await fetchNearbyBusinesses({
-          latitude: savedLocation.latitude,
-          longitude: savedLocation.longitude,
-          radiusKm: NEARBY_RADIUS_KM,
-          category: 'All',
-        })
+        const results = await fetchBusinessesInSavedSuburb()
         if (active) {
           setCustomerLocation(savedLocation)
-          setNearbyResults(results)
+          setSuburbResults(results)
         }
       } catch (error) {
-        console.error('Unable to load nearby businesses.', error)
+        console.error('Unable to load businesses in the saved suburb.', error)
       }
     }
-    loadNearbyBusinesses()
+    loadSuburbBusinesses()
+
     return () => {
       active = false
     }
@@ -128,7 +120,7 @@ export default function Home() {
 
   const displayedJobs = user ? accountJobs : previewJobs
 
-  const nearbyBusinesses = nearbyResults
+  const suburbBusinesses = suburbResults
     .filter((business) => {
       const query = search.trim().toLowerCase()
       return (
@@ -141,8 +133,8 @@ export default function Home() {
 
   // First result shows big as the "featured" one, the rest go in the
   // plain list below it - same split as the approved draft.
-  const featuredBusiness = nearbyBusinesses[0]
-  const otherBusinesses = nearbyBusinesses.slice(1)
+  const featuredBusiness = suburbBusinesses[0]
+  const otherBusinesses = suburbBusinesses.slice(1)
 
   const stampsRemaining = loyaltyCard.stampsTotal - loyaltyCard.stampsFilled
 
@@ -180,7 +172,7 @@ export default function Home() {
         <div>
           {/* Deals Near You - everything here goes to Deals & Discovery */}
           <div className="home-section-head">
-            <h3>Deals near you</h3>
+            <h3>Deals in your suburb</h3>
             <button
               className="section-link-btn"
               onClick={() => navigate('/deals')}
@@ -189,14 +181,14 @@ export default function Home() {
             </button>
           </div>
           <p className="home-section-note">
-            Closest first, all within walking distance of you.
+            Closest first, all in your registered suburb.
           </p>
 
-          {nearbyBusinesses.length === 0 ? (
+          {suburbBusinesses.length === 0 ? (
             <div className="empty-state">
               {search
-                ? `No businesses match "${search}" within ${NEARBY_RADIUS_KM}km.`
-                : 'No businesses found nearby right now.'}
+                ? `No businesses match "${search}" in your suburb.`
+                : 'No businesses or deals are available in your suburb right now.'}
             </div>
           ) : (
             <>

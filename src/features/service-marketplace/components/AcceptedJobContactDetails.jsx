@@ -1,4 +1,5 @@
 import { Mail, MapPin, Phone, ShieldCheck, UserRound } from 'lucide-react'
+import { formatSavedAddress } from '../../location/addressFormatting'
 
 function ContactRow({ icon: Icon, label, children }) {
   if (!Icon || !children) return null
@@ -30,9 +31,11 @@ export default function AcceptedJobContactDetails({ contactDetails, viewer }) {
   const phone = viewingAsConsumer
     ? contactDetails.provider_phone
     : contactDetails.consumer_phone
-  const address = viewingAsConsumer
-    ? contactDetails.provider_address
-    : contactDetails.consumer_address
+  const address = formatSavedAddress(
+    viewingAsConsumer
+      ? contactDetails.provider_address
+      : contactDetails.consumer_address,
+  )
   const title = viewingAsConsumer
     ? 'Accepted provider contact'
     : 'Customer contact'
