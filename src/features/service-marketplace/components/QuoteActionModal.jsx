@@ -20,7 +20,7 @@ export default function QuoteActionModal({
         <p style={{ margin: '0 0 22px', color: 'var(--text-muted)' }}>
           {isDecline
             ? `${businessName} will be notified that you've gone with another provider. This can't be undone.`
-            : `${businessName} will receive your full address and can start the job. Your other quotes will be declined.`}
+            : `You and ${businessName} will be able to see each other’s account contact details and saved address. Your other quotes will be declined.`}
         </p>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
           <Button variant="secondary" onClick={onCancel} disabled={isSaving}>
