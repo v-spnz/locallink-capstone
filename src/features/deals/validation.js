@@ -118,7 +118,7 @@ export function validateDeal(deal, { forPublication = false } = {}) {
   }
 
   if (forPublication && (!deal.locationIds || deal.locationIds.length === 0))
-    errors.locationIds = 'Select at least one participating location.'
+    errors.locationIds = 'Add a business address before publishing.'
 
   if (forPublication && !deal.startDate)
     errors.startDate = 'Select a start date.'

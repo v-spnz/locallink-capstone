@@ -95,17 +95,6 @@ export default function useBusinessDeals() {
     setHasUnsavedChanges(true)
   }
 
-  function toggleLocation(locationId) {
-    setForm((current) => ({
-      ...current,
-      locationIds: current.locationIds.includes(locationId)
-        ? current.locationIds.filter((id) => id !== locationId)
-        : [...current.locationIds, locationId],
-    }))
-    setErrors((current) => ({ ...current, locationIds: '' }))
-    setHasUnsavedChanges(true)
-  }
-
   function setImage(file) {
     setForm((current) => ({
       ...current,
@@ -174,7 +163,10 @@ export default function useBusinessDeals() {
     setSuccessMessage('')
     setRequestError('')
     setErrors({})
-    setForm(newDeal())
+    setForm({
+      ...newDeal(),
+      locationIds: locations[0]?.id ? [locations[0].id] : [],
+    })
     setHasUnsavedChanges(false)
     setStep('form')
   }
@@ -182,7 +174,11 @@ export default function useBusinessDeals() {
   function handleEditDeal(dealId) {
     const deal = deals.find((item) => item.id === dealId)
     if (!deal) return
-    setForm({ ...deal, locationIds: [...deal.locationIds], imageFile: null })
+    setForm({
+      ...deal,
+      locationIds: locations[0]?.id ? [locations[0].id] : [],
+      imageFile: null,
+    })
     setErrors({})
     setSuccessMessage('')
     setRequestError('')
@@ -218,7 +214,6 @@ export default function useBusinessDeals() {
     hasUnsavedChanges,
     setField,
     setImage,
-    toggleLocation,
     handleReview,
     handleSaveDraft: () => persist('draft'),
     handleConfirmPublish: () => persist('published'),

@@ -107,10 +107,26 @@
   border-top: 1px solid var(--border);
 }
 
+.deal-form > .deal-form-section:first-of-type {
+  border-top: 0;
+}
+
 .deal-form-section h3 {
-  margin: 0 0 16px;
+  margin: 0;
   color: var(--text);
   font-size: 15px;
+}
+
+.deal-form-section-heading {
+  margin-bottom: 18px;
+}
+
+.deal-form-section-heading p {
+  max-width: 52ch;
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .deal-gst-policy {
@@ -124,6 +140,13 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+}
+
+.deal-basics-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.75fr);
+  gap: 16px;
+  align-items: start;
 }
 
 .deal-textarea {
@@ -142,18 +165,24 @@
 }
 
 .deal-image-picker {
-  min-height: 150px;
+  min-height: 96px;
+  padding: 9px;
   border: 1.5px dashed #bac5d8;
   border-radius: var(--radius);
-  display: flex;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
   overflow: hidden;
   background: #f8faff;
   color: var(--text-muted);
   cursor: pointer;
   font-size: 12px;
-  text-align: center;
+  text-align: left;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease;
 }
 
 .deal-image-picker:hover {
@@ -161,20 +190,61 @@
   background: var(--blue-light);
 }
 
-.deal-image-picker span {
-  display: grid;
-  gap: 5px;
+.deal-image-picker:has(+ .deal-file-input:focus-visible) {
+  border-color: var(--blue);
+  background: var(--blue-light);
+  outline: 3px solid rgb(63 91 211 / 22%);
+  outline-offset: 2px;
 }
 
-.deal-image-picker strong {
+.deal-image-picker:active {
+  transform: translateY(1px);
+}
+
+.deal-image-thumbnail {
+  width: 76px;
+  height: 76px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #e9edf6;
+  color: var(--blue);
+}
+
+.deal-image-thumbnail svg {
+  width: 24px;
+  height: 24px;
+}
+
+.deal-image-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.deal-image-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.deal-image-copy strong {
   color: var(--blue);
   font-size: 14px;
 }
 
-.deal-image-picker img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
+.deal-image-copy small {
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.deal-image-action {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .deal-file-input {
@@ -191,35 +261,29 @@
   border: 0;
 }
 
-.deal-location-options {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.deal-location-options label {
+.deal-business-address {
+  min-height: 48px;
   padding: 11px 13px;
-  border: 1.5px solid var(--border);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   display: flex;
   align-items: center;
   gap: 9px;
-  background: var(--white);
-  cursor: pointer;
+  background: #f8faff;
+  color: var(--text);
   font-size: 14px;
-}
-
-.deal-location-options label:has(input:checked) {
-  border-color: var(--blue);
-  background: var(--blue-light);
-  color: var(--blue-dark);
   font-weight: 600;
 }
 
-.deal-location-options input {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--blue);
+.deal-business-address > svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  color: var(--blue);
+}
+
+.deal-business-address > span {
+  line-height: 1.4;
 }
 
 .deal-location-empty {
@@ -262,7 +326,6 @@
   text-decoration: underline;
 }
 
-.deal-detail-image,
 .deal-review-image {
   width: 100%;
   max-height: 260px;
@@ -286,13 +349,26 @@
   }
 
   .deal-field-grid,
-  .deal-location-options {
+  .deal-basics-detail-grid {
     grid-template-columns: 1fr;
     gap: 0;
   }
 
-  .deal-location-options {
-    gap: 8px;
+  .deal-basics-detail-grid {
+    gap: 0;
+  }
+
+  .deal-image-picker {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .deal-image-thumbnail {
+    width: 64px;
+    height: 64px;
+  }
+
+  .deal-image-action {
+    display: none;
   }
 
   .deal-form-actions {

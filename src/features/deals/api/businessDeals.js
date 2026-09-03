@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabase'
+import { selectBusinessDealLocation } from '../businessLocation'
 
 const DEAL_FIELDS = `
   id,
@@ -77,17 +78,22 @@ export async function fetchBusinessDeals(businessId) {
       .order('updated_at', { ascending: false }),
     supabase
       .from('business_locations')
-      .select('id, name')
+      .select('id, name, address_line1, suburb, city, postcode, is_primary')
       .eq('business_id', businessId)
+      .order('is_primary', { ascending: false })
       .order('name'),
   ])
 
   if (dealsResult.error) throw dealsResult.error
   if (locationsResult.error) throw locationsResult.error
 
+  const businessLocation = selectBusinessDealLocation(
+    locationsResult.data || [],
+  )
+
   return {
     deals: (dealsResult.data || []).map(mapBusinessDeal),
-    locations: locationsResult.data || [],
+    locations: businessLocation ? [businessLocation] : [],
   }
 }
 

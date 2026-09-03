@@ -1,5 +1,4 @@
 import Button from '../../../components/ui/Button'
-import GstIncluded from '../../../components/ui/GstIncluded'
 import localBusinessNeighbourhood from '../../../assets/images/local-business-neighbourhood.jpg'
 import {
   BadgePercent,
@@ -7,8 +6,6 @@ import {
   ChevronDown,
   Clock3,
   ImageIcon,
-  Info,
-  MapPin,
   Plus,
 } from 'lucide-react'
 import { formatDealOffer } from '../constants'
@@ -54,7 +51,6 @@ function getExpiryDetail(endDate) {
 
 export default function DealList({
   deals,
-  locations,
   selectedDealId,
   successMessage,
   onCreate,
@@ -130,7 +126,7 @@ export default function DealList({
           {deals.map((deal) => {
             const selected = selectedDealId === deal.id
             const expiry = getExpiryDetail(deal.endDate)
-            const locationCount = deal.locationIds.length
+            const detailId = `deal-details-${deal.id}`
 
             return (
               <article
@@ -142,6 +138,7 @@ export default function DealList({
                   className="deal-list-row"
                   onClick={() => onSelect(deal.id)}
                   aria-expanded={selected}
+                  aria-controls={detailId}
                 >
                   <span className="deal-card-media">
                     {deal.imageUrl ? (
@@ -158,10 +155,7 @@ export default function DealList({
 
                   <span className="deal-card-copy">
                     <span className="deal-card-heading">
-                      <span>
-                        <small>{deal.category || 'Uncategorised deal'}</small>
-                        <strong>{deal.title || 'Untitled deal draft'}</strong>
-                      </span>
+                      <small>{deal.category || 'Uncategorised deal'}</small>
                       <span
                         className={`deal-status ${
                           deal.status === 'draft' ? 'is-draft' : ''
@@ -170,10 +164,12 @@ export default function DealList({
                         {deal.status === 'published' ? 'Published' : 'Draft'}
                       </span>
                     </span>
+                    <strong className="deal-card-title">
+                      {deal.title || 'Untitled deal draft'}
+                    </strong>
 
                     <span className="deal-card-offer">
                       {formatDealOffer(deal) || 'Offer details not set'}
-                      <GstIncluded />
                     </span>
                     <span className="deal-card-description">
                       {deal.description ||
@@ -191,20 +187,6 @@ export default function DealList({
                           ? `Starts ${formatDealDate(deal.startDate)}`
                           : 'Start date not set'}
                       </span>
-                      <span>
-                        <MapPin aria-hidden="true" />
-                        {locationCount > 0
-                          ? `${locationCount} ${locationCount === 1 ? 'location' : 'locations'}`
-                          : 'No locations selected'}
-                      </span>
-                    </span>
-
-                    <span className="deal-card-condition">
-                      <Info aria-hidden="true" />
-                      <span>
-                        <strong>Conditions</strong>
-                        {deal.conditions || 'No conditions added yet.'}
-                      </span>
                     </span>
                   </span>
 
@@ -214,8 +196,8 @@ export default function DealList({
                 </button>
                 {selected && (
                   <DealDetails
+                    id={detailId}
                     deal={deal}
-                    locations={locations}
                     onClose={onClose}
                     onEdit={() => onEdit(deal.id)}
                   />

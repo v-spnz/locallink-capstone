@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from 'react'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ImagePlus, MapPin } from 'lucide-react'
 import Button from '../../../components/ui/Button'
 import GstIncluded from '../../../components/ui/GstIncluded'
+import { formatBusinessDealAddress } from '../businessLocation'
 import { DEAL_CATEGORIES, DEAL_OFFER_TYPES } from '../constants'
 import {
   sanitizeClaimLimit,
@@ -95,23 +96,31 @@ function DealImageField({ deal, error, onChange }) {
   }, [deal.imageFile, previewUrl])
 
   return (
-    <div className="form-group">
+    <div className="form-group deal-image-field">
       <span className="form-label" id="deal-image-label">
-        Agreed deal image <span className="deal-required">Required</span>
+        Deal image <span className="deal-required">Required</span>
       </span>
       <label className="deal-image-picker" htmlFor="deal-image">
-        {previewUrl ? (
-          <img src={previewUrl} alt="Deal preview" />
-        ) : (
-          <span>
-            <strong>Choose image</strong>
-            JPG, PNG or WebP, up to 5 MB
-          </span>
-        )}
+        <span className="deal-image-thumbnail">
+          {previewUrl ? (
+            <img src={previewUrl} alt="Deal preview" />
+          ) : (
+            <ImagePlus aria-hidden="true" />
+          )}
+        </span>
+        <span className="deal-image-copy">
+          <strong>{previewUrl ? 'Replace image' : 'Add an image'}</strong>
+          <small>JPG, PNG or WebP, up to 5 MB</small>
+        </span>
+        <span className="deal-image-action" aria-hidden="true">
+          Choose file
+        </span>
       </label>
       <input
         accept="image/jpeg,image/png,image/webp"
         aria-labelledby="deal-image-label"
+        aria-describedby={error ? 'deal-image-error' : undefined}
+        aria-invalid={Boolean(error)}
         className="deal-file-input"
         id="deal-image"
         type="file"
@@ -215,7 +224,6 @@ export default function DealForm({
   requestError,
   onChange,
   onImageChange,
-  onToggleLocation,
   onBack,
   onSaveDraft,
   onSubmit,
@@ -234,11 +242,11 @@ export default function DealForm({
       <div className="deal-form-heading">
         <div>
           <div className="placeholder-section-title is-complete">
-            {isEditing ? 'Edit deal' : 'Prepare deal draft'}
+            {isEditing ? 'Edit deal details' : 'Deal details'}
           </div>
           <p>
-            Save at any time. Drafts stay private until every required field is
-            complete and you publish.
+            Complete the required fields, then review everything before you
+            publish. You can save a private draft at any time.
           </p>
         </div>
         <span className="deal-status is-draft">Draft</span>
@@ -251,7 +259,10 @@ export default function DealForm({
       )}
 
       <section className="deal-form-section">
-        <h3>Deal basics</h3>
+        <div className="deal-form-section-heading">
+          <h3>Deal basics</h3>
+          <p>The essentials customers will see first.</p>
+        </div>
         <div className="deal-field-grid">
           <FormField
             id="deal-title"
@@ -284,24 +295,29 @@ export default function DealForm({
             <FieldError id="deal-category-error">{errors.category}</FieldError>
           </div>
         </div>
-        <TextAreaField
-          id="deal-description"
-          label="Description"
-          value={deal.description}
-          onChange={(value) => onChange('description', value)}
-          placeholder="Explain what the customer receives and why it is valuable."
-          error={errors.description}
-          required
-        />
-        <DealImageField
-          deal={deal}
-          error={errors.image}
-          onChange={onImageChange}
-        />
+        <div className="deal-basics-detail-grid">
+          <TextAreaField
+            id="deal-description"
+            label="Description"
+            value={deal.description}
+            onChange={(value) => onChange('description', value)}
+            placeholder="Explain what the customer receives and why it is valuable."
+            error={errors.description}
+            required
+          />
+          <DealImageField
+            deal={deal}
+            error={errors.image}
+            onChange={onImageChange}
+          />
+        </div>
       </section>
 
       <section className="deal-form-section">
-        <h3>Offer and pricing</h3>
+        <div className="deal-form-section-heading">
+          <h3>Offer and pricing</h3>
+          <p>Choose how the customer saving is calculated.</p>
+        </div>
         <div className="form-group">
           <span className="form-label" id="deal-offer-type-label">
             Offer type <span className="deal-required">Required</span>
@@ -330,28 +346,21 @@ export default function DealForm({
       </section>
 
       <section className="deal-form-section">
-        <h3>Participating locations and dates</h3>
+        <div className="deal-form-section-heading">
+          <h3>Availability</h3>
+          <p>Your business address and the dates this deal is available.</p>
+        </div>
         <fieldset className="deal-location-fieldset">
-          <legend className="form-label">
-            Locations <span className="deal-required">Required</span>
-          </legend>
+          <legend className="form-label">Business address</legend>
           {locations.length === 0 ? (
             <p className="deal-location-empty">
               No business location was added during registration. A location is
               required before publishing.
             </p>
           ) : (
-            <div className="deal-location-options">
-              {locations.map((location) => (
-                <label key={location.id}>
-                  <input
-                    type="checkbox"
-                    checked={deal.locationIds.includes(location.id)}
-                    onChange={() => onToggleLocation(location.id)}
-                  />
-                  <span>{location.name}</span>
-                </label>
-              ))}
+            <div className="deal-business-address">
+              <MapPin aria-hidden="true" />
+              <span>{formatBusinessDealAddress(locations[0])}</span>
             </div>
           )}
           <FieldError id="deal-locations-error">
@@ -382,7 +391,10 @@ export default function DealForm({
       </section>
 
       <section className="deal-form-section">
-        <h3>Conditions and redemption</h3>
+        <div className="deal-form-section-heading">
+          <h3>Conditions and redemption</h3>
+          <p>Set the limits and explain how the deal is claimed.</p>
+        </div>
         <TextAreaField
           id="deal-conditions"
           label="Conditions"

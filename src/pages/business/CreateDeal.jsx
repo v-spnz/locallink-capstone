@@ -25,7 +25,6 @@ export default function CreateDeal() {
       {!deals.isLoading && deals.step === 'list' && (
         <DealList
           deals={deals.deals}
-          locations={deals.locations}
           selectedDealId={deals.selectedDealId}
           successMessage={deals.successMessage}
           onCreate={deals.handleStartNewDeal}
@@ -54,7 +53,6 @@ export default function CreateDeal() {
           requestError={deals.requestError}
           onChange={deals.setField}
           onImageChange={deals.setImage}
-          onToggleLocation={deals.toggleLocation}
           onBack={deals.handleBackToList}
           onSaveDraft={deals.handleSaveDraft}
           onSubmit={deals.handleReview}

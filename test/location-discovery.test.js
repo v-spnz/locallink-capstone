@@ -157,8 +157,6 @@ test('consumer discovery is derived from the authenticated saved suburb', async 
     /lower\(trim\(location\.suburb\)\) = lower\(origin\.suburb\)/,
   )
   assert.doesNotMatch(migration, /p_latitude|p_longitude|p_radius_km/)
-})
-
   assert.match(migration, /order by candidate\.distance_km/i)
 })
 
@@ -186,10 +184,6 @@ test('discovery uses Supabase results and a react-leaflet map instead of mocks',
   assert.match(profile, /showCurrentLocation=\{false\}/)
   assert.match(portal, /path="home"[\s\S]+<ProtectedRoute>[\s\S]+<Home \/>/)
   assert.match(portal, /path="deals"[\s\S]+<ProtectedRoute>[\s\S]+<Deals \/>/)
-
-  assert.doesNotMatch(deals, /USER_LOCATION|mockBusinesses|getDistanceKm/)
-  assert.doesNotMatch(home, /USER_LOCATION|mockBusinesses|getDistanceKm/)
-  assert.doesNotMatch(deals, /Map Preview|map-placeholder/)
 
   assert.doesNotMatch(deals, /USER_LOCATION|mockBusinesses|getDistanceKm/)
   assert.doesNotMatch(home, /USER_LOCATION|mockBusinesses|getDistanceKm/)

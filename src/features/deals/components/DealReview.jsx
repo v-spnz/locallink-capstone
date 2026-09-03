@@ -2,6 +2,7 @@ import Button from '../../../components/ui/Button'
 import GstIncluded from '../../../components/ui/GstIncluded'
 import { CalendarDays, CheckCircle2, MapPin, ReceiptText } from 'lucide-react'
 import { formatDealOffer, getOfferTypeLabel } from '../constants'
+import { formatBusinessDealAddress } from '../businessLocation'
 
 function ReviewRow({ label, value }) {
   return (
@@ -20,10 +21,9 @@ export default function DealReview({
   onBack,
   onConfirm,
 }) {
-  const locationNames = locations
-    .filter(({ id }) => deal.locationIds.includes(id))
-    .map(({ name }) => name)
-    .join(', ')
+  const businessAddress = formatBusinessDealAddress(
+    locations.find(({ id }) => deal.locationIds.includes(id)) || locations[0],
+  )
 
   return (
     <div className="placeholder-section deal-review">
@@ -89,11 +89,11 @@ export default function DealReview({
           <CalendarDays aria-hidden="true" />
           <div>
             <h3>Where and when</h3>
-            <p>Availability and participating locations.</p>
+            <p>The business address and deal period.</p>
           </div>
         </div>
         <div className="deal-review-rows">
-          <ReviewRow label="Participating locations" value={locationNames} />
+          <ReviewRow label="Business address" value={businessAddress} />
           <ReviewRow
             label="Deal period"
             value={`${deal.startDate} to ${deal.endDate}`}
@@ -102,7 +102,7 @@ export default function DealReview({
         </div>
         <p className="deal-review-location-note">
           <MapPin aria-hidden="true" />
-          Customers will only see this deal at the selected locations.
+          This deal uses the address saved to your business account.
         </p>
       </section>
 

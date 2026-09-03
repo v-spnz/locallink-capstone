@@ -137,7 +137,6 @@ export default function Profile() {
           LocalLink uses this suburb for all business and deal discovery. You
           can update it here if you move.
         </p>
-        </p>
         <AddressAutocomplete
           key={customerLocation?.formattedAddress || 'profile-location'}
           id="profile-address"
@@ -146,7 +145,6 @@ export default function Profile() {
           bias={customerLocation}
           showCurrentLocation={false}
           searchType="suburb"
-
           onSelect={handleLocationSelect}
         />
         {locationStatus && (

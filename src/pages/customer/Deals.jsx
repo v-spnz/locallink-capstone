@@ -4,7 +4,6 @@ import {
   fetchBusinessesInSavedSuburb,
   fetchCustomerLocation,
 } from '../../features/location/api/locations'
-} from '../../features/location/api/locations'
 import '../../features/location/discovery.css'
 
 const DiscoveryMap = lazy(
@@ -109,6 +108,8 @@ export default function Deals() {
         <div className="auth-error" role="alert">
           {error}
         </div>
+      )}
+
       {location ? (
         <Suspense
           fallback={<div className="discovery-map-empty">Loading map…</div>}
@@ -120,8 +121,6 @@ export default function Deals() {
           {isLoadingLocation
             ? 'Loading your registered suburb...'
             : 'Add your suburb in Profile to discover local businesses.'}
-        </div>
-      )
         </div>
       )}
 

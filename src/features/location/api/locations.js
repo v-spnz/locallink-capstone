@@ -68,28 +68,6 @@ export async function fetchBusinessesInSavedSuburb(category = 'All') {
     p_category: category === 'All' ? null : category,
   })
   if (error) throw error
-  return data
-}
-
-export async function fetchNearbyBusinesses({
-  latitude,
-  longitude,
-  radiusKm,
-  category,
-}) {
-  const { data, error } = await supabase.rpc('nearby_businesses', {
-    p_latitude: latitude,
-    p_longitude: longitude,
-    p_radius_km: radiusKm,
-    p_category: category === 'All' ? null : category,
-  })
-  if (error) throw error
-  return data
-}
-
-    p_category: category === 'All' ? null : category,
-  })
-  if (error) throw error
   return data || []
 }
 

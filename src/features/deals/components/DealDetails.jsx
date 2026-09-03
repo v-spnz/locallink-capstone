@@ -1,7 +1,5 @@
 import Button from '../../../components/ui/Button'
-import GstIncluded from '../../../components/ui/GstIncluded'
-import { CalendarDays, MapPin, ReceiptText, Tag } from 'lucide-react'
-import { formatDealOffer, getOfferTypeLabel } from '../constants'
+import { ReceiptText, Tag } from 'lucide-react'
 
 function DetailRow({ label, value }) {
   return (
@@ -12,71 +10,46 @@ function DetailRow({ label, value }) {
   )
 }
 
-export default function DealDetails({ deal, locations, onClose, onEdit }) {
-  const locationNames = locations
-    .filter(({ id }) => deal.locationIds.includes(id))
-    .map(({ name }) => name)
-    .join(', ')
-
+export default function DealDetails({ id, deal, onClose, onEdit }) {
   return (
-    <div className="deal-details">
-      <div className="deal-detail-overview">
-        {deal.imageUrl && (
-          <img
-            className="deal-detail-image"
-            src={deal.imageUrl}
-            alt={`Preview for ${deal.title || 'deal draft'}`}
-          />
-        )}
-        <div className="deal-detail-offer">
-          <span>
-            {getOfferTypeLabel(deal.offerType) || 'Offer type not set'}
-          </span>
-          <strong>{formatDealOffer(deal) || 'Offer details not set'}</strong>
-          <GstIncluded block />
-          <p>{deal.description || 'No customer-facing description added.'}</p>
+    <div id={id} className="deal-details">
+      <div className="deal-details-heading">
+        <div>
+          <h3>Deal details</h3>
+          <p>Claim limits, customer terms and redemption information.</p>
         </div>
       </div>
 
-      <div className="deal-detail-section-heading">
-        <Tag aria-hidden="true" />
-        <h3>Offer setup</h3>
-      </div>
-      <dl className="deal-detail-grid">
-        <DetailRow label="Category" value={deal.category} />
-        <DetailRow label="GST treatment" value="GST Included" />
-        <DetailRow
-          label="Claim limit"
-          value={deal.claimLimit ? `${deal.claimLimit} total claims` : ''}
-        />
-        <DetailRow label="Status" value={deal.status} />
-      </dl>
+      <div className="deal-detail-sections">
+        <section className="deal-detail-section">
+          <div className="deal-detail-section-heading">
+            <Tag aria-hidden="true" />
+            <h4>Claim details</h4>
+          </div>
+          <dl className="deal-detail-list">
+            <DetailRow
+              label="Claim limit"
+              value={deal.claimLimit ? `${deal.claimLimit} total claims` : ''}
+            />
+            <DetailRow
+              label="How to redeem"
+              value={deal.redemptionInstructions}
+            />
+          </dl>
+        </section>
 
-      <div className="deal-detail-section-heading">
-        <CalendarDays aria-hidden="true" />
-        <h3>Availability</h3>
+        <section className="deal-detail-section">
+          <div className="deal-detail-section-heading">
+            <ReceiptText aria-hidden="true" />
+            <h4>Conditions and exclusions</h4>
+          </div>
+          <dl className="deal-detail-list">
+            <DetailRow label="Conditions" value={deal.conditions} />
+            <DetailRow label="Exclusions" value={deal.exclusions} />
+          </dl>
+        </section>
       </div>
-      <dl className="deal-detail-grid">
-        <DetailRow label="Starts" value={deal.startDate} />
-        <DetailRow label="Expires" value={deal.endDate} />
-      </dl>
-      <p className="deal-detail-location-line">
-        <MapPin aria-hidden="true" />
-        <span>
-          <strong>Participating locations</strong>
-          {locationNames || 'No locations selected'}
-        </span>
-      </p>
 
-      <div className="deal-detail-section-heading">
-        <ReceiptText aria-hidden="true" />
-        <h3>Customer terms</h3>
-      </div>
-      <dl className="deal-detail-grid is-single-column">
-        <DetailRow label="Conditions" value={deal.conditions} />
-        <DetailRow label="Exclusions" value={deal.exclusions} />
-        <DetailRow label="How to redeem" value={deal.redemptionInstructions} />
-      </dl>
       <div className="deal-actions">
         <Button variant="secondary" onClick={onClose}>
           Close
