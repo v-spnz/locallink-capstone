@@ -2578,3 +2578,14 @@ details.sm-past-jobs[open] .sm-past-chev {
 .sm-decline-confirm-btn.btn-primary:hover {
   background: #a61e1e;
 }
+
+
+/* Solid red confirm button for the delete confirmation modal */
+.sm-delete-confirm-btn.btn-primary {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.sm-delete-confirm-btn.btn-primary:hover {
+  background: #a61e1e;
+}

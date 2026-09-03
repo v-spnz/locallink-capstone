@@ -92,10 +92,16 @@ export default function Jobs() {
           }
           onBack={marketplace.closeJobDetail}
           onEdit={marketplace.openEditModal}
-          onRepost={marketplace.openRepostModal}
-          onDelete={marketplace.handleDeleteJob}
+          onRepost={marketplace.handleRepostClick}
+          onDelete={marketplace.handleDeleteClick}
           onViewQuotes={marketplace.viewQuotesForJob}
           onConfirmCompletion={marketplace.handleConfirmCompletion}
+          repostPrompt={marketplace.repostPrompt}
+          onRepostConfirm={marketplace.confirmRepost}
+          onRepostDismiss={marketplace.dismissRepostPrompt}
+          deletePrompt={marketplace.deletePrompt}
+          onDeleteConfirm={marketplace.confirmDeletePrompt}
+          onDeleteDismiss={marketplace.dismissDeletePrompt}
         />
       )}
 

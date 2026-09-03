@@ -111,6 +111,18 @@ export function getActiveQuoteCount(quotes) {
   return quotes.filter((quote) => quote.quote_status !== 'declined').length
 }
 
+// true once a job's preferred date has passed; a job with no date set is never blocked on this.
+export function isJobDateInPast(jobDate) {
+  if (!jobDate) return true
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const preferredDate = new Date(jobDate)
+  preferredDate.setHours(0, 0, 0, 0)
+
+  return preferredDate < today
+}
+
 // initials shown on a quote's avatar, e.g. "Justine's Carpentry" -> "JC"
 export function getInitials(name = '') {
   const words = name.trim().split(/\s+/).filter(Boolean)
