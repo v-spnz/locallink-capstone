@@ -12,7 +12,19 @@ export default function ProtectedRoute({ children }) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace state={{ from: location }} />
+    return (
+      <Navigate
+        to="/register"
+        replace
+        state={{
+          from: location,
+          startAt: 'account',
+          intent: location.pathname.startsWith('/business')
+            ? 'business'
+            : 'personal',
+        }}
+      />
+    )
   }
 
   return children

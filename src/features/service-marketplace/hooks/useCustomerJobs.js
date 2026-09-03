@@ -265,7 +265,11 @@ export default function useCustomerJobs() {
       if (updatedQuote?.business_id) {
         notifyBusinessMarketplaceChanged(updatedQuote.business_id)
       }
-      setSuccessMessage(accept ? 'Quote accepted!' : 'Quote declined.')
+      setSuccessMessage(
+        accept
+          ? 'Quote accepted — contact details are now available in the job.'
+          : 'Quote declined.',
+      )
       setReloadKey((current) => current + 1)
     } catch {
       setRequestError(

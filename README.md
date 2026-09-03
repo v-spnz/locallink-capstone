@@ -1,5 +1,20 @@
 # React + Vite
 
+## Local configuration
+
+Copy `.env.example` to `.env` and provide the Supabase credentials plus a
+Geoapify project key:
+
+```text
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_PUBLISHABLE_KEY=...
+VITE_GEOAPIFY_API_KEY=...
+```
+
+Restrict the Geoapify browser key to the application origins in the Geoapify
+project settings. Address search is limited to New Zealand; browser
+geolocation can also be used after the user grants permission.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

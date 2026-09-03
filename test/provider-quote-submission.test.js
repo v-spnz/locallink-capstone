@@ -73,6 +73,124 @@ test('quote price accepts currency digits only', () => {
   )
 })
 
+test('quote price, date, and arrival controls use consistent interactions and spacing', async () => {
+  const [form, styles] = await Promise.all([
+    readFile(
+      new URL(
+        '../src/features/service-marketplace/components/QuoteForm.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/service-marketplace/ServiceMarketplace.css',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
+
+  assert.match(
+    form,
+    /className="service-quote-field service-quote-availability-field"/,
+  )
+  assert.match(form, /event\.currentTarget\.showPicker\(\)/)
+  assert.match(form, /onClick=\{openAvailabilityPicker\}/)
+  assert.match(
+    styles,
+    /\.service-quote-field,[\s\S]*\.service-arrival-window-field \{[\s\S]*align-content: start/,
+  )
+  assert.match(styles, /\.service-quote-form-grid \{[\s\S]*align-items: start/)
+  assert.match(
+    styles,
+    /\.service-price-prefix \{[\s\S]*pointer-events: none;[\s\S]*user-select: none/,
+  )
+})
+
+test('quote field titles do not activate controls outside their boxes', async () => {
+  const form = await readFile(
+    new URL(
+      '../src/features/service-marketplace/components/QuoteForm.jsx',
+      import.meta.url,
+    ),
+    'utf8',
+  )
+
+  assert.doesNotMatch(form, /<label/)
+  assert.match(form, /id="quote-price-type-label"/)
+  assert.match(form, /aria-labelledby="quote-price-type-label"/)
+  assert.match(form, /id="quote-availability-label"/)
+  assert.match(form, /aria-labelledby="quote-availability-label"/)
+  assert.match(
+    form,
+    /aria-labelledby="quote-arrival-window-label quote-arrival-start-label"/,
+  )
+  assert.match(form, /aria-labelledby="quote-included-work-label"/)
+})
+
+test('interactive and typing controls use the expected cursor', async () => {
+  const styles = await readFile(
+    new URL('../src/styles/base.css', import.meta.url),
+    'utf8',
+  )
+
+  assert.match(styles, /button:not\(:disabled\)/)
+  assert.match(styles, /select:not\(:disabled\)/)
+  assert.match(styles, /input\[type='date'\]:not\(:disabled\)/)
+  assert.match(styles, /cursor: pointer/)
+  assert.match(styles, /input\[type='text'\]/)
+  assert.match(styles, /textarea/)
+  assert.match(styles, /cursor: text/)
+  assert.match(styles, /cursor: not-allowed/)
+})
+
+test('business form field containers do not enlarge their control hit areas', async () => {
+  const [onboarding, marketplace] = await Promise.all([
+    readFile(
+      new URL('../src/pages/business/BusinessOnboarding.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/pages/business/ServiceMarketplacePage.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
+
+  assert.doesNotMatch(
+    onboarding,
+    /<label className="business-onboarding-field"/,
+  )
+  assert.match(onboarding, /aria-labelledby="business-name-label"/)
+  assert.match(onboarding, /aria-labelledby="business-availability-label"/)
+  assert.doesNotMatch(
+    marketplace,
+    /<label className="service-marketplace-search"/,
+  )
+  assert.match(marketplace, /aria-labelledby="service-leads-search-label"/)
+  assert.match(marketplace, /aria-labelledby="service-history-search-label"/)
+})
+
+test('returning to the browser tab does not reload and unmount the business portal', async () => {
+  const [authProvider, businessProvider] = await Promise.all([
+    readFile(new URL('../src/auth/AuthProvider.jsx', import.meta.url), 'utf8'),
+    readFile(
+      new URL('../src/business/BusinessProvider.jsx', import.meta.url),
+      'utf8',
+    ),
+  ])
+
+  assert.match(authProvider, /const isSameSession/)
+  assert.match(authProvider, /isSameSession \? currentSession : nextSession/)
+  assert.match(businessProvider, /const userId = user\?\.id \?\? null/)
+  assert.match(businessProvider, /\[isAuthLoading, userId\]/)
+  assert.match(businessProvider, /isLoading: !current\.business/)
+  assert.doesNotMatch(businessProvider, /\[isAuthLoading, user\]/)
+})
+
 test('arrival window requires an end time after its start time', () => {
   const errors = validateQuote(
     {
@@ -113,12 +231,14 @@ test('AC4: quote entry leads to review and only review confirms submission', asy
   assert.match(form, /className="service-price-prefix"/)
   assert.match(form, /inputMode="decimal"/)
   assert.match(form, /sanitizeQuoteAmount/)
+  assert.match(form, /GstIncluded/)
   assert.doesNotMatch(
     form,
     /Message to customer \(optional\)[\s\S]{0,80}service-required-mark/,
   )
   assert.doesNotMatch(form, /Confirm and send/)
   assert.match(review, /Review your quote/)
+  assert.match(review, /GstIncluded/)
   assert.match(review, /Confirm and send/)
 })
 

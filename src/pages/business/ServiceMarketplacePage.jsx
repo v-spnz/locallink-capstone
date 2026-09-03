@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Check, ChevronDown, Funnel } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import localBusinessNeighbourhood from '../../assets/images/local-business-neighbourhood.jpg'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import ActiveJobCard from '../../features/service-marketplace/components/ActiveJobCard'
 import BusinessQuoteCard from '../../features/service-marketplace/components/BusinessQuoteCard'
@@ -19,6 +21,63 @@ import {
   BUSINESS_QUOTE_STATUS_OPTIONS,
 } from '../../features/service-marketplace/quoteTracking'
 import '../../features/service-marketplace/ServiceMarketplace.css'
+
+const EMPTY_STATE_DETAILS = {
+  leads: {
+    title: 'New local work will land here',
+    hint: 'LocalLink matches requests using your service categories and coverage areas.',
+    action: 'Review service profile',
+    to: '/business/settings/services',
+  },
+  quotes: {
+    title: 'Your quote pipeline starts with a lead',
+    hint: 'When you respond to a suitable request, the quote and customer response will stay together here.',
+    action: 'View available leads',
+    to: '/business/services',
+  },
+  jobs: {
+    title: 'Accepted work becomes a clear plan',
+    hint: 'Accepted quotes move here so you can track each job from arrival through customer confirmation.',
+    action: 'Review submitted quotes',
+    to: '/business/services?tab=quotes',
+  },
+  history: {
+    title: 'Completed work builds your record',
+    hint: 'Finished and customer-confirmed jobs will remain available here for future reference.',
+    action: 'View active jobs',
+    to: '/business/services?tab=jobs',
+  },
+}
+
+function ServiceMarketplaceEmptyState({ type, totalItems, message }) {
+  const filtered = totalItems > 0
+  const details = EMPTY_STATE_DETAILS[type]
+
+  return (
+    <div className={`empty-state service-empty-state is-${type}`}>
+      <div className="service-empty-state-visual">
+        <img
+          src={localBusinessNeighbourhood}
+          alt="A local service professional speaking with a customer in their neighbourhood"
+        />
+      </div>
+      <div className="service-empty-state-copy">
+        <h3>{filtered ? 'Nothing matches those filters' : details.title}</h3>
+        <p>{message}</p>
+        <small>
+          {filtered
+            ? 'Try a broader search or choose a different status.'
+            : details.hint}
+        </small>
+        {!filtered && (
+          <Link className="service-empty-state-link" to={details.to}>
+            {details.action}
+          </Link>
+        )}
+      </div>
+    </div>
+  )
+}
 
 function MarketplaceSelect({
   label,
@@ -128,15 +187,16 @@ export function ServiceMarketplaceContent({
           className="service-marketplace-toolbar"
           aria-label="Job lead search and ordering"
         >
-          <label className="service-marketplace-search">
-            <span>Search</span>
+          <div className="service-marketplace-search">
+            <span id="service-leads-search-label">Search</span>
             <input
+              aria-labelledby="service-leads-search-label"
               type="search"
               value={marketplace.search}
               onChange={(event) => marketplace.setSearch(event.target.value)}
               placeholder="Search by keyword"
             />
-          </label>
+          </div>
           <div className="service-toolbar-controls">
             <MarketplaceSelect
               label="Filter"
@@ -166,15 +226,16 @@ export function ServiceMarketplaceContent({
           className="service-marketplace-toolbar service-quote-toolbar"
           aria-label="Search, filter, and order submitted quotes"
         >
-          <label className="service-marketplace-search">
-            <span>Search</span>
+          <div className="service-marketplace-search">
+            <span id="service-quotes-search-label">Search</span>
             <input
+              aria-labelledby="service-quotes-search-label"
               type="search"
               value={marketplace.search}
               onChange={(event) => marketplace.setSearch(event.target.value)}
               placeholder="Search by keyword"
             />
-          </label>
+          </div>
           <div className="service-toolbar-controls">
             <MarketplaceSelect
               label="Filter"
@@ -200,15 +261,16 @@ export function ServiceMarketplaceContent({
           className="service-marketplace-toolbar service-quote-toolbar"
           aria-label="Search, filter, and order jobs"
         >
-          <label className="service-marketplace-search">
-            <span>Search</span>
+          <div className="service-marketplace-search">
+            <span id="service-jobs-search-label">Search</span>
             <input
+              aria-labelledby="service-jobs-search-label"
               type="search"
               value={marketplace.search}
               onChange={(event) => marketplace.setSearch(event.target.value)}
               placeholder="Search by keyword"
             />
-          </label>
+          </div>
           <div className="service-toolbar-controls">
             <MarketplaceSelect
               label="Filter"
@@ -246,15 +308,16 @@ export function ServiceMarketplaceContent({
           className="service-marketplace-toolbar service-history-toolbar"
           aria-label="Search completed job history"
         >
-          <label className="service-marketplace-search">
-            <span>Search job history</span>
+          <div className="service-marketplace-search">
+            <span id="service-history-search-label">Search job history</span>
             <input
+              aria-labelledby="service-history-search-label"
               type="search"
               value={marketplace.search}
               onChange={(event) => marketplace.setSearch(event.target.value)}
               placeholder="Search completed jobs"
             />
-          </label>
+          </div>
         </div>
       )}
 
@@ -263,9 +326,11 @@ export function ServiceMarketplaceContent({
         {!marketplace.isLoading &&
           !marketplace.error &&
           marketplace.items.length === 0 && (
-            <div className="empty-state">
-              {getMarketplaceEmptyMessage(type, marketplace.totalItems)}
-            </div>
+            <ServiceMarketplaceEmptyState
+              type={type}
+              totalItems={marketplace.totalItems}
+              message={getMarketplaceEmptyMessage(type, marketplace.totalItems)}
+            />
           )}
         {!marketplace.isLoading &&
           marketplace.items.map((item) => {

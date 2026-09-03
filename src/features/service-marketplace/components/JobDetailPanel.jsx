@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Button from '../../../components/ui/Button'
+import GstIncluded from '../../../components/ui/GstIncluded'
 import { getJobBadge } from '../formatters'
+import AcceptedJobContactDetails from './AcceptedJobContactDetails'
 import ActiveJobProgressTimeline from './ActiveJobProgressTimeline'
 import RepostJobModal from './RepostJobModal'
 import DeleteJobModal from './DeleteJobModal'
@@ -93,6 +95,7 @@ export default function JobDetailPanel({
             <div className="sm-field-label">Budget</div>
             <div className="sm-field-value">
               {job.budget || 'Not specified'}
+              {job.budget && <GstIncluded block />}
             </div>
           </div>
           <div>
@@ -106,6 +109,10 @@ export default function JobDetailPanel({
         </div>
 
         <ActiveJobProgressTimeline job={job} />
+        <AcceptedJobContactDetails
+          contactDetails={job.contact_details}
+          viewer="consumer"
+        />
       </div>
 
       <div className="sm-detail-actions">

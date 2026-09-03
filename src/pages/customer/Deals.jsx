@@ -1,40 +1,77 @@
-import { useState } from 'react'
-import mockBusinesses from '../../data/mockBusinesses'
-import { getDistanceKm } from '../../utils/distance'
+import { MapPin } from 'lucide-react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import {
+  fetchBusinessesInSavedSuburb,
+  fetchCustomerLocation,
+} from '../../features/location/api/locations'
+import '../../features/location/discovery.css'
 
-const USER_LOCATION = { lat: -36.8485, lng: 174.7633 }
-const filters = [
+const DiscoveryMap = lazy(
+  () => import('../../features/location/components/DiscoveryMap'),
+)
+
+const FILTERS = [
   'All',
   'Food & Drink',
   'Retail',
   'Services',
-  'Health',
+  'Health & Wellness',
   'Trades',
+  'Entertainment',
+  'Other',
 ]
 
 export default function Deals() {
   const [activeFilter, setActiveFilter] = useState('All')
-  const [radius, setRadius] = useState(5)
+  const [location, setLocation] = useState(null)
+  const [businesses, setBusinesses] = useState([])
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true)
+  const [isSearching, setIsSearching] = useState(false)
+  const [error, setError] = useState('')
 
-  const businessesWithDistance = mockBusinesses
-    .map((business) => ({
-      ...business,
-      distance: getDistanceKm(
-        USER_LOCATION.lat,
-        USER_LOCATION.lng,
-        business.lat,
-        business.lng,
-      ),
-    }))
-    .filter((business) => business.distance <= radius)
-    .filter(
-      (business) =>
-        activeFilter === 'All' || business.category === activeFilter,
-    )
-    .sort(
-      (firstBusiness, secondBusiness) =>
-        firstBusiness.distance - secondBusiness.distance,
-    )
+  useEffect(() => {
+    let active = true
+    const timer = window.setTimeout(async () => {
+      try {
+        const savedLocation = await fetchCustomerLocation()
+        if (active) setLocation(savedLocation)
+      } catch (loadError) {
+        console.error('Unable to load saved location.', loadError)
+        if (active) setError('Unable to load your saved location.')
+      } finally {
+        if (active) setIsLoadingLocation(false)
+      }
+    }, 0)
+    return () => {
+      active = false
+      window.clearTimeout(timer)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!location) return undefined
+    let active = true
+    const timer = window.setTimeout(async () => {
+      setIsSearching(true)
+      setError('')
+      try {
+        const results = await fetchBusinessesInSavedSuburb(activeFilter)
+        if (active) setBusinesses(results)
+      } catch (searchError) {
+        console.error('Unable to load businesses in your suburb.', searchError)
+        if (active)
+          setError(
+            'Unable to load businesses in your suburb. Please try again.',
+          )
+      } finally {
+        if (active) setIsSearching(false)
+      }
+    }, 250)
+    return () => {
+      active = false
+      window.clearTimeout(timer)
+    }
+  }, [activeFilter, location])
 
   return (
     <>
@@ -42,16 +79,23 @@ export default function Deals() {
         <p
           style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}
         >
-          Deals & Discovery
+          Deals &amp; Discovery
         </p>
         <h2>Discover Local</h2>
-        <p>Find businesses near you and explore what's on.</p>
+        <p>Find businesses and published deals in your registered suburb.</p>
+        {location && (
+          <div className="discovery-selected-location">
+            <MapPin aria-hidden="true" size={17} />
+            Showing {location.suburb}
+          </div>
+        )}
       </div>
 
-      <div className="pill-filter-row">
-        {filters.map((filter) => (
+      <div className="pill-filter-row" aria-label="Business category filters">
+        {FILTERS.map((filter) => (
           <button
             key={filter}
+            type="button"
             className={`pill${activeFilter === filter ? ' active' : ''}`}
             onClick={() => setActiveFilter(filter)}
           >
@@ -60,76 +104,81 @@ export default function Deals() {
         ))}
       </div>
 
-      <div className="radius-control">
-        <div className="radius-header">
-          <span className="radius-label">Search Radius</span>
-          <span className="radius-value">{radius} km</span>
+      {error && (
+        <div className="auth-error" role="alert">
+          {error}
         </div>
-        <input
-          type="range"
-          className="radius-slider"
-          min={1}
-          max={5}
-          step={0.1}
-          value={radius}
-          onChange={(event) => setRadius(Number(event.target.value))}
-        />
-        <div className="radius-ticks">
-          <span>1 km</span>
-          <span>3 km</span>
-          <span>5 km</span>
-        </div>
-      </div>
+      )}
 
-      <div className="map-placeholder">
-        <span className="map-placeholder-label">Map Preview</span>
-      </div>
+      {location ? (
+        <Suspense
+          fallback={<div className="discovery-map-empty">Loading map…</div>}
+        >
+          <DiscoveryMap location={location} businesses={businesses} />
+        </Suspense>
+      ) : (
+        <div className="discovery-map-empty">
+          {isLoadingLocation
+            ? 'Loading your registered suburb...'
+            : 'Add your suburb in Profile to discover local businesses.'}
+        </div>
+      )}
 
       <div className="placeholder-section">
         <div
           className="placeholder-section-title is-complete"
           style={{ justifyContent: 'space-between' }}
         >
-          <span>Businesses Near You</span>
+          <span>
+            {location ? `Businesses in ${location.suburb}` : 'Local businesses'}
+          </span>
           <span style={resultCountStyles}>
-            {businessesWithDistance.length} result
-            {businessesWithDistance.length !== 1 ? 's' : ''}
+            {isSearching
+              ? 'Searching…'
+              : `${businesses.length} result${businesses.length !== 1 ? 's' : ''}`}
           </span>
         </div>
-        {businessesWithDistance.length === 0 ? (
+        {!location ? (
           <div className="empty-state">
-            No businesses found within {radius} km. Try increasing your radius.
+            Add your suburb in Profile to discover local businesses.
+          </div>
+        ) : !isSearching && businesses.length === 0 ? (
+          <div className="empty-state">
+            No businesses or deals are available in {location.suburb} right now.
           </div>
         ) : (
           <div className="business-grid">
-            {businessesWithDistance.map((business) => (
-              <div className="business-card" key={business.id}>
+            {businesses.map((business) => (
+              <div className="business-card" key={business.business_id}>
                 <div className="business-card-icon">
                   {getCategoryEmoji(business.category)}
                 </div>
                 <div className="business-card-body">
-                  <div className="business-card-name">{business.name}</div>
+                  <div className="business-card-name">
+                    {business.business_name}
+                  </div>
                   <div className="business-card-category">
                     {business.category}
                   </div>
                   <div className="business-card-desc">
-                    {business.description}
+                    {business.deal_description || business.description}
+                  </div>
+                  {business.deal_title && (
+                    <div className="business-card-deal">
+                      Deal: {business.deal_title}
+                    </div>
+                  )}
+                  <div className="business-card-address">
+                    {business.formatted_address}
                   </div>
                 </div>
                 <div className="business-card-distance">
-                  {business.distance.toFixed(1)} km
+                  {Number(business.distance_km).toFixed(1)} km
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
-
-      <div className="placeholder-section">
-        <div className="placeholder-section-title">Business Detail View</div>
-        <div className="placeholder-box tall">
-          Business detail panel — component TBD
-        </div>
       </div>
     </>
   )
@@ -148,9 +197,9 @@ function getCategoryEmoji(category) {
     'Food & Drink': '🍔',
     Retail: '🛍️',
     Services: '✂️',
-    Health: '🏥',
+    'Health & Wellness': '🏥',
     Trades: '🔧',
+    Entertainment: '🎟️',
   }
-
   return categoryIcons[category] || '📍'
 }

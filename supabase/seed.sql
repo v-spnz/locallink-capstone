@@ -159,7 +159,7 @@ insert into public.business_capabilities (
 values
   (
     '21000000-0000-0000-0000-000000000001',
-    false,
+    true,
     false,
     true
   ),
@@ -167,6 +167,60 @@ values
     '31000000-0000-0000-0000-000000000001',
     false,
     false,
+    true
+  );
+
+insert into public.business_locations (
+  id,
+  business_id,
+  name,
+  formatted_address,
+  address_line1,
+  suburb,
+  city,
+  postcode,
+  country_code,
+  location,
+  is_primary
+)
+values
+  (
+    '21100000-0000-0000-0000-000000000001',
+    '21000000-0000-0000-0000-000000000001',
+    'Ponsonby workshop',
+    'Ponsonby Road, Ponsonby, Auckland 1011, New Zealand',
+    'Ponsonby Road',
+    'Ponsonby',
+    'Auckland',
+    '1011',
+    'nz',
+    extensions.st_setsrid(extensions.st_makepoint(174.745, -36.8545), 4326)::extensions.geography,
+    true
+  ),
+  (
+    '21100000-0000-0000-0000-000000000002',
+    '21000000-0000-0000-0000-000000000001',
+    'Auckland CBD',
+    'Queen Street, Auckland Central, Auckland 1010, New Zealand',
+    'Queen Street',
+    'Auckland Central',
+    'Auckland',
+    '1010',
+    'nz',
+    extensions.st_setsrid(extensions.st_makepoint(174.7633, -36.8485), 4326)::extensions.geography,
+    false
+  ),
+  (
+    '31100000-0000-0000-0000-000000000001',
+    '31000000-0000-0000-0000-000000000001',
+    'Newmarket office',
+    'Broadway, Newmarket, Auckland 1023, New Zealand',
+    'Broadway',
+    'Newmarket',
+    'Auckland',
+    '1023',
+    'nz',
+    extensions.st_setsrid(extensions.st_makepoint(174.778, -36.869), 4326)::extensions.geography,
     true
   );
 
@@ -222,6 +276,19 @@ values
     '31000000-0000-0000-0000-000000000001',
     'Auckland'
   );
+
+-- Give the seeded consumer an approved full address so accepted-job contact
+-- sharing can be exercised in both portals. It is never returned for leads or
+-- unaccepted quotes.
+update public.profiles
+set
+  formatted_address = '12 Franklin Road, Ponsonby, Auckland 1011, New Zealand',
+  address_line1 = '12 Franklin Road',
+  suburb = 'Ponsonby',
+  city = 'Auckland',
+  postcode = '1011',
+  country_code = 'nz'
+where id = '10000000-0000-0000-0000-000000000001';
 
 -- ============================================================
 -- Consumer job requests

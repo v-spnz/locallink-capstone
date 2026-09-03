@@ -1,20 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import mockBusinesses from '../../data/mockBusinesses'
-import { getDistanceKm } from '../../utils/distance'
 import useAuth from '../../auth/useAuth'
 import { supabase } from '../../lib/supabase'
+import {
+  fetchBusinessesInSavedSuburb,
+  fetchCustomerLocation,
+} from '../../features/location/api/locations'
 
-const USER_LOCATION = { lat: -36.8485, lng: 174.7633 }
-
-// Keeping this small on purpose - 5km still feels "local", 20km (the old
-// slider's max) doesn't really. Radius isn't a homepage control anymore
-// per Jim's feedback so this is just a fixed number now, not state.
-const NEARBY_RADIUS_KM = 5
 const DEAL_DISPLAY_COUNT = 4 // 1 featured + 3 in the list, matches the wireframe
 
-// The business, deal, and loyalty displays remain shared mock catalogue data
-// until real participating stores are available.
+// Loyalty remains preview data until the loyalty catalogue is connected.
 const loyaltyCard = {
   businessName: 'Britomart Espresso Bar',
   stampsTotal: 5,
@@ -52,6 +47,8 @@ export default function Home() {
   const { user } = useAuth()
   const [search, setSearch] = useState('')
   const [accountJobs, setAccountJobs] = useState([])
+  const [customerLocation, setCustomerLocation] = useState(null)
+  const [suburbResults, setSuburbResults] = useState([])
 
   useEffect(() => {
     let active = true
@@ -99,36 +96,45 @@ export default function Home() {
     }
   }, [user])
 
+  useEffect(() => {
+    let active = true
+    async function loadSuburbBusinesses() {
+      try {
+        const savedLocation = await fetchCustomerLocation()
+        if (!savedLocation) return
+        const results = await fetchBusinessesInSavedSuburb()
+        if (active) {
+          setCustomerLocation(savedLocation)
+          setSuburbResults(results)
+        }
+      } catch (error) {
+        console.error('Unable to load businesses in the saved suburb.', error)
+      }
+    }
+    loadSuburbBusinesses()
+
+    return () => {
+      active = false
+    }
+  }, [])
+
   const displayedJobs = user ? accountJobs : previewJobs
 
-  // Same Haversine calc as before (US009), just no longer wired to a
-  // slider - filtered against the fixed radius above instead.
-  const nearbyBusinesses = mockBusinesses
-    .map((business) => ({
-      ...business,
-      distance: getDistanceKm(
-        USER_LOCATION.lat,
-        USER_LOCATION.lng,
-        business.lat,
-        business.lng,
-      ),
-    }))
-    .filter((business) => business.distance <= NEARBY_RADIUS_KM)
+  const suburbBusinesses = suburbResults
     .filter((business) => {
       const query = search.trim().toLowerCase()
       return (
         query === '' ||
-        business.name.toLowerCase().includes(query) ||
+        business.business_name.toLowerCase().includes(query) ||
         business.category.toLowerCase().includes(query)
       )
     })
-    .sort((first, second) => first.distance - second.distance)
     .slice(0, DEAL_DISPLAY_COUNT)
 
   // First result shows big as the "featured" one, the rest go in the
   // plain list below it - same split as the approved draft.
-  const featuredBusiness = nearbyBusinesses[0]
-  const otherBusinesses = nearbyBusinesses.slice(1)
+  const featuredBusiness = suburbBusinesses[0]
+  const otherBusinesses = suburbBusinesses.slice(1)
 
   const stampsRemaining = loyaltyCard.stampsTotal - loyaltyCard.stampsFilled
 
@@ -147,7 +153,9 @@ export default function Home() {
           </p>
           <h2 style={{ fontSize: 22, fontWeight: 700 }}>My LocalLink</h2>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 7 }}>
-            Auckland CBD
+            {customerLocation?.suburb ||
+              customerLocation?.city ||
+              'Set your location in Profile'}
           </p>
         </div>
         <div className="home-search">
@@ -164,7 +172,7 @@ export default function Home() {
         <div>
           {/* Deals Near You - everything here goes to Deals & Discovery */}
           <div className="home-section-head">
-            <h3>Deals near you</h3>
+            <h3>Deals in your suburb</h3>
             <button
               className="section-link-btn"
               onClick={() => navigate('/deals')}
@@ -173,14 +181,14 @@ export default function Home() {
             </button>
           </div>
           <p className="home-section-note">
-            Closest first, all within walking distance of you.
+            Closest first, all in your registered suburb.
           </p>
 
-          {nearbyBusinesses.length === 0 ? (
+          {suburbBusinesses.length === 0 ? (
             <div className="empty-state">
               {search
-                ? `No businesses match "${search}" within ${NEARBY_RADIUS_KM}km.`
-                : 'No businesses found nearby right now.'}
+                ? `No businesses match "${search}" in your suburb.`
+                : 'No businesses or deals are available in your suburb right now.'}
             </div>
           ) : (
             <>
@@ -193,13 +201,16 @@ export default function Home() {
                 <div className="featured-deal-body">
                   <span className="deal-tag">{featuredBusiness.category}</span>
                   <h4 className="featured-deal-name">
-                    {featuredBusiness.name}
+                    {featuredBusiness.business_name}
                   </h4>
                   <p className="featured-deal-desc">
-                    {featuredBusiness.description}
+                    {featuredBusiness.deal_description ||
+                      featuredBusiness.description}
                   </p>
                   <div className="featured-deal-foot">
-                    <strong>{featuredBusiness.distance.toFixed(1)} km</strong>{' '}
+                    <strong>
+                      {Number(featuredBusiness.distance_km).toFixed(1)} km
+                    </strong>{' '}
                     away · closest to you
                   </div>
                 </div>
@@ -210,17 +221,19 @@ export default function Home() {
                   {otherBusinesses.map((business) => (
                     <div
                       className="deal-row"
-                      key={business.id}
+                      key={business.business_id}
                       onClick={() => navigate('/deals')}
                     >
                       <div className="deal-row-body">
-                        <div className="deal-row-name">{business.name}</div>
+                        <div className="deal-row-name">
+                          {business.business_name}
+                        </div>
                         <div className="deal-row-sub">
                           {business.category} · {business.description}
                         </div>
                       </div>
                       <div className="deal-row-dist">
-                        {business.distance.toFixed(1)} km
+                        {Number(business.distance_km).toFixed(1)} km
                       </div>
                     </div>
                   ))}

@@ -16,6 +16,16 @@ export const JOB_PROGRESS_STAGES = [
   { value: 'completed', label: 'Completed' },
 ]
 
+export const JOB_PROGRESS_TIMELINE_STAGES = [
+  JOB_PROGRESS_STAGES[0],
+  {
+    value: 'contact_details_shared',
+    label: 'Contact details shared',
+    timelineOnly: true,
+  },
+  ...JOB_PROGRESS_STAGES.slice(1),
+]
+
 const JOB_PROGRESS_ORDER = JOB_PROGRESS_STAGES.map((stage) => stage.value)
 
 export const JOB_COMPLETION_PENDING_STATUS = 'pending_completion'

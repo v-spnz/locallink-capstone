@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import useAuth from '../../auth/useAuth'
+import AddressAutocomplete from '../../features/location/components/AddressAutocomplete'
+import {
+  fetchCustomerLocation,
+  saveCustomerLocation,
+} from '../../features/location/api/locations'
 
 export default function Profile() {
   const navigate = useNavigate()
@@ -10,28 +15,33 @@ export default function Profile() {
   const [logoutError, setLogoutError] = useState('')
   const [profile, setProfile] = useState(null)
   const [hasBusinessAccess, setHasBusinessAccess] = useState(false)
+  const [customerLocation, setCustomerLocation] = useState(null)
+  const [locationStatus, setLocationStatus] = useState('')
 
   useEffect(() => {
     let active = true
 
     async function loadProfile() {
-      const [profileResult, membershipResult] = await Promise.all([
-        supabase
-          .from('profiles')
-          .select('first_name, last_name')
-          .eq('id', user.id)
-          .maybeSingle(),
-        supabase
-          .from('business_members')
-          .select('business_id')
-          .eq('profile_id', user.id)
-          .limit(1)
-          .maybeSingle(),
-      ])
+      const [profileResult, membershipResult, savedLocation] =
+        await Promise.all([
+          supabase
+            .from('profiles')
+            .select('first_name, last_name')
+            .eq('id', user.id)
+            .maybeSingle(),
+          supabase
+            .from('business_members')
+            .select('business_id')
+            .eq('profile_id', user.id)
+            .limit(1)
+            .maybeSingle(),
+          fetchCustomerLocation().catch(() => null),
+        ])
 
       if (active) {
         setProfile(profileResult.data)
         setHasBusinessAccess(Boolean(membershipResult.data))
+        setCustomerLocation(savedLocation)
       }
     }
 
@@ -57,21 +67,34 @@ export default function Profile() {
     navigate('/login', { replace: true })
   }
 
+  async function handleLocationSelect(address) {
+    setLocationStatus('Saving location…')
+    try {
+      await saveCustomerLocation(address)
+      setCustomerLocation(address)
+      setLocationStatus('Location saved successfully.')
+    } catch (error) {
+      console.error('Unable to save profile location.', error)
+      setLocationStatus('Unable to save this location. Please try again.')
+    }
+  }
+
   return (
     <>
       <div className="page-header">
         <h2>Profile</h2>
-        <p>Manage your personal details and location preferences.</p>
+        <p>Manage your personal details and registered suburb.</p>
       </div>
       <div className="placeholder-section">
         <div className="placeholder-section-title is-complete">
           Profile Details
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="profile-first-name">
+          <span className="form-label" id="profile-first-name-label">
             First Name
-          </label>
+          </span>
           <input
+            aria-labelledby="profile-first-name-label"
             id="profile-first-name"
             className="form-input"
             disabled
@@ -80,10 +103,11 @@ export default function Profile() {
           />
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="profile-last-name">
+          <span className="form-label" id="profile-last-name-label">
             Last Name
-          </label>
+          </span>
           <input
+            aria-labelledby="profile-last-name-label"
             id="profile-last-name"
             className="form-input"
             disabled
@@ -92,10 +116,11 @@ export default function Profile() {
           />
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="profile-email">
+          <span className="form-label" id="profile-email-label">
             Email
-          </label>
+          </span>
           <input
+            aria-labelledby="profile-email-label"
             id="profile-email"
             className="form-input"
             disabled
@@ -105,10 +130,28 @@ export default function Profile() {
         </div>
       </div>
       <div className="placeholder-section">
-        <div className="placeholder-section-title">Location Range Filter</div>
-        <div className="placeholder-box">
-          Range filter slider — component TBD
+        <div className="placeholder-section-title is-complete">
+          Registered Suburb
         </div>
+        <p className="account-section-copy">
+          LocalLink uses this suburb for all business and deal discovery. You
+          can update it here if you move.
+        </p>
+        <AddressAutocomplete
+          key={customerLocation?.formattedAddress || 'profile-location'}
+          id="profile-address"
+          label="Registered suburb"
+          value={customerLocation?.formattedAddress || ''}
+          bias={customerLocation}
+          showCurrentLocation={false}
+          searchType="suburb"
+          onSelect={handleLocationSelect}
+        />
+        {locationStatus && (
+          <p className="account-section-copy" role="status">
+            {locationStatus}
+          </p>
+        )}
       </div>
 
       <div className="placeholder-section">

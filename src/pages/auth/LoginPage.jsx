@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import AuthPageHeader from '../../components/auth/AuthPageHeader'
 import loginLocalStreet from '../../assets/images/login-local-street.jpg'
 import { supabase } from '../../lib/supabase'
 import useAuth from '../../auth/useAuth'
 import { getDefaultAuthenticatedPath } from '../../business/businessAccess'
+import {
+  getRegistrationResumePath,
+  normaliseDestination,
+} from '../../features/onboarding/registrationFlow'
 import './LoginPage.css'
 
 export default function LoginPage() {
@@ -13,7 +17,7 @@ export default function LoginPage() {
   const location = useLocation()
   const { user, isLoading: isSessionLoading } = useAuth()
 
-  const requestedDestination = location.state?.from?.pathname ?? null
+  const requestedDestination = normaliseDestination(location.state?.from)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -21,6 +25,7 @@ export default function LoginPage() {
   const [success, setSuccess] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [authenticatedDestination, setAuthenticatedDestination] = useState('')
 
   useEffect(() => {
@@ -29,6 +34,12 @@ export default function LoginPage() {
     async function resolveDestination() {
       if (!user) {
         setAuthenticatedDestination('')
+        return
+      }
+
+      const registrationResumePath = getRegistrationResumePath()
+      if (registrationResumePath) {
+        setAuthenticatedDestination(registrationResumePath)
         return
       }
 
@@ -70,7 +81,7 @@ export default function LoginPage() {
         return
       }
 
-      let nextPath = requestedDestination
+      let nextPath = getRegistrationResumePath() || requestedDestination
 
       if (!nextPath) {
         try {
@@ -132,17 +143,13 @@ export default function LoginPage() {
             alt="Rainy city laneway lined with local restaurants and businesses"
           />
           <div className="login-photo-overlay" />
-          <div className="login-photo-heading">
-            Welcome
-            <br />
-            back to
-            <br />
-            <span>LocalLink</span>
+          <div className="login-photo-copy">
+            <h2>Welcome back to LocalLink.</h2>
+            <p>
+              Pick up where you left, with your requests, nearby choices, and
+              local rewards kept together.
+            </p>
           </div>
-          <p>
-            Pick up where you left, with your requests, nearby choices, and
-            local rewards kept together.
-          </p>
         </section>
 
         <section className="login-form-panel">
@@ -155,8 +162,11 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit}>
               <div className="login-field">
-                <label htmlFor="login-email">Email address</label>
+                <span className="login-field-label" id="login-email-label">
+                  Email address
+                </span>
                 <input
+                  aria-labelledby="login-email-label"
                   id="login-email"
                   type="email"
                   placeholder="you@example.com"
@@ -169,17 +179,37 @@ export default function LoginPage() {
               </div>
 
               <div className="login-field">
-                <label htmlFor="login-password">Password</label>
-                <input
-                  id="login-password"
-                  type="password"
-                  placeholder="At least 8 characters"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  autoComplete="current-password"
-                  disabled={isSubmitting || isResetting}
-                  required
-                />
+                <span className="login-field-label" id="login-password-label">
+                  Password
+                </span>
+                <div className="login-password-wrap">
+                  <input
+                    aria-labelledby="login-password-label"
+                    id="login-password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="At least 8 characters"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    autoComplete="current-password"
+                    disabled={isSubmitting || isResetting}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((current) => !current)}
+                    disabled={isSubmitting || isResetting}
+                    aria-label={
+                      showPassword ? 'Hide Password' : 'Show Password'
+                    }
+                    title={showPassword ? 'Hide Password' : 'Show Password'}
+                  >
+                    {showPassword ? (
+                      <EyeOff aria-hidden="true" />
+                    ) : (
+                      <Eye aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               <button
@@ -214,7 +244,11 @@ export default function LoginPage() {
 
             <div className="login-register-row">
               <span>New to LocalLink?</span>
-              <Link to="/register" viewTransition>
+              <Link
+                to="/register"
+                state={{ from: location.state?.from, startAt: 'account' }}
+                viewTransition
+              >
                 Create an account
               </Link>
             </div>

@@ -1,6 +1,15 @@
-import { BriefcaseBusiness, FileText, UsersRound } from 'lucide-react'
+import {
+  BriefcaseBusiness,
+  Clock3,
+  FileText,
+  MapPin,
+  ShieldCheck,
+  Tags,
+  UsersRound,
+} from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import useBusiness from '../../business/useBusiness'
 import useBusinessMarketplace from '../../features/service-marketplace/hooks/useBusinessMarketplace'
 import { ServiceMarketplaceContent } from './ServiceMarketplacePage'
 
@@ -13,6 +22,8 @@ const SERVICE_TABS = [
 const VALID_TAB_VALUES = [...SERVICE_TABS.map(({ value }) => value), 'history']
 
 export default function Services() {
+  const { business, serviceProfile, serviceCategories, serviceAreas } =
+    useBusiness()
   const [searchParams, setSearchParams] = useSearchParams()
   const handledNotificationTargetRef = useRef('')
   const leads = useBusinessMarketplace('leads')
@@ -114,9 +125,7 @@ export default function Services() {
     <div className="business-services-page">
       <div className="business-services-hero">
         <div className="page-header">
-          <div className="page-header-eyebrow">Service Marketplace</div>
-          <h2>Services</h2>
-          <p>Manage new leads, sent quotes, and accepted jobs in one place.</p>
+          <h1>Services</h1>
         </div>
 
         <div className="service-overview" aria-label="Service overview">
@@ -134,13 +143,56 @@ export default function Services() {
                 </span>
                 <span className="service-overview-copy">
                   <span>{summary.label}</span>
-                  <strong>{marketplace.isLoading ? '—' : summary.value}</strong>
+                  <strong>{marketplace.isLoading ? '…' : summary.value}</strong>
                   <small>{summary.description}</small>
                 </span>
               </article>
             )
           })}
         </div>
+
+        <dl className="service-profile-context" aria-label="Service profile">
+          <div>
+            <dt>
+              <ShieldCheck aria-hidden="true" />
+              Verification
+            </dt>
+            <dd>{business.verification_status.replaceAll('_', ' ')}</dd>
+          </div>
+          <div>
+            <dt>
+              <Tags aria-hidden="true" />
+              Categories
+            </dt>
+            <dd>
+              {serviceCategories.length > 0
+                ? serviceCategories
+                    .map(({ service_category }) => service_category)
+                    .join(', ')
+                : 'Not set'}
+            </dd>
+          </div>
+          <div>
+            <dt>
+              <MapPin aria-hidden="true" />
+              Service areas
+            </dt>
+            <dd>
+              {serviceAreas.length > 0
+                ? serviceAreas
+                    .map(({ service_area }) => service_area)
+                    .join(', ')
+                : 'Not set'}
+            </dd>
+          </div>
+          <div>
+            <dt>
+              <Clock3 aria-hidden="true" />
+              Availability
+            </dt>
+            <dd>{serviceProfile?.availability || 'Not set'}</dd>
+          </div>
+        </dl>
       </div>
 
       <div className="service-tabs" role="tablist" aria-label="Services">
