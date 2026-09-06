@@ -1018,6 +1018,16 @@
   transform: translateY(-1px);
 }
 
+.business-card:not(.business-card-clickable) {
+  cursor: default;
+}
+
+.business-card:not(.business-card-clickable):hover {
+  border-color: var(--border);
+  box-shadow: none;
+  transform: none;
+}
+
 .business-card-icon {
   width: 42px;
   height: 42px;
@@ -1059,6 +1069,19 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.business-card-deal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--amber-light, #fff3bf);
+  color: #7c4a03;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .business-card-distance {

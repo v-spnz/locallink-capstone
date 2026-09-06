@@ -43,7 +43,6 @@ for (const [city, suburbs] of Object.entries(suburbsByCity)) {
   }
 }
 
-
 export function preferKnownEnglishPlaceName(placeName) {
   if (!placeName) return ''
 

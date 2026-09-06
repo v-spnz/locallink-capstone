@@ -31,7 +31,11 @@ export default function QuoteActionModal({
             onClick={onConfirm}
             disabled={isSaving}
           >
-            {isSaving ? 'Saving…' : isDecline ? 'Decline quote' : 'Accept quote'}
+            {isSaving
+              ? 'Saving…'
+              : isDecline
+                ? 'Decline quote'
+                : 'Accept quote'}
           </Button>
         </div>
       </div>

@@ -2684,7 +2684,6 @@ details.sm-past-jobs[open] .sm-past-chev {
   background: #a61e1e;
 }
 
-
 /* Solid red confirm button for the delete confirmation modal */
 .sm-delete-confirm-btn.btn-primary {
   background: var(--danger);

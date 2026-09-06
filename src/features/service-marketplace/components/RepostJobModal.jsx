@@ -16,7 +16,7 @@ export default function RepostJobModal({ mode, job, onCancel, onConfirm }) {
           <p style={{ margin: '0 0 22px', color: 'var(--text-muted)' }}>
             {preferredDate
               ? `You can repost this job once its preferred date (${preferredDate}) has passed.`
-              : "You can repost this job once its preferred date has passed."}
+              : 'You can repost this job once its preferred date has passed.'}
           </p>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button onClick={onCancel}>Got it</Button>
@@ -30,7 +30,9 @@ export default function RepostJobModal({ mode, job, onCancel, onConfirm }) {
     return (
       <Modal onClose={onCancel} maxWidthClassName="max-w-md">
         <div style={{ padding: 24 }}>
-          <h3 style={{ margin: '0 0 10px' }}>Can't repost with quotes waiting</h3>
+          <h3 style={{ margin: '0 0 10px' }}>
+            Can't repost with quotes waiting
+          </h3>
           <p style={{ margin: '0 0 22px', color: 'var(--text-muted)' }}>
             This job still has quotes waiting for a response. Decline them, or
             wait until it's resolved, before reposting.

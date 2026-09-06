@@ -4,6 +4,15 @@ import {
   fetchBusinessesInSavedSuburb,
   fetchCustomerLocation,
 } from '../../features/location/api/locations'
+import {
+  fetchPublishedDealById,
+  fetchSavedDealIds,
+  saveDeal,
+  unsaveDeal,
+} from '../../features/deals/api/customerDeals'
+import DealDetailModal from '../../features/deals/components/DealDetailModal'
+import Modal from '../../components/ui/Modal'
+import useAuth from '../../auth/useAuth'
 import '../../features/location/discovery.css'
 
 const DiscoveryMap = lazy(
@@ -22,12 +31,17 @@ const FILTERS = [
 ]
 
 export default function Deals() {
+  const { user } = useAuth()
   const [activeFilter, setActiveFilter] = useState('All')
   const [location, setLocation] = useState(null)
   const [businesses, setBusinesses] = useState([])
   const [isLoadingLocation, setIsLoadingLocation] = useState(true)
   const [isSearching, setIsSearching] = useState(false)
   const [error, setError] = useState('')
+  const [savedDealIds, setSavedDealIds] = useState([])
+  const [selectedDeal, setSelectedDeal] = useState(null)
+  const [selectedBusinessRow, setSelectedBusinessRow] = useState(null)
+  const [isDealLoading, setIsDealLoading] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -72,6 +86,59 @@ export default function Deals() {
       window.clearTimeout(timer)
     }
   }, [activeFilter, location])
+
+  useEffect(() => {
+    let active = true
+    if (!user?.id) return undefined
+    fetchSavedDealIds(user.id)
+      .then((ids) => {
+        if (active) setSavedDealIds(ids)
+      })
+      .catch((savedError) => {
+        console.error('Unable to load saved deals.', savedError)
+      })
+    return () => {
+      active = false
+    }
+  }, [user?.id])
+
+  async function openDeal(business) {
+    if (!business.deal_id) return
+    setSelectedBusinessRow(business)
+    setIsDealLoading(true)
+    try {
+      const fullDeal = await fetchPublishedDealById(business.deal_id)
+      setSelectedDeal(fullDeal)
+    } catch (dealError) {
+      console.error('Unable to load deal details.', dealError)
+      setError('Unable to load this deal right now.')
+      setSelectedBusinessRow(null)
+    } finally {
+      setIsDealLoading(false)
+    }
+  }
+
+  function closeDeal() {
+    setSelectedDeal(null)
+    setSelectedBusinessRow(null)
+  }
+
+  async function toggleSaveDeal(dealId) {
+    if (!user?.id) return
+    const wasSaved = savedDealIds.includes(dealId)
+    setSavedDealIds((current) =>
+      wasSaved ? current.filter((id) => id !== dealId) : [...current, dealId],
+    )
+    try {
+      if (wasSaved) await unsaveDeal(user.id, dealId)
+      else await saveDeal(user.id, dealId)
+    } catch (saveError) {
+      console.error('Unable to update saved deal.', saveError)
+      setSavedDealIds((current) =>
+        wasSaved ? [...current, dealId] : current.filter((id) => id !== dealId),
+      )
+    }
+  }
 
   return (
     <>
@@ -149,7 +216,13 @@ export default function Deals() {
         ) : (
           <div className="business-grid">
             {businesses.map((business) => (
-              <div className="business-card" key={business.business_id}>
+              <div
+                className={`business-card${business.deal_id ? ' business-card-clickable' : ''}`}
+                key={business.business_id}
+                onClick={() => openDeal(business)}
+                role={business.deal_id ? 'button' : undefined}
+                tabIndex={business.deal_id ? 0 : undefined}
+              >
                 <div className="business-card-icon">
                   {getCategoryEmoji(business.category)}
                 </div>
@@ -180,6 +253,25 @@ export default function Deals() {
           </div>
         )}
       </div>
+
+      {isDealLoading && !selectedDeal && (
+        <Modal onClose={closeDeal} maxWidthClassName="max-w-sm">
+          <div className="px-6 py-10 text-center text-sm text-[var(--text-muted)]">
+            Loading deal…
+          </div>
+        </Modal>
+      )}
+
+      {selectedDeal && selectedBusinessRow && (
+        <DealDetailModal
+          deal={selectedDeal}
+          businessName={selectedBusinessRow.business_name}
+          address={selectedBusinessRow.formatted_address}
+          isSaved={savedDealIds.includes(selectedDeal.id)}
+          onToggleSave={toggleSaveDeal}
+          onClose={closeDeal}
+        />
+      )}
     </>
   )
 }
