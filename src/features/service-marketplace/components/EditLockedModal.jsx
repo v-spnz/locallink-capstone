@@ -9,8 +9,8 @@ export default function EditLockedModal({ onCancel }) {
         <h3 style={{ margin: '0 0 10px' }}>Can't edit right now</h3>
         <p style={{ margin: '0 0 22px', color: 'var(--text-muted)' }}>
           This job has quotes waiting for a response, so it can't be edited.
-          Decline the quotes you don't want, or wait for the job to be
-          resolved, before making changes.
+          Decline the quotes you don't want, or wait for the job to be resolved,
+          before making changes.
         </p>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button onClick={onCancel}>Got it</Button>
