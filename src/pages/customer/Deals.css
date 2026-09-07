@@ -666,3 +666,146 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ─── Motion + feedback polish ────────────────────────────────────── */
+
+@keyframes dd-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dd-card-enter {
+  animation: dd-fade-in-up 0.32s ease both;
+}
+
+@keyframes dd-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.dd-save-btn.is-popping {
+  animation: dd-pop 0.26s ease;
+}
+
+@keyframes dd-press {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.dd-claim-btn.is-popping {
+  animation: dd-press 0.22s ease;
+}
+
+@keyframes dd-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dd-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dd-modal-overlay {
+  animation: dd-overlay-in 0.18s ease both;
+}
+
+.dd-modal {
+  animation: dd-modal-in 0.22s ease both;
+}
+
+.dd-modal-overlay.is-closing {
+  animation: dd-overlay-in 0.18s ease reverse both;
+}
+
+.dd-modal.is-closing {
+  animation: dd-modal-in 0.18s ease reverse both;
+}
+
+.dd-search-clear {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 50%;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.dd-search-clear:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+@keyframes dd-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.dd-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  background: #202a3a;
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 999px;
+  box-shadow: var(--shadow-md);
+  z-index: 1100;
+  animation: dd-toast-in 0.22s ease both;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-card-enter,
+  .dd-save-btn.is-popping,
+  .dd-claim-btn.is-popping,
+  .dd-modal-overlay,
+  .dd-modal,
+  .dd-toast {
+    animation: none;
+  }
+}

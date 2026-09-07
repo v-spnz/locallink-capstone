@@ -1,12 +1,28 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { X, CheckCircle2, Ban, Tag, CalendarDays, MapPin } from 'lucide-react'
 
-export default function DealModal({ deal, visual, isSaved, onToggleSaved, onClose }) {
+export default function DealModal({ deal, visual, isSaved, onToggleSaved, onClose, onClaim }) {
   const VisualIcon = visual.icon
+  const [isClosing, setIsClosing] = useState(false)
+  const [isClaimPopping, setIsClaimPopping] = useState(false)
+
+  function handleClose() {
+    setIsClosing(true)
+    setTimeout(onClose, 180)
+  }
+
+  function handleClaim() {
+    onClaim()
+    setIsClaimPopping(true)
+    setTimeout(() => setIsClaimPopping(false), 260)
+  }
 
   useEffect(() => {
     function closeOnEscape(event) {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape') {
+        setIsClosing(true)
+        setTimeout(onClose, 180)
+      }
     }
 
     document.addEventListener('keydown', closeOnEscape)
@@ -14,9 +30,12 @@ export default function DealModal({ deal, visual, isSaved, onToggleSaved, onClos
   }, [onClose])
 
   return (
-    <div className="dd-modal-overlay" onClick={onClose}>
+    <div
+      className={`dd-modal-overlay${isClosing ? ' is-closing' : ''}`}
+      onClick={handleClose}
+    >
       <div
-        className="dd-modal"
+        className={`dd-modal${isClosing ? ' is-closing' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-label={deal.title}
@@ -29,7 +48,7 @@ export default function DealModal({ deal, visual, isSaved, onToggleSaved, onClos
             type="button"
             className="dd-modal-close"
             aria-label="Close"
-            onClick={onClose}
+            onClick={handleClose}
           >
             <X aria-hidden="true" />
           </button>
@@ -110,7 +129,11 @@ export default function DealModal({ deal, visual, isSaved, onToggleSaved, onClos
           >
             {isSaved ? 'Saved' : 'Save'}
           </button>
-          <button type="button" className="dd-claim-btn">
+          <button
+            type="button"
+            className={`dd-claim-btn${isClaimPopping ? ' is-popping' : ''}`}
+            onClick={handleClaim}
+          >
             Claim Deal
           </button>
         </div>

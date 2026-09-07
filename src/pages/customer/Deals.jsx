@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Search,
   ChevronDown,
   SlidersHorizontal,
+  X,
   Coffee,
   UtensilsCrossed,
   Dumbbell,
@@ -47,6 +48,18 @@ export default function Deals() {
   const [sortOption, setSortOption] = useState('Recommended')
   const [activeDealId, setActiveDealId] = useState(null)
   const [savedDealIds, setSavedDealIds] = useState(() => new Set())
+  const [toast, setToast] = useState(null)
+  const toastTimeoutRef = useRef(null)
+
+  useEffect(() => {
+    return () => clearTimeout(toastTimeoutRef.current)
+  }, [])
+
+  function showToast(message) {
+    clearTimeout(toastTimeoutRef.current)
+    setToast(message)
+    toastTimeoutRef.current = setTimeout(() => setToast(null), 2200)
+  }
 
   const visibleDeals = mockDeals
     .filter(
@@ -68,10 +81,16 @@ export default function Deals() {
   function toggleSaved(dealId) {
     setSavedDealIds((previous) => {
       const next = new Set(previous)
-      if (next.has(dealId)) next.delete(dealId)
+      const wasSaved = next.has(dealId)
+      if (wasSaved) next.delete(dealId)
       else next.add(dealId)
+      showToast(wasSaved ? 'Removed from saved deals' : 'Saved to your deals')
       return next
     })
+  }
+
+  function handleClaim() {
+    showToast('Deal claimed — show this screen in-store to redeem.')
   }
 
   return (
@@ -98,6 +117,16 @@ export default function Deals() {
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
           />
+          {searchTerm && (
+            <button
+              type="button"
+              className="dd-search-clear"
+              aria-label="Clear search"
+              onClick={() => setSearchTerm('')}
+            >
+              <X size={14} aria-hidden="true" />
+            </button>
+          )}
         </div>
 
         <div className="dd-toolbar-actions">
@@ -139,8 +168,8 @@ export default function Deals() {
           No deals match your search. Try a different category or search term.
         </div>
       ) : (
-        <div className="dd-grid">
-          {visibleDeals.map((deal) => (
+        <div className="dd-grid" key={`${activeCategory}-${sortOption}`}>
+          {visibleDeals.map((deal, index) => (
             <DealCard
               key={deal.id}
               deal={deal}
@@ -148,6 +177,7 @@ export default function Deals() {
               isSaved={savedDealIds.has(deal.id)}
               onToggleSaved={() => toggleSaved(deal.id)}
               onView={() => setActiveDealId(deal.id)}
+              animationDelay={index * 40}
             />
           ))}
         </div>
@@ -160,7 +190,14 @@ export default function Deals() {
           isSaved={savedDealIds.has(activeDeal.id)}
           onToggleSaved={() => toggleSaved(activeDeal.id)}
           onClose={() => setActiveDealId(null)}
+          onClaim={handleClaim}
         />
+      )}
+
+      {toast && (
+        <div className="dd-toast" role="status">
+          {toast}
+        </div>
       )}
     </>
   )
