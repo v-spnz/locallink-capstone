@@ -8,7 +8,7 @@ import {
   ImageIcon,
   Plus,
 } from 'lucide-react'
-import { formatDealOffer } from '../constants'
+import { formatDealOffer, getDealLifecycle } from '../constants'
 import DealDetails from './DealDetails'
 
 function parseDealDate(value) {
@@ -79,7 +79,11 @@ export default function DealList({
           New deal
         </Button>
       </div>
-      {successMessage && <p className="form-success">{successMessage}</p>}
+      {successMessage && (
+        <p className="form-success" role="status" aria-live="polite">
+          {successMessage}
+        </p>
+      )}
       {deals.length > 0 && (
         <dl className="deal-list-summary" aria-label="Deal summary">
           <div>
@@ -126,6 +130,7 @@ export default function DealList({
           {deals.map((deal) => {
             const selected = selectedDealId === deal.id
             const expiry = getExpiryDetail(deal.endDate)
+            const lifecycle = getDealLifecycle(deal)
             const detailId = `deal-details-${deal.id}`
 
             return (
@@ -156,12 +161,8 @@ export default function DealList({
                   <span className="deal-card-copy">
                     <span className="deal-card-heading">
                       <small>{deal.category || 'Uncategorised deal'}</small>
-                      <span
-                        className={`deal-status ${
-                          deal.status === 'draft' ? 'is-draft' : ''
-                        }`}
-                      >
-                        {deal.status === 'published' ? 'Published' : 'Draft'}
+                      <span className={`deal-status is-${lifecycle.value}`}>
+                        {lifecycle.label}
                       </span>
                     </span>
                     <strong className="deal-card-title">

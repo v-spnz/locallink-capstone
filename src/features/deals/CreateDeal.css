@@ -48,6 +48,18 @@
   color: #666;
 }
 
+.deal-status.is-scheduled,
+body.business-surface .deal-status.is-scheduled {
+  background: #fff3bf;
+  color: #8a5b00;
+}
+
+.deal-status.is-expired,
+body.business-surface .deal-status.is-expired {
+  background: #f1f3f5;
+  color: #667085;
+}
+
 .deal-details {
   margin-bottom: 10px;
   padding: 10px 14px;
@@ -343,6 +355,45 @@
   font-weight: 600;
 }
 
+.deal-publish-confirmation {
+  padding: 28px;
+}
+
+.deal-publish-confirmation-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.deal-publish-confirmation-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.deal-publish-confirmation h2 {
+  margin: 18px 0 8px;
+  color: var(--text);
+  font-size: 22px;
+}
+
+.deal-publish-confirmation p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.deal-publish-confirmation-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 @media (max-width: 640px) {
   .deal-form {
     padding: 18px;
@@ -376,6 +427,14 @@
   }
 
   .deal-form-actions button {
+    width: 100%;
+  }
+
+  .deal-publish-confirmation-actions {
+    flex-direction: column-reverse;
+  }
+
+  .deal-publish-confirmation-actions button {
     width: 100%;
   }
 }

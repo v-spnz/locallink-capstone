@@ -37,3 +37,32 @@ export function formatDealOffer(deal) {
       return ''
   }
 }
+
+function localDateKey(date) {
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return date
+  }
+
+  const value = date instanceof Date ? date : new Date(date)
+  if (Number.isNaN(value.getTime())) return ''
+
+  const year = value.getFullYear()
+  const month = String(value.getMonth() + 1).padStart(2, '0')
+  const day = String(value.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+export function getDealLifecycle(deal, today = new Date()) {
+  if (deal.status !== 'published') {
+    return { value: 'draft', label: 'Draft' }
+  }
+
+  const todayKey = localDateKey(today)
+  if (deal.startDate && todayKey && deal.startDate > todayKey) {
+    return { value: 'scheduled', label: 'Scheduled' }
+  }
+  if (deal.endDate && todayKey && deal.endDate < todayKey) {
+    return { value: 'expired', label: 'Expired' }
+  }
+  return { value: 'active', label: 'Active' }
+}

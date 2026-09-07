@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import useBusiness from '../../../business/useBusiness'
 import { fetchBusinessDeals, saveBusinessDeal } from '../api/businessDeals'
+import { getDealLifecycle } from '../constants'
 import { validateDeal } from '../validation'
 
 export const EMPTY_DEAL = {
@@ -44,6 +45,7 @@ export default function useBusinessDeals() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const saveInProgressRef = useRef(false)
 
   const loadDeals = useCallback(async () => {
     setIsLoading(true)
@@ -106,6 +108,8 @@ export default function useBusinessDeals() {
   }
 
   async function persist(status) {
+    if (saveInProgressRef.current) return false
+
     const validationErrors = validateDeal(form, {
       forPublication: status === 'published',
     })
@@ -115,13 +119,16 @@ export default function useBusinessDeals() {
       return false
     }
 
+    saveInProgressRef.current = true
     setIsSaving(true)
     setRequestError('')
     setSuccessMessage('')
+    const dealForSave = form.id ? form : { ...form, id: crypto.randomUUID() }
+    if (!form.id) setForm(dealForSave)
     try {
       const saved = await saveBusinessDeal({
         businessId: business.id,
-        deal: form,
+        deal: dealForSave,
         status,
       })
       setDeals((current) => [
@@ -130,9 +137,10 @@ export default function useBusinessDeals() {
       ])
       setForm(saved)
       setHasUnsavedChanges(false)
+      const lifecycle = getDealLifecycle(saved)
       setSuccessMessage(
         status === 'published'
-          ? 'Deal published successfully.'
+          ? `Deal published successfully. Status: ${lifecycle.label}.`
           : 'Deal saved as a private draft.',
       )
       setStep('list')
@@ -146,6 +154,7 @@ export default function useBusinessDeals() {
       )
       return false
     } finally {
+      saveInProgressRef.current = false
       setIsSaving(false)
     }
   }
