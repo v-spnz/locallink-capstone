@@ -1,0 +1,811 @@
+/* ─── Deals & Discovery redesign ─────────────────────────────────── */
+/* New classes use a dd- prefix so nothing here can collide with or   */
+/* override existing shared-ui.css rules used by other customer pages.*/
+
+.dd-page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.dd-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.dd-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.dd-subtitle strong {
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.dd-result-count {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  padding-bottom: 2px;
+}
+
+.dd-toolbar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.dd-search {
+  flex: 1 1 260px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  transition: var(--transition);
+}
+
+.dd-search:focus-within {
+  border-color: var(--blue);
+}
+
+.dd-search svg {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.dd-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  color: var(--text);
+}
+
+.dd-search input::placeholder {
+  color: var(--text-muted);
+}
+
+.dd-toolbar-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.dd-select {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.dd-select select {
+  appearance: none;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 32px 10px 14px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.dd-select select:hover {
+  border-color: var(--blue);
+}
+
+.dd-select svg {
+  position: absolute;
+  right: 10px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.dd-filters-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.dd-filters-btn:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.dd-pill {
+  background: var(--blue-light);
+  border: none;
+  color: var(--blue-dark);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.dd-pill:hover {
+  background: #cddaff;
+}
+
+.dd-pill.active {
+  background: var(--blue);
+  color: var(--white);
+  font-weight: 600;
+}
+
+.dd-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 18px;
+  margin-top: 4px;
+}
+
+.dd-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.dd-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.dd-card-media {
+  position: relative;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dd-card-media-icon {
+  width: 40px;
+  height: 40px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dd-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--amber);
+  color: #7a5c00;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  z-index: 2;
+}
+
+.dd-save-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  transition: var(--transition);
+  z-index: 2;
+}
+
+.dd-save-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.dd-save-btn:hover {
+  background: var(--white);
+  transform: scale(1.06);
+}
+
+.dd-save-btn.is-saved {
+  color: var(--blue);
+}
+
+.dd-card-body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.dd-card-business {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.dd-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+
+.dd-card-desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0 0 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dd-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11.5px;
+  margin-bottom: 12px;
+}
+
+.dd-card-location,
+.dd-card-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dd-card-location {
+  color: var(--text-muted);
+}
+
+.dd-card-countdown {
+  color: var(--danger);
+}
+
+.dd-card-meta svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.dd-view-btn {
+  width: 100%;
+  background: var(--blue);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius);
+  padding: 11px;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: auto;
+}
+
+.dd-view-btn:hover {
+  background: var(--blue-dark);
+}
+
+.dd-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 20, 30, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1000;
+}
+
+.dd-modal {
+  background: var(--white);
+  width: min(560px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.dd-modal-media {
+  position: relative;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dd-modal-media-icon {
+  width: 52px;
+  height: 52px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dd-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text);
+  transition: var(--transition);
+  z-index: 2;
+}
+
+.dd-modal-close svg {
+  width: 16px;
+  height: 16px;
+}
+
+.dd-modal-close:hover {
+  background: var(--white);
+}
+
+.dd-modal-heading {
+  background: #202a3a;
+  padding: 16px 22px;
+}
+
+.dd-modal-business {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 4px;
+}
+
+.dd-modal-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--white);
+  margin: 0;
+}
+
+.dd-modal-content {
+  padding: 20px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dd-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dd-tag {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.dd-tag-category {
+  background: var(--amber-light);
+  color: #7a5c00;
+}
+
+.dd-tag-neutral {
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.dd-tag-expiry {
+  background: #fff5f5;
+  color: var(--danger);
+}
+
+.dd-tag-open {
+  background: var(--emerald-light);
+  color: #087f5b;
+}
+
+.dd-modal-desc {
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.dd-modal-address {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.dd-modal-address svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.dd-modal-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.dd-modal-included,
+.dd-modal-excluded {
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.dd-modal-included {
+  background: var(--emerald-light);
+}
+
+.dd-modal-excluded {
+  background: var(--bg);
+}
+
+.dd-modal-col-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.dd-modal-col-title svg {
+  width: 15px;
+  height: 15px;
+}
+
+.dd-modal-included .dd-modal-col-title {
+  color: #087f5b;
+}
+
+.dd-modal-excluded .dd-modal-col-title {
+  color: var(--text-muted);
+}
+
+.dd-modal-columns ul {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dd-modal-columns li {
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.dd-modal-excluded li {
+  color: var(--text-muted);
+}
+
+.dd-redeem-box {
+  background: var(--blue-light);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.dd-redeem-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blue-dark);
+  margin-bottom: 4px;
+}
+
+.dd-redeem-title svg {
+  width: 15px;
+  height: 15px;
+}
+
+.dd-redeem-box p {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.dd-conditions-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.dd-conditions p {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.dd-expiry-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.dd-expiry-row svg {
+  width: 14px;
+  height: 14px;
+}
+
+.dd-expiry-row strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.dd-modal-footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px 22px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.dd-save-toggle {
+  flex: 0 0 110px;
+  background: var(--white);
+  border: 1.5px solid var(--blue);
+  color: var(--blue);
+  border-radius: var(--radius);
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.dd-save-toggle:hover,
+.dd-save-toggle.is-saved {
+  background: var(--blue-light);
+}
+
+.dd-claim-btn {
+  flex: 1;
+  background: var(--blue);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius);
+  padding: 11px;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.dd-claim-btn:hover {
+  background: var(--blue-dark);
+}
+
+@media (max-width: 760px) {
+  .dd-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dd-toolbar-actions {
+    justify-content: stretch;
+  }
+
+  .dd-toolbar-actions .dd-select,
+  .dd-toolbar-actions select,
+  .dd-filters-btn {
+    flex: 1;
+  }
+}
+
+@media (max-width: 560px) {
+  .dd-modal-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Motion + feedback polish ────────────────────────────────────── */
+
+@keyframes dd-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dd-card-enter {
+  animation: dd-fade-in-up 0.32s ease both;
+}
+
+@keyframes dd-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.dd-save-btn.is-popping {
+  animation: dd-pop 0.26s ease;
+}
+
+@keyframes dd-press {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.dd-claim-btn.is-popping {
+  animation: dd-press 0.22s ease;
+}
+
+@keyframes dd-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dd-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dd-modal-overlay {
+  animation: dd-overlay-in 0.18s ease both;
+}
+
+.dd-modal {
+  animation: dd-modal-in 0.22s ease both;
+}
+
+.dd-modal-overlay.is-closing {
+  animation: dd-overlay-in 0.18s ease reverse both;
+}
+
+.dd-modal.is-closing {
+  animation: dd-modal-in 0.18s ease reverse both;
+}
+
+.dd-search-clear {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 50%;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.dd-search-clear:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+@keyframes dd-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.dd-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  background: #202a3a;
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 999px;
+  box-shadow: var(--shadow-md);
+  z-index: 1100;
+  animation: dd-toast-in 0.22s ease both;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-card-enter,
+  .dd-save-btn.is-popping,
+  .dd-claim-btn.is-popping,
+  .dd-modal-overlay,
+  .dd-modal,
+  .dd-toast {
+    animation: none;
+  }
+}

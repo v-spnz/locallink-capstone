@@ -49,6 +49,9 @@ export default function DealDetailModal({
   deal,
   businessName,
   address,
+  categoryEmoji,
+  distanceKm,
+  suburb,
   onClose,
   isSaved,
   onToggleSave,
@@ -59,37 +62,50 @@ export default function DealDetailModal({
 
   return (
     <Modal onClose={onClose} maxWidthClassName="max-w-xl">
-      <div className="flex items-start justify-between border-b border-[var(--border)] px-6 py-5">
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-            {businessName}
-          </div>
-          <h2 className="mt-0.5 text-lg font-extrabold text-[var(--text)]">
-            {deal.title}
-          </h2>
-        </div>
+      <div
+        className="relative flex h-28 items-center justify-center rounded-t-2xl"
+        style={{ background: 'linear-gradient(135deg, #6d7dc9, #3f4f9e)' }}
+      >
+        <span className="text-4xl" aria-hidden="true">
+          {categoryEmoji}
+        </span>
+        <span className="absolute left-3 top-3 rounded-full bg-[var(--amber-light)] px-3 py-1 text-xs font-bold text-[#7a5c00]">
+          {getOfferSummary(deal)}
+        </span>
         <button
           onClick={onClose}
           aria-label="Close"
-          className="rounded-full p-1 text-[var(--text-muted)] hover:bg-[var(--bg)] hover:text-[var(--text)]"
+          className="absolute right-3 top-3 rounded-full bg-white/20 p-1.5 text-white hover:bg-white/30"
         >
           <X size={20} />
         </button>
       </div>
 
+      <div className="bg-[#202a3a] px-6 py-4">
+        <div className="text-xs font-semibold uppercase tracking-wide text-white/70">
+          {businessName}
+        </div>
+        <h2 className="mt-0.5 text-lg font-extrabold text-white">
+          {deal.title}
+        </h2>
+      </div>
+
       <div className="px-6 py-5">
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-[var(--amber-light)] px-3 py-1 text-xs font-semibold text-[var(--text)]">
-            {getOfferSummary(deal)}
-          </span>
           {deal.category && (
             <span className="rounded-full bg-[var(--blue-light)] px-3 py-1 text-xs font-semibold text-[var(--blue)]">
               {deal.category}
             </span>
           )}
-          {deal.gst_included !== null && (
-            <span className="rounded-full bg-[var(--bg)] px-3 py-1 text-xs text-[var(--text-muted)]">
-              {deal.gst_included ? 'Inc. GST' : 'Excl. GST'}
+          {suburb && (
+            <span className="rounded-full bg-[var(--bg)] px-3 py-1 text-xs font-semibold text-[var(--text-muted)]">
+              {suburb}
+              {distanceKm != null && ` · ${Number(distanceKm).toFixed(1)} km`}
+            </span>
+          )}
+          {deal.end_date && (
+            <span className="rounded-full bg-[#fff5f5] px-3 py-1 text-xs font-semibold text-[var(--danger)]">
+              Expires {formatDate(deal.end_date)}
             </span>
           )}
         </div>

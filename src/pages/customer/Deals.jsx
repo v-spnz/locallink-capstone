@@ -1,4 +1,4 @@
-import { MapPin } from 'lucide-react'
+import { MapPin, Bookmark } from 'lucide-react'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import {
   fetchBusinessesInSavedSuburb,
@@ -142,16 +142,16 @@ export default function Deals() {
 
   return (
     <>
-      <div className="page-header">
-        <p
+      <div className="page-header discovery-page-header">
+                <p
           style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}
         >
-          Deals &amp; Discovery
+          Deals & Discovery
         </p>
         <h2>Discover Local</h2>
         <p>Find businesses and published deals in your registered suburb.</p>
         {location && (
-          <div className="discovery-selected-location">
+          <div className="discovery-selected-location is-chip">
             <MapPin aria-hidden="true" size={17} />
             Showing {location.suburb}
           </div>
@@ -163,8 +163,8 @@ export default function Deals() {
           <button
             key={filter}
             type="button"
-            className={`pill${activeFilter === filter ? ' active' : ''}`}
-            onClick={() => setActiveFilter(filter)}
+            className={`pill discovery-pill${activeFilter === filter ? ' active' : ''}`}
+                        onClick={() => setActiveFilter(filter)}
           >
             {filter}
           </button>
@@ -191,7 +191,7 @@ export default function Deals() {
         </div>
       )}
 
-      <div className="placeholder-section">
+      <div className="placeholder-section discovery-results-panel">
         <div
           className="placeholder-section-title is-complete"
           style={{ justifyContent: 'space-between' }}
@@ -214,18 +214,45 @@ export default function Deals() {
             No businesses or deals are available in {location.suburb} right now.
           </div>
         ) : (
-          <div className="business-grid">
+          <div className="business-grid discovery-grid discovery-card-grid">
             {businesses.map((business) => (
               <div
-                className={`business-card${business.deal_id ? ' business-card-clickable' : ''}`}
+                className={`business-card discovery-business-card${business.deal_id ? ' business-card-clickable' : ''}`}
                 key={business.business_id}
                 onClick={() => openDeal(business)}
                 role={business.deal_id ? 'button' : undefined}
                 tabIndex={business.deal_id ? 0 : undefined}
               >
-                <div className="business-card-icon">
-                  {getCategoryEmoji(business.category)}
+                <div className="discovery-card-media">
+                  <span className="discovery-card-icon" aria-hidden="true">
+                    {getCategoryEmoji(business.category)}
+                  </span>
+                  {business.deal_id && (
+                    <button
+                      type="button"
+                      className={`discovery-save-btn${savedDealIds.includes(business.deal_id) ? ' is-saved' : ''}`}
+                      aria-label={
+                        savedDealIds.includes(business.deal_id)
+                          ? 'Remove from saved deals'
+                          : 'Save this deal'
+                      }
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        toggleSaveDeal(business.deal_id)
+                      }}
+                    >
+                      <Bookmark
+                        aria-hidden="true"
+                        fill={
+                          savedDealIds.includes(business.deal_id)
+                            ? 'currentColor'
+                            : 'none'
+                        }
+                      />
+                    </button>
+                  )}
                 </div>
+
                 <div className="business-card-body">
                   <div className="business-card-name">
                     {business.business_name}
@@ -241,12 +268,28 @@ export default function Deals() {
                       Deal: {business.deal_title}
                     </div>
                   )}
-                  <div className="business-card-address">
-                    {business.formatted_address}
+
+                  <div className="discovery-card-footer">
+                    <span className="business-card-address">
+                      {business.formatted_address}
+                    </span>
+                    <span className="business-card-distance discovery-distance-badge">
+                      {Number(business.distance_km).toFixed(1)} km
+                    </span>
                   </div>
-                </div>
-                <div className="business-card-distance">
-                  {Number(business.distance_km).toFixed(1)} km
+
+                  {business.deal_id && (
+                    <button
+                      type="button"
+                      className="discovery-view-deal-btn"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        openDeal(business)
+                      }}
+                    >
+                      View Deal
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -267,6 +310,9 @@ export default function Deals() {
           deal={selectedDeal}
           businessName={selectedBusinessRow.business_name}
           address={selectedBusinessRow.formatted_address}
+          categoryEmoji={getCategoryEmoji(selectedBusinessRow.category)}
+          distanceKm={selectedBusinessRow.distance_km}
+          suburb={location?.suburb}
           isSaved={savedDealIds.includes(selectedDeal.id)}
           onToggleSave={toggleSaveDeal}
           onClose={closeDeal}
