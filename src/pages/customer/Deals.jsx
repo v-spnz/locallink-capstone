@@ -1,97 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
-import {
-  Search,
-  ChevronDown,
-  SlidersHorizontal,
-  X,
-  Coffee,
-  UtensilsCrossed,
-  Dumbbell,
-  Sparkles,
-  BookOpen,
-  Pizza,
-  Flower2,
-  ShoppingBasket,
-} from 'lucide-react'
-import mockDeals from '../../data/mockDeals'
-import DealCard from './DealCard'
-import DealModal from './DealModal'
-import './Deals.css'
-
-const CATEGORIES = [
-  'All Deals',
-  'Food & Drink',
-  'Shopping',
-  'Health & Beauty',
-  'Activities',
-  'Home & Services',
-]
-
-// Gradient + icon per deal, used until real business photos exist.
-// Shared by DealCard and DealModal — kept here and passed down as a
-// prop so both stay in sync from one source, without either file
-// importing back from this one.
-const CATEGORY_VISUALS = {
-  coffee: { icon: Coffee, gradient: 'linear-gradient(135deg, #c9a479, #7a5738)' },
-  dining: { icon: UtensilsCrossed, gradient: 'linear-gradient(135deg, #d1927a, #93503d)' },
-  fitness: { icon: Dumbbell, gradient: 'linear-gradient(135deg, #7c8db5, #47597c)' },
-  beauty: { icon: Sparkles, gradient: 'linear-gradient(135deg, #cf9fb6, #8f5c7d)' },
-  books: { icon: BookOpen, gradient: 'linear-gradient(135deg, #8fae9c, #52705f)' },
-  pizza: { icon: Pizza, gradient: 'linear-gradient(135deg, #cf9678, #9a5642)' },
-  wellness: { icon: Flower2, gradient: 'linear-gradient(135deg, #a993c4, #6d5589)' },
-  market: { icon: ShoppingBasket, gradient: 'linear-gradient(135deg, #a3b98f, #6e8759)' },
-}
-
-export default function Deals() {
-  const [activeCategory, setActiveCategory] = useState(CATEGORIES[0])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [sortOption, setSortOption] = useState('Recommended')
-  const [activeDealId, setActiveDealId] = useState(null)
-  const [savedDealIds, setSavedDealIds] = useState(() => new Set())
-  const [toast, setToast] = useState(null)
-  const toastTimeoutRef = useRef(null)
-
-  useEffect(() => {
-    return () => clearTimeout(toastTimeoutRef.current)
-  }, [])
-
-  function showToast(message) {
-    clearTimeout(toastTimeoutRef.current)
-    setToast(message)
-    toastTimeoutRef.current = setTimeout(() => setToast(null), 2200)
-  }
-
-  const visibleDeals = mockDeals
-    .filter(
-      (deal) => activeCategory === 'All Deals' || deal.category === activeCategory,
-    )
-    .filter((deal) => {
-      if (!searchTerm.trim()) return true
-      const haystack = `${deal.businessName} ${deal.title}`.toLowerCase()
-      return haystack.includes(searchTerm.trim().toLowerCase())
-    })
-    .sort((first, second) => {
-      if (sortOption === 'Closest') return first.distanceKm - second.distanceKm
-      if (sortOption === 'Ending soon') return first.daysLeft - second.daysLeft
-      return 0
-    })
-
-  const activeDeal = mockDeals.find((deal) => deal.id === activeDealId) ?? null
-
-  function toggleSaved(dealId) {
-    setSavedDealIds((previous) => {
-      const next = new Set(previous)
-      const wasSaved = next.has(dealId)
-      if (wasSaved) next.delete(dealId)
-      else next.add(dealId)
-      showToast(wasSaved ? 'Removed from saved deals' : 'Saved to your deals')
-      return next
-    })
-  }
-
-  function handleClaim() {
-    showToast('Deal claimed — show this screen in-store to redeem.')
-import { MapPin } from 'lucide-react'
+import { MapPin, Bookmark } from 'lucide-react'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import {
   fetchBusinessesInSavedSuburb,
@@ -235,78 +142,16 @@ export default function Deals() {
 
   return (
     <>
-      <div className="dd-page-head">
-        <div>
-          <h2 className="dd-title">Deals & Discovery</h2>
-          <p className="dd-subtitle">
-            Explore offers near <strong>Ponsonby</strong>
-          </p>
-        </div>
-        <span className="dd-result-count">
-          {visibleDeals.length} deal{visibleDeals.length !== 1 ? 's' : ''} found
-        </span>
-      </div>
-
-      <div className="dd-toolbar">
-        <div className="dd-search">
-          <Search size={16} aria-hidden="true" />
-          <input
-            type="text"
-            placeholder="Search deals or businesses..."
-            aria-label="Search deals or businesses"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-          />
-          {searchTerm && (
-            <button
-              type="button"
-              className="dd-search-clear"
-              aria-label="Clear search"
-              onClick={() => setSearchTerm('')}
-            >
-              <X size={14} aria-hidden="true" />
-            </button>
-          )}
-        </div>
-
-        <div className="dd-toolbar-actions">
-          <div className="dd-select">
-            <select
-              aria-label="Sort deals"
-              value={sortOption}
-              onChange={(event) => setSortOption(event.target.value)}
-            >
-              <option>Recommended</option>
-              <option>Closest</option>
-              <option>Ending soon</option>
-            </select>
-            <ChevronDown size={14} aria-hidden="true" />
-          </div>
-
-          <button type="button" className="dd-filters-btn">
-            <SlidersHorizontal size={15} aria-hidden="true" />
-            Filters
-          </button>
-        </div>
-      </div>
-
-      <div className="pill-filter-row">
-        {CATEGORIES.map((category) => (
-          <button
-            key={category}
-            type="button"
-            className={`dd-pill${activeCategory === category ? ' active' : ''}`}
-            onClick={() => setActiveCategory(category)}
-      <div className="page-header">
-        <p
+      <div className="page-header discovery-page-header">
+                <p
           style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}
         >
-          Deals &amp; Discovery
+          Deals & Discovery
         </p>
         <h2>Discover Local</h2>
         <p>Find businesses and published deals in your registered suburb.</p>
         {location && (
-          <div className="discovery-selected-location">
+          <div className="discovery-selected-location is-chip">
             <MapPin aria-hidden="true" size={17} />
             Showing {location.suburb}
           </div>
@@ -318,53 +163,14 @@ export default function Deals() {
           <button
             key={filter}
             type="button"
-            className={`pill${activeFilter === filter ? ' active' : ''}`}
-            onClick={() => setActiveFilter(filter)}
+            className={`pill discovery-pill${activeFilter === filter ? ' active' : ''}`}
+                        onClick={() => setActiveFilter(filter)}
           >
-            {category}
+            {filter}
           </button>
         ))}
       </div>
 
-      {visibleDeals.length === 0 ? (
-        <div className="empty-state">
-          No deals match your search. Try a different category or search term.
-        </div>
-      ) : (
-        <div className="dd-grid" key={`${activeCategory}-${sortOption}`}>
-          {visibleDeals.map((deal, index) => (
-            <DealCard
-              key={deal.id}
-              deal={deal}
-              visual={CATEGORY_VISUALS[deal.iconKey]}
-              isSaved={savedDealIds.has(deal.id)}
-              onToggleSaved={() => toggleSaved(deal.id)}
-              onView={() => setActiveDealId(deal.id)}
-              animationDelay={index * 40}
-            />
-          ))}
-        </div>
-      )}
-
-      {activeDeal && (
-        <DealModal
-          deal={activeDeal}
-          visual={CATEGORY_VISUALS[activeDeal.iconKey]}
-          isSaved={savedDealIds.has(activeDeal.id)}
-          onToggleSaved={() => toggleSaved(activeDeal.id)}
-          onClose={() => setActiveDealId(null)}
-          onClaim={handleClaim}
-        />
-      )}
-
-      {toast && (
-        <div className="dd-toast" role="status">
-          {toast}
-        </div>
-      )}
-    </>
-  )
-}
       {error && (
         <div className="auth-error" role="alert">
           {error}
@@ -385,7 +191,7 @@ export default function Deals() {
         </div>
       )}
 
-      <div className="placeholder-section">
+      <div className="placeholder-section discovery-results-panel">
         <div
           className="placeholder-section-title is-complete"
           style={{ justifyContent: 'space-between' }}
@@ -408,18 +214,45 @@ export default function Deals() {
             No businesses or deals are available in {location.suburb} right now.
           </div>
         ) : (
-          <div className="business-grid">
+          <div className="business-grid discovery-grid discovery-card-grid">
             {businesses.map((business) => (
               <div
-                className={`business-card${business.deal_id ? ' business-card-clickable' : ''}`}
+                className={`business-card discovery-business-card${business.deal_id ? ' business-card-clickable' : ''}`}
                 key={business.business_id}
                 onClick={() => openDeal(business)}
                 role={business.deal_id ? 'button' : undefined}
                 tabIndex={business.deal_id ? 0 : undefined}
               >
-                <div className="business-card-icon">
-                  {getCategoryEmoji(business.category)}
+                <div className="discovery-card-media">
+                  <span className="discovery-card-icon" aria-hidden="true">
+                    {getCategoryEmoji(business.category)}
+                  </span>
+                  {business.deal_id && (
+                    <button
+                      type="button"
+                      className={`discovery-save-btn${savedDealIds.includes(business.deal_id) ? ' is-saved' : ''}`}
+                      aria-label={
+                        savedDealIds.includes(business.deal_id)
+                          ? 'Remove from saved deals'
+                          : 'Save this deal'
+                      }
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        toggleSaveDeal(business.deal_id)
+                      }}
+                    >
+                      <Bookmark
+                        aria-hidden="true"
+                        fill={
+                          savedDealIds.includes(business.deal_id)
+                            ? 'currentColor'
+                            : 'none'
+                        }
+                      />
+                    </button>
+                  )}
                 </div>
+
                 <div className="business-card-body">
                   <div className="business-card-name">
                     {business.business_name}
@@ -435,12 +268,28 @@ export default function Deals() {
                       Deal: {business.deal_title}
                     </div>
                   )}
-                  <div className="business-card-address">
-                    {business.formatted_address}
+
+                  <div className="discovery-card-footer">
+                    <span className="business-card-address">
+                      {business.formatted_address}
+                    </span>
+                    <span className="business-card-distance discovery-distance-badge">
+                      {Number(business.distance_km).toFixed(1)} km
+                    </span>
                   </div>
-                </div>
-                <div className="business-card-distance">
-                  {Number(business.distance_km).toFixed(1)} km
+
+                  {business.deal_id && (
+                    <button
+                      type="button"
+                      className="discovery-view-deal-btn"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        openDeal(business)
+                      }}
+                    >
+                      View Deal
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -461,6 +310,9 @@ export default function Deals() {
           deal={selectedDeal}
           businessName={selectedBusinessRow.business_name}
           address={selectedBusinessRow.formatted_address}
+          categoryEmoji={getCategoryEmoji(selectedBusinessRow.category)}
+          distanceKm={selectedBusinessRow.distance_km}
+          suburb={location?.suburb}
           isSaved={savedDealIds.includes(selectedDeal.id)}
           onToggleSave={toggleSaveDeal}
           onClose={closeDeal}
