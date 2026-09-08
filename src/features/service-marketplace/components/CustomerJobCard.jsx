@@ -1,4 +1,5 @@
 import { getJobBadge } from '../formatters'
+import GstIncluded from '../../../components/ui/GstIncluded'
 
 export default function CustomerJobCard({ job, quoteCount, onSelect }) {
   const badge = getJobBadge(job, quoteCount)
@@ -57,6 +58,7 @@ export default function CustomerJobCard({ job, quoteCount, onSelect }) {
                 <path d="M17 6.5c0-1.9-2.2-3.5-5-3.5s-5 1.6-5 3.5 2.2 3 5 3.5 5 1.6 5 3.5-2.2 3.5-5 3.5-5-1.6-5-3.5" />
               </svg>
               Budget: <strong>{job.budget}</strong>
+              <GstIncluded />
             </span>
           )}
           <span>

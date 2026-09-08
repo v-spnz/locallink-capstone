@@ -13,8 +13,22 @@ export default function CustomerPortal() {
     <PortalLayout navigation={<CustomerNavigation />}>
       <Routes>
         <Route index element={<Navigate to="/home" replace />} />
-        <Route path="home" element={<Home />} />
-        <Route path="deals" element={<Deals />} />
+        <Route
+          path="home"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="deals"
+          element={
+            <ProtectedRoute>
+              <Deals />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="loyalty"
           element={

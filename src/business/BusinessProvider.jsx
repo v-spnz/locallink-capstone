@@ -11,6 +11,7 @@ const EMPTY_CAPABILITIES = {
 
 export default function BusinessProvider({ children }) {
   const { user, isLoading: isAuthLoading } = useAuth()
+  const userId = user?.id ?? null
   const [state, setState] = useState({
     membership: null,
     business: null,
@@ -25,7 +26,7 @@ export default function BusinessProvider({ children }) {
   const loadBusiness = useCallback(async () => {
     if (isAuthLoading) return
 
-    if (!user) {
+    if (!userId) {
       setState((current) => ({
         ...current,
         membership: null,
@@ -40,12 +41,16 @@ export default function BusinessProvider({ children }) {
       return
     }
 
-    setState((current) => ({ ...current, isLoading: true, error: '' }))
+    setState((current) => ({
+      ...current,
+      isLoading: !current.business,
+      error: '',
+    }))
 
     const { data: membership, error: membershipError } = await supabase
       .from('business_members')
       .select('business_id, role, created_at')
-      .eq('profile_id', user.id)
+      .eq('profile_id', userId)
       .order('created_at', { ascending: true })
       .limit(1)
       .maybeSingle()
@@ -135,7 +140,7 @@ export default function BusinessProvider({ children }) {
       isLoading: false,
       error: '',
     })
-  }, [isAuthLoading, user])
+  }, [isAuthLoading, userId])
 
   useEffect(() => {
     const loadTimer = window.setTimeout(loadBusiness, 0)

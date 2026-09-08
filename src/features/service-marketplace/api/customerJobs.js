@@ -1,24 +1,45 @@
 import { supabase } from '../../../lib/supabase'
 import { formatBudgetRange } from '../formatters'
+import { isAcceptedJobContactsRpcMissing } from './acceptedJobContactErrors'
+import { fetchAcceptedJobContacts } from './acceptedJobContacts'
 const JOB_FIELDS =
   'id, title, description, category, job_type, city, suburb, radius_km, ' +
   'status, image_urls, job_date, budget, urgency, created_at, updated_at, ' +
   'status_history:job_status_history(status, updated_at)'
 
 export async function fetchCustomerJobs(customerId) {
-  const [jobsResult, quotesResult] = await Promise.all([
+  const [jobsResult, quotesResult, contactsResult] = await Promise.all([
     supabase
       .from('job_requests')
       .select(JOB_FIELDS)
       .eq('customer_id', customerId)
       .order('created_at', { ascending: false }),
     supabase.rpc('get_customer_job_quotes'),
+    fetchAcceptedJobContacts(),
   ])
 
+  const hasContactError =
+    contactsResult.error &&
+    !isAcceptedJobContactsRpcMissing(contactsResult.error)
+
+  const contactsByJob = new Map(
+    (contactsResult.data ?? []).map((contact) => [
+      contact.job_request_id,
+      contact,
+    ]),
+  )
+
   return {
-    jobs: jobsResult.error ? null : (jobsResult.data ?? []),
+    jobs: jobsResult.error
+      ? null
+      : (jobsResult.data ?? []).map((job) => ({
+          ...job,
+          contact_details: contactsByJob.get(job.id) ?? null,
+        })),
     quotes: quotesResult.error ? null : (quotesResult.data ?? []),
-    hasError: Boolean(jobsResult.error || quotesResult.error),
+    hasError: Boolean(
+      jobsResult.error || quotesResult.error || hasContactError,
+    ),
   }
 }
 

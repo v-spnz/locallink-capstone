@@ -7,6 +7,6 @@ export function isVideoUrl(url = '') {
 export function getLeadMedia(imageUrls = []) {
   return imageUrls
     .filter((url) => typeof url === 'string' && url.trim())
-    .slice(0, 10)
+    .slice(0, 20)
     .map((url) => ({ url, type: isVideoUrl(url) ? 'video' : 'image' }))
 }

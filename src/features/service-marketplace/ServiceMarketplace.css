@@ -203,10 +203,6 @@
   margin-bottom: 22px;
 }
 
-.business-services-hero .page-header-eyebrow {
-  color: rgb(255 255 255 / 68%);
-}
-
 .business-services-hero .page-header h2 {
   color: #fff;
 }
@@ -925,7 +921,7 @@
   padding: 14px;
   border-radius: 10px;
   display: grid;
-  grid-template-columns: repeat(5, minmax(92px, 1fr));
+  grid-template-columns: repeat(6, minmax(92px, 1fr));
   overflow-x: auto;
   background: var(--bg);
   list-style: none;
@@ -1003,6 +999,100 @@
   color: var(--text-muted);
   font-size: 9px;
   line-height: 1.35;
+}
+
+.accepted-job-contact {
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid #b2f2bb;
+  border-radius: 12px;
+  background: #f4fff7;
+}
+
+.accepted-job-contact-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+}
+
+.accepted-job-contact-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  background: #d3f9d8;
+  color: #087f5b;
+}
+
+.accepted-job-contact-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.accepted-job-contact-heading h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.accepted-job-contact-heading p {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.accepted-job-contact-list {
+  margin: 14px 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px 18px;
+}
+
+.accepted-job-contact-list > div {
+  min-width: 0;
+}
+
+.accepted-job-contact-list dt {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.accepted-job-contact-list dt svg {
+  width: 12px;
+  height: 12px;
+}
+
+.accepted-job-contact-list dd {
+  margin: 3px 0 0;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.accepted-job-contact-list a {
+  color: var(--blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.accepted-job-contact-list a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .accepted-job-contact-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 .service-quote-timeline {
@@ -1417,8 +1507,10 @@
   border-top: 0;
 }
 
-.service-quote-form label {
+.service-quote-field,
+.service-arrival-window-field {
   display: grid;
+  align-content: start;
   gap: 6px;
 }
 
@@ -1430,10 +1522,11 @@
 }
 
 .service-arrival-window legend,
-.service-arrival-window label > span {
+.service-quote-field-title {
   color: var(--text-muted);
   font-size: 10px;
   text-transform: uppercase;
+  cursor: default;
 }
 
 .service-arrival-window-selects {
@@ -1446,13 +1539,18 @@
 .service-quote-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  align-items: start;
+  column-gap: 24px;
+  row-gap: 20px;
 }
 
-.service-quote-form label > span {
-  color: var(--text-muted);
-  font-size: 10px;
-  text-transform: uppercase;
+.service-quote-form-grid > .service-quote-field,
+.service-quote-form-grid > fieldset {
+  align-self: start;
+}
+
+.service-quote-availability-field input {
+  margin-top: 25px;
 }
 
 .service-quote-form .service-required-mark {
@@ -1492,6 +1590,7 @@
   align-items: center;
   overflow: hidden;
   background: var(--white);
+  cursor: text;
   transition: var(--transition);
 }
 
@@ -1505,6 +1604,8 @@
   font-size: 13px;
   font-weight: 600;
   line-height: 1;
+  pointer-events: none;
+  user-select: none;
 }
 
 .service-quote-form .service-price-input input {
@@ -1933,6 +2034,10 @@
   .service-opportunity-facts {
     grid-template-columns: 1fr;
     gap: 3px;
+  }
+
+  .service-quote-availability-field input {
+    margin-top: 0;
   }
 }
 
@@ -2576,5 +2681,15 @@ details.sm-past-jobs[open] .sm-past-chev {
 }
 
 .sm-decline-confirm-btn.btn-primary:hover {
+  background: #a61e1e;
+}
+
+/* Solid red confirm button for the delete confirmation modal */
+.sm-delete-confirm-btn.btn-primary {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.sm-delete-confirm-btn.btn-primary:hover {
   background: #a61e1e;
 }

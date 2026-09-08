@@ -30,7 +30,8 @@ test('AC1 and AC3: lead summary displays location, closing date, and urgency', a
     assert.match(card, new RegExp(label, 'i'))
   }
   assert.match(card, /toLocaleDateString/)
-  assert.doesNotMatch(card, /details\.quoteCount/)
+  assert.match(card, /details\.quoteCount/)
+  assert.match(card, /details\.maxQuotes/)
   assert.match(card, /details\.urgency === 'Urgent'/)
   assert.match(card, /service-lead-urgency-dot/)
   assert.match(card, /service-lead-divider/)

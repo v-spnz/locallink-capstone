@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react'
 import Button from '../../../components/ui/Button'
+import GstIncluded from '../../../components/ui/GstIncluded'
 import {
   QUOTE_ARRIVAL_TIMES,
   QUOTE_DURATION_OPTIONS,
@@ -54,14 +55,29 @@ export default function QuoteForm({
     event.preventDefault()
   }
 
+  function openAvailabilityPicker(event) {
+    if (isSaving || typeof event.currentTarget.showPicker !== 'function') return
+
+    try {
+      event.currentTarget.showPicker()
+    } catch {
+      // Browsers without an available native picker still retain normal input
+      // focus and keyboard behaviour.
+    }
+  }
+
   return (
     <form className="service-quote-form" onSubmit={onReview} noValidate>
       <div className="service-quote-form-grid">
-        <label>
-          <span>
+        <div className="service-quote-field">
+          <span
+            className="service-quote-field-title"
+            id="quote-price-type-label"
+          >
             Price type <span className="service-required-mark">*</span>
           </span>
           <select
+            aria-labelledby="quote-price-type-label"
             required
             value={quote.priceType}
             onChange={(event) => onChange('priceType', event.target.value)}
@@ -76,9 +92,9 @@ export default function QuoteForm({
             ))}
           </select>
           <FieldError id="quote-priceType-error" message={errors.priceType} />
-        </label>
-        <label>
-          <span>
+        </div>
+        <div className="service-quote-field service-quote-price-field">
+          <span className="service-quote-field-title" id="quote-amount-label">
             Price (NZD) <span className="service-required-mark">*</span>
           </span>
           <span className="service-price-input">
@@ -86,6 +102,7 @@ export default function QuoteForm({
               $
             </span>
             <input
+              aria-labelledby="quote-amount-label"
               required
               type="text"
               inputMode="decimal"
@@ -102,17 +119,23 @@ export default function QuoteForm({
               {...fieldErrorProps('amount', errors)}
             />
           </span>
+          <GstIncluded block />
           <FieldError id="quote-amount-error" message={errors.amount} />
-        </label>
-        <label>
-          <span>
+        </div>
+        <div className="service-quote-field service-quote-availability-field">
+          <span
+            className="service-quote-field-title"
+            id="quote-availability-label"
+          >
             Available date <span className="service-required-mark">*</span>
           </span>
           <input
+            aria-labelledby="quote-availability-label"
             required
             type="date"
             min={minAvailability}
             value={quote.availability}
+            onClick={openAvailabilityPicker}
             onChange={(event) => onChange('availability', event.target.value)}
             disabled={isSaving}
             {...fieldErrorProps('availability', errors)}
@@ -121,15 +144,21 @@ export default function QuoteForm({
             id="quote-availability-error"
             message={errors.availability}
           />
-        </label>
+        </div>
         <fieldset className="service-arrival-window">
-          <legend>
+          <legend id="quote-arrival-window-label">
             Arrival window <span className="service-required-mark">*</span>
           </legend>
           <div className="service-arrival-window-selects">
-            <label>
-              <span>From</span>
+            <div className="service-arrival-window-field">
+              <span
+                className="service-quote-field-title"
+                id="quote-arrival-start-label"
+              >
+                From
+              </span>
               <select
+                aria-labelledby="quote-arrival-window-label quote-arrival-start-label"
                 required
                 value={quote.arrivalStart}
                 onChange={(event) =>
@@ -145,10 +174,16 @@ export default function QuoteForm({
                   </option>
                 ))}
               </select>
-            </label>
-            <label>
-              <span>To</span>
+            </div>
+            <div className="service-arrival-window-field">
+              <span
+                className="service-quote-field-title"
+                id="quote-arrival-end-label"
+              >
+                To
+              </span>
               <select
+                aria-labelledby="quote-arrival-window-label quote-arrival-end-label"
                 required
                 value={quote.arrivalEnd}
                 onChange={(event) => onChange('arrivalEnd', event.target.value)}
@@ -162,18 +197,22 @@ export default function QuoteForm({
                   </option>
                 ))}
               </select>
-            </label>
+            </div>
           </div>
           <FieldError
             id="quote-arrivalWindow-error"
             message={errors.arrivalWindow}
           />
         </fieldset>
-        <label>
-          <span>
+        <div className="service-quote-field">
+          <span
+            className="service-quote-field-title"
+            id="quote-expected-duration-label"
+          >
             Expected duration <span className="service-required-mark">*</span>
           </span>
           <select
+            aria-labelledby="quote-expected-duration-label"
             required
             value={quote.expectedDuration}
             onChange={(event) =>
@@ -193,13 +232,17 @@ export default function QuoteForm({
             id="quote-expectedDuration-error"
             message={errors.expectedDuration}
           />
-        </label>
+        </div>
       </div>
-      <label>
-        <span>
+      <div className="service-quote-field">
+        <span
+          className="service-quote-field-title"
+          id="quote-included-work-label"
+        >
           Included work <span className="service-required-mark">*</span>
         </span>
         <textarea
+          aria-labelledby="quote-included-work-label"
           required
           value={quote.includedWork}
           onChange={(event) => onChange('includedWork', event.target.value)}
@@ -213,12 +256,13 @@ export default function QuoteForm({
           id="quote-includedWork-error"
           message={errors.includedWork}
         />
-      </label>
-      <label>
-        <span>
+      </div>
+      <div className="service-quote-field">
+        <span className="service-quote-field-title" id="quote-conditions-label">
           Conditions <span className="service-required-mark">*</span>
         </span>
         <textarea
+          aria-labelledby="quote-conditions-label"
           required
           value={quote.conditions}
           onChange={(event) => onChange('conditions', event.target.value)}
@@ -229,10 +273,13 @@ export default function QuoteForm({
           {...fieldErrorProps('conditions', errors)}
         />
         <FieldError id="quote-conditions-error" message={errors.conditions} />
-      </label>
-      <label>
-        <span>Message to customer (optional)</span>
+      </div>
+      <div className="service-quote-field">
+        <span className="service-quote-field-title" id="quote-message-label">
+          Message to customer (optional)
+        </span>
         <textarea
+          aria-labelledby="quote-message-label"
           value={quote.message}
           onChange={(event) => onChange('message', event.target.value)}
           placeholder="Add a personal note for the customer"
@@ -242,7 +289,7 @@ export default function QuoteForm({
           {...fieldErrorProps('message', errors)}
         />
         <FieldError id="quote-message-error" message={errors.message} />
-      </label>
+      </div>
       <Button type="submit" disabled={isSaving}>
         Review quote
         <ArrowRight aria-hidden="true" />

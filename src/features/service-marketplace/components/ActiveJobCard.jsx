@@ -1,5 +1,7 @@
 import { CheckCircle2, MapPin } from 'lucide-react'
 import Button from '../../../components/ui/Button'
+import GstIncluded from '../../../components/ui/GstIncluded'
+import AcceptedJobContactDetails from './AcceptedJobContactDetails'
 import ActiveJobProgressTimeline from './ActiveJobProgressTimeline'
 import { formatMoney } from '../formatters'
 import { formatJobProgressStage, getNextJobProgressStage } from '../jobTracking'
@@ -15,10 +17,18 @@ export default function ActiveJobCard({
   return (
     <article
       id={`service-item-${isHistory ? 'history' : 'jobs'}-${item.job_request_id}`}
-      className="service-marketplace-card"
+      className="service-marketplace-card marketplace-job-card"
     >
       <div className="service-marketplace-card-head">
         <div>
+          <div className="marketplace-card-labels">
+            <span className="marketplace-category">{item.category}</span>
+            {!isHistory && (
+              <span className={`marketplace-status is-${item.job_status}`}>
+                {formatJobProgressStage(item.job_status)}
+              </span>
+            )}
+          </div>
           <h3>{item.title}</h3>
         </div>
         {isHistory && (
@@ -28,7 +38,9 @@ export default function ActiveJobCard({
           </span>
         )}
       </div>
-      {item.description && <p>{item.description}</p>}
+      {item.description && (
+        <p className="marketplace-job-description">{item.description}</p>
+      )}
       <div className="service-marketplace-meta">
         <span>
           <MapPin aria-hidden="true" />
@@ -41,6 +53,10 @@ export default function ActiveJobCard({
         )}
       </div>
       <ActiveJobProgressTimeline job={item} />
+      <AcceptedJobContactDetails
+        contactDetails={item.contact_details}
+        viewer="provider"
+      />
       {isHistory && item.status_updated_at && (
         <p className="service-history-completed-at">
           Completed{' '}
@@ -51,25 +67,29 @@ export default function ActiveJobCard({
           })}
         </p>
       )}
-      <div className="service-quote-summary">
-        <strong className="business-structured-data">
-          {formatMoney(item.amount_cents)}
-        </strong>
-        {item.message && <span>{item.message}</span>}
+      <div className="marketplace-job-footer">
+        <div className="service-quote-summary">
+          <span className="marketplace-value-label">Accepted quote</span>
+          <strong className="business-structured-data">
+            {formatMoney(item.amount_cents)}
+          </strong>
+          <GstIncluded block />
+          {item.message && <span>{item.message}</span>}
+        </div>
+        {!isHistory && nextStatus && (
+          <Button
+            variant="success"
+            onClick={onAdvanceStatus}
+            disabled={isUpdating}
+          >
+            {isUpdating
+              ? 'Updating…'
+              : nextStatus === 'pending_completion'
+                ? 'Mark work complete'
+                : `Mark as ${formatJobProgressStage(nextStatus)}`}
+          </Button>
+        )}
       </div>
-      {nextStatus && (
-        <Button
-          variant="success"
-          onClick={onAdvanceStatus}
-          disabled={isUpdating}
-        >
-          {isUpdating
-            ? 'Updating…'
-            : nextStatus === 'pending_completion'
-              ? 'Mark work complete'
-              : `Mark as ${formatJobProgressStage(nextStatus)}`}
-        </Button>
-      )}
     </article>
   )
 }

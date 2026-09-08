@@ -1,0 +1,210 @@
+import {
+  Ban,
+  Bookmark,
+  Calendar,
+  Check,
+  MapPin,
+  QrCode,
+  Tag,
+  X,
+} from 'lucide-react'
+import { useState } from 'react'
+import Modal from '../../../components/ui/Modal'
+
+function formatDate(value) {
+  if (!value) return '—'
+  return new Date(value).toLocaleDateString('en-NZ', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+function formatMoney(cents) {
+  return (cents / 100).toLocaleString('en-NZ', {
+    style: 'currency',
+    currency: 'NZD',
+  })
+}
+function getOfferSummary(deal) {
+  switch (deal.offer_type) {
+    case 'percentage_discount':
+      return `${deal.discount_percentage}% off`
+    case 'fixed_discount':
+      return deal.discount_amount_cents
+        ? `${formatMoney(deal.discount_amount_cents)} off`
+        : 'Discount'
+    case 'special_price':
+      return deal.original_price_cents && deal.deal_price_cents
+        ? `Was ${formatMoney(deal.original_price_cents)}, now ${formatMoney(deal.deal_price_cents)}`
+        : 'Special price'
+    case 'buy_one_get_one':
+    case 'other':
+    default:
+      return deal.offer_details || 'Special offer'
+  }
+}
+
+export default function DealDetailModal({
+  deal,
+  businessName,
+  address,
+  onClose,
+  isSaved,
+  onToggleSave,
+}) {
+  const [showQrCode, setShowQrCode] = useState(false)
+
+  if (!deal) return null
+
+  return (
+    <Modal onClose={onClose} maxWidthClassName="max-w-xl">
+      <div className="flex items-start justify-between border-b border-[var(--border)] px-6 py-5">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+            {businessName}
+          </div>
+          <h2 className="mt-0.5 text-lg font-extrabold text-[var(--text)]">
+            {deal.title}
+          </h2>
+        </div>
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="rounded-full p-1 text-[var(--text-muted)] hover:bg-[var(--bg)] hover:text-[var(--text)]"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      <div className="px-6 py-5">
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className="rounded-full bg-[var(--amber-light)] px-3 py-1 text-xs font-semibold text-[var(--text)]">
+            {getOfferSummary(deal)}
+          </span>
+          {deal.category && (
+            <span className="rounded-full bg-[var(--blue-light)] px-3 py-1 text-xs font-semibold text-[var(--blue)]">
+              {deal.category}
+            </span>
+          )}
+          {deal.gst_included !== null && (
+            <span className="rounded-full bg-[var(--bg)] px-3 py-1 text-xs text-[var(--text-muted)]">
+              {deal.gst_included ? 'Inc. GST' : 'Excl. GST'}
+            </span>
+          )}
+        </div>
+
+        {deal.description && (
+          <p className="mb-4 text-sm text-[var(--text)]">{deal.description}</p>
+        )}
+
+        {address && (
+          <div className="mb-4 flex items-start gap-2 text-sm text-[var(--text-muted)]">
+            <MapPin size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
+            <span>{address}</span>
+          </div>
+        )}
+
+        {deal.claim_limit != null && (
+          <div className="mb-4 text-sm text-[var(--text-muted)]">
+            Limited to {deal.claim_limit} claim
+            {deal.claim_limit === 1 ? '' : 's'}
+          </div>
+        )}
+
+        {deal.redemption_instructions && (
+          <div className="mb-4 flex items-start gap-2 rounded-md bg-[var(--blue-light)] p-3">
+            <Tag
+              size={15}
+              className="mt-0.5 shrink-0 text-[var(--blue)]"
+              aria-hidden="true"
+            />
+            <div>
+              <div className="text-sm font-semibold text-[var(--text)]">
+                How to redeem
+              </div>
+              <p className="whitespace-pre-line text-sm text-[var(--text)]">
+                {deal.redemption_instructions}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {deal.exclusions && (
+          <div className="mb-4 rounded-md bg-[var(--bg)] p-3">
+            <div className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-[var(--text-muted)]">
+              <Ban size={15} aria-hidden="true" />
+              Exclusions
+            </div>
+            <p className="whitespace-pre-line text-sm text-[var(--text-muted)]">
+              {deal.exclusions}
+            </p>
+          </div>
+        )}
+
+        {deal.conditions && (
+          <div className="mb-4">
+            <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+              <Check size={13} aria-hidden="true" />
+              Conditions
+            </div>
+            <p className="mt-1 whitespace-pre-line text-sm text-[var(--text-muted)]">
+              {deal.conditions}
+            </p>
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 border-t border-[var(--border)] pt-3 text-sm text-[var(--text-muted)]">
+          <Calendar size={15} aria-hidden="true" />
+          <span>Valid:</span>
+          <strong className="text-[var(--text)]">
+            {formatDate(deal.start_date)} – {formatDate(deal.end_date)}
+          </strong>
+        </div>
+      </div>
+
+      {showQrCode && (
+        <div className="flex flex-col items-center gap-2 border-t border-[var(--border)] bg-[var(--bg)] px-6 py-6">
+          <div className="flex h-40 w-40 items-center justify-center rounded-lg border border-[var(--border)] bg-white">
+            <QrCode
+              size={120}
+              className="text-[var(--text)]"
+              aria-hidden="true"
+            />
+          </div>
+          <p className="text-center text-xs text-[var(--text-muted)]">
+            Show this code to staff to redeem this deal.
+          </p>
+        </div>
+      )}
+
+      <div className="flex items-center gap-3 border-t border-[var(--border)] px-6 py-5">
+        <button
+          type="button"
+          onClick={() => onToggleSave(deal.id)}
+          className={
+            'flex items-center gap-1.5 rounded-md border px-5 py-2 text-sm font-semibold transition ' +
+            (isSaved
+              ? 'border-[var(--blue)] bg-[var(--blue-light)] text-[var(--blue)]'
+              : 'border-[var(--border)] text-[var(--text)] hover:border-[var(--blue)]')
+          }
+        >
+          <Bookmark
+            size={16}
+            aria-hidden="true"
+            fill={isSaved ? 'currentColor' : 'none'}
+          />
+          {isSaved ? 'Saved' : 'Save'}
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowQrCode(true)}
+          disabled={showQrCode}
+          className="flex-1 rounded-md bg-[var(--blue)] py-2 text-sm font-semibold text-white hover:bg-[var(--blue-dark)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-[var(--blue)]"
+        >
+          {showQrCode ? 'Claimed' : 'Claim Deal'}
+        </button>
+      </div>
+    </Modal>
+  )
+}

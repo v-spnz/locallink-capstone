@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { MapPin, Play, ShieldCheck, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Button from '../../../components/ui/Button'
+import GstIncluded from '../../../components/ui/GstIncluded'
 import Modal from '../../../components/ui/Modal'
 import BusinessQuoteTimeline from './BusinessQuoteTimeline'
 import { formatMoney } from '../formatters'
 import { QUOTE_PRICE_TYPES } from '../constants'
 import { getLeadMedia } from '../media'
+import { formatBusinessQuoteStatus } from '../quoteTracking'
 
 function JobRequestMediaGrid({ media, onSelect }) {
   if (media.length === 0) {
@@ -81,6 +83,12 @@ export default function BusinessQuoteCard({
     >
       <div className="service-quote-card-summary">
         <div className="service-quote-card-copy">
+          <div className="marketplace-card-labels">
+            <span className="marketplace-category">{item.category}</span>
+            <span className={`marketplace-status is-${item.quote_status}`}>
+              {formatBusinessQuoteStatus(item.quote_status)}
+            </span>
+          </div>
           <div className="service-marketplace-card-head">
             <div>
               <h3>{item.title}</h3>
@@ -103,19 +111,32 @@ export default function BusinessQuoteCard({
           </div>
         </div>
         <div className="service-quote-card-actions">
-          <Button variant="secondary" onClick={onToggleDetails}>
+          <div className="marketplace-quote-value">
+            <span>Your quote</span>
+            <strong>{formatMoney(item.amount_cents)}</strong>
+            <small>
+              {priceType} <GstIncluded />
+            </small>
+          </div>
+          <Button
+            variant="secondary"
+            onClick={onToggleDetails}
+            aria-expanded={isDetailsOpen}
+            aria-controls={`quote-details-${item.quote_id}`}
+          >
             {isDetailsOpen ? 'Hide details' : 'View details'}
           </Button>
         </div>
       </div>
 
+      <BusinessQuoteTimeline quote={item} />
+
       {isDetailsOpen && (
         <section
+          id={`quote-details-${item.quote_id}`}
           className="service-quote-details"
           aria-label={`Quote details for ${item.title}`}
         >
-          <BusinessQuoteTimeline quote={item} />
-
           <section className="service-quote-request-review">
             <h4>Original job request</h4>
             <dl className="service-opportunity-facts">
@@ -167,6 +188,7 @@ export default function BusinessQuoteCard({
               <strong className="business-structured-data">
                 {formatMoney(item.amount_cents)} {priceType && `· ${priceType}`}
               </strong>
+              <GstIncluded block />
               <span className="business-structured-data">
                 Available {item.availability_date}
               </span>

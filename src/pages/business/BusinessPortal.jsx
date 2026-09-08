@@ -12,6 +12,8 @@ import Settings from './Settings'
 import BusinessOnboarding from './BusinessOnboarding'
 import Services from './Services'
 import './BusinessTypography.css'
+import './BusinessPortal.css'
+import './BusinessMarketplace.css'
 
 function BusinessPage({ children, capability, roles }) {
   return (
@@ -88,7 +90,7 @@ export default function BusinessPortal() {
           element={<Navigate to="/business/services?tab=jobs" replace />}
         />
         <Route
-          path="settings"
+          path="settings/*"
           element={
             <BusinessPage roles={['owner', 'admin']}>
               <Settings />

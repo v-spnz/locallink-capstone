@@ -1,6 +1,12 @@
+import { useState } from 'react'
 import Button from '../../../components/ui/Button'
+import GstIncluded from '../../../components/ui/GstIncluded'
 import { getJobBadge } from '../formatters'
+import AcceptedJobContactDetails from './AcceptedJobContactDetails'
 import ActiveJobProgressTimeline from './ActiveJobProgressTimeline'
+import RepostJobModal from './RepostJobModal'
+import DeleteJobModal from './DeleteJobModal'
+import EditLockedModal from './EditLockedModal'
 
 export default function JobDetailPanel({
   job,
@@ -12,9 +18,25 @@ export default function JobDetailPanel({
   onDelete,
   onViewQuotes,
   onConfirmCompletion,
+  repostPrompt,
+  onRepostConfirm,
+  onRepostDismiss,
+  deletePrompt,
+  onDeleteConfirm,
+  onDeleteDismiss,
 }) {
   const badge = getJobBadge(job, quoteCount)
   const canEdit = ['open', 'closed', 'cancelled'].includes(job.status)
+  const editLocked = canEdit && quoteCount > 0
+  const [showEditLockedNotice, setShowEditLockedNotice] = useState(false)
+
+  function handleEditClick() {
+    if (editLocked) {
+      setShowEditLockedNotice(true)
+      return
+    }
+    onEdit(job)
+  }
 
   return (
     <div>
@@ -73,6 +95,7 @@ export default function JobDetailPanel({
             <div className="sm-field-label">Budget</div>
             <div className="sm-field-value">
               {job.budget || 'Not specified'}
+              {job.budget && <GstIncluded block />}
             </div>
           </div>
           <div>
@@ -86,6 +109,10 @@ export default function JobDetailPanel({
         </div>
 
         <ActiveJobProgressTimeline job={job} />
+        <AcceptedJobContactDetails
+          contactDetails={job.contact_details}
+          viewer="consumer"
+        />
       </div>
 
       <div className="sm-detail-actions">
@@ -109,7 +136,7 @@ export default function JobDetailPanel({
 
         {canEdit && (
           <div className="sm-detail-actions-right">
-            <Button variant="secondary" onClick={() => onEdit(job)}>
+            <Button variant="secondary" onClick={handleEditClick}>
               Edit Job
             </Button>
             <Button variant="secondary" onClick={() => onRepost(job)}>
@@ -118,21 +145,34 @@ export default function JobDetailPanel({
             <Button
               variant="secondary"
               className="sm-delete-btn"
-              onClick={() => {
-                if (
-                  window.confirm(
-                    'Delete this job? This is for testing only and cannot be undone.',
-                  )
-                ) {
-                  onDelete(job.id)
-                }
-              }}
+              onClick={() => onDelete(job)}
             >
               Delete Job
             </Button>
           </div>
         )}
       </div>
+
+      {repostPrompt && repostPrompt.job.id === job.id && (
+        <RepostJobModal
+          mode={repostPrompt.mode}
+          job={repostPrompt.job}
+          onCancel={onRepostDismiss}
+          onConfirm={onRepostConfirm}
+        />
+      )}
+
+      {deletePrompt && deletePrompt.job.id === job.id && (
+        <DeleteJobModal
+          mode={deletePrompt.mode}
+          onCancel={onDeleteDismiss}
+          onConfirm={onDeleteConfirm}
+        />
+      )}
+
+      {showEditLockedNotice && (
+        <EditLockedModal onCancel={() => setShowEditLockedNotice(false)} />
+      )}
     </div>
   )
 }
