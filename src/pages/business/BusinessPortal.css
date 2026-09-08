@@ -701,6 +701,10 @@ body.business-surface .deal-list-header {
   height: 15px;
 }
 
+.deal-list-header > .btn-primary {
+  margin-left: auto;
+}
+
 .deal-filter-bar {
   margin-bottom: 20px;
   display: flex;
@@ -797,7 +801,6 @@ body.business-surface .deal-list-header {
   margin-bottom: 22px;
   padding: 16px 18px;
   border: 1px solid #ead8ae;
-  border-left: 3px solid #c27a0a;
   border-radius: 12px;
   display: grid;
   grid-template-columns: minmax(210px, 0.78fr) minmax(0, 1.22fr);

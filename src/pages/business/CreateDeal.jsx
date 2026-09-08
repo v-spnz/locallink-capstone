@@ -19,7 +19,7 @@ export default function CreateDeal() {
           : 'Create a deal'
   const pageIntroduction =
     deals.step === 'list'
-      ? 'Create and manage offers for nearby customers.'
+      ? ''
       : deals.step === 'review'
         ? 'Check the customer-facing details before the deal goes live.'
         : deals.editingDealId

@@ -124,7 +124,7 @@ test('US0091: successful publication announces a clear lifecycle status', async 
   assert.match(page, /<ActionToast/)
 })
 
-test('business deals uses an accessible campaign manager with responsive loading feedback', async () => {
+test('business deals uses accessible management controls with responsive loading feedback', async () => {
   const [list, page, styles] = await Promise.all([
     readFile(
       new URL('../src/features/deals/components/DealList.jsx', import.meta.url),
@@ -140,7 +140,7 @@ test('business deals uses an accessible campaign manager with responsive loading
     ),
   ])
 
-  assert.match(list, /Campaign manager/)
+  assert.doesNotMatch(list, /Campaign manager/)
   assert.match(list, /aria-label="Filter deals"/)
   assert.match(list, /aria-pressed=/)
   assert.match(list, /Ending soon/)
