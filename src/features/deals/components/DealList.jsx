@@ -196,7 +196,6 @@ export function DealListSkeleton() {
 export default function DealList({
   deals,
   selectedDealId,
-  successMessage,
   onCreate,
   onSelect,
   onClose,
@@ -233,12 +232,6 @@ export default function DealList({
           New deal
         </Button>
       </div>
-
-      {successMessage && (
-        <p className="form-success" role="status" aria-live="polite">
-          {successMessage}
-        </p>
-      )}
 
       {deals.length > 0 && (
         <div className="deal-filter-bar">

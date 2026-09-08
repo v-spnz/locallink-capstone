@@ -4,6 +4,7 @@ import DealList, {
 } from '../../features/deals/components/DealList'
 import DealReview from '../../features/deals/components/DealReview'
 import useBusinessDeals from '../../features/deals/hooks/useBusinessDeals'
+import ActionToast from '../../components/ui/ActionToast'
 import '../../features/deals/CreateDeal.css'
 
 export default function CreateDeal() {
@@ -44,7 +45,6 @@ export default function CreateDeal() {
         <DealList
           deals={deals.deals}
           selectedDealId={deals.selectedDealId}
-          successMessage={deals.successMessage}
           onCreate={deals.handleStartNewDeal}
           onSelect={deals.handleSelectDeal}
           onClose={deals.handleCloseDetails}
@@ -74,6 +74,13 @@ export default function CreateDeal() {
           onBack={deals.handleBackToList}
           onSaveDraft={deals.handleSaveDraft}
           onSubmit={deals.handleReview}
+        />
+      )}
+      {deals.feedback && (
+        <ActionToast
+          message={deals.feedback.message}
+          variant={deals.feedback.variant}
+          onDismiss={deals.dismissFeedback}
         />
       )}
     </div>

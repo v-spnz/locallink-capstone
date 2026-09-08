@@ -38,7 +38,7 @@ export default function useBusinessDeals() {
   const [errors, setErrors] = useState({})
   const [deals, setDeals] = useState([])
   const [locations, setLocations] = useState([])
-  const [successMessage, setSuccessMessage] = useState('')
+  const [feedback, setFeedback] = useState(null)
   const [requestError, setRequestError] = useState('')
   const [step, setStep] = useState('list')
   const [selectedDealId, setSelectedDealId] = useState(null)
@@ -122,7 +122,7 @@ export default function useBusinessDeals() {
     saveInProgressRef.current = true
     setIsSaving(true)
     setRequestError('')
-    setSuccessMessage('')
+    setFeedback(null)
     const dealForSave = form.id ? form : { ...form, id: crypto.randomUUID() }
     if (!form.id) setForm(dealForSave)
     try {
@@ -138,20 +138,23 @@ export default function useBusinessDeals() {
       setForm(saved)
       setHasUnsavedChanges(false)
       const lifecycle = getDealLifecycle(saved)
-      setSuccessMessage(
-        status === 'published'
-          ? `Deal published successfully. Status: ${lifecycle.label}.`
-          : 'Deal saved as a private draft.',
-      )
+      setFeedback({
+        variant: 'success',
+        message:
+          status === 'published'
+            ? `Deal published. Status: ${lifecycle.label}.`
+            : 'Deal saved as draft.',
+      })
       setStep('list')
       return true
     } catch (error) {
       console.error('Unable to save deal.', error)
-      setRequestError(
+      const message =
         status === 'published'
           ? 'Unable to publish the deal. Check every highlighted field and try again.'
-          : 'Unable to save this draft. Please try again.',
-      )
+          : 'Unable to save this draft. Please try again.'
+      setRequestError(message)
+      setFeedback({ variant: 'error', message })
       return false
     } finally {
       saveInProgressRef.current = false
@@ -161,7 +164,7 @@ export default function useBusinessDeals() {
 
   function handleReview(event) {
     event.preventDefault()
-    setSuccessMessage('')
+    setFeedback(null)
     setRequestError('')
     const validationErrors = validateDeal(form, { forPublication: true })
     setErrors(validationErrors)
@@ -169,7 +172,7 @@ export default function useBusinessDeals() {
   }
 
   function handleStartNewDeal() {
-    setSuccessMessage('')
+    setFeedback(null)
     setRequestError('')
     setErrors({})
     setForm({
@@ -189,7 +192,7 @@ export default function useBusinessDeals() {
       imageFile: null,
     })
     setErrors({})
-    setSuccessMessage('')
+    setFeedback(null)
     setRequestError('')
     setSelectedDealId(null)
     setHasUnsavedChanges(false)
@@ -204,6 +207,7 @@ export default function useBusinessDeals() {
       return
     setHasUnsavedChanges(false)
     setErrors({})
+    setFeedback(null)
     setRequestError('')
     setStep('list')
   }
@@ -213,7 +217,7 @@ export default function useBusinessDeals() {
     errors,
     deals,
     locations,
-    successMessage,
+    feedback,
     requestError,
     step,
     selectedDealId,
@@ -233,6 +237,7 @@ export default function useBusinessDeals() {
     handleCloseDetails: () => setSelectedDealId(null),
     handleBackToEdit: () => setStep('form'),
     handleBackToList,
+    dismissFeedback: () => setFeedback(null),
     reload: loadDeals,
   }
 }

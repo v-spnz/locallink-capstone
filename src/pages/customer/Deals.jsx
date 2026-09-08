@@ -5,6 +5,8 @@ import {
   fetchCustomerLocation,
 } from '../../features/location/api/locations'
 import {
+  claimDeal,
+  fetchDealClaim,
   fetchPublishedDealById,
   fetchSavedDealIds,
   saveDeal,
@@ -42,6 +44,9 @@ export default function Deals() {
   const [selectedDeal, setSelectedDeal] = useState(null)
   const [selectedBusinessRow, setSelectedBusinessRow] = useState(null)
   const [isDealLoading, setIsDealLoading] = useState(false)
+  const [selectedClaim, setSelectedClaim] = useState(null)
+  const [isClaiming, setIsClaiming] = useState(false)
+  const [claimError, setClaimError] = useState('')
 
   useEffect(() => {
     let active = true
@@ -106,9 +111,14 @@ export default function Deals() {
     if (!business.deal_id) return
     setSelectedBusinessRow(business)
     setIsDealLoading(true)
+    setClaimError('')
     try {
-      const fullDeal = await fetchPublishedDealById(business.deal_id)
+      const [fullDeal, existingClaim] = await Promise.all([
+        fetchPublishedDealById(business.deal_id),
+        fetchDealClaim(user.id, business.deal_id),
+      ])
       setSelectedDeal(fullDeal)
+      setSelectedClaim(existingClaim)
     } catch (dealError) {
       console.error('Unable to load deal details.', dealError)
       setError('Unable to load this deal right now.')
@@ -121,6 +131,28 @@ export default function Deals() {
   function closeDeal() {
     setSelectedDeal(null)
     setSelectedBusinessRow(null)
+    setSelectedClaim(null)
+    setClaimError('')
+  }
+
+  async function handleClaimDeal(dealId) {
+    setIsClaiming(true)
+    setClaimError('')
+    try {
+      const claim = await claimDeal(dealId)
+      setSelectedClaim(claim)
+      return true
+    } catch (claimRequestError) {
+      console.error('Unable to claim deal.', claimRequestError)
+      setClaimError(
+        claimRequestError.message?.includes('claim limit')
+          ? 'This deal has reached its claim limit.'
+          : 'This deal is no longer available to claim.',
+      )
+      return false
+    } finally {
+      setIsClaiming(false)
+    }
   }
 
   async function toggleSaveDeal(dealId) {
@@ -268,6 +300,10 @@ export default function Deals() {
           businessName={selectedBusinessRow.business_name}
           address={selectedBusinessRow.formatted_address}
           isSaved={savedDealIds.includes(selectedDeal.id)}
+          isClaimed={Boolean(selectedClaim)}
+          isClaiming={isClaiming}
+          claimError={claimError}
+          onClaim={handleClaimDeal}
           onToggleSave={toggleSaveDeal}
           onClose={closeDeal}
         />

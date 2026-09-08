@@ -53,7 +53,7 @@ function localDateKey(date) {
 }
 
 export function getDealLifecycle(deal, today = new Date()) {
-  if (deal.status !== 'published') {
+  if (!deal.status || deal.status === 'draft') {
     return { value: 'draft', label: 'Draft' }
   }
 

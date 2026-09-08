@@ -50,7 +50,7 @@ export default function useBusinessMarketplace(type) {
   const [items, setItems] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  const [feedback, setFeedback] = useState(null)
   const [selectedLead, setSelectedLead] = useState(null)
   const [reviewedLead, setReviewedLead] = useState(null)
   const [reviewedQuote, setReviewedQuote] = useState(null)
@@ -97,7 +97,6 @@ export default function useBusinessMarketplace(type) {
     async function loadItems() {
       setIsLoading(true)
       setError('')
-      setSuccess('')
       setSelectedLead(null)
       setReviewedLead(null)
       try {
@@ -154,7 +153,7 @@ export default function useBusinessMarketplace(type) {
       return next
     })
     setError('')
-    setSuccess('')
+    setFeedback(null)
     setQuoteErrors({})
     setQuoteStep('form')
   }
@@ -168,7 +167,7 @@ export default function useBusinessMarketplace(type) {
     setQuoteErrors({})
     setQuoteStep('form')
     setError('')
-    setSuccess('')
+    setFeedback(null)
   }
 
   function showLeadReview(jobRequestId) {
@@ -183,14 +182,14 @@ export default function useBusinessMarketplace(type) {
     setReviewedQuote((current) => (current === quoteId ? null : quoteId))
     setWithdrawConfirmationId(null)
     setError('')
-    setSuccess('')
+    setFeedback(null)
   }
 
   function showQuoteReview(quoteId) {
     setReviewedQuote(quoteId)
     setWithdrawConfirmationId(null)
     setError('')
-    setSuccess('')
+    setFeedback(null)
   }
 
   function setQuoteField(field, value) {
@@ -219,7 +218,7 @@ export default function useBusinessMarketplace(type) {
   function handleQuoteReview(event) {
     event.preventDefault()
     setError('')
-    setSuccess('')
+    setFeedback(null)
     const validationErrors = validateQuote(quote)
     setQuoteErrors(validationErrors)
     if (Object.keys(validationErrors).length > 0) return
@@ -235,7 +234,7 @@ export default function useBusinessMarketplace(type) {
     }
 
     setError('')
-    setSuccess('')
+    setFeedback(null)
     setIsSaving(true)
     try {
       await submitBusinessQuote({
@@ -244,7 +243,10 @@ export default function useBusinessMarketplace(type) {
         quote,
       })
       clearBusinessQuoteDraft(selectedLead, business.id)
-      setSuccess('Quote submitted with Awaiting response status.')
+      setFeedback({
+        variant: 'success',
+        message: 'Quote submitted. Status: Awaiting response.',
+      })
       setSelectedLead(null)
       setReviewedLead(null)
       setQuote(EMPTY_QUOTE)
@@ -255,12 +257,12 @@ export default function useBusinessMarketplace(type) {
       )
       notifyBusinessMarketplaceChanged(business.id)
     } catch (submitError) {
-      setError(
-        formatRequestError(
-          'Unable to submit this quote. The three-working-day window may have closed, the request may already have three quotes, or it may no longer be open.',
-          submitError,
-        ),
+      const message = formatRequestError(
+        'Unable to submit this quote. The three-working-day window may have closed, the request may already have three quotes, or it may no longer be open.',
+        submitError,
       )
+      setError(message)
+      setFeedback({ variant: 'error', message })
     } finally {
       setIsSaving(false)
     }
@@ -273,7 +275,7 @@ export default function useBusinessMarketplace(type) {
     }
 
     setError('')
-    setSuccess('')
+    setFeedback(null)
     setUpdatingJobId(jobRequestId)
     try {
       const updatedJob = await updateBusinessJobStatus(
@@ -288,19 +290,21 @@ export default function useBusinessMarketplace(type) {
             : item,
         ),
       )
-      setSuccess(
-        nextStatus === 'pending_completion'
-          ? 'Job marked as completed. Awaiting customer confirmation.'
-          : `Job status updated to ${formatJobProgressStage(nextStatus)}.`,
-      )
+      setFeedback({
+        variant: 'success',
+        message:
+          nextStatus === 'pending_completion'
+            ? 'Job marked as completed. Awaiting customer confirmation.'
+            : `Job status updated to ${formatJobProgressStage(nextStatus)}.`,
+      })
       notifyBusinessMarketplaceChanged(business.id)
     } catch (updateError) {
-      setError(
-        formatRequestError(
-          'Unable to update this job status. It may no longer be available or the status transition may not be valid.',
-          updateError,
-        ),
+      const message = formatRequestError(
+        'Unable to update this job status. It may no longer be available or the status transition may not be valid.',
+        updateError,
       )
+      setError(message)
+      setFeedback({ variant: 'error', message })
     } finally {
       setUpdatingJobId(null)
     }
@@ -308,7 +312,7 @@ export default function useBusinessMarketplace(type) {
 
   async function handleDeclineOpportunity(jobRequestId) {
     setError('')
-    setSuccess('')
+    setFeedback(null)
     setIsSaving(true)
     try {
       await declineBusinessOpportunity(business.id, jobRequestId)
@@ -317,16 +321,18 @@ export default function useBusinessMarketplace(type) {
       )
       if (selectedLead === jobRequestId) setSelectedLead(null)
       if (reviewedLead === jobRequestId) setReviewedLead(null)
-      setSuccess(
-        'Opportunity declined. It remains available to other eligible providers.',
-      )
+      setFeedback({
+        variant: 'success',
+        message:
+          'Opportunity declined. It remains available to other eligible providers.',
+      })
     } catch (declineError) {
-      setError(
-        formatRequestError(
-          'Unable to decline this opportunity. It may no longer be available.',
-          declineError,
-        ),
+      const message = formatRequestError(
+        'Unable to decline this opportunity. It may no longer be available.',
+        declineError,
       )
+      setError(message)
+      setFeedback({ variant: 'error', message })
     } finally {
       setIsSaving(false)
     }
@@ -334,7 +340,7 @@ export default function useBusinessMarketplace(type) {
 
   async function handleWithdrawQuote(quoteId) {
     setError('')
-    setSuccess('')
+    setFeedback(null)
     setWithdrawingQuoteId(quoteId)
     try {
       await withdrawBusinessQuote(business.id, quoteId)
@@ -346,17 +352,25 @@ export default function useBusinessMarketplace(type) {
         ),
       )
       setWithdrawConfirmationId(null)
-      setSuccess('Quote withdrawn. It can no longer be accepted or edited.')
+      setFeedback({
+        variant: 'success',
+        message: 'Quote withdrawn. It can no longer be accepted or edited.',
+      })
     } catch (withdrawError) {
-      setError(
-        formatRequestError(
-          'Unable to withdraw this quote. It may no longer be awaiting a response.',
-          withdrawError,
-        ),
+      const message = formatRequestError(
+        'Unable to withdraw this quote. It may no longer be awaiting a response.',
+        withdrawError,
       )
+      setError(message)
+      setFeedback({ variant: 'error', message })
     } finally {
       setWithdrawingQuoteId(null)
     }
+  }
+
+  function dismissFeedback() {
+    if (feedback?.variant === 'error') setError('')
+    setFeedback(null)
   }
 
   return {
@@ -373,7 +387,7 @@ export default function useBusinessMarketplace(type) {
     jobOrder,
     isLoading,
     error,
-    success,
+    feedback,
     selectedLead,
     reviewedLead,
     reviewedQuote,
@@ -404,5 +418,6 @@ export default function useBusinessMarketplace(type) {
     handleDeclineOpportunity,
     handleAdvanceJobStatus,
     handleWithdrawQuote,
+    dismissFeedback,
   }
 }
