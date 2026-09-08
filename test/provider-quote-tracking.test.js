@@ -206,7 +206,7 @@ test('awaiting timeline owns the consumer deadline instead of a separate card', 
   assert.doesNotMatch(card, /service-response-period/)
 })
 
-test('quote details reveal the timeline and withdrawal controls on demand', async () => {
+test('quote summaries show price and progress while details reveal withdrawal controls', async () => {
   const [card, page, hook] = await Promise.all([
     readFile(
       new URL(
@@ -236,12 +236,10 @@ test('quote details reveal the timeline and withdrawal controls on demand', asyn
     card.indexOf('<div className="service-quote-card-summary">'),
     card.indexOf('{isDetailsOpen &&'),
   )
-  assert.doesNotMatch(collapsedSummary, /formatMoney/)
-  assert.doesNotMatch(collapsedSummary, /formatBusinessQuoteStatus/)
-  assert.match(
-    card,
-    /\{isDetailsOpen && \([\s\S]+<BusinessQuoteTimeline quote=\{item\} \/>[\s\S]+Withdraw quote/,
-  )
+  assert.match(collapsedSummary, /formatMoney/)
+  assert.match(collapsedSummary, /formatBusinessQuoteStatus/)
+  assert.match(collapsedSummary, /<BusinessQuoteTimeline quote=\{item\} \/>/)
+  assert.match(card, /\{isDetailsOpen && \([\s\S]+Withdraw quote/)
   assert.match(page, /marketplace\.reviewedQuote === item\.quote_id/)
   assert.match(page, /marketplace\.toggleQuoteReview\(item\.quote_id\)/)
   assert.match(

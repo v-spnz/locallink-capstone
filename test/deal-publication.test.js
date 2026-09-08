@@ -123,3 +123,23 @@ test('US0091: successful publication announces a clear lifecycle status', async 
   assert.match(list, /role="status"/)
   assert.match(list, /getDealLifecycle\(deal\)/)
 })
+
+test('business deals uses an accessible campaign manager with responsive loading feedback', async () => {
+  const [list, page] = await Promise.all([
+    readFile(
+      new URL('../src/features/deals/components/DealList.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/pages/business/CreateDeal.jsx', import.meta.url),
+      'utf8',
+    ),
+  ])
+
+  assert.match(list, /Campaign manager/)
+  assert.match(list, /aria-label="Filter deals"/)
+  assert.match(list, /aria-pressed=/)
+  assert.match(list, /Ending soon/)
+  assert.match(list, /deal-campaign-table/)
+  assert.match(page, /<DealListSkeleton \/>/)
+})

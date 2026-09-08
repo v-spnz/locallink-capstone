@@ -1,19 +1,37 @@
 import DealForm from '../../features/deals/components/DealForm'
-import DealList from '../../features/deals/components/DealList'
+import DealList, {
+  DealListSkeleton,
+} from '../../features/deals/components/DealList'
 import DealReview from '../../features/deals/components/DealReview'
 import useBusinessDeals from '../../features/deals/hooks/useBusinessDeals'
-import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import '../../features/deals/CreateDeal.css'
 
 export default function CreateDeal() {
   const deals = useBusinessDeals()
+  const pageHeading =
+    deals.step === 'list'
+      ? 'Your deals'
+      : deals.step === 'review'
+        ? 'Review your deal'
+        : deals.editingDealId
+          ? 'Edit deal'
+          : 'Create a deal'
+  const pageIntroduction =
+    deals.step === 'list'
+      ? 'Create and manage offers for nearby customers.'
+      : deals.step === 'review'
+        ? 'Check the customer-facing details before the deal goes live.'
+        : deals.editingDealId
+          ? ''
+          : 'Shape the offer, set its dates, and preview it as you work.'
 
   return (
     <div className="business-deals-page">
-      <div className="page-header">
-        <h1>{deals.step === 'list' ? 'Your deals' : 'Create a deal'}</h1>
+      <div className="page-header business-deals-heading">
+        <h1>{pageHeading}</h1>
+        {pageIntroduction && <p>{pageIntroduction}</p>}
       </div>
-      {deals.isLoading && <LoadingSpinner label="Loading deals…" />}
+      {deals.isLoading && <DealListSkeleton />}
       {!deals.isLoading && deals.requestError && deals.step === 'list' && (
         <div className="auth-error deal-request-error" role="alert">
           {deals.requestError}
