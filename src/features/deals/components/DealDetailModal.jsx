@@ -54,11 +54,25 @@ export default function DealDetailModal({
   suburb,
   onClose,
   isSaved,
+  isClaimed,
+  isClaiming,
+  claimError,
+  onClaim,
   onToggleSave,
 }) {
   const [showQrCode, setShowQrCode] = useState(false)
 
   if (!deal) return null
+
+  async function handleClaim() {
+    if (isClaimed) {
+      setShowQrCode(true)
+      return
+    }
+
+    const claimed = await onClaim(deal.id)
+    if (claimed) setShowQrCode(true)
+  }
 
   return (
     <Modal onClose={onClose} maxWidthClassName="max-w-xl">
@@ -194,7 +208,12 @@ export default function DealDetailModal({
         </div>
       )}
 
-      <div className="flex items-center gap-3 border-t border-[var(--border)] px-6 py-5">
+      <div className="flex flex-wrap items-center gap-3 border-t border-[var(--border)] px-6 py-5">
+        {claimError && (
+          <p className="auth-error w-full" role="alert">
+            {claimError}
+          </p>
+        )}
         <button
           type="button"
           onClick={() => onToggleSave(deal.id)}
@@ -214,11 +233,17 @@ export default function DealDetailModal({
         </button>
         <button
           type="button"
-          onClick={() => setShowQrCode(true)}
-          disabled={showQrCode}
+          onClick={handleClaim}
+          disabled={isClaiming || showQrCode}
           className="flex-1 rounded-md bg-[var(--blue)] py-2 text-sm font-semibold text-white hover:bg-[var(--blue-dark)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-[var(--blue)]"
         >
-          {showQrCode ? 'Claimed' : 'Claim Deal'}
+          {isClaiming
+            ? 'Claiming…'
+            : showQrCode
+              ? 'Claim ready'
+              : isClaimed
+                ? 'View claim'
+                : 'Claim deal'}
         </button>
       </div>
     </Modal>

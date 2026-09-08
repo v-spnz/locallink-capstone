@@ -110,8 +110,8 @@ select lives_ok(
       offer_type = 'percentage_discount',
       discount_percentage = 20,
       gst_included = true,
-      start_date = '2026-09-01',
-      end_date = '2026-09-30',
+      start_date = (now() at time zone 'Pacific/Auckland')::date - 1,
+      end_date = (now() at time zone 'Pacific/Auckland')::date + 30,
       claim_limit = 100,
       redemption_instructions = 'Show the LocalLink deal before booking.',
       status = 'published'
@@ -131,10 +131,10 @@ select is(
     select count(*)
     from public.business_deals
     where id = '27000000-0000-0000-0000-000000000001'
-      and status = 'published'
+      and status = 'active'
   ),
   1::bigint,
-  'a consumer can view the published deal'
+  'a consumer can view the Active deal'
 );
 
 select * from finish();

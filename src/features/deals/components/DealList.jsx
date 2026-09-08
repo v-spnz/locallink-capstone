@@ -196,7 +196,6 @@ export function DealListSkeleton() {
 export default function DealList({
   deals,
   selectedDealId,
-  successMessage,
   onCreate,
   onSelect,
   onClose,
@@ -224,21 +223,11 @@ export default function DealList({
   return (
     <section className="placeholder-section deal-list-panel">
       <div className="deal-list-header">
-        <div>
-          <h2>Campaign manager</h2>
-          <p>Keep every offer clear, current and ready for local customers.</p>
-        </div>
         <Button onClick={onCreate}>
           <Plus aria-hidden="true" />
           New deal
         </Button>
       </div>
-
-      {successMessage && (
-        <p className="form-success" role="status" aria-live="polite">
-          {successMessage}
-        </p>
-      )}
 
       {deals.length > 0 && (
         <div className="deal-filter-bar">
