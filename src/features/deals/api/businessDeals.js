@@ -146,57 +146,41 @@ export async function saveBusinessDeal({ businessId, deal, status = 'draft' }) {
     claim_limit: deal.claimLimit ? Number(deal.claimLimit) : null,
     exclusions: nullableText(deal.exclusions),
     redemption_instructions: nullableText(deal.redemptionInstructions),
-    status: 'draft',
   }
 
-  const dealQuery = deal.id
-    ? supabase
-        .from('business_deals')
-        .update(payload)
-        .eq('id', deal.id)
-        .eq('business_id', businessId)
-    : supabase.from('business_deals').insert(payload)
-
-  const { data: savedDraft, error: saveError } = await dealQuery
-    .select(DEAL_FIELDS)
-    .single()
+  const { data: savedDealId, error: saveError } = await supabase.rpc(
+    'save_business_deal',
+    {
+      p_deal_id: deal.id,
+      p_business_id: payload.business_id,
+      p_title: payload.title,
+      p_description: payload.description,
+      p_category: payload.category,
+      p_image_url: payload.image_url,
+      p_offer_type: payload.offer_type,
+      p_discount_percentage: payload.discount_percentage,
+      p_discount_amount_cents: payload.discount_amount_cents,
+      p_original_price_cents: payload.original_price_cents,
+      p_deal_price_cents: payload.deal_price_cents,
+      p_offer_details: payload.offer_details,
+      p_start_date: payload.start_date,
+      p_end_date: payload.end_date,
+      p_conditions: payload.conditions,
+      p_claim_limit: payload.claim_limit,
+      p_exclusions: payload.exclusions,
+      p_redemption_instructions: payload.redemption_instructions,
+      p_location_ids: deal.locationIds,
+      p_status: status,
+    },
+  )
   if (saveError) throw saveError
 
-  const { error: removeLocationsError } = await supabase
-    .from('business_deal_locations')
-    .delete()
-    .eq('deal_id', savedDraft.id)
-  if (removeLocationsError) throw removeLocationsError
-
-  if (deal.locationIds.length > 0) {
-    const { error: locationError } = await supabase
-      .from('business_deal_locations')
-      .insert(
-        deal.locationIds.map((locationId) => ({
-          deal_id: savedDraft.id,
-          location_id: locationId,
-        })),
-      )
-    if (locationError) throw locationError
-  }
-
-  if (status === 'published') {
-    const { data: published, error: publishError } = await supabase
-      .from('business_deals')
-      .update({ status: 'published' })
-      .eq('id', savedDraft.id)
-      .eq('business_id', businessId)
-      .select(DEAL_FIELDS)
-      .single()
-    if (publishError) throw publishError
-    return mapBusinessDeal(published)
-  }
-
-  const { data: refreshed, error: refreshError } = await supabase
+  const { data: saved, error: refreshError } = await supabase
     .from('business_deals')
     .select(DEAL_FIELDS)
-    .eq('id', savedDraft.id)
+    .eq('id', savedDealId)
+    .eq('business_id', businessId)
     .single()
   if (refreshError) throw refreshError
-  return mapBusinessDeal(refreshed)
+  return mapBusinessDeal(saved)
 }

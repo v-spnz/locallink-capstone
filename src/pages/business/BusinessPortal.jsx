@@ -13,6 +13,7 @@ import BusinessOnboarding from './BusinessOnboarding'
 import Services from './Services'
 import './BusinessTypography.css'
 import './BusinessPortal.css'
+import './BusinessMarketplace.css'
 
 function BusinessPage({ children, capability, roles }) {
   return (

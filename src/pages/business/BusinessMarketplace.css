@@ -1,0 +1,1171 @@
+/* Business marketplace only. Reuse the portal palette, Figtree typography,
+   10px controls and 16px cards; customer marketplace styles stay independent. */
+body.business-surface .business-services-page {
+  --marketplace-muted: var(--business-ink-soft);
+  min-width: 0;
+}
+
+body.business-surface .business-services-page .business-services-hero {
+  margin-bottom: 28px;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.business-surface .business-services-page .marketplace-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+body.business-surface .business-services-page .page-header {
+  margin: 0;
+}
+
+body.business-surface .business-services-page .page-header h1 {
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.16;
+  letter-spacing: -0.035em;
+}
+
+body.business-surface .business-services-page .page-header p {
+  margin: 10px 0 0;
+  max-width: 58ch;
+  color: var(--marketplace-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+body.business-surface .business-services-page .marketplace-profile-link {
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+body.business-surface .business-services-page .marketplace-profile-link svg {
+  width: 16px;
+  height: 16px;
+}
+
+body.business-surface .business-services-page .service-overview {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--business-border);
+  border-radius: var(--business-radius-card);
+  background: var(--business-surface);
+}
+
+body.business-surface .business-services-page .service-overview-card {
+  position: relative;
+  padding: 22px 24px;
+  border: 0;
+  border-radius: 0;
+  grid-template-columns: 36px minmax(0, 1fr) 32px;
+  align-items: start;
+  gap: 12px;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.business-surface
+  .business-services-page
+  .service-overview-card
+  + .service-overview-card {
+  border-left: 1px solid var(--business-border);
+}
+
+body.business-surface .business-services-page .service-overview-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--business-accent-soft);
+  color: var(--business-accent-strong);
+}
+
+body.business-surface .business-services-page .service-overview-copy {
+  gap: 5px;
+}
+
+body.business-surface .business-services-page .service-overview-copy > span {
+  color: var(--marketplace-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+body.business-surface .business-services-page .service-overview-copy strong {
+  font-size: 32px;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+}
+
+body.business-surface .business-services-page .service-overview-copy small {
+  color: var(--marketplace-muted);
+  font-size: 12px;
+}
+
+body.business-surface .business-services-page .marketplace-overview-link {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--marketplace-muted);
+  cursor: pointer;
+}
+
+body.business-surface .business-services-page .marketplace-overview-link:hover {
+  color: var(--business-accent-strong);
+  background: var(--business-accent-soft);
+}
+
+body.business-surface .business-services-page .marketplace-overview-link svg {
+  width: 18px;
+  height: 18px;
+}
+
+body.business-surface .business-services-page .marketplace-profile {
+  margin-top: 12px;
+  border: 1px solid var(--business-border);
+  border-radius: 10px;
+  background: var(--business-surface-soft);
+}
+
+body.business-surface .business-services-page .marketplace-profile summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 18px;
+  list-style: none;
+  cursor: pointer;
+  color: var(--marketplace-muted);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+body.business-surface
+  .business-services-page
+  .marketplace-profile
+  summary::-webkit-details-marker {
+  display: none;
+}
+
+body.business-surface
+  .business-services-page
+  .marketplace-profile
+  summary
+  span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.business-surface .business-services-page .marketplace-profile summary svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+body.business-surface
+  .business-services-page
+  .marketplace-profile[open]
+  summary
+  > span:last-child
+  svg {
+  transform: rotate(180deg);
+}
+
+body.business-surface .business-services-page .service-profile-context {
+  margin: 0 18px;
+  padding: 16px 0;
+  gap: 18px;
+}
+
+body.business-surface .business-services-page .service-profile-context > div {
+  padding: 0;
+  background: transparent;
+}
+
+body.business-surface .business-services-page .service-profile-context dd {
+  overflow: visible;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+
+body.business-surface .business-services-page .service-tabs {
+  margin: 0;
+  padding: 0;
+  gap: 24px;
+  border: 0;
+  border-bottom: 1px solid var(--business-border-strong);
+  border-radius: 0;
+  background: transparent;
+}
+
+body.business-surface .business-services-page .service-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  gap: 8px;
+  min-height: 50px;
+  padding: 12px 3px;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--marketplace-muted);
+  font-size: 14px;
+}
+
+body.business-surface .business-services-page .service-tabs button svg {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+}
+
+body.business-surface .business-services-page .service-tabs button.active {
+  border-bottom-color: var(--business-accent);
+  color: var(--business-accent-strong);
+  background: transparent;
+  box-shadow: none;
+}
+
+body.business-surface .business-services-page .marketplace-tab-count {
+  min-width: 24px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--business-border);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+body.business-surface .business-services-page .active .marketplace-tab-count {
+  background: var(--business-accent-soft);
+}
+
+body.business-surface .business-services-page .marketplace-workspace {
+  padding-top: 26px;
+}
+
+body.business-surface .business-services-page .marketplace-section-heading {
+  margin-bottom: 20px;
+}
+
+body.business-surface .business-services-page .marketplace-section-heading h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+}
+
+body.business-surface .business-services-page .marketplace-section-heading p {
+  margin: 5px 0 0;
+  color: var(--marketplace-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+body.business-surface .business-services-page .service-marketplace-toolbar {
+  margin-bottom: 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  align-items: end;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.business-surface .business-services-page .service-marketplace-search {
+  position: relative;
+  min-width: 0;
+}
+
+body.business-surface
+  .business-services-page
+  .service-marketplace-search
+  > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--marketplace-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+body.business-surface .business-services-page .marketplace-search-icon {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  width: 16px;
+  height: 16px;
+  color: var(--marketplace-muted);
+  pointer-events: none;
+}
+
+body.business-surface
+  .business-services-page
+  .service-marketplace-toolbar
+  input {
+  min-height: 44px;
+  padding-left: 40px;
+  border-width: 1px;
+}
+
+body.business-surface .business-services-page input::placeholder {
+  color: var(--business-muted);
+  opacity: 1;
+}
+
+body.business-surface .business-services-page .service-toolbar-select-trigger {
+  min-height: 44px;
+  border: 1px solid var(--business-border-strong);
+  border-radius: var(--business-radius-control);
+  color: var(--marketplace-muted);
+  background: var(--business-surface);
+}
+
+body.business-surface
+  .business-services-page
+  .service-toolbar-select.is-order
+  .service-toolbar-select-trigger {
+  border-color: var(--business-border-strong);
+  background: var(--business-surface);
+}
+
+body.business-surface .business-services-page .marketplace-results {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+  margin-bottom: 8px;
+  color: var(--marketplace-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+body.business-surface .business-services-page .marketplace-results button {
+  padding: 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--business-accent-strong);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+body.business-surface .business-services-page .service-history-link-row {
+  margin: 8px 0 0;
+}
+
+body.business-surface .business-services-page .service-marketplace-list {
+  gap: 16px;
+}
+
+body.business-surface .business-services-page .service-marketplace-card {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--business-border);
+  border-radius: var(--business-radius-card);
+  background: var(--business-surface);
+  box-shadow: 0 2px 3px rgb(35 50 82 / 3%);
+  overflow-wrap: anywhere;
+}
+
+body.business-surface .business-services-page .service-marketplace-card:hover {
+  border-color: var(--business-border-strong);
+}
+
+body.business-surface
+  .business-services-page
+  .service-marketplace-card.is-expanded {
+  margin-bottom: 0;
+  border-color: var(--business-accent);
+  transform: none;
+  box-shadow: 0 0 0 1px var(--business-accent-soft);
+}
+
+body.business-surface .business-services-page .service-marketplace-card h3 {
+  margin: 0;
+  color: var(--business-ink);
+  font-size: 20px;
+  line-height: 1.4;
+  letter-spacing: -0.025em;
+  font-weight: 650;
+}
+
+body.business-surface .business-services-page .marketplace-card-labels {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+body.business-surface .business-services-page .marketplace-category {
+  padding: 4px 8px;
+  border-radius: 5px;
+  background: var(--business-accent-soft);
+  color: var(--business-accent-strong);
+  font-weight: 600;
+}
+
+body.business-surface .business-services-page .marketplace-quote-capacity {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--marketplace-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+body.business-surface .business-services-page .marketplace-quote-capacity svg {
+  width: 13px;
+  height: 13px;
+}
+
+body.business-surface .business-services-page .service-lead-summary {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+}
+
+body.business-surface .business-services-page .service-marketplace-meta {
+  gap: 10px 18px;
+  margin: 10px 0 12px;
+  color: var(--marketplace-muted);
+  font-size: 13px;
+}
+
+body.business-surface .business-services-page .service-lead-divider {
+  display: none;
+}
+
+body.business-surface .business-services-page .service-lead-urgency {
+  padding: 3px 7px;
+  min-width: 0;
+  font-size: 11px;
+}
+
+body.business-surface .business-services-page .service-lead-urgency.is-normal,
+body.business-surface
+  .business-services-page
+  .service-lead-urgency.is-flexible {
+  color: var(--marketplace-muted);
+  background: var(--business-surface-soft);
+}
+
+body.business-surface
+  .business-services-page
+  .service-marketplace-card
+  .service-lead-description,
+body.business-surface
+  .business-services-page
+  .service-marketplace-card
+  .service-quote-description {
+  display: -webkit-box;
+  max-width: 78ch;
+  margin: 0;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  color: var(--marketplace-muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+body.business-surface .business-services-page .service-lead-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-width: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--business-border);
+}
+
+body.business-surface .business-services-page .service-lead-attachment-count {
+  margin-right: auto;
+  color: var(--marketplace-muted);
+  font-size: 12px;
+}
+
+body.business-surface .business-services-page .service-lead-actions > div {
+  order: 2;
+  gap: 8px;
+}
+
+body.business-surface .business-services-page .service-lead-decline {
+  order: 1;
+  min-height: 44px;
+  padding: 8px;
+  color: var(--marketplace-muted);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+body.business-surface .business-services-page .service-lead-decline:hover {
+  color: var(--business-danger);
+}
+
+body.business-surface .business-services-page .btn-primary {
+  box-shadow: none;
+}
+
+body.business-surface .business-services-page .btn-primary svg {
+  width: 16px;
+  height: 16px;
+}
+
+body.business-surface .business-services-page .service-opportunity-review,
+body.business-surface .business-services-page .service-quote-details {
+  margin-top: 22px;
+  padding-top: 22px;
+}
+
+body.business-surface .business-services-page .service-opportunity-facts {
+  gap: 16px;
+  padding: 16px;
+  border-radius: 10px;
+  background: var(--business-surface-soft);
+}
+
+body.business-surface .business-services-page .service-opportunity-facts dt,
+body.business-surface .business-services-page .service-opportunity-copy h5,
+body.business-surface .business-services-page .service-opportunity-media h5 {
+  color: var(--marketplace-muted);
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+body.business-surface .business-services-page .service-opportunity-copy p {
+  max-width: 80ch;
+  font-size: 14px;
+}
+
+body.business-surface .business-services-page .service-opportunity-privacy {
+  color: var(--marketplace-muted);
+  background: var(--business-surface-soft);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+body.business-surface .business-services-page .marketplace-status {
+  padding: 4px 8px;
+  border-radius: 5px;
+  color: var(--marketplace-muted);
+  background: var(--business-surface-soft);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+body.business-surface
+  .business-services-page
+  .marketplace-status.is-awaiting_response,
+body.business-surface
+  .business-services-page
+  .marketplace-status.is-pending_completion {
+  color: #87570d;
+  background: #fff5df;
+}
+
+body.business-surface .business-services-page .marketplace-status.is-accepted,
+body.business-surface
+  .business-services-page
+  .marketplace-status.is-in_progress,
+body.business-surface .business-services-page .marketplace-status.is-scheduled,
+body.business-surface
+  .business-services-page
+  .marketplace-status.is-on_the_way {
+  color: var(--business-success);
+  background: #eaf7f1;
+}
+
+body.business-surface .business-services-page .service-quote-card-summary {
+  grid-template-columns: minmax(0, 1fr) minmax(160px, auto);
+  align-items: start;
+}
+
+body.business-surface .business-services-page .service-quote-card-actions {
+  display: grid;
+  justify-items: end;
+  gap: 16px;
+  padding-left: 24px;
+  border-left: 1px solid var(--business-border);
+}
+
+body.business-surface .business-services-page .marketplace-quote-value {
+  display: grid;
+  gap: 3px;
+  text-align: right;
+}
+
+body.business-surface .business-services-page .marketplace-quote-value > span,
+body.business-surface .business-services-page .marketplace-quote-value small {
+  color: var(--marketplace-muted);
+  font-size: 12px;
+}
+
+body.business-surface .business-services-page .marketplace-quote-value strong {
+  color: var(--business-ink);
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+
+body.business-surface
+  .business-services-page
+  .service-quote-card
+  > .service-quote-timeline {
+  margin: 20px 0 0;
+  padding: 16px;
+  border-radius: 10px;
+  background: var(--business-surface-soft);
+}
+
+body.business-surface .business-services-page .service-quote-timeline-label {
+  font-size: 12px;
+}
+
+body.business-surface .business-services-page .service-quote-timeline-deadline {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+body.business-surface
+  .business-services-page
+  .service-quote-timeline-step:last-child {
+  flex: 1.5;
+}
+
+body.business-surface
+  .business-services-page
+  .service-quote-timeline
+  .service-quote-timeline-marker {
+  color: var(--business-surface);
+  background: var(--business-success);
+}
+
+body.business-surface
+  .business-services-page
+  .service-quote-timeline
+  .service-quote-timeline-label {
+  color: var(--business-success);
+}
+
+body.business-surface
+  .business-services-page
+  .service-quote-timeline.is-terminal
+  .is-current
+  .service-quote-timeline-marker {
+  background: var(--marketplace-muted);
+}
+
+body.business-surface
+  .business-services-page
+  .service-quote-timeline.is-terminal
+  .is-current
+  .service-quote-timeline-label {
+  color: var(--marketplace-muted);
+}
+
+body.business-surface
+  .business-services-page
+  .service-quote-timeline.is-deadline-urgent
+  .is-current
+  .service-quote-timeline-marker {
+  background: #87570d;
+}
+
+body.business-surface
+  .business-services-page
+  .service-quote-timeline.is-deadline-urgent
+  .is-current
+  .service-quote-timeline-label {
+  color: #87570d;
+}
+
+body.business-surface
+  .business-services-page
+  .service-quote-timeline-marker::after {
+  display: none;
+}
+
+body.business-surface .business-services-page .service-quote-request-review,
+body.business-surface .business-services-page .service-submitted-quote-review {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+body.business-surface .business-services-page .service-submitted-quote-review {
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--business-border);
+}
+
+body.business-surface
+  .business-services-page
+  .marketplace-job-card
+  .service-job-progress-timeline {
+  margin: 22px 0;
+  padding: 20px 16px;
+  background: var(--business-surface-soft);
+}
+
+body.business-surface
+  .business-services-page
+  .marketplace-job-card
+  .accepted-job-contact {
+  margin: 0;
+  padding: 20px;
+  border-color: var(--business-border);
+  background: var(--business-surface);
+}
+
+body.business-surface
+  .business-services-page
+  .marketplace-job-card
+  .accepted-job-contact
+  h3 {
+  font-size: 16px;
+}
+
+body.business-surface
+  .business-services-page
+  .marketplace-job-card
+  .accepted-job-contact
+  p {
+  font-size: 12px;
+  color: var(--marketplace-muted);
+}
+
+body.business-surface
+  .business-services-page
+  .marketplace-job-card
+  .accepted-job-contact
+  dd {
+  overflow-wrap: anywhere;
+}
+
+body.business-surface .business-services-page .marketplace-job-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--business-border);
+}
+
+body.business-surface
+  .business-services-page
+  .marketplace-job-footer
+  .service-quote-summary {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+body.business-surface
+  .business-services-page
+  .marketplace-job-footer
+  .service-quote-summary
+  strong {
+  font-size: 23px;
+  color: var(--business-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+body.business-surface
+  .business-services-page
+  .marketplace-job-footer
+  .marketplace-value-label {
+  color: var(--marketplace-muted);
+  font-size: 12px;
+}
+
+body.business-surface .business-services-page .service-empty-state {
+  min-height: 230px;
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  align-items: center;
+  gap: 30px;
+  padding: 38px;
+  border: 1px dashed var(--business-border-strong);
+  border-radius: var(--business-radius-card);
+  text-align: left;
+  background: var(--business-surface);
+}
+
+body.business-surface .business-services-page .service-empty-state-visual {
+  width: 150px;
+  height: 150px;
+  min-height: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+body.business-surface .business-services-page .service-empty-state-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+body.business-surface .business-services-page .service-empty-state-copy {
+  padding: 0;
+}
+
+body.business-surface .business-services-page .service-empty-state-copy h3 {
+  margin: 0 0 8px;
+  color: var(--business-ink);
+  font-size: 21px;
+}
+
+body.business-surface .business-services-page .service-empty-state-copy p,
+body.business-surface .business-services-page .service-empty-state-copy small {
+  display: block;
+  max-width: 62ch;
+  margin: 6px 0;
+  color: var(--marketplace-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+body.business-surface .business-services-page .service-empty-state-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  color: var(--business-accent-strong);
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+body.business-surface .business-services-page .service-empty-state-link svg {
+  width: 15px;
+  height: 15px;
+}
+
+body.business-surface
+  .business-services-page
+  .service-empty-state-copy
+  .btn-secondary {
+  margin-top: 14px;
+}
+
+body.business-surface .business-services-page .marketplace-loading {
+  display: grid;
+  gap: 16px;
+}
+
+body.business-surface .business-services-page .marketplace-skeleton {
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+  border: 1px solid var(--business-border);
+  border-radius: var(--business-radius-card);
+  background: var(--business-surface);
+}
+
+body.business-surface .business-services-page .marketplace-skeleton span {
+  height: 16px;
+  border-radius: 4px;
+  background: var(--business-border);
+}
+
+body.business-surface
+  .business-services-page
+  .marketplace-skeleton
+  span:first-child {
+  width: 18%;
+}
+body.business-surface
+  .business-services-page
+  .marketplace-skeleton
+  span:nth-child(2) {
+  width: 48%;
+  height: 24px;
+}
+body.business-surface
+  .business-services-page
+  .marketplace-skeleton
+  span:nth-child(3) {
+  width: 80%;
+}
+body.business-surface
+  .business-services-page
+  .marketplace-skeleton
+  span:last-child {
+  width: 24%;
+  height: 40px;
+  justify-self: end;
+}
+
+body.business-surface .business-services-page .marketplace-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+body.business-surface
+  .business-services-page
+  :is(button, a, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--business-accent);
+  outline-offset: 3px;
+}
+
+/* The quote composer is portalled to body, but only used by providers. */
+body.business-surface .service-quote-modal > header {
+  padding: 22px 26px;
+  background: var(--business-surface);
+  border-bottom: 1px solid var(--business-border);
+}
+
+body.business-surface .service-quote-modal > header h2 {
+  color: var(--business-ink);
+  font-size: 24px;
+  letter-spacing: -0.025em;
+}
+
+body.business-surface .service-quote-job-context {
+  padding: 26px;
+  background: var(--business-surface-soft);
+}
+
+body.business-surface .service-quote-modal-content {
+  padding: 26px;
+}
+body.business-surface .service-quote-modal .service-quote-field-title {
+  color: var(--business-ink-soft);
+}
+body.business-surface .service-quote-modal :is(input, select, textarea) {
+  border-color: var(--business-border-strong);
+  border-radius: 10px;
+}
+body.business-surface .service-quote-modal .service-quote-form .btn-primary {
+  box-shadow: none;
+}
+
+@media (max-width: 900px) {
+  body.business-surface .business-services-page .service-overview-card {
+    padding: 18px;
+    grid-template-columns: minmax(0, 1fr) 32px;
+  }
+  body.business-surface .business-services-page .service-overview-icon {
+    display: none;
+  }
+  body.business-surface .business-services-page .service-profile-context {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  body.business-surface .business-services-page .marketplace-heading {
+    gap: 16px;
+  }
+  body.business-surface
+    .business-services-page
+    .service-quote-request-review
+    .service-opportunity-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  body.business-surface .business-services-page .marketplace-heading {
+    flex-direction: column;
+    margin-bottom: 22px;
+  }
+  body.business-surface .business-services-page .service-overview {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  body.business-surface .business-services-page .service-overview-card {
+    display: block;
+    padding: 16px 12px;
+  }
+  body.business-surface .business-services-page .service-overview-copy strong {
+    font-size: 28px;
+  }
+  body.business-surface .business-services-page .service-overview-copy small {
+    display: none;
+  }
+  body.business-surface .business-services-page .marketplace-overview-link {
+    position: absolute;
+    right: 6px;
+    bottom: 14px;
+  }
+  body.business-surface .business-services-page .service-tabs {
+    gap: 0;
+  }
+  body.business-surface .business-services-page .service-tabs button {
+    flex: 1;
+    gap: 6px;
+    font-size: 13px;
+    padding-inline: 2px;
+    min-width: 0;
+  }
+  body.business-surface .business-services-page .service-tabs button svg {
+    display: none;
+  }
+  body.business-surface .business-services-page .service-marketplace-toolbar {
+    grid-template-columns: 1fr;
+  }
+  body.business-surface .business-services-page .service-toolbar-controls {
+    justify-content: stretch;
+  }
+  body.business-surface .business-services-page .service-toolbar-select {
+    flex: 1;
+  }
+  body.business-surface
+    .business-services-page
+    .service-toolbar-select-trigger {
+    width: 100%;
+  }
+  body.business-surface .business-services-page .service-toolbar-menu {
+    max-width: calc(100vw - 48px);
+  }
+  body.business-surface .business-services-page .service-marketplace-card {
+    padding: 20px;
+  }
+  body.business-surface .business-services-page .service-marketplace-card h3 {
+    font-size: 19px;
+  }
+  body.business-surface .business-services-page .service-quote-card-summary {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  body.business-surface .business-services-page .service-quote-card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--business-border);
+  }
+  body.business-surface .business-services-page .marketplace-quote-value {
+    text-align: left;
+  }
+  body.business-surface .business-services-page .service-lead-actions > div {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  body.business-surface
+    .business-services-page
+    .service-lead-actions
+    :is(.btn-secondary, .btn-primary) {
+    min-width: 0;
+    padding-inline: 10px;
+    font-size: 13px;
+  }
+  body.business-surface .business-services-page .service-empty-state {
+    grid-template-columns: 1fr;
+    padding: 26px;
+    gap: 20px;
+  }
+  body.business-surface .business-services-page .service-empty-state-visual {
+    width: 112px;
+    height: 100px;
+  }
+  body.business-surface .business-services-page .marketplace-job-footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+  }
+  body.business-surface
+    .business-services-page
+    .marketplace-job-footer
+    > button {
+    width: 100%;
+  }
+  body.business-surface
+    .business-services-page
+    .marketplace-job-card
+    .service-job-progress-timeline {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    overflow: visible;
+  }
+  body.business-surface .business-services-page .service-job-progress-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  body.business-surface
+    .business-services-page
+    .service-job-progress-step::after {
+    display: none;
+  }
+  body.business-surface .business-services-page .service-job-progress-copy {
+    text-align: left;
+  }
+  body.business-surface .business-services-page .service-quote-timeline {
+    flex-direction: column;
+    gap: 14px;
+  }
+  body.business-surface
+    .business-services-page
+    .service-quote-timeline-step::after {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  body.business-surface .business-services-page .service-marketplace-card {
+    padding: 16px;
+  }
+  body.business-surface .business-services-page .service-profile-context,
+  body.business-surface .business-services-page .service-opportunity-facts,
+  body.business-surface
+    .business-services-page
+    .service-quote-request-review
+    .service-opportunity-facts {
+    grid-template-columns: 1fr;
+  }
+  body.business-surface .business-services-page .marketplace-profile summary {
+    padding-inline: 12px;
+    font-size: 12px;
+  }
+  body.business-surface
+    .business-services-page
+    .marketplace-profile
+    summary
+    > span:last-child {
+    font-size: 0;
+    gap: 0;
+  }
+  body.business-surface .business-services-page .service-quote-card-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  body.business-surface .business-services-page .service-overview-copy strong {
+    font-size: 24px;
+  }
+  body.business-surface .business-services-page .marketplace-overview-link {
+    width: 28px;
+    right: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.business-surface .business-services-page *,
+  body.business-surface .service-quote-modal * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

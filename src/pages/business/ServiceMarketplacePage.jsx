@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
-import { Check, ChevronDown, Funnel } from 'lucide-react'
+import { useEffect, useId, useRef, useState } from 'react'
+import { Check, ChevronDown, Funnel, Search, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import localBusinessNeighbourhood from '../../assets/images/local-business-neighbourhood.jpg'
-import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import ActiveJobCard from '../../features/service-marketplace/components/ActiveJobCard'
 import BusinessQuoteCard from '../../features/service-marketplace/components/BusinessQuoteCard'
 import LeadCard from '../../features/service-marketplace/components/LeadCard'
@@ -49,7 +48,7 @@ const EMPTY_STATE_DETAILS = {
   },
 }
 
-function ServiceMarketplaceEmptyState({ type, totalItems, message }) {
+function ServiceMarketplaceEmptyState({ type, totalItems, message, onReset }) {
   const filtered = totalItems > 0
   const details = EMPTY_STATE_DETAILS[type]
 
@@ -72,7 +71,13 @@ function ServiceMarketplaceEmptyState({ type, totalItems, message }) {
         {!filtered && (
           <Link className="service-empty-state-link" to={details.to}>
             {details.action}
+            <ArrowRight aria-hidden="true" />
           </Link>
+        )}
+        {filtered && (
+          <button className="btn-secondary" type="button" onClick={onReset}>
+            Clear filters
+          </button>
         )}
       </div>
     </div>
@@ -89,18 +94,28 @@ function MarketplaceSelect({
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
+  const triggerRef = useRef(null)
+  const listId = useId()
   const selectedLabel = options.find((option) => option.value === value)?.label
   const displayLabel = useLabelForAll && value === 'all' ? label : selectedLabel
 
   useEffect(() => {
     if (!isOpen) return undefined
+    const options = dropdownRef.current?.querySelectorAll('[role="option"]')
+    const selected = dropdownRef.current?.querySelector(
+      '[aria-selected="true"]',
+    )
+    ;(selected ?? options?.[0])?.focus()
 
     function closeOnOutsideClick(event) {
       if (!dropdownRef.current?.contains(event.target)) setIsOpen(false)
     }
 
     function closeOnEscape(event) {
-      if (event.key === 'Escape') setIsOpen(false)
+      if (event.key === 'Escape') {
+        setIsOpen(false)
+        triggerRef.current?.focus()
+      }
     }
 
     document.addEventListener('pointerdown', closeOnOutsideClick)
@@ -116,6 +131,28 @@ function MarketplaceSelect({
     <div
       className={`service-toolbar-select is-${variant}${isOpen ? ' is-open' : ''}`}
       ref={dropdownRef}
+      onKeyDown={(event) => {
+        if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return
+        event.preventDefault()
+        if (!isOpen) {
+          setIsOpen(true)
+          return
+        }
+        const elements = [
+          ...dropdownRef.current.querySelectorAll('[role="option"]'),
+        ]
+        const index = elements.indexOf(document.activeElement)
+        const next =
+          event.key === 'Home'
+            ? 0
+            : event.key === 'End'
+              ? elements.length - 1
+              : (index +
+                  (event.key === 'ArrowDown' ? 1 : -1) +
+                  elements.length) %
+                elements.length
+        elements[next]?.focus()
+      }}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) setIsOpen(false)
       }}
@@ -123,6 +160,8 @@ function MarketplaceSelect({
       <button
         type="button"
         className="service-toolbar-select-trigger"
+        ref={triggerRef}
+        aria-controls={isOpen ? listId : undefined}
         aria-label={label}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
@@ -135,17 +174,24 @@ function MarketplaceSelect({
         )}
       </button>
       {isOpen && (
-        <div className="service-toolbar-menu" role="listbox" aria-label={label}>
+        <div
+          className="service-toolbar-menu"
+          id={listId}
+          role="listbox"
+          aria-label={label}
+        >
           {options.map((option) => (
             <button
               type="button"
               className={option.value === value ? 'is-selected' : ''}
               role="option"
+              tabIndex={-1}
               aria-selected={option.value === value}
               key={option.value}
               onClick={() => {
                 onChange(option.value)
                 setIsOpen(false)
+                triggerRef.current?.focus()
               }}
             >
               <span>{option.label}</span>
@@ -169,6 +215,19 @@ export function ServiceMarketplaceContent({
   marketplace,
   onViewHistory,
 }) {
+  const hasFilters =
+    Boolean(marketplace.search.trim()) ||
+    (type === 'leads' && marketplace.urgencyFilter !== 'all') ||
+    (type === 'quotes' && marketplace.quoteStatus !== 'all') ||
+    (type === 'jobs' && marketplace.jobStatus !== 'all')
+
+  function resetFilters() {
+    marketplace.setSearch('')
+    if (type === 'leads') marketplace.setUrgencyFilter('all')
+    if (type === 'quotes') marketplace.setQuoteStatus('all')
+    if (type === 'jobs') marketplace.setJobStatus('all')
+  }
+
   return (
     <>
       {marketplace.error && (
@@ -188,6 +247,7 @@ export function ServiceMarketplaceContent({
           aria-label="Job lead search and ordering"
         >
           <div className="service-marketplace-search">
+            <Search className="marketplace-search-icon" aria-hidden="true" />
             <span id="service-leads-search-label">Search</span>
             <input
               aria-labelledby="service-leads-search-label"
@@ -227,6 +287,7 @@ export function ServiceMarketplaceContent({
           aria-label="Search, filter, and order submitted quotes"
         >
           <div className="service-marketplace-search">
+            <Search className="marketplace-search-icon" aria-hidden="true" />
             <span id="service-quotes-search-label">Search</span>
             <input
               aria-labelledby="service-quotes-search-label"
@@ -262,6 +323,7 @@ export function ServiceMarketplaceContent({
           aria-label="Search, filter, and order jobs"
         >
           <div className="service-marketplace-search">
+            <Search className="marketplace-search-icon" aria-hidden="true" />
             <span id="service-jobs-search-label">Search</span>
             <input
               aria-labelledby="service-jobs-search-label"
@@ -291,7 +353,7 @@ export function ServiceMarketplaceContent({
         </div>
       )}
 
-      {type === 'jobs' && (
+      {type === 'jobs' && onViewHistory && (
         <div className="service-history-link-row">
           <button
             type="button"
@@ -309,6 +371,7 @@ export function ServiceMarketplaceContent({
           aria-label="Search completed job history"
         >
           <div className="service-marketplace-search">
+            <Search className="marketplace-search-icon" aria-hidden="true" />
             <span id="service-history-search-label">Search job history</span>
             <input
               aria-labelledby="service-history-search-label"
@@ -321,8 +384,43 @@ export function ServiceMarketplaceContent({
         </div>
       )}
 
-      <div className="service-marketplace-list">
-        {marketplace.isLoading && <LoadingSpinner />}
+      {!marketplace.isLoading && !marketplace.error && (
+        <div className="marketplace-results">
+          <span role="status">
+            {marketplace.items.length}{' '}
+            {hasFilters ? `of ${marketplace.totalItems} ` : ''}
+            {type === 'history' ? 'completed jobs' : type}
+          </span>
+          {hasFilters && (
+            <button type="button" onClick={resetFilters}>
+              Clear filters
+            </button>
+          )}
+        </div>
+      )}
+      <div
+        className="service-marketplace-list"
+        aria-busy={marketplace.isLoading}
+      >
+        {marketplace.isLoading && (
+          <div className="marketplace-loading" role="status">
+            <span className="marketplace-sr-only">
+              Loading {type === 'history' ? 'job history' : type}…
+            </span>
+            {[0, 1, 2].map((item) => (
+              <div
+                className="marketplace-skeleton"
+                key={item}
+                aria-hidden="true"
+              >
+                <span />
+                <span />
+                <span />
+                <span />
+              </div>
+            ))}
+          </div>
+        )}
         {!marketplace.isLoading &&
           !marketplace.error &&
           marketplace.items.length === 0 && (
@@ -330,6 +428,7 @@ export function ServiceMarketplaceContent({
               type={type}
               totalItems={marketplace.totalItems}
               message={getMarketplaceEmptyMessage(type, marketplace.totalItems)}
+              onReset={resetFilters}
             />
           )}
         {!marketplace.isLoading &&

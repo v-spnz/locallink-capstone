@@ -7,6 +7,8 @@ import {
   ShieldCheck,
   Zap,
   X,
+  FileText,
+  ArrowUpRight,
 } from 'lucide-react'
 import Button from '../../../components/ui/Button'
 import Modal from '../../../components/ui/Modal'
@@ -111,6 +113,13 @@ export default function LeadCard({
     >
       <div className="service-lead-summary">
         <div className="service-lead-copy">
+          <div className="marketplace-card-labels">
+            <span className="marketplace-category">{details.category}</span>
+            <span className="marketplace-quote-capacity">
+              <FileText aria-hidden="true" /> {details.quoteCount} of{' '}
+              {details.maxQuotes} quotes received
+            </span>
+          </div>
           <div className="service-marketplace-card-head">
             <div>
               <h3>{details.title}</h3>
@@ -155,11 +164,17 @@ export default function LeadCard({
             {mediaSummary}
           </span>
           <div>
-            <Button variant="secondary" onClick={toggleReview}>
+            <Button
+              variant="secondary"
+              onClick={toggleReview}
+              aria-expanded={isReviewOpen}
+              aria-controls={`lead-details-${item.job_request_id}`}
+            >
               {isReviewOpen ? 'Hide details' : 'View details'}
             </Button>
             <Button onClick={toggleQuoteForm} disabled={isSaving}>
               {isSelected ? 'Close quote form' : 'Send quote'}
+              <ArrowUpRight aria-hidden="true" />
             </Button>
           </div>
           <button
@@ -175,6 +190,7 @@ export default function LeadCard({
 
       {isReviewOpen && (
         <section
+          id={`lead-details-${item.job_request_id}`}
           className="service-opportunity-review"
           aria-label={`Review ${details.title}`}
         >
