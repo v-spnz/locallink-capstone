@@ -1573,8 +1573,7 @@ body.business-surface .deal-form-actions {
   backdrop-filter: blur(12px);
 }
 
-body.business-surface .deal-review-image {
-  max-height: 360px;
+body.business-surface .deal-review-image-frame {
   border-radius: 12px;
 }
 
@@ -1643,11 +1642,8 @@ body.business-surface .deal-review-heading .review-introduction {
   font-size: 22px;
 }
 
-body.business-surface .deal-review-image {
-  width: 100%;
-  aspect-ratio: 16 / 7;
+body.business-surface .deal-review-image-frame {
   margin-bottom: 18px;
-  object-fit: cover;
 }
 
 .deal-review-section {

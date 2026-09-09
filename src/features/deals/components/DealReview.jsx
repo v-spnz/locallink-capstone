@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import Button from '../../../components/ui/Button'
 import GstIncluded from '../../../components/ui/GstIncluded'
 import Modal from '../../../components/ui/Modal'
@@ -24,21 +24,21 @@ export default function DealReview({
   onConfirm,
 }) {
   const [isConfirming, setIsConfirming] = useState(false)
+  const previewImageRef = useRef(null)
   const businessAddress = formatBusinessDealAddress(
     locations.find(({ id }) => deal.locationIds.includes(id)) || locations[0],
   )
-  const imagePreviewUrl = useMemo(
-    () =>
-      deal.imageFile
-        ? URL.createObjectURL(deal.imageFile)
-        : deal.imageUrl || '',
-    [deal.imageFile, deal.imageUrl],
-  )
+  const hasImage = Boolean(deal.imageFile || deal.imageUrl)
+  const savedImageUrl = deal.imageFile ? undefined : deal.imageUrl || undefined
 
-  useEffect(() => {
-    if (!deal.imageFile || !imagePreviewUrl) return undefined
-    return () => URL.revokeObjectURL(imagePreviewUrl)
-  }, [deal.imageFile, imagePreviewUrl])
+  useLayoutEffect(() => {
+    if (!deal.imageFile) return undefined
+
+    const objectUrl = URL.createObjectURL(deal.imageFile)
+    if (previewImageRef.current) previewImageRef.current.src = objectUrl
+
+    return () => URL.revokeObjectURL(objectUrl)
+  }, [deal.imageFile])
 
   function handleDeclinePublication() {
     if (isSaving) return
@@ -76,12 +76,15 @@ export default function DealReview({
           {requestError}
         </div>
       )}
-      {imagePreviewUrl && (
-        <img
-          className="deal-review-image"
-          src={imagePreviewUrl}
-          alt={`Preview for ${deal.title || 'deal draft'}`}
-        />
+      {hasImage && (
+        <div className="deal-review-image-frame">
+          <img
+            ref={previewImageRef}
+            className="deal-review-image"
+            src={savedImageUrl}
+            alt={`Preview for ${deal.title || 'deal draft'}`}
+          />
+        </div>
       )}
 
       <section className="deal-review-section">
