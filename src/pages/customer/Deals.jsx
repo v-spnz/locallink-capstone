@@ -1,4 +1,4 @@
-import { BadgeCheck, Bookmark, Clock3, MapPin, TicketCheck } from 'lucide-react'
+import { BadgeCheck, Bookmark, Clock3, MapPin, TicketCheck, X } from 'lucide-react'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import {
   fetchBusinessesInSavedSuburb,
@@ -49,6 +49,7 @@ export default function Deals() {
   const [isClaiming, setIsClaiming] = useState(false)
   const [claimError, setClaimError] = useState('')
   const [customerClaims, setCustomerClaims] = useState([])
+  const [isClaimsDrawerOpen, setIsClaimsDrawerOpen] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -197,6 +198,7 @@ export default function Deals() {
       distance_km: null,
     })
     setClaimError('')
+    setIsClaimsDrawerOpen(false)
   }
 
   async function handleClaimDeal(dealId) {
@@ -238,19 +240,32 @@ export default function Deals() {
 
   return (
     <>
-      <div className="page-header discovery-page-header">
-        <p
-          style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}
-        >
-          Deals & Discovery
-        </p>
-        <h2>Discover Local</h2>
-        <p>Find businesses and published deals in your registered suburb.</p>
-        {location && (
-          <div className="discovery-selected-location is-chip">
-            <MapPin aria-hidden="true" size={17} />
-            Showing {location.suburb}
-          </div>
+      <div className="page-header discovery-page-header discovery-page-header-row">
+        <div>
+          <p
+            style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}
+          >
+            Deals & Discovery
+          </p>
+          <h2>Discover Local</h2>
+          <p>Find businesses and published deals in your registered suburb.</p>
+          {location && (
+            <div className="discovery-selected-location is-chip">
+              <MapPin aria-hidden="true" size={17} />
+              Showing {location.suburb}
+            </div>
+          )}
+        </div>
+        {customerClaims.length > 0 && (
+          <button
+            type="button"
+            className="discovery-claims-trigger"
+            aria-label="View your claimed deals"
+            onClick={() => setIsClaimsDrawerOpen(true)}
+          >
+            <TicketCheck aria-hidden="true" />
+            <span className="discovery-claims-badge">{customerClaims.length}</span>
+          </button>
         )}
       </div>
 
@@ -271,51 +286,6 @@ export default function Deals() {
         <div className="auth-error" role="alert">
           {error}
         </div>
-      )}
-
-      {customerClaims.length > 0 && (
-        <section
-          className="customer-deal-claims"
-          aria-labelledby="customer-deal-claims-title"
-        >
-          <div className="customer-deal-claims-heading">
-            <span aria-hidden="true">
-              <TicketCheck />
-            </span>
-            <div>
-              <h3 id="customer-deal-claims-title">Your claimed deals</h3>
-              <p>Claims and redemption records stay available here.</p>
-            </div>
-          </div>
-          <div className="customer-deal-claim-list">
-            {customerClaims.map((claim) => {
-              const endedEarly = claim.status === 'ended_early'
-              return (
-                <button
-                  type="button"
-                  className={`customer-deal-claim${endedEarly ? ' is-ended-early' : ''}`}
-                  onClick={() => openClaimedDeal(claim)}
-                  key={claim.claim_id}
-                >
-                  <span className="customer-deal-claim-icon" aria-hidden="true">
-                    {claim.redeemed_at ? <BadgeCheck /> : <Clock3 />}
-                  </span>
-                  <span>
-                    <strong>{claim.title}</strong>
-                    <small>{claim.business_name}</small>
-                  </span>
-                  <span className="customer-deal-claim-status">
-                    {claim.redeemed_at
-                      ? 'Redeemed'
-                      : endedEarly
-                        ? 'Claim remains redeemable'
-                        : 'Ready to redeem'}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        </section>
       )}
 
       {location ? (
@@ -355,14 +325,22 @@ export default function Deals() {
             No businesses or deals are available in {location.suburb} right now.
           </div>
         ) : (
-          <div className="business-grid discovery-grid discovery-card-grid">
-            {businesses.map((business) => (
-              <div
-                className={`business-card discovery-business-card${business.deal_id ? ' business-card-clickable' : ''}`}
-                key={business.business_id}
-                onClick={() => openDeal(business)}
-                role={business.deal_id ? 'button' : undefined}
-                tabIndex={business.deal_id ? 0 : undefined}
+          <div className="discovery-category-sections">
+            {groupBusinessesByCategory(businesses).map(({ category, items }) => (
+              <section className="discovery-category-section" key={category}>
+                <h3 className="discovery-category-heading">
+                  <span aria-hidden="true">{getCategoryEmoji(category)}</span>
+                  {category}
+                  <span className="discovery-category-count">{items.length}</span>
+                </h3>
+                <div className="business-grid discovery-grid discovery-card-grid">
+                  {items.map((business) => (
+                    <div
+                      className={`business-card discovery-business-card${business.deal_id ? ' business-card-clickable' : ''}`}
+                      key={business.business_id}
+                      onClick={() => openDeal(business)}
+                      role={business.deal_id ? 'button' : undefined}
+                      tabIndex={business.deal_id ? 0 : undefined}
               >
                 <div className="discovery-card-media">
                   <span className="discovery-card-icon" aria-hidden="true">
@@ -434,10 +412,71 @@ export default function Deals() {
                 </div>
               </div>
             ))}
+                </div>
+              </section>
+            ))}
           </div>
         )}
       </div>
 
+      {isClaimsDrawerOpen && (
+        <div
+          className="discovery-claims-drawer-overlay"
+          onClick={() => setIsClaimsDrawerOpen(false)}
+        >
+          <div
+            className="discovery-claims-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="claims-drawer-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="discovery-claims-drawer-header">
+              <h3 id="claims-drawer-title">Your claimed deals</h3>
+              <button
+                type="button"
+                className="discovery-claims-drawer-close"
+                aria-label="Close"
+                onClick={() => setIsClaimsDrawerOpen(false)}
+              >
+                <X aria-hidden="true" />
+              </button>
+            </div>
+            <p className="discovery-claims-drawer-subtitle">
+              Claims and redemption records stay available here.
+            </p>
+            <div className="customer-deal-claim-list discovery-claims-drawer-list">
+              {customerClaims.map((claim) => {
+                const endedEarly = claim.status === 'ended_early'
+                return (
+                  <button
+                    type="button"
+                    className={`customer-deal-claim${endedEarly ? ' is-ended-early' : ''}`}
+                    onClick={() => openClaimedDeal(claim)}
+                    key={claim.claim_id}
+                  >
+                    <span className="customer-deal-claim-icon" aria-hidden="true">
+                      {claim.redeemed_at ? <BadgeCheck /> : <Clock3 />}
+                    </span>
+                    <span>
+                      <strong>{claim.title}</strong>
+                      <small>{claim.business_name}</small>
+                    </span>
+                    <span className="customer-deal-claim-status">
+                      {claim.redeemed_at
+                        ? 'Redeemed'
+                        : endedEarly
+                          ? 'Claim remains redeemable'
+                          : 'Ready to redeem'}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+      
       {isDealLoading && !selectedDeal && (
         <Modal onClose={closeDeal} maxWidthClassName="max-w-sm">
           <div className="px-6 py-10 text-center text-sm text-[var(--text-muted)]">
@@ -486,3 +525,23 @@ function getCategoryEmoji(category) {
   }
   return categoryIcons[category] || '📍'
 }
+
+function groupBusinessesByCategory(businesses) {
+  const groups = new Map()
+  businesses.forEach((business) => {
+    const category = business.category || 'Other'
+    if (!groups.has(category)) groups.set(category, [])
+    groups.get(category).push(business)
+  })
+
+  const ordered = []
+  FILTERS.filter((filter) => filter !== 'All').forEach((category) => {
+    if (groups.has(category)) {
+      ordered.push({ category, items: groups.get(category) })
+      groups.delete(category)
+    }
+  })
+  groups.forEach((items, category) => ordered.push({ category, items }))
+  return ordered
+}
+

@@ -342,3 +342,140 @@
     grid-template-columns: 1fr;
   }
 }
+.discovery-category-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.discovery-category-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.discovery-category-count {
+  margin-left: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.discovery-page-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.discovery-claims-trigger {
+  position: relative;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  display: grid;
+  place-items: center;
+  color: var(--blue);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.discovery-claims-trigger:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.discovery-claims-trigger svg {
+  width: 19px;
+  height: 19px;
+}
+
+.discovery-claims-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: var(--white);
+  font-size: 10.5px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.discovery-claims-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 20, 30, 0.45);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 1000;
+}
+
+.discovery-claims-drawer {
+  width: min(380px, 100%);
+  height: 100%;
+  background: var(--white);
+  box-shadow: var(--shadow-md);
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.discovery-claims-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.discovery-claims-drawer-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.discovery-claims-drawer-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg);
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.discovery-claims-drawer-subtitle {
+  margin: 0 0 14px;
+  color: var(--text-muted);
+  font-size: 12.5px;
+}
+
+.discovery-claims-drawer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 480px) {
+  .discovery-claims-drawer {
+    width: 100%;
+  }
+}
