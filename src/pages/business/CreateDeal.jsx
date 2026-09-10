@@ -45,7 +45,6 @@ export default function CreateDeal() {
         <DealList
           deals={deals.deals}
           selectedDealId={deals.selectedDealId}
-          successMessage={deals.successMessage}
           deleteConfirmationId={deals.deleteConfirmationId}
           deletingDealId={deals.deletingDealId}
           cancelingDealId={deals.cancelingDealId}

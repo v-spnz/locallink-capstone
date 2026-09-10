@@ -110,8 +110,6 @@ function DealRow({
   onConfirmDelete,
   onCancelScheduling,
   isEnding,
-  onSelect,
-  onEdit,
   onRequestEnd,
   onEnd,
 }) {
@@ -234,7 +232,6 @@ export function DealListSkeleton() {
 export default function DealList({
   deals,
   selectedDealId,
-  successMessage,
   deleteConfirmationId,
   deletingDealId,
   cancelingDealId,

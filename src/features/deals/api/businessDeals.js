@@ -193,6 +193,8 @@ export async function deleteBusinessDeal(businessId, dealId) {
     p_deal_id: dealId,
   })
   if (error || !data) throw error ?? new Error('Draft could not be deleted')
+}
+
 export async function fetchBusinessDealEndSummary(dealId) {
   const { data, error } = await supabase
     .rpc('get_business_deal_end_summary', { p_deal_id: dealId })

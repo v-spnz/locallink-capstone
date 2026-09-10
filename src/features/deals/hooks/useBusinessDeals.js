@@ -250,7 +250,7 @@ export default function useBusinessDeals() {
     if (!deal) return
 
     setRequestError('')
-    setSuccessMessage('')
+    setFeedback(null)
     setCancelingDealId(dealId)
     try {
       const saved = await saveBusinessDeal({
