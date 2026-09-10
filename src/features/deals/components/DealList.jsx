@@ -10,15 +10,12 @@ import {
   ImageIcon,
   Plus,
 } from 'lucide-react'
-import { formatDealOffer, getDealLifecycle } from '../constants'
+import {
+  DEAL_STATUS_FILTERS,
+  formatDealOffer,
+  getDealLifecycle,
+} from '../constants'
 import DealDetails from './DealDetails'
-
-const DEAL_FILTERS = [
-  { value: 'all', label: 'All' },
-  { value: 'active', label: 'Live' },
-  { value: 'draft', label: 'Drafts' },
-  { value: 'ending-soon', label: 'Ending soon' },
-]
 
 function parseDealDate(value) {
   if (!value) return null
@@ -103,9 +100,16 @@ function DealImage({ deal }) {
 function DealRow({
   record,
   selected,
-  isEnding,
+  deleteConfirmationId,
+  deletingDealId,
+  cancelingDealId,
   onSelect,
   onEdit,
+  onRequestDelete,
+  onCancelDeleteRequest,
+  onConfirmDelete,
+  onCancelScheduling,
+  isEnding,
   onRequestEnd,
   onEnd,
 }) {
@@ -166,8 +170,16 @@ function DealRow({
         <DealDetails
           id={detailId}
           deal={deal}
+          lifecycle={lifecycle}
+          isDeleteConfirming={deleteConfirmationId === deal.id}
+          isDeleting={deletingDealId === deal.id}
+          isCanceling={cancelingDealId === deal.id}
           onClose={() => onSelect(deal.id)}
           onEdit={() => onEdit(deal.id)}
+          onRequestDelete={onRequestDelete}
+          onCancelDeleteRequest={onCancelDeleteRequest}
+          onConfirmDelete={onConfirmDelete}
+          onCancelScheduling={onCancelScheduling}
           canEnd={lifecycle.value === 'active'}
           isEnding={isEnding}
           onRequestEnd={() => onRequestEnd(deal.id)}
@@ -194,7 +206,7 @@ export function DealListSkeleton() {
       </div>
       <div className="deal-filter-bar" aria-hidden="true">
         <div className="deal-filters deal-skeleton-filters">
-          {DEAL_FILTERS.map(({ value }) => (
+          {DEAL_STATUS_FILTERS.map(({ value }) => (
             <span className="deal-skeleton-filter" key={value} />
           ))}
         </div>
@@ -220,10 +232,17 @@ export function DealListSkeleton() {
 export default function DealList({
   deals,
   selectedDealId,
+  deleteConfirmationId,
+  deletingDealId,
+  cancelingDealId,
   onCreate,
   onSelect,
   onClose,
   onEdit,
+  onRequestDelete,
+  onCancelDeleteRequest,
+  onConfirmDelete,
+  onCancelScheduling,
   endingDealId,
   onRequestEnd,
   onEnd,
@@ -233,19 +252,26 @@ export default function DealList({
   const endingSoonRecords = records.filter(({ isEndingSoon }) => isEndingSoon)
   const counts = {
     all: records.length,
-    active: records.filter(({ lifecycle }) => lifecycle.value === 'active')
-      .length,
     draft: records.filter(({ lifecycle }) => lifecycle.value === 'draft')
       .length,
-    'ending-soon': endingSoonRecords.length,
+    scheduled: records.filter(
+      ({ lifecycle }) => lifecycle.value === 'scheduled',
+    ).length,
+    active: records.filter(({ lifecycle }) => lifecycle.value === 'active')
+      .length,
+    expired: records.filter(({ lifecycle }) => lifecycle.value === 'expired')
+      .length,
+    ended_early: records.filter(
+      ({ lifecycle }) => lifecycle.value === 'ended_early',
+    ).length,
   }
-  const visibleRecords = records.filter((record) => {
-    if (activeFilter === 'all') return true
-    if (activeFilter === 'ending-soon') return record.isEndingSoon
-    return record.lifecycle.value === activeFilter
-  })
+  const visibleRecords = records.filter(
+    (record) =>
+      activeFilter === 'all' || record.lifecycle.value === activeFilter,
+  )
   const activeFilterLabel =
-    DEAL_FILTERS.find(({ value }) => value === activeFilter)?.label || 'All'
+    DEAL_STATUS_FILTERS.find(({ value }) => value === activeFilter)?.label ||
+    'All'
 
   return (
     <section className="placeholder-section deal-list-panel">
@@ -259,7 +285,7 @@ export default function DealList({
       {deals.length > 0 && (
         <div className="deal-filter-bar">
           <div className="deal-filters" role="group" aria-label="Filter deals">
-            {DEAL_FILTERS.map(({ value, label }) => (
+            {DEAL_STATUS_FILTERS.map(({ value, label }) => (
               <button
                 type="button"
                 className={activeFilter === value ? 'is-active' : ''}
@@ -366,12 +392,19 @@ export default function DealList({
               <DealRow
                 record={record}
                 selected={selectedDealId === record.deal.id}
+                deleteConfirmationId={deleteConfirmationId}
+                deletingDealId={deletingDealId}
+                cancelingDealId={cancelingDealId}
                 isEnding={endingDealId === record.deal.id}
                 onSelect={(dealId) => {
                   if (selectedDealId === dealId) onClose()
                   else onSelect(dealId)
                 }}
                 onEdit={onEdit}
+                onRequestDelete={onRequestDelete}
+                onCancelDeleteRequest={onCancelDeleteRequest}
+                onConfirmDelete={onConfirmDelete}
+                onCancelScheduling={onCancelScheduling}
                 onRequestEnd={onRequestEnd}
                 onEnd={onEnd}
                 key={record.deal.id}

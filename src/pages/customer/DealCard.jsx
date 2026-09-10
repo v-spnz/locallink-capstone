@@ -34,7 +34,10 @@ export default function DealCard({
           aria-label={isSaved ? 'Remove from saved deals' : 'Save this deal'}
           onClick={handleToggleSaved}
         >
-          <Bookmark aria-hidden="true" fill={isSaved ? 'currentColor' : 'none'} />
+          <Bookmark
+            aria-hidden="true"
+            fill={isSaved ? 'currentColor' : 'none'}
+          />
         </button>
       </div>
 
