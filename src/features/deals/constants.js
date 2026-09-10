@@ -52,7 +52,20 @@ function localDateKey(date) {
   return `${year}-${month}-${day}`
 }
 
+export const DEAL_STATUS_FILTERS = [
+  { value: 'all', label: 'All' },
+  { value: 'draft', label: 'Draft' },
+  { value: 'scheduled', label: 'Scheduled' },
+  { value: 'active', label: 'Active' },
+  { value: 'expired', label: 'Expired' },
+  { value: 'ended_early', label: 'Ended Early' },
+]
+
 export function getDealLifecycle(deal, today = new Date()) {
+  if (deal.status === 'ended_early') {
+    return { value: 'ended_early', label: 'Ended Early' }
+  }
+
   if (deal.status !== 'published') {
     return { value: 'draft', label: 'Draft' }
   }

@@ -45,10 +45,17 @@ export default function CreateDeal() {
           deals={deals.deals}
           selectedDealId={deals.selectedDealId}
           successMessage={deals.successMessage}
+          deleteConfirmationId={deals.deleteConfirmationId}
+          deletingDealId={deals.deletingDealId}
+          cancelingDealId={deals.cancelingDealId}
           onCreate={deals.handleStartNewDeal}
           onSelect={deals.handleSelectDeal}
           onClose={deals.handleCloseDetails}
           onEdit={deals.handleEditDeal}
+          onRequestDelete={deals.setDeleteConfirmationId}
+          onCancelDeleteRequest={() => deals.setDeleteConfirmationId(null)}
+          onConfirmDelete={deals.handleDeleteDraft}
+          onCancelScheduling={deals.handleCancelScheduledPublication}
         />
       )}
       {deals.step === 'review' && (

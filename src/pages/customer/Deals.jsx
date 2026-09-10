@@ -143,7 +143,7 @@ export default function Deals() {
   return (
     <>
       <div className="page-header discovery-page-header">
-                <p
+        <p
           style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}
         >
           Deals & Discovery
@@ -164,7 +164,7 @@ export default function Deals() {
             key={filter}
             type="button"
             className={`pill discovery-pill${activeFilter === filter ? ' active' : ''}`}
-                        onClick={() => setActiveFilter(filter)}
+            onClick={() => setActiveFilter(filter)}
           >
             {filter}
           </button>

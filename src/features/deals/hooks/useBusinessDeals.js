@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useBusiness from '../../../business/useBusiness'
-import { fetchBusinessDeals, saveBusinessDeal } from '../api/businessDeals'
+import {
+  deleteBusinessDeal,
+  fetchBusinessDeals,
+  saveBusinessDeal,
+} from '../api/businessDeals'
 import { getDealLifecycle } from '../constants'
 import { validateDeal } from '../validation'
 
@@ -45,6 +49,9 @@ export default function useBusinessDeals() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [deleteConfirmationId, setDeleteConfirmationId] = useState(null)
+  const [deletingDealId, setDeletingDealId] = useState(null)
+  const [cancelingDealId, setCancelingDealId] = useState(null)
   const saveInProgressRef = useRef(false)
 
   const loadDeals = useCallback(async () => {
@@ -208,6 +215,51 @@ export default function useBusinessDeals() {
     setStep('list')
   }
 
+  async function handleDeleteDraft(dealId) {
+    setRequestError('')
+    setSuccessMessage('')
+    setDeletingDealId(dealId)
+    try {
+      await deleteBusinessDeal(business.id, dealId)
+      setDeals((current) => current.filter((deal) => deal.id !== dealId))
+      setDeleteConfirmationId(null)
+      setSelectedDealId((current) => (current === dealId ? null : current))
+      setSuccessMessage('Draft deleted.')
+    } catch (error) {
+      console.error('Unable to delete draft.', error)
+      setRequestError('Unable to delete this draft. Please try again.')
+    } finally {
+      setDeletingDealId(null)
+    }
+  }
+
+  async function handleCancelScheduledPublication(dealId) {
+    const deal = deals.find((item) => item.id === dealId)
+    if (!deal) return
+
+    setRequestError('')
+    setSuccessMessage('')
+    setCancelingDealId(dealId)
+    try {
+      const saved = await saveBusinessDeal({
+        businessId: business.id,
+        deal,
+        status: 'draft',
+      })
+      setDeals((current) =>
+        current.map((item) => (item.id === saved.id ? saved : item)),
+      )
+      setSuccessMessage(
+        'Scheduled publication cancelled. The deal is now a draft.',
+      )
+    } catch (error) {
+      console.error('Unable to cancel scheduled publication.', error)
+      setRequestError('Unable to cancel this scheduled deal. Please try again.')
+    } finally {
+      setCancelingDealId(null)
+    }
+  }
+
   return {
     form,
     errors,
@@ -221,8 +273,12 @@ export default function useBusinessDeals() {
     isLoading,
     isSaving,
     hasUnsavedChanges,
+    deleteConfirmationId,
+    deletingDealId,
+    cancelingDealId,
     setField,
     setImage,
+    setDeleteConfirmationId,
     handleReview,
     handleSaveDraft: () => persist('draft'),
     handleConfirmPublish: () => persist('published'),
@@ -233,6 +289,8 @@ export default function useBusinessDeals() {
     handleCloseDetails: () => setSelectedDealId(null),
     handleBackToEdit: () => setStep('form'),
     handleBackToList,
+    handleDeleteDraft,
+    handleCancelScheduledPublication,
     reload: loadDeals,
   }
 }

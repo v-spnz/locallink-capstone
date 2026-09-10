@@ -60,6 +60,12 @@ body.business-surface .deal-status.is-expired {
   color: #667085;
 }
 
+.deal-status.is-ended_early,
+body.business-surface .deal-status.is-ended_early {
+  background: #fff5f5;
+  color: #c92a2a;
+}
+
 .deal-details {
   margin-bottom: 10px;
   padding: 10px 14px;
@@ -78,6 +84,62 @@ body.business-surface .deal-status.is-expired {
   color: var(--text-muted);
   font-size: 12px;
   text-transform: uppercase;
+}
+
+.deal-detail-readonly-note {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.deal-delete-confirmation {
+  margin-top: 14px;
+  padding: 13px;
+  border: 1px solid #ffc9c9;
+  border-radius: var(--radius);
+  background: #fff5f5;
+}
+
+.deal-delete-confirmation strong {
+  font-size: 13px;
+}
+
+.deal-delete-confirmation p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.deal-delete-confirmation > div {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.deal-cancel-scheduling-note {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  background: #fff3bf;
+  color: #8a5b00;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.deal-cancel-scheduling-note svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  margin-top: 1px;
 }
 
 .deal-actions {
