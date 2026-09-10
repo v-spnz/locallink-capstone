@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useBusiness from '../../../business/useBusiness'
-import { fetchBusinessDeals, saveBusinessDeal } from '../api/businessDeals'
+import {
+  endBusinessDeal,
+  fetchBusinessDealEndSummary,
+  fetchBusinessDeals,
+  saveBusinessDeal,
+} from '../api/businessDeals'
 import { getDealLifecycle } from '../constants'
 import { validateDeal } from '../validation'
 
@@ -26,6 +31,7 @@ export const EMPTY_DEAL = {
   exclusions: '',
   redemptionInstructions: '',
   status: 'draft',
+  endedAt: null,
 }
 
 function newDeal() {
@@ -44,8 +50,10 @@ export default function useBusinessDeals() {
   const [selectedDealId, setSelectedDealId] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [endingDealId, setEndingDealId] = useState(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const saveInProgressRef = useRef(false)
+  const endInProgressRef = useRef(false)
 
   const loadDeals = useCallback(async () => {
     setIsLoading(true)
@@ -212,6 +220,38 @@ export default function useBusinessDeals() {
     setStep('list')
   }
 
+  async function handleEndDeal(dealId) {
+    if (endInProgressRef.current) return false
+
+    endInProgressRef.current = true
+    setEndingDealId(dealId)
+    setRequestError('')
+    setFeedback(null)
+    try {
+      const result = await endBusinessDeal(dealId, business.id)
+      setDeals((current) =>
+        current.map((deal) => (deal.id === dealId ? result.deal : deal)),
+      )
+      setFeedback({
+        variant: 'success',
+        message:
+          result.claimCount > 0
+            ? `Deal ended early. ${result.claimCount} existing ${result.claimCount === 1 ? 'claim remains' : 'claims remain'} redeemable and ${result.notificationsCreated} ${result.notificationsCreated === 1 ? 'customer was' : 'customers were'} notified.`
+            : 'Deal ended early. New claims are no longer available.',
+      })
+      return true
+    } catch (error) {
+      console.error('Unable to end deal.', error)
+      const message = 'Unable to end this deal right now. Please try again.'
+      setRequestError(message)
+      setFeedback({ variant: 'error', message })
+      return false
+    } finally {
+      endInProgressRef.current = false
+      setEndingDealId(null)
+    }
+  }
+
   return {
     form,
     errors,
@@ -224,6 +264,7 @@ export default function useBusinessDeals() {
     editingDealId: form.id,
     isLoading,
     isSaving,
+    endingDealId,
     hasUnsavedChanges,
     setField,
     setImage,
@@ -232,6 +273,8 @@ export default function useBusinessDeals() {
     handleConfirmPublish: () => persist('published'),
     handleStartNewDeal,
     handleEditDeal,
+    handleGetEndSummary: fetchBusinessDealEndSummary,
+    handleEndDeal,
     handleSelectDeal: (dealId) =>
       setSelectedDealId((current) => (current === dealId ? null : dealId)),
     handleCloseDetails: () => setSelectedDealId(null),

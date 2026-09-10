@@ -48,6 +48,7 @@ const NOTIFICATION_ICONS = {
   on_the_way: Car,
   in_progress: LoaderCircle,
   quote_deadline_reminder: Clock,
+  deal_ended: BadgePercent,
 }
 
 function getConsumerInitials(user) {
@@ -198,8 +199,8 @@ export default function CustomerNavigation() {
                   )}
                   {!areNotificationsLoading && notifications.length === 0 && (
                     <p className="business-notification-empty">
-                      You’re all caught up. Updates on your jobs and quotes will
-                      appear here.
+                      You’re all caught up. Updates on your jobs, quotes and
+                      deal claims will appear here.
                     </p>
                   )}
                   {notifications.map((notification) => {

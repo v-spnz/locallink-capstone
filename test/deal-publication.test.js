@@ -73,6 +73,31 @@ test('US0091: preview includes the consumer-facing details and an explicit confi
   assert.match(review, /onBack\(\)/)
 })
 
+test('US0091: review images keep local uploads available and crop every ratio consistently', async () => {
+  const [review, styles] = await Promise.all([
+    readFile(
+      new URL('../src/features/deals/components/DealReview.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/features/deals/CreateDeal.css', import.meta.url),
+      'utf8',
+    ),
+  ])
+
+  assert.match(review, /useLayoutEffect/)
+  assert.match(review, /previewImageRef\.current\.src = objectUrl/)
+  assert.match(review, /URL\.revokeObjectURL\(objectUrl\)/)
+  assert.match(
+    styles,
+    /\.deal-review-image-frame \{[\s\S]*?height: clamp\([\s\S]*?overflow: hidden/,
+  )
+  assert.match(
+    styles,
+    /\.deal-review-image \{[\s\S]*?height: 100%[\s\S]*?object-fit: cover/,
+  )
+})
+
 test('US0091: publication is atomic and guarded against repeated submissions', async () => {
   const [api, hook, migration] = await Promise.all([
     readFile(

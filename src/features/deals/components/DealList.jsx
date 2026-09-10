@@ -61,7 +61,19 @@ function getExpiryDetail(endDate) {
 
 function getDealRecord(deal) {
   const lifecycle = getDealLifecycle(deal)
-  const expiry = getExpiryDetail(deal.endDate)
+  const expiry =
+    lifecycle.value === 'ended-early'
+      ? {
+          label: deal.endedAt
+            ? `Ended ${new Date(deal.endedAt).toLocaleDateString('en-NZ', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              })}`
+            : 'Ended early',
+          tone: 'is-expired',
+        }
+      : getExpiryDetail(deal.endDate)
 
   return {
     deal,
@@ -88,7 +100,15 @@ function DealImage({ deal }) {
   )
 }
 
-function DealRow({ record, selected, onSelect, onEdit }) {
+function DealRow({
+  record,
+  selected,
+  isEnding,
+  onSelect,
+  onEdit,
+  onRequestEnd,
+  onEnd,
+}) {
   const { deal, expiry, lifecycle } = record
   const detailId = `deal-details-${deal.id}`
 
@@ -148,6 +168,10 @@ function DealRow({ record, selected, onSelect, onEdit }) {
           deal={deal}
           onClose={() => onSelect(deal.id)}
           onEdit={() => onEdit(deal.id)}
+          canEnd={lifecycle.value === 'active'}
+          isEnding={isEnding}
+          onRequestEnd={() => onRequestEnd(deal.id)}
+          onEnd={() => onEnd(deal.id)}
         />
       )}
     </article>
@@ -200,6 +224,9 @@ export default function DealList({
   onSelect,
   onClose,
   onEdit,
+  endingDealId,
+  onRequestEnd,
+  onEnd,
 }) {
   const [activeFilter, setActiveFilter] = useState('all')
   const records = deals.map(getDealRecord)
@@ -339,11 +366,14 @@ export default function DealList({
               <DealRow
                 record={record}
                 selected={selectedDealId === record.deal.id}
+                isEnding={endingDealId === record.deal.id}
                 onSelect={(dealId) => {
                   if (selectedDealId === dealId) onClose()
                   else onSelect(dealId)
                 }}
                 onEdit={onEdit}
+                onRequestEnd={onRequestEnd}
+                onEnd={onEnd}
                 key={record.deal.id}
               />
             ))}

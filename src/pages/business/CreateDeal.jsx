@@ -49,6 +49,9 @@ export default function CreateDeal() {
           onSelect={deals.handleSelectDeal}
           onClose={deals.handleCloseDetails}
           onEdit={deals.handleEditDeal}
+          endingDealId={deals.endingDealId}
+          onRequestEnd={deals.handleGetEndSummary}
+          onEnd={deals.handleEndDeal}
         />
       )}
       {deals.step === 'review' && (

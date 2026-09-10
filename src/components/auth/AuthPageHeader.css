@@ -23,21 +23,10 @@
   letter-spacing: -0.02em;
 }
 
-.auth-page-brand-mark {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  color: #fff;
-  background: #3f5bd3;
-  box-shadow: 0 4px 10px rgb(63 91 211 / 22%);
-}
-
-.auth-page-brand-mark svg {
-  width: 16px;
-  height: 16px;
-  stroke-width: 1.4;
+.auth-page-brand-wordmark {
+  display: block;
+  width: 124px;
+  height: auto;
 }
 
 .auth-page-back {
