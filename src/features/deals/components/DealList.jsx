@@ -58,7 +58,19 @@ function getExpiryDetail(endDate) {
 
 function getDealRecord(deal) {
   const lifecycle = getDealLifecycle(deal)
-  const expiry = getExpiryDetail(deal.endDate)
+  const expiry =
+    lifecycle.value === 'ended-early'
+      ? {
+          label: deal.endedAt
+            ? `Ended ${new Date(deal.endedAt).toLocaleDateString('en-NZ', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              })}`
+            : 'Ended early',
+          tone: 'is-expired',
+        }
+      : getExpiryDetail(deal.endDate)
 
   return {
     deal,
@@ -97,6 +109,11 @@ function DealRow({
   onCancelDeleteRequest,
   onConfirmDelete,
   onCancelScheduling,
+  isEnding,
+  onSelect,
+  onEdit,
+  onRequestEnd,
+  onEnd,
 }) {
   const { deal, expiry, lifecycle } = record
   const detailId = `deal-details-${deal.id}`
@@ -165,6 +182,10 @@ function DealRow({
           onCancelDeleteRequest={onCancelDeleteRequest}
           onConfirmDelete={onConfirmDelete}
           onCancelScheduling={onCancelScheduling}
+          canEnd={lifecycle.value === 'active'}
+          isEnding={isEnding}
+          onRequestEnd={() => onRequestEnd(deal.id)}
+          onEnd={() => onEnd(deal.id)}
         />
       )}
     </article>
@@ -225,6 +246,9 @@ export default function DealList({
   onCancelDeleteRequest,
   onConfirmDelete,
   onCancelScheduling,
+  endingDealId,
+  onRequestEnd,
+  onEnd,
 }) {
   const [activeFilter, setActiveFilter] = useState('all')
   const records = deals.map(getDealRecord)
@@ -255,21 +279,11 @@ export default function DealList({
   return (
     <section className="placeholder-section deal-list-panel">
       <div className="deal-list-header">
-        <div>
-          <h2>Campaign manager</h2>
-          <p>Keep every offer clear, current and ready for local customers.</p>
-        </div>
         <Button onClick={onCreate}>
           <Plus aria-hidden="true" />
           New deal
         </Button>
       </div>
-
-      {successMessage && (
-        <p className="form-success" role="status" aria-live="polite">
-          {successMessage}
-        </p>
-      )}
 
       {deals.length > 0 && (
         <div className="deal-filter-bar">
@@ -384,6 +398,7 @@ export default function DealList({
                 deleteConfirmationId={deleteConfirmationId}
                 deletingDealId={deletingDealId}
                 cancelingDealId={cancelingDealId}
+                isEnding={endingDealId === record.deal.id}
                 onSelect={(dealId) => {
                   if (selectedDealId === dealId) onClose()
                   else onSelect(dealId)
@@ -393,6 +408,8 @@ export default function DealList({
                 onCancelDeleteRequest={onCancelDeleteRequest}
                 onConfirmDelete={onConfirmDelete}
                 onCancelScheduling={onCancelScheduling}
+                onRequestEnd={onRequestEnd}
+                onEnd={onEnd}
                 key={record.deal.id}
               />
             ))}

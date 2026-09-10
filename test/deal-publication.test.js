@@ -73,6 +73,31 @@ test('US0091: preview includes the consumer-facing details and an explicit confi
   assert.match(review, /onBack\(\)/)
 })
 
+test('US0091: review images keep local uploads available and crop every ratio consistently', async () => {
+  const [review, styles] = await Promise.all([
+    readFile(
+      new URL('../src/features/deals/components/DealReview.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/features/deals/CreateDeal.css', import.meta.url),
+      'utf8',
+    ),
+  ])
+
+  assert.match(review, /useLayoutEffect/)
+  assert.match(review, /previewImageRef\.current\.src = objectUrl/)
+  assert.match(review, /URL\.revokeObjectURL\(objectUrl\)/)
+  assert.match(
+    styles,
+    /\.deal-review-image-frame \{[\s\S]*?height: clamp\([\s\S]*?overflow: hidden/,
+  )
+  assert.match(
+    styles,
+    /\.deal-review-image \{[\s\S]*?height: 100%[\s\S]*?object-fit: cover/,
+  )
+})
+
 test('US0091: publication is atomic and guarded against repeated submissions', async () => {
   const [api, hook, migration] = await Promise.all([
     readFile(
@@ -105,7 +130,7 @@ test('US0091: publication is atomic and guarded against repeated submissions', a
 })
 
 test('US0091: successful publication announces a clear lifecycle status', async () => {
-  const [hook, list] = await Promise.all([
+  const [hook, page] = await Promise.all([
     readFile(
       new URL(
         '../src/features/deals/hooks/useBusinessDeals.js',
@@ -114,18 +139,18 @@ test('US0091: successful publication announces a clear lifecycle status', async 
       'utf8',
     ),
     readFile(
-      new URL('../src/features/deals/components/DealList.jsx', import.meta.url),
+      new URL('../src/pages/business/CreateDeal.jsx', import.meta.url),
       'utf8',
     ),
   ])
 
-  assert.match(hook, /Deal published successfully\. Status:/)
-  assert.match(list, /role="status"/)
-  assert.match(list, /getDealLifecycle\(deal\)/)
+  assert.match(hook, /Deal published\. Status:/)
+  assert.match(hook, /Deal saved as draft\./)
+  assert.match(page, /<ActionToast/)
 })
 
-test('business deals uses an accessible campaign manager with responsive loading feedback', async () => {
-  const [list, page] = await Promise.all([
+test('business deals uses accessible management controls with responsive loading feedback', async () => {
+  const [list, page, styles] = await Promise.all([
     readFile(
       new URL('../src/features/deals/components/DealList.jsx', import.meta.url),
       'utf8',
@@ -134,12 +159,25 @@ test('business deals uses an accessible campaign manager with responsive loading
       new URL('../src/pages/business/CreateDeal.jsx', import.meta.url),
       'utf8',
     ),
+    readFile(
+      new URL('../src/pages/business/BusinessPortal.css', import.meta.url),
+      'utf8',
+    ),
   ])
 
-  assert.match(list, /Campaign manager/)
+  assert.doesNotMatch(list, /Campaign manager/)
   assert.match(list, /aria-label="Filter deals"/)
   assert.match(list, /aria-pressed=/)
   assert.match(list, /Ending soon/)
   assert.match(list, /deal-campaign-table/)
   assert.match(page, /<DealListSkeleton \/>/)
+  assert.match(styles, /\.deal-card-list \{[\s\S]*?gap: 16px/)
+  assert.match(
+    styles,
+    /\.deal-management-card \{[\s\S]*?border: 1px solid var\(--business-border\)[\s\S]*?border-radius: var\(--business-radius-card\)/,
+  )
+  assert.doesNotMatch(
+    styles,
+    /body\.business-surface \.deal-list-panel \{[\s\S]*?background: transparent/,
+  )
 })

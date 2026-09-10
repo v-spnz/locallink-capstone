@@ -1,10 +1,13 @@
-import { MapPin, Bookmark } from 'lucide-react'
+import { BadgeCheck, Bookmark, Clock3, MapPin, TicketCheck } from 'lucide-react'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import {
   fetchBusinessesInSavedSuburb,
   fetchCustomerLocation,
 } from '../../features/location/api/locations'
 import {
+  claimDeal,
+  fetchDealClaim,
+  fetchCustomerDealClaims,
   fetchPublishedDealById,
   fetchSavedDealIds,
   saveDeal,
@@ -42,6 +45,10 @@ export default function Deals() {
   const [selectedDeal, setSelectedDeal] = useState(null)
   const [selectedBusinessRow, setSelectedBusinessRow] = useState(null)
   const [isDealLoading, setIsDealLoading] = useState(false)
+  const [selectedClaim, setSelectedClaim] = useState(null)
+  const [isClaiming, setIsClaiming] = useState(false)
+  const [claimError, setClaimError] = useState('')
+  const [customerClaims, setCustomerClaims] = useState([])
 
   useEffect(() => {
     let active = true
@@ -102,13 +109,58 @@ export default function Deals() {
     }
   }, [user?.id])
 
+  useEffect(() => {
+    let active = true
+    if (!user?.id) return undefined
+
+    fetchCustomerDealClaims()
+      .then((claims) => {
+        if (!active) return
+        setCustomerClaims(claims)
+
+        const requestedDealId = new URLSearchParams(window.location.search).get(
+          'claim',
+        )
+        const requestedClaim = claims.find(
+          (claim) => claim.deal_id === requestedDealId,
+        )
+        if (requestedClaim) {
+          setSelectedDeal(requestedClaim)
+          setSelectedClaim({
+            id: requestedClaim.claim_id,
+            deal_id: requestedClaim.deal_id,
+            claimed_at: requestedClaim.claimed_at,
+          })
+          setSelectedBusinessRow({
+            business_name: requestedClaim.business_name,
+            formatted_address: requestedClaim.formatted_address,
+            category: requestedClaim.category,
+            suburb: requestedClaim.suburb,
+            distance_km: null,
+          })
+        }
+      })
+      .catch((claimsError) => {
+        console.error('Unable to load customer deal claims.', claimsError)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [user?.id])
+
   async function openDeal(business) {
     if (!business.deal_id) return
     setSelectedBusinessRow(business)
     setIsDealLoading(true)
+    setClaimError('')
     try {
-      const fullDeal = await fetchPublishedDealById(business.deal_id)
+      const [fullDeal, existingClaim] = await Promise.all([
+        fetchPublishedDealById(business.deal_id),
+        fetchDealClaim(user.id, business.deal_id),
+      ])
       setSelectedDeal(fullDeal)
+      setSelectedClaim(existingClaim)
     } catch (dealError) {
       console.error('Unable to load deal details.', dealError)
       setError('Unable to load this deal right now.')
@@ -121,6 +173,50 @@ export default function Deals() {
   function closeDeal() {
     setSelectedDeal(null)
     setSelectedBusinessRow(null)
+    setSelectedClaim(null)
+    setClaimError('')
+    const url = new URL(window.location.href)
+    if (url.searchParams.has('claim')) {
+      url.searchParams.delete('claim')
+      window.history.replaceState(window.history.state, '', url)
+    }
+  }
+
+  function openClaimedDeal(claim) {
+    setSelectedDeal(claim)
+    setSelectedClaim({
+      id: claim.claim_id,
+      deal_id: claim.deal_id,
+      claimed_at: claim.claimed_at,
+    })
+    setSelectedBusinessRow({
+      business_name: claim.business_name,
+      formatted_address: claim.formatted_address,
+      category: claim.category,
+      suburb: claim.suburb,
+      distance_km: null,
+    })
+    setClaimError('')
+  }
+
+  async function handleClaimDeal(dealId) {
+    setIsClaiming(true)
+    setClaimError('')
+    try {
+      const claim = await claimDeal(dealId)
+      setSelectedClaim(claim)
+      return true
+    } catch (claimRequestError) {
+      console.error('Unable to claim deal.', claimRequestError)
+      setClaimError(
+        claimRequestError.message?.includes('claim limit')
+          ? 'This deal has reached its claim limit.'
+          : 'This deal is no longer available to claim.',
+      )
+      return false
+    } finally {
+      setIsClaiming(false)
+    }
   }
 
   async function toggleSaveDeal(dealId) {
@@ -175,6 +271,51 @@ export default function Deals() {
         <div className="auth-error" role="alert">
           {error}
         </div>
+      )}
+
+      {customerClaims.length > 0 && (
+        <section
+          className="customer-deal-claims"
+          aria-labelledby="customer-deal-claims-title"
+        >
+          <div className="customer-deal-claims-heading">
+            <span aria-hidden="true">
+              <TicketCheck />
+            </span>
+            <div>
+              <h3 id="customer-deal-claims-title">Your claimed deals</h3>
+              <p>Claims and redemption records stay available here.</p>
+            </div>
+          </div>
+          <div className="customer-deal-claim-list">
+            {customerClaims.map((claim) => {
+              const endedEarly = claim.status === 'ended_early'
+              return (
+                <button
+                  type="button"
+                  className={`customer-deal-claim${endedEarly ? ' is-ended-early' : ''}`}
+                  onClick={() => openClaimedDeal(claim)}
+                  key={claim.claim_id}
+                >
+                  <span className="customer-deal-claim-icon" aria-hidden="true">
+                    {claim.redeemed_at ? <BadgeCheck /> : <Clock3 />}
+                  </span>
+                  <span>
+                    <strong>{claim.title}</strong>
+                    <small>{claim.business_name}</small>
+                  </span>
+                  <span className="customer-deal-claim-status">
+                    {claim.redeemed_at
+                      ? 'Redeemed'
+                      : endedEarly
+                        ? 'Claim remains redeemable'
+                        : 'Ready to redeem'}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </section>
       )}
 
       {location ? (
@@ -312,8 +453,12 @@ export default function Deals() {
           address={selectedBusinessRow.formatted_address}
           categoryEmoji={getCategoryEmoji(selectedBusinessRow.category)}
           distanceKm={selectedBusinessRow.distance_km}
-          suburb={location?.suburb}
+          suburb={selectedBusinessRow.suburb ?? location?.suburb}
           isSaved={savedDealIds.includes(selectedDeal.id)}
+          isClaimed={Boolean(selectedClaim)}
+          isClaiming={isClaiming}
+          claimError={claimError}
+          onClaim={handleClaimDeal}
           onToggleSave={toggleSaveDeal}
           onClose={closeDeal}
         />

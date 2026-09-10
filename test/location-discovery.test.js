@@ -161,14 +161,16 @@ test('consumer discovery is derived from the authenticated saved suburb', async 
 })
 
 test('discovery uses Supabase results and a react-leaflet map instead of mocks', async () => {
-  const [deals, home, map, locationsApi, profile, portal] = await Promise.all([
-    read('../src/pages/customer/Deals.jsx'),
-    read('../src/pages/customer/Home.jsx'),
-    read('../src/features/location/components/DiscoveryMap.jsx'),
-    read('../src/features/location/api/locations.js'),
-    read('../src/pages/customer/Profile.jsx'),
-    read('../src/pages/customer/CustomerPortal.jsx'),
-  ])
+  const [deals, home, map, boundaryApi, locationsApi, profile, portal] =
+    await Promise.all([
+      read('../src/pages/customer/Deals.jsx'),
+      read('../src/pages/customer/Home.jsx'),
+      read('../src/features/location/components/DiscoveryMap.jsx'),
+      read('../src/features/location/api/suburbBoundaries.js'),
+      read('../src/features/location/api/locations.js'),
+      read('../src/pages/customer/Profile.jsx'),
+      read('../src/pages/customer/CustomerPortal.jsx'),
+    ])
 
   assert.match(deals, /fetchBusinessesInSavedSuburb/)
   assert.match(home, /fetchBusinessesInSavedSuburb/)
@@ -191,6 +193,14 @@ test('discovery uses Supabase results and a react-leaflet map instead of mocks',
   assert.match(map, /MapContainer/)
   assert.match(map, /TileLayer/)
   assert.match(map, /CircleMarker/)
+  assert.match(map, /tile\/osm-bright/)
+  assert.match(map, /createOutsideMaskPositions/)
+  assert.match(map, /fillOpacity: 0\.3/)
+  assert.match(map, /<GeoJSON/)
+  assert.match(map, /<GeoJSON[\s\S]*?weight: 2,[\s\S]*?fill: false/)
+  assert.match(map, /fill: false/)
+  assert.match(boundaryApi, /LINZ_NZ_Suburbs_and_Localities/)
+  assert.match(boundaryApi, /esriSpatialRelIntersects/)
 })
 
 test('customer and business signup addresses are persisted and business locations feed deals', async () => {

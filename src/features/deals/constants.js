@@ -62,12 +62,11 @@ export const DEAL_STATUS_FILTERS = [
 ]
 
 export function getDealLifecycle(deal, today = new Date()) {
-  if (deal.status === 'ended_early') {
-    return { value: 'ended_early', label: 'Ended Early' }
-  }
-
-  if (deal.status !== 'published') {
+  if (!deal.status || deal.status === 'draft') {
     return { value: 'draft', label: 'Draft' }
+  }
+  if (deal.status === 'ended_early') {
+    return { value: 'ended-early', label: 'Ended Early' }
   }
 
   const todayKey = localDateKey(today)

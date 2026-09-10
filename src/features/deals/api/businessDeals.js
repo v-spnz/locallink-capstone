@@ -23,6 +23,7 @@ const DEAL_FIELDS = `
   redemption_instructions,
   status,
   published_at,
+  ended_at,
   created_at,
   updated_at,
   locations:business_deal_locations(location_id)
@@ -64,6 +65,7 @@ export function mapBusinessDeal(record) {
     redemptionInstructions: record.redemption_instructions || '',
     status: record.status || 'draft',
     publishedAt: record.published_at,
+    endedAt: record.ended_at,
     createdAt: record.created_at,
     updatedAt: record.updated_at,
   }
@@ -191,4 +193,38 @@ export async function deleteBusinessDeal(businessId, dealId) {
     p_deal_id: dealId,
   })
   if (error || !data) throw error ?? new Error('Draft could not be deleted')
+export async function fetchBusinessDealEndSummary(dealId) {
+  const { data, error } = await supabase
+    .rpc('get_business_deal_end_summary', { p_deal_id: dealId })
+    .single()
+
+  if (error) throw error
+  return {
+    dealId: data.deal_id,
+    title: data.deal_title,
+    status: data.deal_status,
+    claimCount: Number(data.claim_count ?? 0),
+    unredeemedClaimCount: Number(data.unredeemed_claim_count ?? 0),
+  }
+}
+
+export async function endBusinessDeal(dealId, businessId) {
+  const { data: result, error: endError } = await supabase
+    .rpc('end_business_deal', { p_deal_id: dealId })
+    .single()
+  if (endError) throw endError
+
+  const { data: endedDeal, error: refreshError } = await supabase
+    .from('business_deals')
+    .select(DEAL_FIELDS)
+    .eq('id', dealId)
+    .eq('business_id', businessId)
+    .single()
+  if (refreshError) throw refreshError
+
+  return {
+    deal: mapBusinessDeal(endedDeal),
+    claimCount: Number(result.claim_count ?? 0),
+    notificationsCreated: Number(result.notifications_created ?? 0),
+  }
 }

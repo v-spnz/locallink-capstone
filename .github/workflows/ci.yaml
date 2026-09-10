@@ -7,6 +7,40 @@ on:
       - main
 
 jobs:
+  detect_database_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      database_changed: ${{ steps.database_changes.outputs.changed }}
+
+    steps:
+      - name: Check out repository history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect database-related changes
+        id: database_changes
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            compare_sha="$PR_BASE_SHA"
+          else
+            compare_sha="$PUSH_BEFORE_SHA"
+          fi
+
+          if [[ -z "$compare_sha" || "$compare_sha" =~ ^0+$ ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif git diff --quiet "$compare_sha" "$GITHUB_SHA" -- \
+            supabase package.json package-lock.json .github/workflows/ci.yaml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
   quality-checks:
     runs-on: ubuntu-latest
 
@@ -29,6 +63,27 @@ jobs:
       - name: Run application tests
         run: npm test
 
+      - name: Build application
+        run: npm run build
+
+  database-tests:
+    needs: detect_database_changes
+    if: needs.detect_database_changes.outputs.database_changed == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -40,6 +95,3 @@ jobs:
 
       - name: Run database tests
         run: npm run test:db
-
-      - name: Build application
-        run: npm run build

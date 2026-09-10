@@ -208,3 +208,137 @@
   background: transparent;
   box-shadow: none;
 }
+
+.customer-deal-claims {
+  margin-bottom: 16px;
+  padding: 18px;
+  border: 1px solid #dce3f5;
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.customer-deal-claims-heading {
+  margin-bottom: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.customer-deal-claims-heading > span {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.customer-deal-claims-heading svg {
+  width: 19px;
+  height: 19px;
+}
+
+.customer-deal-claims-heading h3,
+.customer-deal-claims-heading p {
+  margin: 0;
+}
+
+.customer-deal-claims-heading h3 {
+  color: var(--text);
+  font-size: 16px;
+}
+
+.customer-deal-claims-heading p {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.customer-deal-claim-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.customer-deal-claim {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.customer-deal-claim:hover {
+  border-color: #bac8ff;
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
+.customer-deal-claim.is-ended-early {
+  border-color: #f1c7c7;
+  background: #fffafa;
+}
+
+.customer-deal-claim-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.customer-deal-claim-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.customer-deal-claim strong,
+.customer-deal-claim small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-deal-claim strong {
+  font-size: 14px;
+}
+
+.customer-deal-claim small {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.customer-deal-claim-status {
+  grid-column: 2;
+  color: #087f5b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.customer-deal-claim.is-ended-early .customer-deal-claim-status {
+  color: var(--danger);
+}
+
+@media (max-width: 640px) {
+  .customer-deal-claim-list {
+    grid-template-columns: 1fr;
+  }
+}

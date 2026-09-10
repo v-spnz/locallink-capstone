@@ -35,8 +35,8 @@ select lives_ok(
       null,
       null,
       null,
-      current_date + 1,
-      current_date + 10,
+      (now() at time zone 'Pacific/Auckland')::date + 1,
+      (now() at time zone 'Pacific/Auckland')::date + 10,
       'Bookings are required.',
       50,
       'Excludes public holidays.',
@@ -55,8 +55,8 @@ select is(
     where business_id = '21000000-0000-0000-0000-000000000001'
       and title = 'US0091 scheduled deal'
   ),
-  'published',
-  'the atomic save records a published deal'
+  'scheduled',
+  'the atomic save records a Scheduled deal'
 );
 
 select lives_ok(
@@ -74,8 +74,8 @@ select lives_ok(
       null,
       null,
       null,
-      current_date + 1,
-      current_date + 10,
+      (now() at time zone 'Pacific/Auckland')::date + 1,
+      (now() at time zone 'Pacific/Auckland')::date + 10,
       'Bookings are required.',
       50,
       'Excludes public holidays.',
@@ -113,8 +113,8 @@ select throws_ok(
       null,
       null,
       null,
-      current_date,
-      current_date + 10,
+      (now() at time zone 'Pacific/Auckland')::date,
+      (now() at time zone 'Pacific/Auckland')::date + 10,
       null,
       50,
       null,

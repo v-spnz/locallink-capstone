@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Check, ChevronDown, Funnel, Search, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import ActionToast from '../../components/ui/ActionToast'
 import localBusinessNeighbourhood from '../../assets/images/local-business-neighbourhood.jpg'
 import ActiveJobCard from '../../features/service-marketplace/components/ActiveJobCard'
 import BusinessQuoteCard from '../../features/service-marketplace/components/BusinessQuoteCard'
@@ -230,15 +231,17 @@ export function ServiceMarketplaceContent({
 
   return (
     <>
-      {marketplace.error && (
+      {marketplace.error && marketplace.feedback?.variant !== 'error' && (
         <div className="auth-error service-marketplace-message" role="alert">
           {marketplace.error}
         </div>
       )}
-      {marketplace.success && (
-        <div className="auth-success service-marketplace-message" role="status">
-          {marketplace.success}
-        </div>
+      {marketplace.feedback && (
+        <ActionToast
+          message={marketplace.feedback.message}
+          variant={marketplace.feedback.variant}
+          onDismiss={marketplace.dismissFeedback}
+        />
       )}
 
       {type === 'leads' && !marketplace.isLoading && !marketplace.error && (
