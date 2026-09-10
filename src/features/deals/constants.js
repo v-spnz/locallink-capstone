@@ -56,6 +56,9 @@ export function getDealLifecycle(deal, today = new Date()) {
   if (!deal.status || deal.status === 'draft') {
     return { value: 'draft', label: 'Draft' }
   }
+  if (deal.status === 'ended_early') {
+    return { value: 'ended-early', label: 'Ended Early' }
+  }
 
   const todayKey = localDateKey(today)
   if (deal.startDate && todayKey && deal.startDate > todayKey) {

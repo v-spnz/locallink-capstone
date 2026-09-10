@@ -63,6 +63,7 @@ export default function DealDetailModal({
   const [showQrCode, setShowQrCode] = useState(false)
 
   if (!deal) return null
+  const endedEarly = deal.status === 'ended_early'
 
   async function handleClaim() {
     if (isClaimed) {
@@ -119,10 +120,22 @@ export default function DealDetailModal({
           )}
           {deal.end_date && (
             <span className="rounded-full bg-[#fff5f5] px-3 py-1 text-xs font-semibold text-[var(--danger)]">
-              Expires {formatDate(deal.end_date)}
+              {endedEarly
+                ? `Ended early ${formatDate(deal.ended_at)}`
+                : `Expires ${formatDate(deal.end_date)}`}
             </span>
           )}
         </div>
+
+        {endedEarly && isClaimed && (
+          <div className="mb-4 rounded-md border border-[#f1c7c7] bg-[#fff5f5] p-3 text-sm text-[var(--text)]">
+            <strong className="block text-[var(--danger)]">
+              Claim protected
+            </strong>
+            This deal ended early, but your existing claim remains redeemable
+            under the original terms.
+          </div>
+        )}
 
         {deal.description && (
           <p className="mb-4 text-sm text-[var(--text)]">{deal.description}</p>

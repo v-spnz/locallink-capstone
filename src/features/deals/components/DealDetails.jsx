@@ -1,5 +1,13 @@
 import Button from '../../../components/ui/Button'
-import { ReceiptText, Tag } from 'lucide-react'
+import Modal from '../../../components/ui/Modal'
+import {
+  BadgeCheck,
+  CircleAlert,
+  ReceiptText,
+  ShieldCheck,
+  Tag,
+} from 'lucide-react'
+import { useState } from 'react'
 
 function DetailRow({ label, value }) {
   return (
@@ -10,54 +18,190 @@ function DetailRow({ label, value }) {
   )
 }
 
-export default function DealDetails({ id, deal, onClose, onEdit }) {
+export default function DealDetails({
+  id,
+  deal,
+  canEnd,
+  isEnding,
+  onClose,
+  onEdit,
+  onRequestEnd,
+  onEnd,
+}) {
+  const [isEndConfirmationOpen, setIsEndConfirmationOpen] = useState(false)
+  const [endSummary, setEndSummary] = useState(null)
+  const [isCheckingClaims, setIsCheckingClaims] = useState(false)
+  const [endError, setEndError] = useState('')
+
+  async function openEndConfirmation() {
+    setIsEndConfirmationOpen(true)
+    setIsCheckingClaims(true)
+    setEndSummary(null)
+    setEndError('')
+    try {
+      setEndSummary(await onRequestEnd())
+    } catch (error) {
+      console.error('Unable to check deal claims.', error)
+      setEndError(
+        'Unable to check existing claims. Please close and try again.',
+      )
+    } finally {
+      setIsCheckingClaims(false)
+    }
+  }
+
+  function closeEndConfirmation() {
+    if (isEnding) return
+    setIsEndConfirmationOpen(false)
+    setEndSummary(null)
+    setEndError('')
+  }
+
+  async function confirmEndDeal() {
+    setEndError('')
+    const ended = await onEnd()
+    if (ended) {
+      setIsEndConfirmationOpen(false)
+      setEndSummary(null)
+    } else setEndError('The deal could not be ended. Please try again.')
+  }
+
   return (
-    <div id={id} className="deal-details">
-      <div className="deal-details-heading">
-        <div>
-          <h3>Deal details</h3>
-          <p>Claim limits, customer terms and redemption information.</p>
+    <>
+      <div id={id} className="deal-details">
+        <div className="deal-details-heading">
+          <div>
+            <h3>Deal details</h3>
+            <p>Claim limits, customer terms and redemption information.</p>
+          </div>
+        </div>
+
+        <div className="deal-detail-sections">
+          <section className="deal-detail-section">
+            <div className="deal-detail-section-heading">
+              <Tag aria-hidden="true" />
+              <h4>Claim details</h4>
+            </div>
+            <dl className="deal-detail-list">
+              <DetailRow
+                label="Claim limit"
+                value={deal.claimLimit ? `${deal.claimLimit} total claims` : ''}
+              />
+              <DetailRow
+                label="How to redeem"
+                value={deal.redemptionInstructions}
+              />
+              {deal.endedAt && (
+                <DetailRow
+                  label="Ended"
+                  value={new Date(deal.endedAt).toLocaleString('en-NZ')}
+                />
+              )}
+            </dl>
+          </section>
+
+          <section className="deal-detail-section">
+            <div className="deal-detail-section-heading">
+              <ReceiptText aria-hidden="true" />
+              <h4>Conditions and exclusions</h4>
+            </div>
+            <dl className="deal-detail-list">
+              <DetailRow label="Conditions" value={deal.conditions} />
+              <DetailRow label="Exclusions" value={deal.exclusions} />
+            </dl>
+          </section>
+        </div>
+
+        <div className="deal-actions">
+          <Button variant="secondary" onClick={onClose}>
+            Close
+          </Button>
+          {canEnd && (
+            <Button variant="danger" onClick={openEndConfirmation}>
+              End deal
+            </Button>
+          )}
+          {deal.status !== 'ended_early' && (
+            <Button onClick={onEdit}>
+              {deal.status === 'draft' ? 'Continue draft' : 'Edit deal'}
+            </Button>
+          )}
         </div>
       </div>
 
-      <div className="deal-detail-sections">
-        <section className="deal-detail-section">
-          <div className="deal-detail-section-heading">
-            <Tag aria-hidden="true" />
-            <h4>Claim details</h4>
-          </div>
-          <dl className="deal-detail-list">
-            <DetailRow
-              label="Claim limit"
-              value={deal.claimLimit ? `${deal.claimLimit} total claims` : ''}
-            />
-            <DetailRow
-              label="How to redeem"
-              value={deal.redemptionInstructions}
-            />
-          </dl>
-        </section>
+      {isEndConfirmationOpen && (
+        <Modal onClose={closeEndConfirmation} maxWidthClassName="max-w-lg">
+          <section
+            className="deal-end-confirmation"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="deal-end-confirmation-title"
+          >
+            <span className="deal-end-confirmation-icon">
+              <CircleAlert aria-hidden="true" />
+            </span>
+            <h2 id="deal-end-confirmation-title">End this active deal?</h2>
+            <p className="deal-end-confirmation-intro">
+              This takes effect immediately and cannot be undone.
+            </p>
 
-        <section className="deal-detail-section">
-          <div className="deal-detail-section-heading">
-            <ReceiptText aria-hidden="true" />
-            <h4>Conditions and exclusions</h4>
-          </div>
-          <dl className="deal-detail-list">
-            <DetailRow label="Conditions" value={deal.conditions} />
-            <DetailRow label="Exclusions" value={deal.exclusions} />
-          </dl>
-        </section>
-      </div>
+            {isCheckingClaims && (
+              <div className="deal-end-checking" role="status">
+                Checking existing claims…
+              </div>
+            )}
 
-      <div className="deal-actions">
-        <Button variant="secondary" onClick={onClose}>
-          Close
-        </Button>
-        <Button onClick={onEdit}>
-          {deal.status === 'draft' ? 'Continue draft' : 'Edit deal'}
-        </Button>
-      </div>
-    </div>
+            {endSummary && (
+              <div className="deal-end-impact">
+                <div>
+                  <ShieldCheck aria-hidden="true" />
+                  <span>
+                    <strong>No new claims</strong>
+                    The deal will be removed from customer discovery
+                    immediately.
+                  </span>
+                </div>
+                <div>
+                  <BadgeCheck aria-hidden="true" />
+                  <span>
+                    <strong>
+                      {endSummary.claimCount === 0
+                        ? 'No existing claims'
+                        : `${endSummary.claimCount} existing ${endSummary.claimCount === 1 ? 'claim' : 'claims'}`}
+                    </strong>
+                    {endSummary.claimCount === 0
+                      ? 'No customer notifications will be sent.'
+                      : 'Claims remain redeemable under the original terms. Each affected customer will be notified, and all claim and redemption records will remain available.'}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {endError && (
+              <p className="auth-error deal-end-error" role="alert">
+                {endError}
+              </p>
+            )}
+
+            <div className="deal-end-confirmation-actions">
+              <Button
+                variant="secondary"
+                onClick={closeEndConfirmation}
+                disabled={isEnding}
+              >
+                Keep deal active
+              </Button>
+              <Button
+                variant="danger"
+                onClick={confirmEndDeal}
+                disabled={!endSummary || isCheckingClaims || isEnding}
+              >
+                {isEnding ? 'Ending deal…' : 'End deal now'}
+              </Button>
+            </div>
+          </section>
+        </Modal>
+      )}
+    </>
   )
 }

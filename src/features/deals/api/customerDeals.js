@@ -67,6 +67,13 @@ export async function claimDeal(dealId) {
   return data
 }
 
+export async function fetchCustomerDealClaims() {
+  const { data, error } = await supabase.rpc('get_my_business_deal_claims')
+
+  if (error) throw error
+  return (data ?? []).map((claim) => ({ ...claim, id: claim.deal_id }))
+}
+
 export async function fetchSavedDealIds(customerId) {
   const { data, error } = await supabase
     .from('saved_deals')
