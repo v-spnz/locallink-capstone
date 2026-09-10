@@ -4,11 +4,11 @@ import {
   ExternalLink,
   MapPin,
   ShieldCheck,
-  Sparkles,
   Tag,
   Wrench,
 } from 'lucide-react'
 import localNeighbourhoodStreet from '../assets/images/local-neighbourhood-street.jpg'
+import LocalLinkLogo from '../components/branding/LocalLinkLogo'
 import './LandingPage.css'
 
 export default function LandingPage() {
@@ -21,10 +21,7 @@ export default function LandingPage() {
           viewTransition
           aria-label="LocalLink home"
         >
-          <span className="landing-brand-mark" aria-hidden="true">
-            <Sparkles />
-          </span>
-          <span>LocalLink</span>
+          <LocalLinkLogo className="landing-brand-wordmark" />
         </Link>
 
         <nav className="landing-auth" aria-label="Account actions">
@@ -158,6 +155,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="landing-footer">
+        <LocalLinkLogo className="landing-footer-wordmark" tone="light" />
         <span>© 2026 LocalLink</span>
         <span>Helping local feel a little closer.</span>
       </footer>

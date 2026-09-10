@@ -400,19 +400,10 @@
   flex-shrink: 0;
 }
 
-.nav-logo-mark {
-  width: 33px;
-  height: 33px;
-  border-radius: 11px;
-  display: grid;
-  place-items: center;
-  background: #4263eb;
-  color: var(--white);
-}
-
-.nav-logo-mark svg {
-  width: 16px;
-  height: 16px;
+.nav-logo-wordmark {
+  display: block;
+  width: 118px;
+  height: auto;
 }
 
 .nav-logo-badge {

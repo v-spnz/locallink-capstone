@@ -183,12 +183,6 @@ body.business-surface .business-nav .business-nav-logo {
   color: var(--business-ink);
 }
 
-body.business-surface .business-nav .nav-logo-mark {
-  border-radius: 10px;
-  background: var(--business-accent);
-  box-shadow: 0 4px 10px rgb(63 91 211 / 22%);
-}
-
 body.business-surface .business-nav .nav-logo-badge {
   border: 1px solid #dce3ff;
   border-radius: 7px;

@@ -1,5 +1,6 @@
-import { ArrowLeft, Crosshair } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import LocalLinkLogo from '../branding/LocalLinkLogo'
 import './AuthPageHeader.css'
 
 export default function AuthPageHeader() {
@@ -11,10 +12,7 @@ export default function AuthPageHeader() {
         viewTransition
         aria-label="LocalLink landing page"
       >
-        <span className="auth-page-brand-mark" aria-hidden="true">
-          <Crosshair />
-        </span>
-        <span>LocalLink</span>
+        <LocalLinkLogo className="auth-page-brand-wordmark" />
       </Link>
 
       <Link className="auth-page-back" to="/" viewTransition>
