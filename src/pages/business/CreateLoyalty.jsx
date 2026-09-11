@@ -99,7 +99,7 @@ export default function CreateLoyalty() {
   }
 
   const openEditProgramme = (programme) => {
-    const { id, status, ...rest } = programme
+    const { id, ...rest } = programme
     setForm(rest)
     setEditingId(id)
     setAttemptedPublish(false)
