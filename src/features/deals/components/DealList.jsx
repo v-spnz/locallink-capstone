@@ -21,7 +21,7 @@ const PRIMARY_FILTER_VALUES = ['draft', 'active', 'scheduled']
 
 const OVERFLOW_DEAL_FILTERS = [
   { value: 'expired', label: 'History' },
-  { value: 'ended_early', label: 'Ended early' }
+  { value: 'ended_early', label: 'Ended early' },
 ]
 
 function parseDealDate(value) {
@@ -295,7 +295,7 @@ export default function DealList({
         </Button>
       </div>
 
-            {deals.length > 0 && (
+      {deals.length > 0 && (
         <div className="deal-filter-bar">
           <div className="deal-filters" role="group" aria-label="Filter deals">
             {primaryFilters.map(({ value, label }) => (
@@ -316,12 +316,16 @@ export default function DealList({
               className={`deal-filters-overflow-trigger${
                 isOverflowOpen ? ' is-open' : ''
               }${
-                OVERFLOW_DEAL_FILTERS.some(({ value }) => value === activeFilter)
+                OVERFLOW_DEAL_FILTERS.some(
+                  ({ value }) => value === activeFilter,
+                )
                   ? ' is-active'
                   : ''
               }`}
               aria-expanded={isOverflowOpen}
-              aria-label={isOverflowOpen ? 'Show fewer filters' : 'Show more filters'}
+              aria-label={
+                isOverflowOpen ? 'Show fewer filters' : 'Show more filters'
+              }
               onClick={() => setIsOverflowOpen((current) => !current)}
             >
               <MoreHorizontal aria-hidden="true" />
