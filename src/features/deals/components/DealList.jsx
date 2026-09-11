@@ -8,6 +8,7 @@ import {
   ChevronDown,
   CircleAlert,
   ImageIcon,
+  MoreVertical as MoreHorizontal,
   Plus,
 } from 'lucide-react'
 import {
@@ -16,6 +17,12 @@ import {
   getDealLifecycle,
 } from '../constants'
 import DealDetails from './DealDetails'
+const PRIMARY_FILTER_VALUES = ['draft', 'active', 'scheduled']
+
+const OVERFLOW_DEAL_FILTERS = [
+  { value: 'expired', label: 'History' },
+  { value: 'ended_early', label: 'Ended early' }
+]
 
 function parseDealDate(value) {
   if (!value) return null
@@ -248,6 +255,8 @@ export default function DealList({
   onEnd,
 }) {
   const [activeFilter, setActiveFilter] = useState('all')
+  const [isOverflowOpen, setIsOverflowOpen] = useState(false)
+
   const records = deals.map(getDealRecord)
   const endingSoonRecords = records.filter(({ isEndingSoon }) => isEndingSoon)
   const counts = {
@@ -269,8 +278,12 @@ export default function DealList({
     (record) =>
       activeFilter === 'all' || record.lifecycle.value === activeFilter,
   )
+  const primaryFilters = DEAL_STATUS_FILTERS.filter(({ value }) =>
+    PRIMARY_FILTER_VALUES.includes(value),
+  )
   const activeFilterLabel =
     DEAL_STATUS_FILTERS.find(({ value }) => value === activeFilter)?.label ||
+    OVERFLOW_DEAL_FILTERS.find(({ value }) => value === activeFilter)?.label ||
     'All'
 
   return (
@@ -282,10 +295,10 @@ export default function DealList({
         </Button>
       </div>
 
-      {deals.length > 0 && (
+            {deals.length > 0 && (
         <div className="deal-filter-bar">
           <div className="deal-filters" role="group" aria-label="Filter deals">
-            {DEAL_STATUS_FILTERS.map(({ value, label }) => (
+            {primaryFilters.map(({ value, label }) => (
               <button
                 type="button"
                 className={activeFilter === value ? 'is-active' : ''}
@@ -297,6 +310,35 @@ export default function DealList({
                 <strong>{counts[value]}</strong>
               </button>
             ))}
+            <span className="deal-filters-divider" aria-hidden="true" />
+            <button
+              type="button"
+              className={`deal-filters-overflow-trigger${
+                isOverflowOpen ? ' is-open' : ''
+              }${
+                OVERFLOW_DEAL_FILTERS.some(({ value }) => value === activeFilter)
+                  ? ' is-active'
+                  : ''
+              }`}
+              aria-expanded={isOverflowOpen}
+              aria-label={isOverflowOpen ? 'Show fewer filters' : 'Show more filters'}
+              onClick={() => setIsOverflowOpen((current) => !current)}
+            >
+              <MoreHorizontal aria-hidden="true" />
+            </button>
+            {isOverflowOpen &&
+              OVERFLOW_DEAL_FILTERS.map(({ value, label }) => (
+                <button
+                  type="button"
+                  className={`deal-filters-pill${activeFilter === value ? ' is-active' : ''}`}
+                  aria-pressed={activeFilter === value}
+                  onClick={() => setActiveFilter(value)}
+                  key={value}
+                >
+                  <span>{label}</span>
+                  <strong>{counts[value]}</strong>
+                </button>
+              ))}
           </div>
           <p aria-live="polite">
             Showing {visibleRecords.length} of {records.length}
