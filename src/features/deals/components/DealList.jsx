@@ -284,6 +284,8 @@ export default function DealList({
   const activeFilterLabel =
     DEAL_STATUS_FILTERS.find(({ value }) => value === activeFilter)?.label ||
     OVERFLOW_DEAL_FILTERS.find(({ value }) => value === activeFilter)?.label ||
+  const activeFilterLabel =
+    DEAL_STATUS_FILTERS.find(({ value }) => value === activeFilter)?.label ||
     'All'
 
   return (
@@ -299,6 +301,7 @@ export default function DealList({
         <div className="deal-filter-bar">
           <div className="deal-filters" role="group" aria-label="Filter deals">
             {primaryFilters.map(({ value, label }) => (
+            {DEAL_STATUS_FILTERS.map(({ value, label }) => (
               <button
                 type="button"
                 className={activeFilter === value ? 'is-active' : ''}
