@@ -1,5 +1,5 @@
 import { BadgeCheck, Bookmark, Clock3, MapPin, TicketCheck } from 'lucide-react'
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import {
   fetchBusinessesInSavedSuburb,
@@ -168,26 +168,30 @@ export default function Deals() {
     (claim) => !isClaimActive(claim, now),
   )
 
-  async function openDeal(business) {
-    if (!business.deal_id) return
-    setSelectedBusinessRow(business)
-    setIsDealLoading(true)
-    setClaimError('')
-    try {
-      const [fullDeal, existingClaim] = await Promise.all([
-        fetchPublishedDealById(business.deal_id),
-        fetchDealClaim(user.id, business.deal_id),
-      ])
-      setSelectedDeal(fullDeal)
-      setSelectedClaim(existingClaim)
-    } catch (dealError) {
-      console.error('Unable to load deal details.', dealError)
-      setError('Unable to load this deal right now.')
-      setSelectedBusinessRow(null)
-    } finally {
-      setIsDealLoading(false)
-    }
-  }
+  const openDeal = useCallback(
+    async (business) => {
+      if (!business.deal_id) return
+      setSelectedBusinessRow(business)
+      setIsDealLoading(true)
+      setClaimError('')
+      try {
+        const [fullDeal, existingClaim] = await Promise.all([
+          fetchPublishedDealById(business.deal_id),
+          fetchDealClaim(user.id, business.deal_id),
+        ])
+        setSelectedDeal(fullDeal)
+        setSelectedClaim(existingClaim)
+      } catch (dealError) {
+        console.error('Unable to load deal details.', dealError)
+        setError('Unable to load this deal right now.')
+        setSelectedBusinessRow(null)
+      } finally {
+        setIsDealLoading(false)
+      }
+    },
+    [user],
+  )
+
   useEffect(() => {
     if (!user?.id) return
     const requestedDealId = new URLSearchParams(window.location.search).get(
@@ -196,8 +200,11 @@ export default function Deals() {
     if (!requestedDealId) return
     const businessFromState = routerLocation.state?.openDeal
 
-    openDeal(businessFromState ?? { deal_id: requestedDealId })
-  }, [user?.id])
+    const timer = window.setTimeout(() => {
+      openDeal(businessFromState ?? { deal_id: requestedDealId })
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [openDeal, routerLocation.state?.openDeal, user?.id])
 
   function closeDeal() {
     setSelectedDeal(null)
