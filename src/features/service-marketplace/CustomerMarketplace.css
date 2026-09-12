@@ -1,0 +1,399 @@
+/* Customer Service Marketplace polish layer.
+   Mirrors the refinement level of BusinessMarketplace.css (tightened
+   spacing, proper stat-card grid, icon-badge tabs, illustrated empty
+   states) but maps everything onto the shared customer tokens in
+   tokens.css instead of the business portal's own branding tokens. */
+
+.customer-services-page {
+  min-width: 0;
+}
+
+.customer-services-page .marketplace-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.customer-services-page .page-header {
+  margin: 0;
+}
+
+/* ─── Stat overview cards ──────────────────────────────────────── */
+
+.customer-services-page .service-overview {
+  gap: 0;
+  margin-bottom: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.customer-services-page .service-overview-card {
+  position: relative;
+  padding: 22px 24px;
+  border: 0;
+  border-radius: 0;
+  grid-template-columns: 36px minmax(0, 1fr) 32px;
+  align-items: start;
+  gap: 12px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.customer-services-page .service-overview-card + .service-overview-card {
+  border-left: 1px solid var(--border);
+}
+
+.customer-services-page .service-overview-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.customer-services-page .service-overview-copy {
+  gap: 5px;
+}
+
+.customer-services-page .service-overview-copy > span {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.customer-services-page .service-overview-copy strong {
+  font-size: 32px;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  color: var(--text);
+}
+
+.customer-services-page .service-overview-copy small {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.customer-services-page .marketplace-overview-link {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.customer-services-page .marketplace-overview-link:hover {
+  color: var(--blue-dark);
+  background: var(--blue-light);
+}
+
+.customer-services-page .marketplace-overview-link svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ─── Tabs ──────────────────────────────────────────────────────── */
+
+.customer-services-page .service-tabs {
+  margin: 0 0 24px;
+  padding: 0;
+  gap: 24px;
+  border: 0;
+  border-bottom: 1px solid var(--border-strong);
+  border-radius: 0;
+  background: transparent;
+}
+
+.customer-services-page .service-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  gap: 8px;
+  min-height: 50px;
+  padding: 12px 3px;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.customer-services-page .service-tabs button svg {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.customer-services-page .service-tabs button.active {
+  border-bottom-color: var(--blue);
+  color: var(--blue-dark);
+  background: transparent;
+  box-shadow: none;
+}
+
+.customer-services-page .marketplace-tab-count {
+  min-width: 24px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--border);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.customer-services-page .service-tabs button.active .marketplace-tab-count {
+  background: var(--blue-light);
+  color: var(--blue-dark);
+}
+
+/* ─── Section heading + workspace ──────────────────────────────── */
+
+.customer-services-page .marketplace-workspace {
+  padding-top: 0;
+}
+
+.customer-services-page .marketplace-section-heading {
+  margin-bottom: 20px;
+}
+
+.customer-services-page .marketplace-section-heading h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.customer-services-page .marketplace-section-heading p {
+  margin: 5px 0 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ─── Illustrated empty state ──────────────────────────────────── */
+
+.customer-services-page .service-empty-state {
+  min-height: 230px;
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  align-items: center;
+  gap: 30px;
+  padding: 38px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  text-align: left;
+  background: var(--white);
+}
+
+.customer-services-page .service-empty-state-visual {
+  width: 150px;
+  height: 150px;
+  min-height: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.customer-services-page .service-empty-state-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.customer-services-page .service-empty-state-copy {
+  padding: 0;
+}
+
+.customer-services-page .service-empty-state-copy h3 {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: 21px;
+}
+
+.customer-services-page .service-empty-state-copy small {
+  display: block;
+  max-width: 62ch;
+  margin: 6px 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.customer-services-page .service-empty-state-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  border: 0;
+  background: transparent;
+  color: var(--blue-dark);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.customer-services-page .service-empty-state-link:hover {
+  text-decoration: underline;
+}
+
+.customer-services-page .service-empty-state-link svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ─── Polish pass on the existing job/quote card components ─────
+   These target classes already rendered by CustomerJobCard, QuoteList,
+   JobDetailPanel, QuoteJobSidebar, and PastJobRow — their JSX is
+   unchanged, only the visual weight is brought in line with the
+   business-side card treatment. */
+
+.customer-services-page .sm-job-card,
+.customer-services-page .sm-quote-card,
+.customer-services-page .sm-detail-card {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: 0 2px 3px rgb(33 37 41 / 3%);
+}
+
+.customer-services-page .sm-job-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: none;
+}
+
+.customer-services-page .sm-job-title {
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+.customer-services-page .sm-quote-sidebar-item {
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.customer-services-page .sm-quote-sidebar-item--selected {
+  border-color: var(--blue);
+  background: var(--blue-light);
+}
+
+.customer-services-page .sm-empty-state {
+  padding: 38px 20px;
+  border-radius: var(--radius-lg);
+}
+
+.customer-services-page .sm-past-row {
+  border-radius: 8px;
+}
+
+.customer-services-page .sm-past-row:hover {
+  background: var(--bg);
+}
+
+/* ─── Mobile ────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .customer-services-page .service-overview-card {
+    padding: 18px;
+    grid-template-columns: minmax(0, 1fr) 32px;
+  }
+
+  .customer-services-page .service-overview-icon {
+    display: none;
+  }
+
+  .customer-services-page .marketplace-heading {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 767px) {
+  .customer-services-page .marketplace-heading {
+    flex-direction: column;
+    margin-bottom: 22px;
+  }
+
+  .customer-services-page .service-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .customer-services-page .service-overview-card {
+    display: block;
+    padding: 16px 12px;
+  }
+
+  .customer-services-page .service-overview-copy strong {
+    font-size: 28px;
+  }
+
+  .customer-services-page .service-overview-copy small {
+    display: none;
+  }
+
+  .customer-services-page .marketplace-overview-link {
+    position: absolute;
+    right: 6px;
+    bottom: 14px;
+  }
+
+  .customer-services-page .service-tabs {
+    gap: 0;
+  }
+
+  .customer-services-page .service-tabs button {
+    flex: 1;
+    gap: 6px;
+    font-size: 13px;
+    padding-inline: 2px;
+    min-width: 0;
+  }
+
+  .customer-services-page .service-empty-state {
+    grid-template-columns: 1fr;
+    padding: 26px;
+    gap: 20px;
+  }
+
+  .customer-services-page .service-empty-state-visual {
+    width: 112px;
+    height: 100px;
+  }
+
+  .customer-services-page .sm-job-card,
+  .customer-services-page .sm-quote-card,
+  .customer-services-page .sm-detail-card {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .customer-services-page .service-overview-copy strong {
+    font-size: 24px;
+  }
+
+  .customer-services-page .marketplace-overview-link {
+    width: 28px;
+    right: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .customer-services-page * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

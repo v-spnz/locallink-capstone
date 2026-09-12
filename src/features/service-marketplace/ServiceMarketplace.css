@@ -8,7 +8,7 @@
 
 .job-status-header {
   margin-bottom: 10px;
-  color: #087f5b;
+  color: var(--emerald);
   font-weight: 600;
 }
 
@@ -74,7 +74,7 @@
 .service-status {
   padding: 5px 9px;
   border-radius: 999px;
-  background: #f1f3f5;
+  background: var(--bg);
   color: var(--text-muted);
   font-size: 10px;
   font-weight: 700;
@@ -88,8 +88,8 @@
 .service-status.open,
 .service-status.submitted,
 .service-status.awaiting_response {
-  background: #eef2ff;
-  color: #3153d8;
+  background: var(--blue-light);
+  color: var(--blue);
 }
 
 .customer-job-status.in_progress,
@@ -98,8 +98,8 @@
 .service-status.accepted,
 .service-status.in_progress,
 .service-status.completed {
-  background: #e6fcf5;
-  color: #087f5b;
+  background: var(--emerald-light);
+  color: var(--emerald);
 }
 
 .customer-job-status.closed,
@@ -108,15 +108,15 @@
 .customer-quote-status.withdrawn,
 .service-status.rejected,
 .service-status.withdrawn {
-  background: #fff5f5;
-  color: #c92a2a;
+  background: var(--danger-light);
+  color: var(--danger);
 }
 
 .service-status.declined,
 .service-status.expired,
 .service-status.request_withdrawn {
-  background: #fff5f5;
-  color: #c92a2a;
+  background: var(--danger-light);
+  color: var(--danger);
 }
 
 .customer-job-quotes {
@@ -249,13 +249,13 @@
 }
 
 .service-overview-card.is-quotes .service-overview-icon {
-  background: #e6fcf5;
-  color: #087f5b;
+  background: var(--emerald-light);
+  color: var(--emerald);
 }
 
 .service-overview-card.is-jobs .service-overview-icon {
-  background: #f3f0ff;
-  color: #5f3dc4;
+  background: var(--purple-light);
+  color: var(--purple);
 }
 
 .service-overview-icon svg {
@@ -316,7 +316,7 @@
 
 .service-tabs .service-history-tab {
   margin-left: 4px;
-  color: #5f3dc4;
+  color: var(--purple);
 }
 
 .service-tabs button:hover {
@@ -409,7 +409,7 @@
 }
 
 .service-history-link:hover {
-  color: #2f4ac4;
+  color: var(--blue-dark);
 }
 
 .service-marketplace-toolbar .service-toolbar-select {
@@ -530,12 +530,12 @@
 .service-marketplace-toolbar .service-toolbar-menu > button:focus-visible {
   outline: 0;
   background: #f3f5ff;
-  color: #2f4ac4;
+  color: var(--blue-dark);
 }
 
 .service-marketplace-toolbar .service-toolbar-menu > button.is-selected {
-  background: #eef2ff;
-  color: #2f4ac4;
+  background: var(--blue-light);
+  color: var(--blue-dark);
   font-weight: 600;
 }
 
@@ -589,8 +589,8 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: #e6fcf5;
-  color: #087f5b;
+  background: var(--emerald-light);
+  color: var(--emerald);
   font-size: 10px;
   font-weight: 700;
 }
@@ -602,7 +602,7 @@
 
 .service-history-completed-at {
   margin: 12px 0 0;
-  color: #087f5b;
+  color: var(--emerald);
   font-size: 11px;
   font-weight: 600;
 }
@@ -782,17 +782,17 @@
 
 .service-lead-urgency.is-urgent {
   background: #fff0f0;
-  color: #c92a2a;
+  color: var(--danger);
 }
 
 .service-lead-urgency.is-normal {
-  background: #e6fcf5;
-  color: #087f5b;
+  background: var(--emerald-light);
+  color: var(--emerald);
 }
 
 .service-lead-urgency.is-flexible {
-  background: #eef2ff;
-  color: #3153d8;
+  background: var(--blue-light);
+  color: var(--blue);
 }
 
 .service-lead-actions {
@@ -843,7 +843,7 @@
 
 .service-lead-actions .btn-secondary:hover {
   border-color: #adb5bd;
-  background: #f8f9fa;
+  background: var(--bg);
   color: var(--text);
 }
 
@@ -854,7 +854,7 @@
   padding: 2px 5px;
   border: 0;
   background: transparent;
-  color: #c92a2a;
+  color: var(--danger);
   cursor: pointer;
   font: inherit;
   font-size: 11px;
@@ -864,7 +864,7 @@
 }
 
 .service-lead-decline:hover {
-  color: #a61e1e;
+  color: var(--danger-dark);
 }
 
 .service-lead-decline:disabled {
@@ -1023,7 +1023,7 @@
   flex: 0 0 auto;
   place-items: center;
   background: #d3f9d8;
-  color: #087f5b;
+  color: var(--emerald);
 }
 
 .accepted-job-contact-icon svg {
@@ -1187,19 +1187,23 @@
 
 .service-quote-timeline.is-terminal
   .service-quote-timeline-step.is-complete:not(:last-child)::after {
-  background: linear-gradient(to right, var(--emerald) 0 50%, #c92a2a 50% 100%);
+  background: linear-gradient(
+    to right,
+    var(--emerald) 0 50%,
+    var(--danger) 50% 100%
+  );
 }
 
 .service-quote-timeline.is-terminal
   .service-quote-timeline-step.is-current
   .service-quote-timeline-marker {
-  background: #c92a2a;
+  background: var(--danger);
 }
 
 .service-quote-timeline.is-terminal
   .service-quote-timeline-step.is-current
   .service-quote-timeline-label {
-  color: #c92a2a;
+  color: var(--danger);
 }
 
 .service-quote-timeline-label {
@@ -1220,14 +1224,14 @@
 }
 
 .service-quote-timeline-deadline.is-urgent {
-  color: #c2410c;
+  color: var(--urgency-critical);
   font-weight: 700;
 }
 
 .service-quote-timeline.is-progress
   .service-quote-timeline-step.is-current
   .service-quote-timeline-marker {
-  background: #facc15;
+  background: var(--urgency-warning);
   color: #713f12;
 }
 
@@ -1239,7 +1243,11 @@
 
 .service-quote-timeline.is-progress:not(.is-deadline-urgent)
   .service-quote-timeline-step.is-complete:not(:last-child)::after {
-  background: linear-gradient(to right, var(--emerald) 0 50%, #facc15 50% 100%);
+  background: linear-gradient(
+    to right,
+    var(--emerald) 0 50%,
+    var(--urgency-warning) 50% 100%
+  );
 }
 
 .service-quote-timeline.is-progress
@@ -1247,7 +1255,7 @@
   .service-quote-timeline-marker::after {
   position: absolute;
   inset: -4px;
-  border: 2px solid #facc15;
+  border: 2px solid var(--urgency-warning);
   border-radius: inherit;
   content: '';
   pointer-events: none;
@@ -1257,31 +1265,35 @@
 .service-quote-timeline.is-deadline-urgent
   .service-quote-timeline-step.is-current
   .service-quote-timeline-marker {
-  background: #f59f00;
+  background: var(--urgency-high);
 }
 
 .service-quote-timeline.is-deadline-urgent
   .service-quote-timeline-step.is-current
   .service-quote-timeline-marker::after {
-  border-color: #f59f00;
+  border-color: var(--urgency-high);
 }
 
 .service-quote-timeline.is-deadline-urgent
   .service-quote-timeline-step.is-current
   .service-quote-timeline-label {
-  color: #c2410c;
+  color: var(--urgency-critical);
 }
 
 .service-quote-timeline.is-deadline-urgent
   .service-quote-timeline-step.is-complete:not(:last-child)::after {
-  background: linear-gradient(to right, var(--emerald) 0 50%, #f59f00 50% 100%);
+  background: linear-gradient(
+    to right,
+    var(--emerald) 0 50%,
+    var(--urgency-high) 50% 100%
+  );
 }
 
 .service-marketplace-meta .service-marketplace-deadline.is-urgent {
   padding: 4px 7px;
   border-radius: 999px;
-  background: #fff4e6;
-  color: #c2410c;
+  background: var(--urgency-warning-light);
+  color: var(--urgency-critical);
   font-weight: 700;
 }
 
@@ -1342,7 +1354,7 @@
   padding: 13px;
   border: 1px solid #ffc9c9;
   border-radius: var(--radius);
-  background: #fff5f5;
+  background: var(--danger-light);
 }
 
 .service-withdraw-confirmation strong {
@@ -1416,7 +1428,7 @@
 }
 
 .service-quote-modal > header button:hover {
-  background: #e9ecef;
+  background: var(--border);
   color: var(--text);
 }
 
@@ -1554,7 +1566,7 @@
 }
 
 .service-quote-form .service-required-mark {
-  color: #c92a2a;
+  color: var(--danger);
   font-weight: 800;
 }
 
@@ -1870,8 +1882,8 @@
   display: flex;
   align-items: flex-start;
   gap: 7px;
-  background: #eef2ff;
-  color: #3153d8;
+  background: var(--blue-light);
+  color: var(--blue);
   font-size: 12px;
   line-height: 1.45;
 }
@@ -1895,7 +1907,7 @@
   padding: 13px;
   border: 1px solid #ffc9c9;
   border-radius: var(--radius);
-  background: #fff5f5;
+  background: var(--danger-light);
 }
 
 .service-decline-confirmation strong {
@@ -2089,19 +2101,19 @@
   font-weight: 700;
   text-transform: capitalize;
   white-space: nowrap;
-  background: #f1f3f5;
+  background: var(--bg);
   color: var(--text-muted);
 }
 
 .sm-badge--quotes-received {
-  background: #fdf3e0;
-  color: #a3690c;
+  background: var(--quote-gold-light);
+  color: var(--quote-gold);
 }
 
 .sm-badge--in-progress,
 .sm-badge--completed {
-  background: #e6fcf5;
-  color: #087f5b;
+  background: var(--emerald-light);
+  color: var(--emerald);
 }
 
 .sm-badge--awaiting {
@@ -2110,7 +2122,7 @@
 }
 
 .sm-badge--category {
-  background: #f1f3f5;
+  background: var(--bg);
   color: var(--text-muted);
 }
 
@@ -2122,7 +2134,7 @@
 
 .sm-quote-count-box {
   text-align: center;
-  background: #fdf3e0;
+  background: var(--quote-gold-light);
   border-radius: var(--radius);
   padding: 10px 16px;
   min-width: 60px;
@@ -2136,7 +2148,7 @@
 .sm-quote-count-num {
   font-size: 18px;
   font-weight: 700;
-  color: #a3690c;
+  color: var(--quote-gold);
 }
 
 .sm-quote-count-box--zero .sm-quote-count-num {
@@ -2242,8 +2254,8 @@
 }
 
 .sm-badge--urgent {
-  background: #fff5f5;
-  color: #c92a2a;
+  background: var(--danger-light);
+  color: var(--danger);
 }
 
 .sm-detail-card-top {
@@ -2258,13 +2270,13 @@
 }
 
 .sm-view-quotes-btn {
-  border-color: #a3690c;
-  color: #a3690c;
+  border-color: var(--quote-gold);
+  color: var(--quote-gold);
 }
 
 .sm-delete-btn {
-  border-color: #c92a2a;
-  color: #c92a2a;
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 /* US0054: tabs + quotes layout, empty state */
@@ -2295,7 +2307,7 @@
 }
 
 .sm-tab-count {
-  background: #f1f3f5;
+  background: var(--bg);
   color: var(--text-muted);
   font-size: 11px;
   padding: 1px 7px;
@@ -2397,8 +2409,8 @@
   width: fit-content;
   padding: 3px 8px;
   border-radius: 999px;
-  background: #f3f0ff;
-  color: #5f3dc4;
+  background: var(--purple-light);
+  color: var(--purple);
   font-size: 10px;
   font-weight: 700;
 }
@@ -2471,18 +2483,18 @@ details.sm-past-jobs[open] .sm-past-chev {
 }
 
 .sm-past-icon--carpentry {
-  background: #fdf3e0;
-  color: #a3690c;
+  background: var(--quote-gold-light);
+  color: var(--quote-gold);
 }
 
 .sm-past-icon--electrical {
-  background: #fff4e6;
-  color: #c2410c;
+  background: var(--urgency-warning-light);
+  color: var(--urgency-critical);
 }
 
 .sm-past-icon--landscaping {
-  background: #e6fcf5;
-  color: #087f5b;
+  background: var(--emerald-light);
+  color: var(--emerald);
 }
 
 .sm-past-icon--plumbing {
@@ -2491,13 +2503,13 @@ details.sm-past-jobs[open] .sm-past-chev {
 }
 
 .sm-past-icon--painting {
-  background: #f3f0ff;
-  color: #5f3dc4;
+  background: var(--purple-light);
+  color: var(--purple);
 }
 
 .sm-past-icon--roofing,
 .sm-past-icon--default {
-  background: #f1f3f5;
+  background: var(--bg);
   color: var(--text-muted);
 }
 
@@ -2681,7 +2693,7 @@ details.sm-past-jobs[open] .sm-past-chev {
 }
 
 .sm-decline-confirm-btn.btn-primary:hover {
-  background: #a61e1e;
+  background: var(--danger-dark);
 }
 
 /* Solid red confirm button for the delete confirmation modal */
@@ -2691,5 +2703,5 @@ details.sm-past-jobs[open] .sm-past-chev {
 }
 
 .sm-delete-confirm-btn.btn-primary:hover {
-  background: #a61e1e;
+  background: var(--danger-dark);
 }

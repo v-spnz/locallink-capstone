@@ -305,17 +305,17 @@ test('timeline colours distinguish active and terminal outcomes', async () => {
   assert.match(styles, /service-quote-timeline\.is-terminal/)
   assert.match(styles, /service-quote-timeline\.is-deadline-urgent/)
   assert.match(styles, /var\(--emerald\)/)
-  assert.match(styles, /#c92a2a/)
-  assert.match(styles, /#f59f00/)
-  assert.match(styles, /#c2410c/)
-  assert.match(styles, /#facc15/)
+  assert.match(styles, /var\(--danger\)/)
+  assert.match(styles, /var\(--urgency-high\)/)
+  assert.match(styles, /var\(--urgency-critical\)/)
+  assert.match(styles, /var\(--urgency-warning\)/)
   assert.match(styles, /#a16207/)
   assert.match(styles, /@keyframes service-quote-timeline-pulse/)
   assert.match(styles, /animation: service-quote-timeline-pulse/)
   assert.match(styles, /prefers-reduced-motion: reduce/)
   assert.match(
     styles,
-    /linear-gradient\([\s\S]+var\(--emerald\) 0 50%[\s\S]+#c92a2a 50% 100%/,
+    /linear-gradient\([\s\S]+var\(--emerald\) 0 50%[\s\S]+var\(--danger\) 50% 100%/,
   )
 })
 

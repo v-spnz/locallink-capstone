@@ -1518,32 +1518,37 @@ insert into public.business_deal_claims (
   id,
   deal_id,
   customer_id,
-  claimed_at
+  claimed_at,
+  expires_at
 )
 values
   (
     'c0000000-0000-0000-0000-000000000001',
     'd0000000-0000-0000-0000-000000000001',
     '10000000-0000-0000-0000-000000000001',
-    now() - interval '2 days'
+    now() - interval '2 days',
+    now() - interval '2 days' + interval '15 minutes'
   ),
   (
     'c0000000-0000-0000-0000-000000000002',
     'd0000000-0000-0000-0000-000000000002',
     '70000000-0000-0000-0000-000000000001',
-    now() - interval '12 hours'
+    now() - interval '12 hours',
+    now() - interval '12 hours' + interval '15 minutes'
   ),
   (
     'c0000000-0000-0000-0000-000000000003',
     'd0000000-0000-0000-0000-000000000006',
     '10000000-0000-0000-0000-000000000001',
-    now() - interval '4 days'
+    now() - interval '4 days',
+    now() - interval '4 days' + interval '15 minutes'
   ),
   (
     'c0000000-0000-0000-0000-000000000004',
     'd0000000-0000-0000-0000-000000000006',
     '70000000-0000-0000-0000-000000000001',
-    now() - interval '3 days'
+    now() - interval '3 days',
+    now() - interval '3 days' + interval '15 minutes'
   );
 
 insert into public.business_deal_redemptions (

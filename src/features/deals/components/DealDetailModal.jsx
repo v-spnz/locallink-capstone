@@ -1,15 +1,18 @@
 import {
+  AlertTriangle,
   Ban,
   Bookmark,
   Calendar,
   Check,
+  Clock,
   MapPin,
   QrCode,
   Tag,
   X,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Modal from '../../../components/ui/Modal'
+import { formatCountdown } from '../countdown'
 
 function formatDate(value) {
   if (!value) return '—'
@@ -57,20 +60,43 @@ export default function DealDetailModal({
   isClaimed,
   isClaiming,
   claimError,
+  claimExpiresAt,
   onClaim,
   onToggleSave,
 }) {
-  const [showQrCode, setShowQrCode] = useState(false)
+  const [showQrCode, setShowQrCode] = useState(() => Boolean(isClaimed))
+  const [showConfirm, setShowConfirm] = useState(false)
+
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    if (!claimExpiresAt) return undefined
+    const interval = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(interval)
+  }, [claimExpiresAt])
 
   if (!deal) return null
+  const msRemaining = claimExpiresAt
+    ? new Date(claimExpiresAt).getTime() - now
+    : null
   const endedEarly = deal.status === 'ended_early'
+  const windowExpired = msRemaining != null && msRemaining <= 0
+  const claimsRemaining =
+    deal.claim_limit != null
+      ? Math.max(0, deal.claim_limit - (deal.claims_used ?? 0))
+      : null
+  const isSoldOut = claimsRemaining === 0 && !isClaimed
 
-  async function handleClaim() {
+  function handleClaim() {
     if (isClaimed) {
       setShowQrCode(true)
       return
     }
+    setShowConfirm(true)
+  }
 
+  async function confirmClaim() {
+    setShowConfirm(false)
     const claimed = await onClaim(deal.id)
     if (claimed) setShowQrCode(true)
   }
@@ -78,12 +104,27 @@ export default function DealDetailModal({
   return (
     <Modal onClose={onClose} maxWidthClassName="max-w-xl">
       <div
-        className="relative flex h-28 items-center justify-center rounded-t-2xl"
-        style={{ background: 'linear-gradient(135deg, #6d7dc9, #3f4f9e)' }}
+        className="relative flex h-28 items-center justify-center overflow-hidden rounded-t-2xl"
+        style={
+          deal.image_url
+            ? undefined
+            : { background: 'linear-gradient(135deg, #6d7dc9, #3f4f9e)' }
+        }
       >
-        <span className="text-4xl" aria-hidden="true">
-          {categoryEmoji}
-        </span>
+        {deal.image_url ? (
+          <>
+            <img
+              src={deal.image_url}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/10" aria-hidden="true" />
+          </>
+        ) : (
+          <span className="text-4xl" aria-hidden="true">
+            {categoryEmoji}
+          </span>
+        )}
         <span className="absolute left-3 top-3 rounded-full bg-[var(--amber-light)] px-3 py-1 text-xs font-bold text-[#7a5c00]">
           {getOfferSummary(deal)}
         </span>
@@ -148,10 +189,19 @@ export default function DealDetailModal({
           </div>
         )}
 
-        {deal.claim_limit != null && (
-          <div className="mb-4 text-sm text-[var(--text-muted)]">
-            Limited to {deal.claim_limit} claim
-            {deal.claim_limit === 1 ? '' : 's'}
+        {claimsRemaining !== null && (
+          <div
+            className={
+              'mb-4 flex items-center gap-1.5 text-sm ' +
+              (claimsRemaining === 0
+                ? 'font-semibold text-[var(--danger)]'
+                : 'text-[var(--text-muted)]')
+            }
+          >
+            {claimsRemaining === 0 && <Ban size={14} aria-hidden="true" />}
+            {claimsRemaining === 0
+              ? 'No claims remaining — this deal is fully claimed'
+              : `${claimsRemaining} claim${claimsRemaining === 1 ? '' : 's'} remaining`}
           </div>
         )}
 
@@ -206,7 +256,63 @@ export default function DealDetailModal({
         </div>
       </div>
 
-      {showQrCode && (
+      {showConfirm && (
+        <div className="border-t border-[var(--border)] bg-[#fff8e6] px-6 py-5">
+          <div className="flex items-start gap-2">
+            <AlertTriangle
+              size={18}
+              className="mt-0.5 shrink-0 text-[#92700a]"
+              aria-hidden="true"
+            />
+            <div>
+              <div className="text-sm font-semibold text-[#7a5c00]">
+                Only claim when you're ready to use this
+              </div>
+              <p className="mt-1 text-sm text-[#7a5c00]">
+                Claiming starts a 15-minute redemption window. Once it starts,
+                it can't be paused or restarted — make sure you're at the
+                business before confirming.
+              </p>
+            </div>
+          </div>
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowConfirm(false)}
+              className="rounded-md border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--text)] hover:border-[var(--blue)]"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={confirmClaim}
+              disabled={isClaiming}
+              className="flex-1 rounded-md bg-[var(--blue)] py-2 text-sm font-semibold text-white hover:bg-[var(--blue-dark)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isClaiming ? 'Claiming…' : 'Yes, start the 15-minute window'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showQrCode && windowExpired && (
+        <div className="flex flex-col items-center gap-2 border-t border-[var(--border)] bg-[#fff5f5] px-6 py-6">
+          <Clock
+            size={40}
+            className="text-[var(--danger)]"
+            aria-hidden="true"
+          />
+          <p className="text-sm font-bold text-[var(--danger)]">
+            This deal has expired
+          </p>
+          <p className="text-center text-xs text-[var(--text-muted)]">
+            Your 15-minute redemption window has closed and this claim can no
+            longer be redeemed.
+          </p>
+        </div>
+      )}
+
+      {showQrCode && !windowExpired && (
         <div className="flex flex-col items-center gap-2 border-t border-[var(--border)] bg-[var(--bg)] px-6 py-6">
           <div className="flex h-40 w-40 items-center justify-center rounded-lg border border-[var(--border)] bg-white">
             <QrCode
@@ -215,49 +321,63 @@ export default function DealDetailModal({
               aria-hidden="true"
             />
           </div>
+          {msRemaining != null && (
+            <p className="text-sm font-bold text-[var(--text)]">
+              {formatCountdown(msRemaining)} remaining
+            </p>
+          )}
           <p className="text-center text-xs text-[var(--text-muted)]">
             Show this code to staff to redeem this deal.
           </p>
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-[var(--border)] px-6 py-5">
+      <div className="border-t border-[var(--border)] px-6 py-5">
         {claimError && (
-          <p className="auth-error w-full" role="alert">
+          <p className="auth-error mb-3" role="alert">
             {claimError}
           </p>
         )}
-        <button
-          type="button"
-          onClick={() => onToggleSave(deal.id)}
-          className={
-            'flex items-center gap-1.5 rounded-md border px-5 py-2 text-sm font-semibold transition ' +
-            (isSaved
-              ? 'border-[var(--blue)] bg-[var(--blue-light)] text-[var(--blue)]'
-              : 'border-[var(--border)] text-[var(--text)] hover:border-[var(--blue)]')
-          }
-        >
-          <Bookmark
-            size={16}
-            aria-hidden="true"
-            fill={isSaved ? 'currentColor' : 'none'}
-          />
-          {isSaved ? 'Saved' : 'Save'}
-        </button>
-        <button
-          type="button"
-          onClick={handleClaim}
-          disabled={isClaiming || showQrCode}
-          className="flex-1 rounded-md bg-[var(--blue)] py-2 text-sm font-semibold text-white hover:bg-[var(--blue-dark)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-[var(--blue)]"
-        >
-          {isClaiming
-            ? 'Claiming…'
-            : showQrCode
-              ? 'Claim ready'
-              : isClaimed
-                ? 'View claim'
-                : 'Claim deal'}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onToggleSave(deal.id)}
+            className={
+              'flex items-center gap-1.5 rounded-md border px-5 py-2 text-sm font-semibold transition ' +
+              (isSaved
+                ? 'border-[var(--blue)] bg-[var(--blue-light)] text-[var(--blue)]'
+                : 'border-[var(--border)] text-[var(--text)] hover:border-[var(--blue)]')
+            }
+          >
+            <Bookmark
+              size={16}
+              aria-hidden="true"
+              fill={isSaved ? 'currentColor' : 'none'}
+            />
+            {isSaved ? 'Saved' : 'Save'}
+          </button>
+          <button
+            type="button"
+            onClick={handleClaim}
+            disabled={isClaiming || showQrCode || showConfirm || isSoldOut}
+            className="flex-1 rounded-md bg-[var(--blue)] py-2 text-sm font-semibold text-white hover:bg-[var(--blue-dark)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-[var(--blue)]"
+          >
+            {isClaiming
+              ? 'Claiming…'
+              : showQrCode
+                ? 'Claim ready'
+                : isClaimed
+                  ? 'View claim'
+                  : isSoldOut
+                    ? 'Fully claimed'
+                    : 'Claim deal'}
+          </button>
+        </div>
+        {!isSaved && (
+          <p className="mt-2 text-xs text-[var(--text-muted)]">
+            You can save up to 3 deals at a time.
+          </p>
+        )}
       </div>
     </Modal>
   )
