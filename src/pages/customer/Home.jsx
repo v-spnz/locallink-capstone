@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAuth from '../../auth/useAuth'
 import { supabase } from '../../lib/supabase'
-import { fetchCustomerLocation } from '../../features/location/api/locations'
 import {
-  fetchCustomerDealClaims,
-  fetchMySavedDeals,
-} from '../../features/deals/api/customerDeals'
+  fetchBusinessesInSavedSuburb,
+  fetchCustomerLocation,
+} from '../../features/location/api/locations'
+import { fetchCustomerDealClaims } from '../../features/deals/api/customerDeals'
 import { isClaimActive } from '../../features/deals/claimStatus'
 import { formatCountdown } from '../../features/deals/countdown'
 import '../../features/location/discovery.css'
@@ -107,7 +107,7 @@ export default function Home() {
       try {
         const savedLocation = await fetchCustomerLocation()
         if (active) setCustomerLocation(savedLocation)
-        const results = await fetchMySavedDeals()
+        const results = await fetchBusinessesInSavedSuburb()
         if (active) setSuburbResults(results)
       } catch (error) {
         console.error('Unable to load saved deals.', error)
