@@ -64,9 +64,12 @@ export default function DealDetailModal({
   onClaim,
   onToggleSave,
 }) {
-  const [showQrCode, setShowQrCode] = useState(false)
+  const [showQrCode, setShowQrCode] = useState(() => Boolean(isClaimed))
   const [showConfirm, setShowConfirm] = useState(false)
-  const [msRemaining, setMsRemaining] = useState(null)
+
+  const [msRemaining, setMsRemaining] = useState(() =>
+    claimExpiresAt ? new Date(claimExpiresAt).getTime() - Date.now() : null,
+  )
 
   useEffect(() => {
     if (!claimExpiresAt) {
@@ -75,17 +78,12 @@ export default function DealDetailModal({
     }
 
     const expiryTime = new Date(claimExpiresAt).getTime()
-    const tick = () => setMsRemaining(expiryTime - Date.now())
-    tick()
-    const interval = setInterval(tick, 1000)
+    const interval = setInterval(
+      () => setMsRemaining(expiryTime - Date.now()),
+      1000,
+    )
     return () => clearInterval(interval)
   }, [claimExpiresAt])
-
-  useEffect(() => {
-    if (isClaimed) {
-      setShowQrCode(true)
-    }
-  }, [isClaimed])
 
   if (!deal) return null
   const endedEarly = deal.status === 'ended_early'
