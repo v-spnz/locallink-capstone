@@ -31,9 +31,17 @@ function aucklandDateKey() {
   }).format(new Date())
 }
 
+export async function fetchDealClaimCount(dealId) {
+  const { data, error } = await supabase.rpc('get_business_deal_claim_count', {
+    p_deal_id: dealId,
+  })
+  if (error) throw error
+  return data ?? 0
+}
+
 export async function fetchPublishedDealById(dealId) {
   const today = aucklandDateKey()
-  const [dealResult, claimCountResult] = await Promise.all([
+  const [dealResult, claimsUsed] = await Promise.all([
     supabase
       .from('business_deals')
       .select(PUBLISHED_DEAL_FIELDS)
@@ -42,13 +50,12 @@ export async function fetchPublishedDealById(dealId) {
       .lte('start_date', today)
       .gte('end_date', today)
       .single(),
-    supabase.rpc('get_business_deal_claim_count', { p_deal_id: dealId }),
+    fetchDealClaimCount(dealId),
   ])
 
   if (dealResult.error) throw dealResult.error
-  if (claimCountResult.error) throw claimCountResult.error
 
-  return { ...dealResult.data, claims_used: claimCountResult.data ?? 0 }
+  return { ...dealResult.data, claims_used: claimsUsed }
 }
 
 export async function fetchDealClaim(customerId, dealId) {

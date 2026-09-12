@@ -149,6 +149,21 @@
   object-fit: cover;
 }
 
+.discovery-sold-out-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
 .discovery-card-icon {
   font-size: 32px;
   line-height: 1;

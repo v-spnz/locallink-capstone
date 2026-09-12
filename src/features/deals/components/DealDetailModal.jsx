@@ -70,7 +70,6 @@ export default function DealDetailModal({
 
   useEffect(() => {
     if (!claimExpiresAt) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMsRemaining(null)
       return undefined
     }
@@ -83,10 +82,7 @@ export default function DealDetailModal({
   }, [claimExpiresAt])
 
   useEffect(() => {
-    // Reopening an existing claim should surface its state immediately —
-    // live countdown or "expired" — without an extra click to reveal it.
     if (isClaimed) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowQrCode(true)
     }
   }, [isClaimed])
@@ -94,6 +90,11 @@ export default function DealDetailModal({
   if (!deal) return null
   const endedEarly = deal.status === 'ended_early'
   const windowExpired = msRemaining != null && msRemaining <= 0
+  const claimsRemaining =
+    deal.claim_limit != null
+      ? Math.max(0, deal.claim_limit - (deal.claims_used ?? 0))
+      : null
+  const isSoldOut = claimsRemaining === 0 && !isClaimed
 
   function handleClaim() {
     if (isClaimed) {
@@ -197,17 +198,19 @@ export default function DealDetailModal({
           </div>
         )}
 
-        {deal.claim_limit != null && (
-          <div className="mb-4 text-sm text-[var(--text-muted)]">
-            {(() => {
-              const remaining = Math.max(
-                0,
-                deal.claim_limit - (deal.claims_used ?? 0),
-              )
-              return remaining === 0
-                ? 'No claims remaining'
-                : `${remaining} claim${remaining === 1 ? '' : 's'} remaining`
-            })()}
+        {claimsRemaining !== null && (
+          <div
+            className={
+              'mb-4 flex items-center gap-1.5 text-sm ' +
+              (claimsRemaining === 0
+                ? 'font-semibold text-[var(--danger)]'
+                : 'text-[var(--text-muted)]')
+            }
+          >
+            {claimsRemaining === 0 && <Ban size={14} aria-hidden="true" />}
+            {claimsRemaining === 0
+              ? 'No claims remaining — this deal is fully claimed'
+              : `${claimsRemaining} claim${claimsRemaining === 1 ? '' : 's'} remaining`}
           </div>
         )}
 
@@ -365,7 +368,7 @@ export default function DealDetailModal({
           <button
             type="button"
             onClick={handleClaim}
-            disabled={isClaiming || showQrCode || showConfirm}
+            disabled={isClaiming || showQrCode || showConfirm || isSoldOut}
             className="flex-1 rounded-md bg-[var(--blue)] py-2 text-sm font-semibold text-white hover:bg-[var(--blue-dark)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-[var(--blue)]"
           >
             {isClaiming
@@ -374,7 +377,9 @@ export default function DealDetailModal({
                 ? 'Claim ready'
                 : isClaimed
                   ? 'View claim'
-                  : 'Claim deal'}
+                  : isSoldOut
+                    ? 'Fully claimed'
+                    : 'Claim deal'}
           </button>
         </div>
         {!isSaved && (

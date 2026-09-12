@@ -3,18 +3,17 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAuth from '../../auth/useAuth'
 import { supabase } from '../../lib/supabase'
+import { fetchCustomerLocation } from '../../features/location/api/locations'
 import {
-  fetchBusinessesInSavedSuburb,
-  fetchCustomerLocation,
-} from '../../features/location/api/locations'
-import { fetchCustomerDealClaims } from '../../features/deals/api/customerDeals'
+  fetchCustomerDealClaims,
+  fetchMySavedDeals,
+} from '../../features/deals/api/customerDeals'
 import { isClaimActive } from '../../features/deals/claimStatus'
 import { formatCountdown } from '../../features/deals/countdown'
 import '../../features/location/discovery.css'
 
-const DEAL_DISPLAY_COUNT = 3 // 1 featured + 2 in the list
+const DEAL_DISPLAY_COUNT = 3
 
-// Loyalty remains preview data until the loyalty catalogue is connected.
 const loyaltyCard = {
   businessName: 'Britomart Espresso Bar',
   stampsTotal: 5,
@@ -107,7 +106,7 @@ export default function Home() {
       try {
         const savedLocation = await fetchCustomerLocation()
         if (active) setCustomerLocation(savedLocation)
-        const results = await fetchBusinessesInSavedSuburb()
+        const results = await fetchMySavedDeals()
         if (active) setSuburbResults(results)
       } catch (error) {
         console.error('Unable to load saved deals.', error)
@@ -138,8 +137,6 @@ export default function Home() {
     }
   }, [user])
 
-  // Ticks every second so an active claim automatically disappears from
-  // this strip the instant its 15-minute window closes.
   const [now, setNow] = useState(() => new Date())
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000)
@@ -163,8 +160,6 @@ export default function Home() {
     })
     .slice(0, DEAL_DISPLAY_COUNT)
 
-  // First result shows big as the "featured" one, the rest go in the
-  // plain list below it - same split as the approved draft.
   const featuredBusiness = suburbBusinesses[0]
   const otherBusinesses = suburbBusinesses.slice(1)
 
@@ -252,7 +247,14 @@ export default function Home() {
             </div>
           ) : (
             <>
-              <div className="featured-deal" onClick={() => navigate('/deals')}>
+              <div
+                className="featured-deal"
+                onClick={() =>
+                  navigate(`/deals?deal=${featuredBusiness.deal_id}`, {
+                    state: { openDeal: featuredBusiness },
+                  })
+                }
+              >
                 <div className="featured-deal-photo">
                   {featuredBusiness.deal_image_url ? (
                     <img
@@ -302,7 +304,11 @@ export default function Home() {
                     <div
                       className="deal-row"
                       key={business.business_id}
-                      onClick={() => navigate('/deals')}
+                      onClick={() =>
+                        navigate(`/deals?deal=${business.deal_id}`, {
+                          state: { openDeal: business },
+                        })
+                      }
                     >
                       <div className="deal-row-body">
                         <div className="deal-row-name">

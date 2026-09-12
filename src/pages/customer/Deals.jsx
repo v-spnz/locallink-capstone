@@ -1,5 +1,6 @@
 import { BadgeCheck, Bookmark, Clock3, MapPin, TicketCheck } from 'lucide-react'
 import { lazy, Suspense, useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
   fetchBusinessesInSavedSuburb,
   fetchCustomerLocation,
@@ -7,6 +8,7 @@ import {
 import {
   claimDeal,
   fetchDealClaim,
+  fetchDealClaimCount,
   fetchCustomerDealClaims,
   fetchPublishedDealById,
   fetchSavedDealIds,
@@ -37,6 +39,7 @@ const FILTERS = [
 
 export default function Deals() {
   const { user } = useAuth()
+  const routerLocation = useLocation()
   const [activeFilter, setActiveFilter] = useState('All')
   const [activeTab, setActiveTab] = useState('discover')
   const [location, setLocation] = useState(null)
@@ -152,8 +155,6 @@ export default function Deals() {
     }
   }, [user?.id])
 
-  // Ticks every second so claims automatically move from "active" to
-  // "history" the instant their window closes, without needing a reload.
   const [now, setNow] = useState(() => new Date())
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000)
@@ -187,6 +188,16 @@ export default function Deals() {
       setIsDealLoading(false)
     }
   }
+  useEffect(() => {
+    if (!user?.id) return
+    const requestedDealId = new URLSearchParams(window.location.search).get(
+      'deal',
+    )
+    if (!requestedDealId) return
+    const businessFromState = routerLocation.state?.openDeal
+
+    openDeal(businessFromState ?? { deal_id: requestedDealId })
+  }, [user?.id])
 
   function closeDeal() {
     setSelectedDeal(null)
@@ -194,13 +205,19 @@ export default function Deals() {
     setSelectedClaim(null)
     setClaimError('')
     const url = new URL(window.location.href)
+    let changed = false
     if (url.searchParams.has('claim')) {
       url.searchParams.delete('claim')
-      window.history.replaceState(window.history.state, '', url)
+      changed = true
     }
+    if (url.searchParams.has('deal')) {
+      url.searchParams.delete('deal')
+      changed = true
+    }
+    if (changed) window.history.replaceState(window.history.state, '', url)
   }
 
-  function openClaimedDeal(claim) {
+  async function openClaimedDeal(claim) {
     setSelectedDeal(claim)
     setSelectedClaim({
       id: claim.claim_id,
@@ -216,6 +233,17 @@ export default function Deals() {
       distance_km: null,
     })
     setClaimError('')
+
+    try {
+      const claimsUsed = await fetchDealClaimCount(claim.deal_id)
+      setSelectedDeal((current) =>
+        current?.deal_id === claim.deal_id
+          ? { ...current, claims_used: claimsUsed }
+          : current,
+      )
+    } catch (claimCountError) {
+      console.error('Unable to load claim count.', claimCountError)
+    }
   }
 
   async function handleClaimDeal(dealId) {
@@ -224,6 +252,13 @@ export default function Deals() {
     try {
       const claim = await claimDeal(dealId)
       setSelectedClaim(claim)
+
+      try {
+        const refreshedClaims = await fetchCustomerDealClaims()
+        setCustomerClaims(refreshedClaims)
+      } catch (refreshError) {
+        console.error('Unable to refresh deal claims.', refreshError)
+      }
       return true
     } catch (claimRequestError) {
       console.error('Unable to claim deal.', claimRequestError)
@@ -411,6 +446,11 @@ export default function Deals() {
                           aria-hidden="true"
                         >
                           {getCategoryEmoji(business.category)}
+                        </span>
+                      )}
+                      {business.deal_is_sold_out && (
+                        <span className="discovery-sold-out-badge">
+                          Sold out
                         </span>
                       )}
                       {business.deal_id && (
