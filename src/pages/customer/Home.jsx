@@ -1,15 +1,19 @@
+import { Clock3 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAuth from '../../auth/useAuth'
 import { supabase } from '../../lib/supabase'
+import { fetchCustomerLocation } from '../../features/location/api/locations'
 import {
-  fetchBusinessesInSavedSuburb,
-  fetchCustomerLocation,
-} from '../../features/location/api/locations'
+  fetchCustomerDealClaims,
+  fetchMySavedDeals,
+} from '../../features/deals/api/customerDeals'
+import { isClaimActive } from '../../features/deals/claimStatus'
+import { formatCountdown } from '../../features/deals/countdown'
+import '../../features/location/discovery.css'
 
-const DEAL_DISPLAY_COUNT = 4 // 1 featured + 3 in the list, matches the wireframe
+const DEAL_DISPLAY_COUNT = 3
 
-// Loyalty remains preview data until the loyalty catalogue is connected.
 const loyaltyCard = {
   businessName: 'Britomart Espresso Bar',
   stampsTotal: 5,
@@ -98,25 +102,50 @@ export default function Home() {
 
   useEffect(() => {
     let active = true
-    async function loadSuburbBusinesses() {
+    async function loadSavedDeals() {
       try {
         const savedLocation = await fetchCustomerLocation()
-        if (!savedLocation) return
-        const results = await fetchBusinessesInSavedSuburb()
-        if (active) {
-          setCustomerLocation(savedLocation)
-          setSuburbResults(results)
-        }
+        if (active) setCustomerLocation(savedLocation)
+        const results = await fetchMySavedDeals()
+        if (active) setSuburbResults(results)
       } catch (error) {
-        console.error('Unable to load businesses in the saved suburb.', error)
+        console.error('Unable to load saved deals.', error)
       }
     }
-    loadSuburbBusinesses()
+    loadSavedDeals()
 
     return () => {
       active = false
     }
   }, [])
+
+  const [customerClaims, setCustomerClaims] = useState([])
+  useEffect(() => {
+    let active = true
+    if (!user) return undefined
+
+    fetchCustomerDealClaims()
+      .then((claims) => {
+        if (active) setCustomerClaims(claims)
+      })
+      .catch((error) => {
+        console.error('Unable to load deal claims.', error)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [user])
+
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const activeClaims = customerClaims.filter((claim) =>
+    isClaimActive(claim, now),
+  )
 
   const displayedJobs = user ? accountJobs : previewJobs
 
@@ -131,8 +160,6 @@ export default function Home() {
     })
     .slice(0, DEAL_DISPLAY_COUNT)
 
-  // First result shows big as the "featured" one, the rest go in the
-  // plain list below it - same split as the approved draft.
   const featuredBusiness = suburbBusinesses[0]
   const otherBusinesses = suburbBusinesses.slice(1)
 
@@ -140,6 +167,34 @@ export default function Home() {
 
   return (
     <>
+      {activeClaims.length > 0 && (
+        <section
+          className="active-claim-strip"
+          aria-label="Deals you're currently redeeming"
+        >
+          {activeClaims.map((claim) => {
+            const msRemaining =
+              new Date(claim.expires_at).getTime() - now.getTime()
+            return (
+              <button
+                type="button"
+                className="active-claim-row"
+                key={claim.claim_id}
+                onClick={() => navigate(`/deals?claim=${claim.deal_id}`)}
+              >
+                <Clock3 size={16} aria-hidden="true" />
+                <span className="active-claim-text">
+                  Active claim: <strong>{claim.title}</strong>
+                </span>
+                <span className="active-claim-countdown">
+                  {formatCountdown(msRemaining)} remaining
+                </span>
+              </button>
+            )
+          })}
+        </section>
+      )}
+
       <div className="home-header-row">
         <div>
           <p
@@ -172,7 +227,7 @@ export default function Home() {
         <div>
           {/* Deals Near You - everything here goes to Deals & Discovery */}
           <div className="home-section-head">
-            <h3>Deals in your suburb</h3>
+            <h3>Your saved deals</h3>
             <button
               className="section-link-btn"
               onClick={() => navigate('/deals')}
@@ -181,22 +236,43 @@ export default function Home() {
             </button>
           </div>
           <p className="home-section-note">
-            Closest first, all in your registered suburb.
+            Deals you've saved, most recent first.
           </p>
 
           {suburbBusinesses.length === 0 ? (
             <div className="empty-state">
               {search
-                ? `No businesses match "${search}" in your suburb.`
-                : 'No businesses or deals are available in your suburb right now.'}
+                ? `No saved deals match "${search}".`
+                : "You haven't saved any deals yet — browse Deals & Discovery to find some."}
             </div>
           ) : (
             <>
-              <div className="featured-deal" onClick={() => navigate('/deals')}>
+              <div
+                className="featured-deal"
+                onClick={() =>
+                  navigate(`/deals?deal=${featuredBusiness.deal_id}`, {
+                    state: { openDeal: featuredBusiness },
+                  })
+                }
+              >
                 <div className="featured-deal-photo">
-                  Business photo
-                  <br />
-                  (TBD)
+                  {featuredBusiness.deal_image_url ? (
+                    <img
+                      src={featuredBusiness.deal_image_url}
+                      alt=""
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                    />
+                  ) : (
+                    <>
+                      Business photo
+                      <br />
+                      (TBD)
+                    </>
+                  )}
                 </div>
                 <div className="featured-deal-body">
                   <span className="deal-tag">{featuredBusiness.category}</span>
@@ -208,10 +284,16 @@ export default function Home() {
                       featuredBusiness.description}
                   </p>
                   <div className="featured-deal-foot">
-                    <strong>
-                      {Number(featuredBusiness.distance_km).toFixed(1)} km
-                    </strong>{' '}
-                    away · closest to you
+                    {featuredBusiness.distance_km != null ? (
+                      <>
+                        <strong>
+                          {Number(featuredBusiness.distance_km).toFixed(1)} km
+                        </strong>{' '}
+                        away
+                      </>
+                    ) : (
+                      'Saved deal'
+                    )}
                   </div>
                 </div>
               </div>
@@ -222,7 +304,11 @@ export default function Home() {
                     <div
                       className="deal-row"
                       key={business.business_id}
-                      onClick={() => navigate('/deals')}
+                      onClick={() =>
+                        navigate(`/deals?deal=${business.deal_id}`, {
+                          state: { openDeal: business },
+                        })
+                      }
                     >
                       <div className="deal-row-body">
                         <div className="deal-row-name">
@@ -233,7 +319,9 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="deal-row-dist">
-                        {Number(business.distance_km).toFixed(1)} km
+                        {business.distance_km != null
+                          ? `${Number(business.distance_km).toFixed(1)} km`
+                          : 'Saved'}
                       </div>
                     </div>
                   ))}

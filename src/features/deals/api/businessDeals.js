@@ -187,6 +187,14 @@ export async function saveBusinessDeal({ businessId, deal, status = 'draft' }) {
   return mapBusinessDeal(saved)
 }
 
+export async function deleteBusinessDeal(businessId, dealId) {
+  const { data, error } = await supabase.rpc('delete_business_deal', {
+    p_business_id: businessId,
+    p_deal_id: dealId,
+  })
+  if (error || !data) throw error ?? new Error('Draft could not be deleted')
+}
+
 export async function fetchBusinessDealEndSummary(dealId) {
   const { data, error } = await supabase
     .rpc('get_business_deal_end_summary', { p_deal_id: dealId })

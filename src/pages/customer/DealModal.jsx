@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react'
 import { X, CheckCircle2, Ban, Tag, CalendarDays, MapPin } from 'lucide-react'
 
-export default function DealModal({ deal, visual, isSaved, onToggleSaved, onClose, onClaim }) {
+export default function DealModal({
+  deal,
+  visual,
+  isSaved,
+  onToggleSaved,
+  onClose,
+  onClaim,
+}) {
   const VisualIcon = visual.icon
   const [isClosing, setIsClosing] = useState(false)
   const [isClaimPopping, setIsClaimPopping] = useState(false)
@@ -65,8 +72,12 @@ export default function DealModal({ deal, visual, isSaved, onToggleSaved, onClos
             <span className="dd-tag dd-tag-neutral">
               {deal.suburb} · {deal.distanceKm.toFixed(1)} km
             </span>
-            <span className="dd-tag dd-tag-expiry">Expires {deal.expiryDate}</span>
-            {deal.isOpenNow && <span className="dd-tag dd-tag-open">• Open now</span>}
+            <span className="dd-tag dd-tag-expiry">
+              Expires {deal.expiryDate}
+            </span>
+            {deal.isOpenNow && (
+              <span className="dd-tag dd-tag-open">• Open now</span>
+            )}
           </div>
 
           <p className="dd-modal-desc">{deal.description}</p>

@@ -37,7 +37,7 @@ export default function Dashboard() {
     capabilities.loyalty_enabled && {
       title: 'Loyalty',
       description: 'Build programmes that reward repeat visits.',
-      detail: 'Programme builder in development',
+      detail: 'Private programme drafts',
       to: '/business/create-loyalty',
       icon: Gift,
       className: 'is-loyalty',

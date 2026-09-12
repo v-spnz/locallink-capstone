@@ -20,10 +20,16 @@ const mockDeals = [
     expiryDate: '31 Jul 2026',
     isOpenNow: true,
     address: '142 Ponsonby Rd, Ponsonby, Auckland 1011',
-    included: ['All espresso drinks', 'Cold brew', 'Any size', 'Takeaway or dine-in'],
+    included: [
+      'All espresso drinks',
+      'Cold brew',
+      'Any size',
+      'Takeaway or dine-in',
+    ],
     excluded: ['Food items', 'Merchandise'],
     howToRedeem: 'Show this deal screen to staff before ordering.',
-    conditions: 'Valid once per customer per day. Cannot be combined with other offers.',
+    conditions:
+      'Valid once per customer per day. Cannot be combined with other offers.',
   },
   {
     id: 2,
@@ -40,10 +46,15 @@ const mockDeals = [
     expiryDate: '5 Aug 2026',
     isOpenNow: true,
     address: '58 Great North Rd, Grey Lynn, Auckland 1021',
-    included: ['Any two mains from the dinner menu', 'Dine-in only', 'Tuesday evenings'],
+    included: [
+      'Any two mains from the dinner menu',
+      'Dine-in only',
+      'Tuesday evenings',
+    ],
     excluded: ['Beverages', 'Desserts', 'Public holidays'],
     howToRedeem: 'Mention this deal when booking or on arrival.',
-    conditions: 'Valid Tuesdays only. Booking recommended. Cannot be combined with other offers.',
+    conditions:
+      'Valid Tuesdays only. Booking recommended. Cannot be combined with other offers.',
   },
   {
     id: 3,
@@ -60,10 +71,15 @@ const mockDeals = [
     expiryDate: '31 Aug 2026',
     isOpenNow: true,
     address: '12 Nuffield St, Newmarket, Auckland 1023',
-    included: ['Full gym floor access', 'Group fitness classes', 'Locker room access'],
+    included: [
+      'Full gym floor access',
+      'Group fitness classes',
+      'Locker room access',
+    ],
     excluded: ['Personal training sessions', 'Merchandise', 'Existing members'],
     howToRedeem: 'Sign up in-studio or online and mention this deal.',
-    conditions: 'New members only. Requires a minimum 3-month membership after the free month.',
+    conditions:
+      'New members only. Requires a minimum 3-month membership after the free month.',
   },
   {
     id: 4,
@@ -109,7 +125,8 @@ const mockDeals = [
     id: 6,
     businessName: 'Verde Pizzeria',
     title: 'Free garlic bread with any pizza',
-    description: "Order any pizza from our menu and we'll add a complimentary garlic bread.",
+    description:
+      "Order any pizza from our menu and we'll add a complimentary garlic bread.",
     badge: 'FREE SIDE',
     category: 'Food & Drink',
     iconKey: 'pizza',
@@ -142,13 +159,15 @@ const mockDeals = [
     included: ['Yoga classes', 'Mat pilates', 'Reformer pilates'],
     excluded: ['Existing members', 'Workshops & events'],
     howToRedeem: 'Purchase the intro pack at reception or online.',
-    conditions: 'New clients only. Classes must be used within 30 days of purchase.',
+    conditions:
+      'New clients only. Classes must be used within 30 days of purchase.',
   },
   {
     id: 8,
     businessName: 'Fresh Market Co.',
     title: '10% off when you spend $30+',
-    description: 'Spend $30 or more on fresh produce, deli, and pantry staples for 10% off.',
+    description:
+      'Spend $30 or more on fresh produce, deli, and pantry staples for 10% off.',
     badge: '10% OFF',
     category: 'Food & Drink',
     iconKey: 'market',
@@ -161,7 +180,8 @@ const mockDeals = [
     included: ['Fresh produce', 'Deli items', 'Pantry staples'],
     excluded: ['Alcohol', 'Gift cards'],
     howToRedeem: 'Show this deal screen to staff at checkout.',
-    conditions: 'Minimum spend $30 before discount is applied. Valid in-store only.',
+    conditions:
+      'Minimum spend $30 before discount is applied. Valid in-store only.',
   },
 ]
 

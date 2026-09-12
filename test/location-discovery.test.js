@@ -173,7 +173,7 @@ test('discovery uses Supabase results and a react-leaflet map instead of mocks',
     ])
 
   assert.match(deals, /fetchBusinessesInSavedSuburb/)
-  assert.match(home, /fetchBusinessesInSavedSuburb/)
+  assert.match(home, /fetchMySavedDeals/)
   assert.doesNotMatch(deals, /Where should we search|AddressAutocomplete/)
   assert.doesNotMatch(deals, /Search Radius|radius-slider|setRadius/)
   assert.doesNotMatch(deals, /saveCustomerLocation/)

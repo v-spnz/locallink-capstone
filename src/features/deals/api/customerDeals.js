@@ -31,25 +31,37 @@ function aucklandDateKey() {
   }).format(new Date())
 }
 
+export async function fetchDealClaimCount(dealId) {
+  const { data, error } = await supabase.rpc('get_business_deal_claim_count', {
+    p_deal_id: dealId,
+  })
+  if (error) throw error
+  return data ?? 0
+}
+
 export async function fetchPublishedDealById(dealId) {
   const today = aucklandDateKey()
-  const { data, error } = await supabase
-    .from('business_deals')
-    .select(PUBLISHED_DEAL_FIELDS)
-    .eq('id', dealId)
-    .in('status', ['scheduled', 'active'])
-    .lte('start_date', today)
-    .gte('end_date', today)
-    .single()
+  const [dealResult, claimsUsed] = await Promise.all([
+    supabase
+      .from('business_deals')
+      .select(PUBLISHED_DEAL_FIELDS)
+      .eq('id', dealId)
+      .in('status', ['scheduled', 'active'])
+      .lte('start_date', today)
+      .gte('end_date', today)
+      .single(),
+    fetchDealClaimCount(dealId),
+  ])
 
-  if (error) throw error
-  return data
+  if (dealResult.error) throw dealResult.error
+
+  return { ...dealResult.data, claims_used: claimsUsed }
 }
 
 export async function fetchDealClaim(customerId, dealId) {
   const { data, error } = await supabase
     .from('business_deal_claims')
-    .select('id, deal_id, customer_id, claimed_at')
+    .select('id, deal_id, customer_id, claimed_at, expires_at')
     .eq('customer_id', customerId)
     .eq('deal_id', dealId)
     .maybeSingle()
@@ -72,6 +84,13 @@ export async function fetchCustomerDealClaims() {
 
   if (error) throw error
   return (data ?? []).map((claim) => ({ ...claim, id: claim.deal_id }))
+}
+
+export async function fetchMySavedDeals() {
+  const { data, error } = await supabase.rpc('get_my_saved_deals')
+
+  if (error) throw error
+  return data ?? []
 }
 
 export async function fetchSavedDealIds(customerId) {

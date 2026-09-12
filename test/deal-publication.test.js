@@ -76,7 +76,10 @@ test('US0091: preview includes the consumer-facing details and an explicit confi
 test('US0091: review images keep local uploads available and crop every ratio consistently', async () => {
   const [review, styles] = await Promise.all([
     readFile(
-      new URL('../src/features/deals/components/DealReview.jsx', import.meta.url),
+      new URL(
+        '../src/features/deals/components/DealReview.jsx',
+        import.meta.url,
+      ),
       'utf8',
     ),
     readFile(

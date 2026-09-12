@@ -2,10 +2,12 @@ import Button from '../../../components/ui/Button'
 import Modal from '../../../components/ui/Modal'
 import {
   BadgeCheck,
+  CalendarX,
   CircleAlert,
   ReceiptText,
   ShieldCheck,
   Tag,
+  Trash2,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -21,13 +23,24 @@ function DetailRow({ label, value }) {
 export default function DealDetails({
   id,
   deal,
+  lifecycle,
   canEnd,
+  isDeleteConfirming,
+  isDeleting,
+  isCanceling,
   isEnding,
   onClose,
   onEdit,
+  onRequestDelete,
+  onCancelDeleteRequest,
+  onConfirmDelete,
+  onCancelScheduling,
   onRequestEnd,
   onEnd,
 }) {
+  const isDraft = lifecycle.value === 'draft'
+  const isScheduled = lifecycle.value === 'scheduled'
+  const isEditable = isDraft || isScheduled
   const [isEndConfirmationOpen, setIsEndConfirmationOpen] = useState(false)
   const [endSummary, setEndSummary] = useState(null)
   const [isCheckingClaims, setIsCheckingClaims] = useState(false)
@@ -112,18 +125,76 @@ export default function DealDetails({
           </section>
         </div>
 
+        {!isEditable && (
+          <p className="deal-detail-readonly-note">
+            This deal is {lifecycle.label.toLowerCase()} and can no longer be
+            edited.
+          </p>
+        )}
+
+        {isDraft && isDeleteConfirming && (
+          <div className="deal-delete-confirmation" role="alert">
+            <strong>Delete this draft?</strong>
+            <p>
+              This permanently removes the draft. It was never published, so no
+              customers are notified.
+            </p>
+            <div>
+              <Button
+                variant="danger"
+                onClick={() => onConfirmDelete(deal.id)}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting…' : 'Confirm delete'}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={onCancelDeleteRequest}
+                disabled={isDeleting}
+              >
+                Keep draft
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {isScheduled && (
+          <div className="deal-cancel-scheduling-note">
+            <CalendarX aria-hidden="true" />
+            <p>
+              This deal is scheduled to go live on its start date. Cancelling
+              returns it to Draft so it stays private.
+            </p>
+          </div>
+        )}
+
         <div className="deal-actions">
           <Button variant="secondary" onClick={onClose}>
             Close
           </Button>
+          {isEditable && (
+            <Button onClick={onEdit}>
+              {isDraft ? 'Continue draft' : 'Edit deal'}
+            </Button>
+          )}
+          {isDraft && !isDeleteConfirming && (
+            <Button variant="danger" onClick={() => onRequestDelete(deal.id)}>
+              <Trash2 aria-hidden="true" />
+              Delete draft
+            </Button>
+          )}
+          {isScheduled && (
+            <Button
+              variant="secondary"
+              onClick={() => onCancelScheduling(deal.id)}
+              disabled={isCanceling}
+            >
+              {isCanceling ? 'Cancelling…' : 'Cancel scheduled publication'}
+            </Button>
+          )}
           {canEnd && (
             <Button variant="danger" onClick={openEndConfirmation}>
               End deal
-            </Button>
-          )}
-          {deal.status !== 'ended_early' && (
-            <Button onClick={onEdit}>
-              {deal.status === 'draft' ? 'Continue draft' : 'Edit deal'}
             </Button>
           )}
         </div>

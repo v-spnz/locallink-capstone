@@ -45,10 +45,17 @@ export default function CreateDeal() {
         <DealList
           deals={deals.deals}
           selectedDealId={deals.selectedDealId}
+          deleteConfirmationId={deals.deleteConfirmationId}
+          deletingDealId={deals.deletingDealId}
+          cancelingDealId={deals.cancelingDealId}
           onCreate={deals.handleStartNewDeal}
           onSelect={deals.handleSelectDeal}
           onClose={deals.handleCloseDetails}
           onEdit={deals.handleEditDeal}
+          onRequestDelete={deals.setDeleteConfirmationId}
+          onCancelDeleteRequest={() => deals.setDeleteConfirmationId(null)}
+          onConfirmDelete={deals.handleDeleteDraft}
+          onCancelScheduling={deals.handleCancelScheduledPublication}
           endingDealId={deals.endingDealId}
           onRequestEnd={deals.handleGetEndSummary}
           onEnd={deals.handleEndDeal}
