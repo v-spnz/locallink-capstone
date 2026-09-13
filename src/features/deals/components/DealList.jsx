@@ -15,14 +15,12 @@ import {
   DEAL_STATUS_FILTERS,
   formatDealOffer,
   getDealLifecycle,
+  matchesDealStatusFilter,
 } from '../constants'
 import DealDetails from './DealDetails'
 const PRIMARY_FILTER_VALUES = ['draft', 'active', 'scheduled']
-
-const OVERFLOW_DEAL_FILTERS = [
-  { value: 'expired', label: 'History' },
-  { value: 'ended_early', label: 'Ended early' },
-]
+const OVERFLOW_FILTER_VALUES = ['history', 'all']
+const DEALS_PER_PAGE = 5
 
 function parseDealDate(value) {
   if (!value) return null
@@ -254,47 +252,42 @@ export default function DealList({
   onRequestEnd,
   onEnd,
 }) {
-  const [activeFilter, setActiveFilter] = useState('all')
+  const [activeFilter, setActiveFilter] = useState('draft')
   const [isOverflowOpen, setIsOverflowOpen] = useState(false)
+  const [visibleDealCount, setVisibleDealCount] = useState(DEALS_PER_PAGE)
 
   const records = deals.map(getDealRecord)
   const endingSoonRecords = records.filter(({ isEndingSoon }) => isEndingSoon)
-  const counts = {
-    all: records.length,
-    draft: records.filter(({ lifecycle }) => lifecycle.value === 'draft')
-      .length,
-    scheduled: records.filter(
-      ({ lifecycle }) => lifecycle.value === 'scheduled',
-    ).length,
-    active: records.filter(({ lifecycle }) => lifecycle.value === 'active')
-      .length,
-    expired: records.filter(({ lifecycle }) => lifecycle.value === 'expired')
-      .length,
-    ended_early: records.filter(
-      ({ lifecycle }) => lifecycle.value === 'ended_early',
-    ).length,
-  }
-  const visibleRecords = records.filter(
-    (record) =>
-      activeFilter === 'all' || record.lifecycle.value === activeFilter,
+  const counts = Object.fromEntries(
+    DEAL_STATUS_FILTERS.map(({ value }) => [
+      value,
+      records.filter(({ lifecycle }) =>
+        matchesDealStatusFilter(lifecycle.value, value),
+      ).length,
+    ]),
   )
+  const visibleRecords = records.filter(
+    ({ lifecycle }) => matchesDealStatusFilter(lifecycle.value, activeFilter),
+  )
+  const displayedRecords = visibleRecords.slice(0, visibleDealCount)
+  const hasMoreDeals = displayedRecords.length < visibleRecords.length
   const primaryFilters = DEAL_STATUS_FILTERS.filter(({ value }) =>
     PRIMARY_FILTER_VALUES.includes(value),
   )
+  const overflowFilters = DEAL_STATUS_FILTERS.filter(({ value }) =>
+    OVERFLOW_FILTER_VALUES.includes(value),
+  )
   const activeFilterLabel =
     DEAL_STATUS_FILTERS.find(({ value }) => value === activeFilter)?.label ||
-    OVERFLOW_DEAL_FILTERS.find(({ value }) => value === activeFilter)?.label ||
     'All'
+
+  function selectFilter(value) {
+    setActiveFilter(value)
+    setVisibleDealCount(DEALS_PER_PAGE)
+  }
 
   return (
     <section className="placeholder-section deal-list-panel">
-      <div className="deal-list-header">
-        <Button onClick={onCreate}>
-          <Plus aria-hidden="true" />
-          New deal
-        </Button>
-      </div>
-
       {deals.length > 0 && (
         <div className="deal-filter-bar">
           <div className="deal-filters" role="group" aria-label="Filter deals">
@@ -303,7 +296,7 @@ export default function DealList({
                 type="button"
                 className={activeFilter === value ? 'is-active' : ''}
                 aria-pressed={activeFilter === value}
-                onClick={() => setActiveFilter(value)}
+                onClick={() => selectFilter(value)}
                 key={value}
               >
                 <span>{label}</span>
@@ -316,7 +309,7 @@ export default function DealList({
               className={`deal-filters-overflow-trigger${
                 isOverflowOpen ? ' is-open' : ''
               }${
-                OVERFLOW_DEAL_FILTERS.some(
+                overflowFilters.some(
                   ({ value }) => value === activeFilter,
                 )
                   ? ' is-active'
@@ -331,12 +324,12 @@ export default function DealList({
               <MoreHorizontal aria-hidden="true" />
             </button>
             {isOverflowOpen &&
-              OVERFLOW_DEAL_FILTERS.map(({ value, label }) => (
+              overflowFilters.map(({ value, label }) => (
                 <button
                   type="button"
-                  className={`deal-filters-pill${activeFilter === value ? ' is-active' : ''}`}
+                  className={activeFilter === value ? 'is-active' : ''}
                   aria-pressed={activeFilter === value}
-                  onClick={() => setActiveFilter(value)}
+                  onClick={() => selectFilter(value)}
                   key={value}
                 >
                   <span>{label}</span>
@@ -344,9 +337,12 @@ export default function DealList({
                 </button>
               ))}
           </div>
-          <p aria-live="polite">
-            Showing {visibleRecords.length} of {records.length}
-          </p>
+          <div className="deal-filter-actions">
+            <Button onClick={onCreate}>
+              <Plus aria-hidden="true" />
+              New deal
+            </Button>
+          </div>
         </div>
       )}
 
@@ -418,7 +414,7 @@ export default function DealList({
           <BadgePercent aria-hidden="true" />
           <strong>No {activeFilterLabel.toLowerCase()} deals</strong>
           <p>Choose another filter to see the rest of your deals.</p>
-          <Button variant="secondary" onClick={() => setActiveFilter('all')}>
+          <Button variant="secondary" onClick={() => selectFilter('all')}>
             View all deals
           </Button>
         </div>
@@ -434,7 +430,7 @@ export default function DealList({
             <span />
           </div>
           <div className="deal-card-list">
-            {visibleRecords.map((record) => (
+            {displayedRecords.map((record) => (
               <DealRow
                 record={record}
                 selected={selectedDealId === record.deal.id}
@@ -456,6 +452,23 @@ export default function DealList({
                 key={record.deal.id}
               />
             ))}
+          </div>
+          <div className="deal-list-pagination">
+            <p aria-live="polite">
+              Showing {displayedRecords.length} of {visibleRecords.length}
+            </p>
+            {hasMoreDeals && (
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  setVisibleDealCount(
+                    (currentCount) => currentCount + DEALS_PER_PAGE,
+                  )
+                }
+              >
+                Show more
+              </Button>
+            )}
           </div>
         </div>
       )}

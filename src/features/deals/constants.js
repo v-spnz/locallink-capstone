@@ -53,13 +53,20 @@ function localDateKey(date) {
 }
 
 export const DEAL_STATUS_FILTERS = [
-  { value: 'all', label: 'All' },
   { value: 'draft', label: 'Draft' },
-  { value: 'scheduled', label: 'Scheduled' },
   { value: 'active', label: 'Active' },
-  { value: 'expired', label: 'Expired' },
-  { value: 'ended_early', label: 'Ended Early' },
+  { value: 'scheduled', label: 'Scheduled' },
+  { value: 'history', label: 'History' },
+  { value: 'all', label: 'All' },
 ]
+
+export function matchesDealStatusFilter(lifecycleValue, filter) {
+  if (filter === 'all') return true
+  if (filter === 'history') {
+    return lifecycleValue === 'expired' || lifecycleValue === 'ended-early'
+  }
+  return lifecycleValue === filter
+}
 
 export function getDealLifecycle(deal, today = new Date()) {
   if (!deal.status || deal.status === 'draft') {
