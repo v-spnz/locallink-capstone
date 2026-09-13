@@ -179,7 +179,6 @@ function DealRow({
           isDeleteConfirming={deleteConfirmationId === deal.id}
           isDeleting={deletingDealId === deal.id}
           isCanceling={cancelingDealId === deal.id}
-          onClose={() => onSelect(deal.id)}
           onEdit={() => onEdit(deal.id)}
           onRequestDelete={onRequestDelete}
           onCancelDeleteRequest={onCancelDeleteRequest}

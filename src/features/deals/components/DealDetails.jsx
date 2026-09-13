@@ -29,7 +29,6 @@ export default function DealDetails({
   isDeleting,
   isCanceling,
   isEnding,
-  onClose,
   onEdit,
   onRequestDelete,
   onCancelDeleteRequest,
@@ -169,18 +168,15 @@ export default function DealDetails({
         )}
 
         <div className="deal-actions">
-          <Button variant="secondary" onClick={onClose}>
-            Close
-          </Button>
-          {isEditable && (
-            <Button onClick={onEdit}>
-              {isDraft ? 'Continue draft' : 'Edit deal'}
-            </Button>
-          )}
           {isDraft && !isDeleteConfirming && (
             <Button variant="danger" onClick={() => onRequestDelete(deal.id)}>
               <Trash2 aria-hidden="true" />
               Delete draft
+            </Button>
+          )}
+          {isEditable && (
+            <Button onClick={onEdit}>
+              {isDraft ? 'Continue draft' : 'Edit deal'}
             </Button>
           )}
           {isScheduled && (

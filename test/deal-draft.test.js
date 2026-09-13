@@ -210,6 +210,8 @@ test('deal management cards omit location and GST metadata', async () => {
     details,
     /GstIncluded|GST treatment|Participating locations|<img|deal-detail-image/,
   )
+  assert.doesNotMatch(details, /onClick=\{onClose\}[\s\S]*?>\s*Close/)
+  assert.ok(details.indexOf('Delete draft') < details.indexOf('Continue draft'))
 })
 
 test('AC11-12: draft saving and unsaved-change protection are wired into the flow', async () => {
@@ -245,4 +247,34 @@ test('AC13: consumer visibility is restricted to published database deals', asyn
   assert.match(migration, /Consumers can view published deals/)
   assert.match(migration, /using \(status = 'published'\)/)
   assert.match(migration, /validate_published_business_deal/)
+})
+
+test('draft deletion uses an available, manager-scoped, draft-only RPC', async () => {
+  const [api, migration, databaseTest] = await Promise.all([
+    readFile(
+      new URL('../src/features/deals/api/businessDeals.js', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../supabase/migrations/20260913030000_delete_business_deal_drafts_safely.sql',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../supabase/tests/database/deal-draft-deletion.test.sql',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
+
+  assert.match(api, /rpc\('delete_business_deal'/)
+  assert.match(migration, /public\.can_manage_business\(p_business_id\)/)
+  assert.match(migration, /v_deal_status <> 'draft'/)
+  assert.match(migration, /delete from public\.business_deals/)
+  assert.match(databaseTest, /another business cannot delete the draft/)
+  assert.match(databaseTest, /published lifecycle deal cannot be deleted/)
 })
