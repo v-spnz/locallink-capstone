@@ -1,5 +1,5 @@
 alter table public.business_deal_claims
-  add column expires_at timestamptz;
+  add column if not exists expires_at timestamptz;
 
 update public.business_deal_claims
 set expires_at = claimed_at + interval '15 minutes'

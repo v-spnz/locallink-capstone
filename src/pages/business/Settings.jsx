@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   LogOut,
   MapPin,
+  ReceiptText,
   ShieldCheck,
   Tags,
   UserCog,
@@ -23,6 +24,7 @@ import {
 import useBusiness from '../../business/useBusiness'
 import { supabase } from '../../lib/supabase'
 import { fetchManagedBusinessLocations } from '../../features/location/api/locations'
+import ClaimRecords from './ClaimRecords'
 
 function SettingsHeading({ icon: Icon, title }) {
   return (
@@ -234,6 +236,15 @@ export default function Settings() {
           },
         ]
       : []),
+    ...(capabilities.deals_enabled
+      ? [
+          {
+            path: 'claim-records',
+            label: 'Claim records',
+            icon: ReceiptText,
+          },
+        ]
+      : []),
     {
       path: 'notifications',
       label: 'Notifications',
@@ -350,6 +361,16 @@ export default function Settings() {
                     serviceCategories={serviceCategories}
                     serviceAreas={serviceAreas}
                   />
+                ) : (
+                  <Navigate to="/business/settings/overview" replace />
+                )
+              }
+            />
+            <Route
+              path="claim-records"
+              element={
+                capabilities.deals_enabled ? (
+                  <ClaimRecords />
                 ) : (
                   <Navigate to="/business/settings/overview" replace />
                 )

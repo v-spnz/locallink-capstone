@@ -225,6 +225,25 @@
   box-shadow: 0 0 0 3px rgb(63 91 211 / 12%);
 }
 
+.business-onboarding-field input[aria-invalid='true'],
+.business-onboarding-field textarea[aria-invalid='true'],
+.business-onboarding-card
+  .address-autocomplete
+  .form-input[aria-invalid='true'] {
+  border-color: #c92a2a;
+  background: var(--onboarding-surface);
+  box-shadow: 0 0 0 3px rgb(201 42 42 / 14%);
+}
+
+.business-onboarding-field input[aria-invalid='true']:focus,
+.business-onboarding-field textarea[aria-invalid='true']:focus,
+.business-onboarding-card
+  .address-autocomplete
+  .form-input[aria-invalid='true']:focus {
+  border-color: #c92a2a;
+  box-shadow: 0 0 0 3px rgb(201 42 42 / 18%);
+}
+
 .business-onboarding-field input::placeholder,
 .business-onboarding-field textarea::placeholder {
   color: var(--onboarding-muted);
@@ -552,8 +571,13 @@
 
 .business-onboarding-error {
   margin-top: 20px;
-  border-radius: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #c92a2a;
   font-size: 13px;
+  line-height: 1.45;
 }
 
 .business-onboarding-actions {

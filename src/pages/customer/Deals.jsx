@@ -135,7 +135,11 @@ export default function Deals() {
           setSelectedClaim({
             id: requestedClaim.claim_id,
             deal_id: requestedClaim.deal_id,
+            claim_reference: requestedClaim.claim_reference,
+            redemption_code: requestedClaim.redemption_code,
             claimed_at: requestedClaim.claimed_at,
+            expires_at: requestedClaim.expires_at,
+            redeemed_at: requestedClaim.redeemed_at,
           })
           setSelectedBusinessRow({
             business_name: requestedClaim.business_name,
@@ -229,8 +233,11 @@ export default function Deals() {
     setSelectedClaim({
       id: claim.claim_id,
       deal_id: claim.deal_id,
+      claim_reference: claim.claim_reference,
+      redemption_code: claim.redemption_code,
       claimed_at: claim.claimed_at,
       expires_at: claim.expires_at,
+      redeemed_at: claim.redeemed_at,
     })
     setSelectedBusinessRow({
       business_name: claim.business_name,
@@ -548,7 +555,7 @@ export default function Deals() {
           </div>
           {historicalClaims.length === 0 ? (
             <div className="empty-state">
-              No past claims yet — claims move here once they're redeemed,
+              No past claims yet. Claims move here once they're redeemed,
               expire, or the deal ends early.
             </div>
           ) : (
@@ -608,6 +615,9 @@ export default function Deals() {
           isClaiming={isClaiming}
           claimError={claimError}
           claimExpiresAt={selectedClaim?.expires_at}
+          claimRedeemedAt={selectedClaim?.redeemed_at}
+          claimReference={selectedClaim?.claim_reference}
+          redemptionCode={selectedClaim?.redemption_code}
           onClaim={handleClaimDeal}
           onToggleSave={toggleSaveDeal}
           onClose={closeDeal}

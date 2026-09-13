@@ -78,6 +78,7 @@ export default function BusinessOnboarding() {
     locations: [],
   }))
   const [error, setError] = useState('')
+  const [invalidFields, setInvalidFields] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const selectedCapabilityCount = CAPABILITY_OPTIONS.filter(
     ({ key }) => form[key],
@@ -95,6 +96,11 @@ export default function BusinessOnboarding() {
   function updateField(event) {
     const { name, value } = event.target
     setForm((current) => ({ ...current, [name]: value }))
+    if (invalidFields.includes(name)) {
+      const nextInvalidFields = invalidFields.filter((field) => field !== name)
+      setInvalidFields(nextInvalidFields)
+      if (nextInvalidFields.length === 0) setError('')
+    }
   }
 
   function toggleCapability(key) {
@@ -129,10 +135,36 @@ export default function BusinessOnboarding() {
     return ''
   }
 
+  function getInvalidFields(stepToValidate) {
+    if (stepToValidate === 'basics') {
+      return form.businessName.trim().length < 2 ? ['businessName'] : []
+    }
+
+    if (stepToValidate !== 'setup') return []
+
+    if (form.deals && form.locations.length === 0) return ['location']
+
+    return [
+      form.serviceMarketplace && form.serviceDescription.trim().length < 10
+        ? 'serviceDescription'
+        : '',
+      form.serviceMarketplace && !form.availability.trim()
+        ? 'availability'
+        : '',
+      form.serviceMarketplace && listFromInput(form.categories).length === 0
+        ? 'categories'
+        : '',
+      form.serviceMarketplace && listFromInput(form.areas).length === 0
+        ? 'areas'
+        : '',
+    ].filter(Boolean)
+  }
+
   function continueSetup(event) {
     event?.preventDefault()
     const validationError = validateStep(step)
     setError(validationError)
+    setInvalidFields(validationError ? getInvalidFields(step) : [])
     if (validationError) return
 
     const nextStep = SETUP_STEPS[currentStepIndex + 1]
@@ -141,6 +173,7 @@ export default function BusinessOnboarding() {
 
   function goBack() {
     setError('')
+    setInvalidFields([])
     const previousStep = SETUP_STEPS[currentStepIndex - 1]
     if (previousStep) setStep(previousStep.key)
   }
@@ -155,13 +188,12 @@ export default function BusinessOnboarding() {
 
     setError('')
 
-    const validationError =
-      validateStep('basics') ||
-      validateStep('capabilities') ||
-      validateStep('setup')
+    const invalidStep = ['basics', 'capabilities', 'setup'].find(validateStep)
+    const validationError = invalidStep ? validateStep(invalidStep) : ''
 
     if (validationError) {
       setError(validationError)
+      setInvalidFields(getInvalidFields(invalidStep))
       return
     }
 
@@ -218,6 +250,11 @@ export default function BusinessOnboarding() {
       ...current,
       locations: [address],
     }))
+    const nextInvalidFields = invalidFields.filter(
+      (field) => field !== 'location',
+    )
+    setInvalidFields(nextInvalidFields)
+    if (nextInvalidFields.length === 0) setError('')
   }
 
   function clearBusinessLocation() {
@@ -283,7 +320,11 @@ export default function BusinessOnboarding() {
         <section className="business-onboarding-card">
           <form onSubmit={handleSubmit} noValidate>
             {step === 'basics' && (
-              <BusinessBasicsStep form={form} onChange={updateField} />
+              <BusinessBasicsStep
+                form={form}
+                invalidFields={invalidFields}
+                onChange={updateField}
+              />
             )}
 
             {step === 'capabilities' && (
@@ -297,6 +338,7 @@ export default function BusinessOnboarding() {
             {step === 'setup' && (
               <ConditionalSetupStep
                 form={form}
+                invalidFields={invalidFields}
                 onChange={updateField}
                 onSetLocation={setBusinessLocation}
                 onClearLocation={clearBusinessLocation}
@@ -314,6 +356,7 @@ export default function BusinessOnboarding() {
             {error && (
               <div
                 className="auth-error business-onboarding-error"
+                id="business-onboarding-error"
                 role="alert"
               >
                 {error}
@@ -362,7 +405,7 @@ export default function BusinessOnboarding() {
   )
 }
 
-function BusinessBasicsStep({ form, onChange }) {
+function BusinessBasicsStep({ form, invalidFields, onChange }) {
   return (
     <div className="business-onboarding-stage">
       <header>
@@ -373,6 +416,12 @@ function BusinessBasicsStep({ form, onChange }) {
       <div className="business-onboarding-field">
         <span id="business-name-label">Business name</span>
         <input
+          aria-describedby={
+            invalidFields.includes('businessName')
+              ? 'business-onboarding-error'
+              : undefined
+          }
+          aria-invalid={invalidFields.includes('businessName')}
           aria-labelledby="business-name-label"
           name="businessName"
           value={form.businessName}
@@ -442,6 +491,7 @@ function CapabilitiesStep({ form, selectedCount, onToggle }) {
 
 function ConditionalSetupStep({
   form,
+  invalidFields,
   onChange,
   onSetLocation,
   onClearLocation,
@@ -485,6 +535,8 @@ function ConditionalSetupStep({
             }
             value={businessLocation?.formattedAddress || ''}
             placeholder="Search for your shop, office, or service address"
+            invalid={invalidFields.includes('location')}
+            describedBy="business-onboarding-error"
             onSelect={onSetLocation}
           />
           {businessLocation && (
@@ -516,6 +568,12 @@ function ConditionalSetupStep({
               Service description
             </span>
             <textarea
+              aria-describedby={
+                invalidFields.includes('serviceDescription')
+                  ? 'business-onboarding-error'
+                  : undefined
+              }
+              aria-invalid={invalidFields.includes('serviceDescription')}
               aria-labelledby="business-service-description-label"
               name="serviceDescription"
               value={form.serviceDescription}
@@ -532,6 +590,12 @@ function ConditionalSetupStep({
                 Service categories
               </span>
               <input
+                aria-describedby={
+                  invalidFields.includes('categories')
+                    ? 'business-onboarding-error'
+                    : undefined
+                }
+                aria-invalid={invalidFields.includes('categories')}
                 aria-labelledby="business-service-categories-label"
                 name="categories"
                 value={form.categories}
@@ -545,6 +609,12 @@ function ConditionalSetupStep({
             <div className="business-onboarding-field">
               <span id="business-service-areas-label">Service areas</span>
               <input
+                aria-describedby={
+                  invalidFields.includes('areas')
+                    ? 'business-onboarding-error'
+                    : undefined
+                }
+                aria-invalid={invalidFields.includes('areas')}
                 aria-labelledby="business-service-areas-label"
                 name="areas"
                 value={form.areas}
@@ -559,6 +629,12 @@ function ConditionalSetupStep({
           <div className="business-onboarding-field">
             <span id="business-availability-label">Availability</span>
             <input
+              aria-describedby={
+                invalidFields.includes('availability')
+                  ? 'business-onboarding-error'
+                  : undefined
+              }
+              aria-invalid={invalidFields.includes('availability')}
               aria-labelledby="business-availability-label"
               name="availability"
               value={form.availability}
