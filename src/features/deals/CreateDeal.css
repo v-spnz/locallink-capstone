@@ -25,35 +25,6 @@
   overflow: visible !important;
 }
 
-.deal-filters-pill {
-  min-height: 36px !important;
-  padding: 7px 9px 7px 11px !important;
-  border: 0 !important;
-  border-radius: 7px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 7px !important;
-  background: #eef1f8 !important;
-  color: #4a5468 !important;
-  cursor: pointer !important;
-  font-size: 14px !important;
-  font-weight: 700 !important;
-  white-space: nowrap !important;
-}
-
-.deal-filters-pill.is-active {
-  background: var(--business-surface, #fff) !important;
-  color: var(--blue, #3f5bd3) !important;
-  box-shadow: 0 1px 5px rgb(35 50 82 / 10%) !important;
-}
-
-.deal-filters-pill strong {
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: rgb(0 0 0 / 8%);
-  font-size: 12px;
-}
-
 .deal-filters-divider {
   display: none;
 }

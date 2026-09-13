@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
-import { getDealLifecycle } from '../src/features/deals/constants.js'
+import {
+  DEAL_STATUS_FILTERS,
+  getDealLifecycle,
+  matchesDealStatusFilter,
+} from '../src/features/deals/constants.js'
 
 test('US0091: a published future deal is Scheduled', () => {
   assert.deepEqual(
@@ -47,6 +51,30 @@ test('US0091: draft and ended deals have accurate business-facing statuses', () 
     ).label,
     'Expired',
   )
+})
+
+test('business deal filters open on Draft and group terminal deals in History', async () => {
+  const list = await readFile(
+    new URL('../src/features/deals/components/DealList.jsx', import.meta.url),
+    'utf8',
+  )
+
+  assert.deepEqual(DEAL_STATUS_FILTERS, [
+    { value: 'draft', label: 'Draft' },
+    { value: 'active', label: 'Active' },
+    { value: 'scheduled', label: 'Scheduled' },
+    { value: 'history', label: 'History' },
+    { value: 'all', label: 'All' },
+  ])
+  assert.equal(matchesDealStatusFilter('expired', 'history'), true)
+  assert.equal(matchesDealStatusFilter('ended-early', 'history'), true)
+  assert.equal(matchesDealStatusFilter('active', 'history'), false)
+  assert.match(list, /useState\('draft'\)/)
+  assert.match(list, /OVERFLOW_FILTER_VALUES = \['history', 'all'\]/)
+  assert.doesNotMatch(list, /deal-filters-pill/)
+  assert.match(list, /DEALS_PER_PAGE = 5/)
+  assert.match(list, /visibleRecords\.slice\(0, visibleDealCount\)/)
+  assert.match(list, /Show more/)
 })
 
 test('US0091: preview includes the consumer-facing details and an explicit confirmation', async () => {
@@ -171,6 +199,12 @@ test('business deals uses accessible management controls with responsive loading
   assert.doesNotMatch(list, /Campaign manager/)
   assert.match(list, /aria-label="Filter deals"/)
   assert.match(list, /aria-pressed=/)
+  assert.match(list, /deal-filter-actions[\s\S]*?New deal/)
+  assert.match(list, /deal-list-pagination[\s\S]*?Showing[\s\S]*?Show more/)
+  assert.match(
+    styles,
+    /\.deal-filter-bar \{[\s\S]*?align-items: flex-start/,
+  )
   assert.match(list, /Ending soon/)
   assert.match(list, /deal-campaign-table/)
   assert.match(page, /<DealListSkeleton \/>/)
