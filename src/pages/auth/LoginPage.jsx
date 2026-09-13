@@ -22,6 +22,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [invalidFields, setInvalidFields] = useState([])
   const [success, setSuccess] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
@@ -66,9 +67,20 @@ export default function LoginPage() {
   async function handleSubmit(event) {
     event.preventDefault()
     setError('')
+    setInvalidFields([])
     setSuccess('')
-    setIsSubmitting(true)
 
+    const missingFields = [
+      !email.trim() ? 'email' : '',
+      !password ? 'password' : '',
+    ].filter(Boolean)
+    if (missingFields.length > 0) {
+      setError('Enter your email address and password.')
+      setInvalidFields(missingFields)
+      return
+    }
+
+    setIsSubmitting(true)
     try {
       const { data, error: signInError } =
         await supabase.auth.signInWithPassword({
@@ -78,6 +90,7 @@ export default function LoginPage() {
 
       if (signInError) {
         setError('The email or password you entered is incorrect.')
+        setInvalidFields(['email', 'password'])
         return
       }
 
@@ -101,11 +114,13 @@ export default function LoginPage() {
 
   async function handleForgotPassword() {
     setError('')
+    setInvalidFields([])
     setSuccess('')
     if (!email.trim()) {
       setError(
         'Enter your email address first, then select “Forgot password?”.',
       )
+      setInvalidFields(['email'])
       return
     }
 
@@ -160,7 +175,7 @@ export default function LoginPage() {
               Enter your details to continue to your LocalLink account.
             </p>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <div className="login-field">
                 <span className="login-field-label" id="login-email-label">
                   Email address
@@ -171,7 +186,15 @@ export default function LoginPage() {
                   type="email"
                   placeholder="you@example.com"
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
+                  onChange={(event) => {
+                    setEmail(event.target.value)
+                    setError('')
+                    setInvalidFields([])
+                  }}
+                  aria-describedby={
+                    invalidFields.includes('email') ? 'login-error' : undefined
+                  }
+                  aria-invalid={invalidFields.includes('email')}
                   autoComplete="email"
                   disabled={isSubmitting || isResetting}
                   required
@@ -189,7 +212,17 @@ export default function LoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="At least 8 characters"
                     value={password}
-                    onChange={(event) => setPassword(event.target.value)}
+                    onChange={(event) => {
+                      setPassword(event.target.value)
+                      setError('')
+                      setInvalidFields([])
+                    }}
+                    aria-describedby={
+                      invalidFields.includes('password')
+                        ? 'login-error'
+                        : undefined
+                    }
+                    aria-invalid={invalidFields.includes('password')}
                     autoComplete="current-password"
                     disabled={isSubmitting || isResetting}
                     required
@@ -222,7 +255,11 @@ export default function LoginPage() {
               </button>
 
               {error && (
-                <div className="auth-error login-message" role="alert">
+                <div
+                  className="auth-error login-message"
+                  id="login-error"
+                  role="alert"
+                >
                   {error}
                 </div>
               )}

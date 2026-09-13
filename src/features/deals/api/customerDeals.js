@@ -61,7 +61,9 @@ export async function fetchPublishedDealById(dealId) {
 export async function fetchDealClaim(customerId, dealId) {
   const { data, error } = await supabase
     .from('business_deal_claims')
-    .select('id, deal_id, customer_id, claimed_at, expires_at')
+    .select(
+      'id, deal_id, customer_id, claim_reference, redemption_code, claimed_at, expires_at',
+    )
     .eq('customer_id', customerId)
     .eq('deal_id', dealId)
     .maybeSingle()

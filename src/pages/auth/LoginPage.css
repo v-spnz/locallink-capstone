@@ -176,6 +176,17 @@
   box-shadow: 0 0 0 3px rgb(63 91 211 / 12%);
 }
 
+.login-field input[aria-invalid='true'] {
+  border-color: #c92a2a;
+  background: var(--auth-surface);
+  box-shadow: 0 0 0 3px rgb(201 42 42 / 14%);
+}
+
+.login-field input[aria-invalid='true']:focus {
+  border-color: #c92a2a;
+  box-shadow: 0 0 0 3px rgb(201 42 42 / 18%);
+}
+
 .login-field input::placeholder {
   color: var(--auth-muted);
 }
@@ -255,6 +266,14 @@
   border-radius: 10px;
   font-size: 13px;
   line-height: 1.45;
+}
+
+.auth-error.login-message {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #c92a2a;
 }
 
 .login-submit {

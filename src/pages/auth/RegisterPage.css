@@ -486,6 +486,17 @@
   box-shadow: 0 0 0 3px rgb(63 91 211 / 12%);
 }
 
+.register-field input[aria-invalid='true'] {
+  border-color: #c92a2a;
+  background: var(--auth-surface);
+  box-shadow: 0 0 0 3px rgb(201 42 42 / 14%);
+}
+
+.register-field input[aria-invalid='true']:focus {
+  border-color: #c92a2a;
+  box-shadow: 0 0 0 3px rgb(201 42 42 / 18%);
+}
+
 .register-field input::placeholder {
   color: var(--auth-muted);
 }
@@ -601,6 +612,14 @@
   border-radius: 10px;
   font-size: 13px;
   line-height: 1.45;
+}
+
+.auth-error.register-account-error {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #c92a2a;
 }
 
 .register-submit {

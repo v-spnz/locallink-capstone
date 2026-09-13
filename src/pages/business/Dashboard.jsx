@@ -1,11 +1,13 @@
 import {
   ArrowUpRight,
+  ArrowRight,
   BadgePercent,
   BriefcaseBusiness,
   Building2,
   CheckCircle2,
   Gift,
   MapPin,
+  ScanLine,
   Settings,
   ShieldCheck,
 } from 'lucide-react'
@@ -69,6 +71,33 @@ export default function Dashboard() {
           />
         </figure>
       </header>
+
+      {capabilities.deals_enabled && (
+        <section
+          className="business-redemption-cta"
+          aria-labelledby="business-redemption-cta-title"
+        >
+          <div className="business-redemption-cta-copy">
+            <span aria-hidden="true">
+              <ScanLine />
+            </span>
+            <div>
+              <h2 id="business-redemption-cta-title">Redeem a customer deal</h2>
+              <p>
+                Scan a customer QR code. Manual entry is available on the same
+                screen.
+              </p>
+            </div>
+          </div>
+          <Link
+            className="business-redemption-cta-action"
+            to="/business/create-deal?redeem=scan"
+          >
+            Scan QR code
+            <ArrowRight aria-hidden="true" />
+          </Link>
+        </section>
+      )}
 
       <section
         className="business-dashboard-section"

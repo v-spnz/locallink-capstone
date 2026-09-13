@@ -29,6 +29,8 @@ export default function AddressAutocomplete({
   disabled = false,
   showCurrentLocation = true,
   searchType = 'address',
+  invalid = false,
+  describedBy,
   onSelect,
 }) {
   const [query, setQuery] = useState(value)
@@ -39,7 +41,11 @@ export default function AddressAutocomplete({
   const [activeIndex, setActiveIndex] = useState(-1)
   const requestNumber = useRef(0)
   const resultsId = `${id}-results`
+  const errorId = `${id}-error`
   const searchSettings = SEARCH_SETTINGS[searchType]
+  const descriptionIds = [error ? errorId : '', invalid ? describedBy : '']
+    .filter(Boolean)
+    .join(' ')
 
   useEffect(() => {
     const trimmedQuery = query.trim()
@@ -196,6 +202,8 @@ export default function AddressAutocomplete({
       >
         <Search aria-hidden="true" size={17} />
         <input
+          aria-describedby={descriptionIds || undefined}
+          aria-invalid={error || invalid ? true : undefined}
           aria-labelledby={`${id}-label`}
           aria-activedescendant={
             isOpen && activeIndex >= 0
@@ -285,7 +293,7 @@ export default function AddressAutocomplete({
         </span>
       </div>
       {error && (
-        <div className="form-error" role="alert">
+        <div className="form-error" id={errorId} role="alert">
           {error}
         </div>
       )}

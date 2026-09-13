@@ -1,0 +1,877 @@
+.deal-redemption-workspace {
+  margin-bottom: 24px;
+  border: 1px solid var(--business-border, var(--border));
+  border-radius: var(--business-radius-card, 14px);
+  overflow: hidden;
+  background: var(--business-surface, #fff);
+  box-shadow: var(--business-shadow-sm, 0 8px 24px rgb(26 39 73 / 8%));
+}
+
+.deal-redemption-entry {
+  min-width: 0;
+  padding: 24px;
+}
+
+.deal-redemption-review-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.deal-redemption-review-heading > span {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: var(--business-accent-soft, #eef2ff);
+  color: var(--business-accent, #3f5bd3);
+}
+
+.deal-redemption-review-heading svg {
+  width: 19px;
+  height: 19px;
+}
+
+.deal-redemption-review-heading p {
+  margin: 3px 0 0;
+  color: var(--business-muted, var(--text-muted));
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.deal-redemption-form {
+  margin-top: 0;
+}
+
+.deal-redemption-form > label {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--business-ink, var(--text));
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.deal-redemption-controls {
+  display: grid;
+  grid-template-columns: minmax(190px, 1fr) auto auto;
+  gap: 8px;
+}
+
+.deal-redemption-controls input {
+  min-width: 0;
+  height: 42px;
+  padding: 0 13px;
+  border: 1px solid var(--business-border, var(--border));
+  border-radius: var(--business-radius-control, 7px);
+  background: #fff;
+  color: var(--business-ink, var(--text));
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.deal-redemption-controls input:focus {
+  border-color: var(--business-accent, var(--blue));
+  outline: 0;
+  box-shadow: 0 0 0 3px rgb(63 91 211 / 14%);
+}
+
+.deal-redemption-controls input[aria-invalid='true'] {
+  border-color: var(--business-danger, #c92a2a);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgb(201 42 42 / 14%);
+}
+
+.deal-redemption-controls input[aria-invalid='true']:focus {
+  border-color: var(--business-danger, #c92a2a);
+  box-shadow: 0 0 0 3px rgb(201 42 42 / 18%);
+}
+
+.deal-redemption-controls input::placeholder {
+  color: #9aa3b4;
+}
+
+.deal-redemption-controls button {
+  min-height: 42px;
+  white-space: nowrap;
+}
+
+.deal-redemption-controls button svg,
+.deal-redemption-review-actions button svg,
+.deal-redemption-success button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.deal-redemption-error {
+  margin: 7px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--business-danger, #c92a2a);
+  line-height: 1.45;
+}
+
+.deal-code-scanner {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--business-border, var(--border));
+  border-radius: 10px;
+  background: #151a24;
+  color: #fff;
+}
+
+.deal-code-scanner-heading {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.deal-code-scanner-heading strong,
+.deal-code-scanner-heading span {
+  display: block;
+}
+
+.deal-code-scanner-heading strong {
+  font-size: 14px;
+}
+
+.deal-code-scanner-heading span {
+  margin-top: 2px;
+  color: rgb(255 255 255 / 66%);
+  font-size: 12px;
+}
+
+.deal-code-scanner-heading button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  background: rgb(255 255 255 / 9%);
+  color: #fff;
+  cursor: pointer;
+}
+
+.deal-code-scanner-heading button svg {
+  width: 18px;
+}
+
+.deal-code-camera-frame {
+  position: relative;
+  min-height: 260px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #07090d;
+}
+
+.deal-code-camera-frame video {
+  width: 100%;
+  height: 280px;
+  display: block;
+  object-fit: cover;
+}
+
+.deal-code-camera-frame > span {
+  position: absolute;
+  width: min(64%, 220px);
+  aspect-ratio: 1;
+  border: 2px solid rgb(255 255 255 / 86%);
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 0 999px rgb(0 0 0 / 30%);
+}
+
+.deal-code-camera-frame > span svg {
+  width: 75%;
+  height: auto;
+  color: #8ea0ff;
+}
+
+.deal-code-scanner-error {
+  min-height: 130px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  color: rgb(255 255 255 / 78%);
+  text-align: center;
+}
+
+.deal-code-scanner-error svg {
+  width: 26px;
+}
+
+.deal-code-scanner-error p {
+  max-width: 40ch;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.deal-redemption-review {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid #cbd8cf;
+  border-radius: 11px;
+  background: #f7fbf8;
+}
+
+.deal-redemption-review-heading > span {
+  background: #e3f5e9;
+  color: #087f5b;
+}
+
+.deal-redemption-review-heading strong,
+.deal-redemption-success strong {
+  color: var(--business-ink, var(--text));
+  font-size: 15px;
+}
+
+.deal-redemption-review dl {
+  margin: 18px 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 20px;
+}
+
+.deal-redemption-review dt {
+  color: var(--business-muted, var(--text-muted));
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.deal-redemption-review dd {
+  margin: 3px 0 0;
+  color: var(--business-ink, var(--text));
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.deal-redemption-instructions {
+  margin: 16px 0 0;
+  padding: 11px 12px;
+  border-radius: 8px;
+  background: #eef1f6;
+  color: var(--business-ink, var(--text));
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.deal-redemption-instructions strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 12px;
+}
+
+.deal-redemption-review-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.deal-redemption-success {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #b9ddc6;
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  background: #effaf3;
+}
+
+.deal-redemption-success > span {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #087f5b;
+  color: #fff;
+}
+
+.deal-redemption-success > span svg {
+  width: 20px;
+}
+
+.deal-redemption-success p {
+  margin: 3px 0 0;
+  color: #3b5b48;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.deal-redemption-records-link {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--business-border, var(--border));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--business-muted, var(--text-muted));
+  font-size: 12px;
+}
+
+.deal-redemption-records-link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--business-accent, var(--blue));
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.deal-redemption-records-link a:hover {
+  text-decoration: underline;
+}
+
+.deal-redemption-records-link a:focus-visible {
+  border-radius: 4px;
+  outline: 3px solid rgb(63 91 211 / 20%);
+  outline-offset: 3px;
+}
+
+.deal-redemption-records-link svg {
+  width: 14px;
+  height: 14px;
+}
+
+.business-claim-records-heading {
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.business-claim-records-heading > span {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: var(--business-accent-soft, #eef2ff);
+  color: var(--business-accent, #3f5bd3);
+}
+
+.business-claim-records-heading svg {
+  width: 18px;
+  height: 18px;
+}
+
+.business-claim-records-heading h2,
+.business-claim-record-list-heading h3 {
+  margin: 0;
+  color: var(--business-ink, var(--text));
+  letter-spacing: -0.015em;
+}
+
+.business-claim-records-heading h2 {
+  font-size: 24px;
+}
+
+.business-claim-records-heading p,
+.business-claim-record-list-heading p {
+  margin: 4px 0 0;
+  color: var(--business-muted, var(--text-muted));
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.business-claim-records-search {
+  max-width: 520px;
+  margin-top: 0;
+}
+
+.business-claim-records-layout {
+  margin-top: 24px;
+  border: 1px solid var(--business-border, var(--border));
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+  overflow: hidden;
+  background: var(--business-surface, #fff);
+}
+
+.business-claim-record-list,
+.business-claim-record-detail {
+  min-width: 0;
+  padding: 20px;
+}
+
+.business-claim-record-list-heading {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--business-border, var(--border));
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.business-claim-record-list-heading h3 {
+  font-size: 16px;
+}
+
+.business-claim-record-list-heading > span {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  background: var(--business-surface-soft, #f4f6fa);
+  color: var(--business-muted, var(--text-muted));
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.business-claim-record-detail {
+  border-left: 1px solid var(--business-border, var(--border));
+  background: var(--business-surface-soft, #f8f9fc);
+}
+
+.business-claim-record-detail .deal-claim-lookup-result {
+  margin-top: 0;
+  padding: 18px;
+}
+
+.business-claim-record-detail-empty {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 7px;
+  color: var(--business-muted, var(--text-muted));
+  text-align: center;
+}
+
+.business-claim-record-detail-empty svg {
+  width: 24px;
+  height: 24px;
+}
+
+.business-claim-record-detail-empty strong {
+  color: var(--business-ink, var(--text));
+  font-size: 14px;
+}
+
+.business-claim-record-detail-empty p {
+  max-width: 34ch;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.deal-claim-lookup-form {
+  margin-top: 16px;
+}
+
+.deal-claim-lookup-form > label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--business-ink, var(--text));
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.deal-claim-lookup-form > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px;
+}
+
+.deal-claim-lookup-form input {
+  min-width: 0;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--business-border, var(--border));
+  border-radius: var(--business-radius-control, 7px);
+  background: #fff;
+  color: var(--business-ink, var(--text));
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.deal-claim-lookup-form input:focus {
+  border-color: var(--business-accent, var(--blue));
+  outline: 0;
+  box-shadow: 0 0 0 3px rgb(63 91 211 / 14%);
+}
+
+.deal-claim-lookup-form input::placeholder {
+  color: #7f899a;
+}
+
+.deal-claim-lookup-form button {
+  min-height: 38px;
+  padding: 0 11px;
+  border: 1px solid var(--business-accent, var(--blue));
+  border-radius: var(--business-radius-control, 7px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--business-accent, var(--blue));
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.deal-claim-lookup-form button:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.deal-claim-lookup-form button:focus-visible,
+.deal-claim-lookup-result-heading button:focus-visible,
+.deal-redemption-history-list button:focus-visible {
+  outline: 3px solid rgb(63 91 211 / 20%);
+  outline-offset: 2px;
+}
+
+.deal-claim-lookup-form button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.deal-claim-lookup-form > p,
+.deal-claim-lookup-error {
+  margin: 7px 0 0;
+  color: var(--business-muted, var(--text-muted));
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.deal-claim-lookup-error {
+  color: var(--business-danger, #b42318);
+  font-weight: 650;
+}
+
+.deal-claim-lookup-result {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid #cbd4f1;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.deal-claim-lookup-result-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.deal-claim-lookup-result-heading > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.deal-claim-lookup-result-heading strong,
+.deal-claim-lookup-result-heading code {
+  display: block;
+}
+
+.deal-claim-lookup-result-heading strong {
+  color: var(--business-ink, var(--text));
+  font-size: 14px;
+}
+
+.deal-claim-lookup-result-heading code {
+  margin-top: 2px;
+  color: var(--business-muted, var(--text-muted));
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.deal-claim-status {
+  padding: 4px 7px;
+  border-radius: 5px;
+  background: #edf7f0;
+  color: #087f5b;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.deal-claim-status.is-not_redeemed {
+  background: #eef1f6;
+  color: #525e70;
+}
+
+.deal-claim-lookup-result-heading button {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: var(--business-muted, var(--text-muted));
+  cursor: pointer;
+}
+
+.deal-claim-lookup-result-heading button:hover {
+  background: var(--business-surface-soft, #f8f9fc);
+  color: var(--business-ink, var(--text));
+}
+
+.deal-claim-lookup-result-heading button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.deal-claim-lookup-result dl {
+  margin: 13px 0 0;
+  display: grid;
+  gap: 9px;
+}
+
+.deal-claim-lookup-result dt {
+  color: var(--business-muted, var(--text-muted));
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.deal-claim-lookup-result dd {
+  margin: 2px 0 0;
+  color: var(--business-ink, var(--text));
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.deal-redemption-history-subheading {
+  margin: 19px 0 7px;
+  color: var(--business-ink, var(--text));
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.deal-redemption-history-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.deal-redemption-history-list li {
+  border-bottom: 1px solid var(--business-border, var(--border));
+}
+
+.deal-redemption-history-list li > button {
+  width: 100%;
+  padding: 12px 2px;
+  border: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.deal-redemption-history-list li > button.is-selected {
+  background: var(--business-accent-soft, #eef2ff);
+}
+
+.deal-redemption-history-list li > button:hover strong {
+  color: var(--business-accent, var(--blue));
+}
+
+.deal-redemption-history-list li > button > span:first-child {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: var(--business-muted, var(--text-muted));
+}
+
+.deal-redemption-history-list li > button > span:first-child svg {
+  width: 14px;
+}
+
+.deal-redemption-history-list strong,
+.deal-redemption-history-list small,
+.deal-redemption-history-list time {
+  display: block;
+}
+
+.deal-redemption-history-list strong {
+  overflow: hidden;
+  color: var(--business-ink, var(--text));
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.deal-redemption-history-list small,
+.deal-redemption-history-list time {
+  color: var(--business-muted, var(--text-muted));
+  font-size: 11px;
+}
+
+.deal-redemption-history-list time {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.deal-redemption-history-empty,
+.deal-redemption-history-error {
+  min-height: 150px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  color: var(--business-muted, var(--text-muted));
+  text-align: center;
+}
+
+.deal-redemption-history-empty svg {
+  width: 23px;
+}
+
+.deal-redemption-history-empty p,
+.deal-redemption-history-error p {
+  max-width: 28ch;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.deal-redemption-history-error button {
+  border: 0;
+  background: transparent;
+  color: var(--business-accent, var(--blue));
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.deal-redemption-history-skeleton {
+  padding-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.deal-redemption-history-skeleton > span:not(.sr-only) {
+  height: 44px;
+  border-radius: 7px;
+  background: linear-gradient(90deg, #e8ebf2 25%, #f7f8fb 50%, #e8ebf2 75%);
+  background-size: 200% 100%;
+  animation: deal-redemption-shimmer 1.2s linear infinite;
+}
+
+@keyframes deal-redemption-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .business-claim-records-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .business-claim-record-detail {
+    border-top: 1px solid var(--business-border, var(--border));
+    border-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .deal-redemption-entry {
+    padding: 18px;
+  }
+
+  .deal-redemption-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .deal-redemption-controls input {
+    grid-column: 1 / -1;
+  }
+
+  .deal-redemption-controls button {
+    justify-content: center;
+  }
+
+  .deal-redemption-review dl {
+    grid-template-columns: 1fr;
+    gap: 11px;
+  }
+
+  .deal-redemption-success {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .deal-redemption-success button {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
+  .deal-redemption-records-link {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .business-claim-records-heading h2 {
+    font-size: 21px;
+  }
+
+  .business-claim-record-list,
+  .business-claim-record-detail {
+    padding: 16px;
+  }
+
+  .deal-redemption-history-list li > button {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .deal-redemption-history-list time {
+    grid-column: 2;
+    margin-top: -4px;
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deal-redemption-history-skeleton > span:not(.sr-only) {
+    animation: none;
+  }
+}

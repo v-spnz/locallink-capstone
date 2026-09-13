@@ -3,12 +3,18 @@ import DealList, {
   DealListSkeleton,
 } from '../../features/deals/components/DealList'
 import DealReview from '../../features/deals/components/DealReview'
+import DealRedemptionPanel from '../../features/deals/components/DealRedemptionPanel'
 import useBusinessDeals from '../../features/deals/hooks/useBusinessDeals'
+import useBusinessDealRedemption from '../../features/deals/hooks/useBusinessDealRedemption'
 import ActionToast from '../../components/ui/ActionToast'
+import { useSearchParams } from 'react-router-dom'
 import '../../features/deals/CreateDeal.css'
+import '../../features/deals/DealRedemption.css'
 
 export default function CreateDeal() {
+  const [searchParams] = useSearchParams()
   const deals = useBusinessDeals()
+  const redemption = useBusinessDealRedemption({ loadRecords: false })
   const pageHeading =
     deals.step === 'list'
       ? 'Your deals'
@@ -42,24 +48,30 @@ export default function CreateDeal() {
         </div>
       )}
       {!deals.isLoading && deals.step === 'list' && (
-        <DealList
-          deals={deals.deals}
-          selectedDealId={deals.selectedDealId}
-          deleteConfirmationId={deals.deleteConfirmationId}
-          deletingDealId={deals.deletingDealId}
-          cancelingDealId={deals.cancelingDealId}
-          onCreate={deals.handleStartNewDeal}
-          onSelect={deals.handleSelectDeal}
-          onClose={deals.handleCloseDetails}
-          onEdit={deals.handleEditDeal}
-          onRequestDelete={deals.setDeleteConfirmationId}
-          onCancelDeleteRequest={() => deals.setDeleteConfirmationId(null)}
-          onConfirmDelete={deals.handleDeleteDraft}
-          onCancelScheduling={deals.handleCancelScheduledPublication}
-          endingDealId={deals.endingDealId}
-          onRequestEnd={deals.handleGetEndSummary}
-          onEnd={deals.handleEndDeal}
-        />
+        <>
+          <DealRedemptionPanel
+            redemption={redemption}
+            openScannerOnLoad={searchParams.get('redeem') === 'scan'}
+          />
+          <DealList
+            deals={deals.deals}
+            selectedDealId={deals.selectedDealId}
+            deleteConfirmationId={deals.deleteConfirmationId}
+            deletingDealId={deals.deletingDealId}
+            cancelingDealId={deals.cancelingDealId}
+            onCreate={deals.handleStartNewDeal}
+            onSelect={deals.handleSelectDeal}
+            onClose={deals.handleCloseDetails}
+            onEdit={deals.handleEditDeal}
+            onRequestDelete={deals.setDeleteConfirmationId}
+            onCancelDeleteRequest={() => deals.setDeleteConfirmationId(null)}
+            onConfirmDelete={deals.handleDeleteDraft}
+            onCancelScheduling={deals.handleCancelScheduledPublication}
+            endingDealId={deals.endingDealId}
+            onRequestEnd={deals.handleGetEndSummary}
+            onEnd={deals.handleEndDeal}
+          />
+        </>
       )}
       {deals.step === 'review' && (
         <DealReview

@@ -6,16 +6,20 @@ import {
   Check,
   Clock,
   MapPin,
-  QrCode,
   Tag,
   X,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 import Modal from '../../../components/ui/Modal'
 import { formatCountdown } from '../countdown'
+import {
+  formatRedemptionCode,
+  getRedemptionCodePayload,
+} from '../redemptionCode'
 
 function formatDate(value) {
-  if (!value) return '—'
+  if (!value) return 'Not set'
   return new Date(value).toLocaleDateString('en-NZ', {
     day: 'numeric',
     month: 'short',
@@ -61,6 +65,9 @@ export default function DealDetailModal({
   isClaiming,
   claimError,
   claimExpiresAt,
+  claimRedeemedAt,
+  claimReference,
+  redemptionCode,
   onClaim,
   onToggleSave,
 }) {
@@ -81,6 +88,7 @@ export default function DealDetailModal({
     : null
   const endedEarly = deal.status === 'ended_early'
   const windowExpired = msRemaining != null && msRemaining <= 0
+  const isRedeemed = Boolean(claimRedeemedAt)
   const claimsRemaining =
     deal.claim_limit != null
       ? Math.max(0, deal.claim_limit - (deal.claims_used ?? 0))
@@ -200,7 +208,7 @@ export default function DealDetailModal({
           >
             {claimsRemaining === 0 && <Ban size={14} aria-hidden="true" />}
             {claimsRemaining === 0
-              ? 'No claims remaining — this deal is fully claimed'
+              ? 'No claims remaining. This deal is fully claimed'
               : `${claimsRemaining} claim${claimsRemaining === 1 ? '' : 's'} remaining`}
           </div>
         )}
@@ -251,7 +259,7 @@ export default function DealDetailModal({
           <Calendar size={15} aria-hidden="true" />
           <span>Valid:</span>
           <strong className="text-[var(--text)]">
-            {formatDate(deal.start_date)} – {formatDate(deal.end_date)}
+            {formatDate(deal.start_date)} to {formatDate(deal.end_date)}
           </strong>
         </div>
       </div>
@@ -270,7 +278,7 @@ export default function DealDetailModal({
               </div>
               <p className="mt-1 text-sm text-[#7a5c00]">
                 Claiming starts a 15-minute redemption window. Once it starts,
-                it can't be paused or restarted — make sure you're at the
+                it can't be paused or restarted. Make sure you're at the
                 business before confirming.
               </p>
             </div>
@@ -295,7 +303,22 @@ export default function DealDetailModal({
         </div>
       )}
 
-      {showQrCode && windowExpired && (
+      {showQrCode && isRedeemed && (
+        <div className="flex flex-col items-center gap-2 border-t border-[var(--border)] bg-[#effaf3] px-6 py-6">
+          <BadgeCheck size={40} className="text-[#087f5b]" aria-hidden="true" />
+          <p className="text-sm font-bold text-[#087f5b]">Deal redeemed</p>
+          <p className="text-center text-xs text-[var(--text-muted)]">
+            Recorded {new Date(claimRedeemedAt).toLocaleString('en-NZ')}.
+          </p>
+          {claimReference && (
+            <p className="font-mono text-sm font-bold tracking-wide text-[var(--text)]">
+              Claim ref: {claimReference}
+            </p>
+          )}
+        </div>
+      )}
+
+      {showQrCode && !isRedeemed && windowExpired && (
         <div className="flex flex-col items-center gap-2 border-t border-[var(--border)] bg-[#fff5f5] px-6 py-6">
           <Clock
             size={40}
@@ -309,25 +332,54 @@ export default function DealDetailModal({
             Your 15-minute redemption window has closed and this claim can no
             longer be redeemed.
           </p>
+          {claimReference && (
+            <p className="font-mono text-sm font-bold tracking-wide text-[var(--text)]">
+              Claim ref: {claimReference}
+            </p>
+          )}
         </div>
       )}
 
-      {showQrCode && !windowExpired && (
+      {showQrCode && !isRedeemed && !windowExpired && (
         <div className="flex flex-col items-center gap-2 border-t border-[var(--border)] bg-[var(--bg)] px-6 py-6">
-          <div className="flex h-40 w-40 items-center justify-center rounded-lg border border-[var(--border)] bg-white">
-            <QrCode
-              size={120}
-              className="text-[var(--text)]"
-              aria-hidden="true"
-            />
+          <div
+            className="flex h-40 w-40 items-center justify-center rounded-lg border border-[var(--border)] bg-white"
+            role="img"
+            aria-label="Deal redemption QR code"
+          >
+            {redemptionCode ? (
+              <QRCodeSVG
+                value={getRedemptionCodePayload(redemptionCode)}
+                size={132}
+                level="M"
+              />
+            ) : (
+              <Clock size={32} className="text-[var(--text-muted)]" />
+            )}
           </div>
+          {claimReference && (
+            <strong className="font-mono text-sm tracking-wide text-[var(--text)]">
+              Claim ref: {claimReference}
+            </strong>
+          )}
+          {redemptionCode && (
+            <div className="text-center">
+              <span className="block text-[11px] font-semibold text-[var(--text-muted)]">
+                Manual redemption code
+              </span>
+              <strong className="mt-0.5 block font-mono text-base tracking-[0.14em] text-[var(--text)]">
+                {formatRedemptionCode(redemptionCode)}
+              </strong>
+            </div>
+          )}
           {msRemaining != null && (
             <p className="text-sm font-bold text-[var(--text)]">
               {formatCountdown(msRemaining)} remaining
             </p>
           )}
           <p className="text-center text-xs text-[var(--text-muted)]">
-            Show this code to staff to redeem this deal.
+            Show the QR code to staff. Keep the claim reference for any
+            follow-up.
           </p>
         </div>
       )}
@@ -364,13 +416,15 @@ export default function DealDetailModal({
           >
             {isClaiming
               ? 'Claiming…'
-              : showQrCode
-                ? 'Claim ready'
-                : isClaimed
-                  ? 'View claim'
-                  : isSoldOut
-                    ? 'Fully claimed'
-                    : 'Claim deal'}
+              : isRedeemed
+                ? 'Redeemed'
+                : showQrCode
+                  ? 'Claim ready'
+                  : isClaimed
+                    ? 'View claim'
+                    : isSoldOut
+                      ? 'Fully claimed'
+                      : 'Claim deal'}
           </button>
         </div>
         {!isSaved && (

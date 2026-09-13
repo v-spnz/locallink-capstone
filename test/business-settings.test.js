@@ -43,6 +43,7 @@ test('business settings uses separate pages without a sidebar account name', asy
     'overview',
     'profile',
     'services',
+    'claim-records',
     'notifications',
     'access',
   ]) {
@@ -51,4 +52,6 @@ test('business settings uses separate pages without a sidebar account name', asy
   assert.doesNotMatch(settings, /path: 'locations'|path="locations"/)
   assert.doesNotMatch(settings, /AddressAutocomplete/)
   assert.doesNotMatch(settings, /business-settings-identity|businessInitials/)
+  assert.match(settings, /capabilities\.deals_enabled/)
+  assert.match(settings, /<ClaimRecords \/>/)
 })

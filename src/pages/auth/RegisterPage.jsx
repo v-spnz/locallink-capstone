@@ -99,6 +99,7 @@ export default function RegisterPage() {
     confirmPassword: '',
   })
   const [error, setError] = useState('')
+  const [invalidFields, setInvalidFields] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -186,6 +187,11 @@ export default function RegisterPage() {
   function updateField(event) {
     const { name, value } = event.target
     setForm((current) => ({ ...current, [name]: value }))
+    if (invalidFields.includes(name)) {
+      const nextInvalidFields = invalidFields.filter((field) => field !== name)
+      setInvalidFields(nextInvalidFields)
+      if (nextInvalidFields.length === 0) setError('')
+    }
   }
 
   function chooseLocation(address) {
@@ -212,6 +218,7 @@ export default function RegisterPage() {
   async function handleEmailSubmit(event) {
     event.preventDefault()
     setError('')
+    setInvalidFields([])
 
     const { firstName, lastName } = nameParts(form.fullName)
     const email = form.email.trim().toLowerCase()
@@ -224,16 +231,26 @@ export default function RegisterPage() {
       !form.confirmPassword
     ) {
       setError('Enter your full name and complete all registration details.')
+      setInvalidFields(
+        [
+          !firstName || !lastName ? 'fullName' : '',
+          !email ? 'email' : '',
+          !form.password ? 'password' : '',
+          !form.confirmPassword ? 'confirmPassword' : '',
+        ].filter(Boolean),
+      )
       return
     }
 
     if (form.password.length < 8) {
       setError('Password must be at least 8 characters long.')
+      setInvalidFields(['password'])
       return
     }
 
     if (form.password !== form.confirmPassword) {
       setError('Passwords do not match.')
+      setInvalidFields(['confirmPassword'])
       return
     }
 
@@ -255,11 +272,18 @@ export default function RegisterPage() {
 
       if (signUpError) {
         setError(registrationError(signUpError.message))
+        if (
+          signUpError.message.toLowerCase().includes('already registered') ||
+          signUpError.message.toLowerCase().includes('already exists')
+        ) {
+          setInvalidFields(['email'])
+        }
         return
       }
 
       if (data.user?.identities?.length === 0) {
         setError('An account already exists for this email address.')
+        setInvalidFields(['email'])
         return
       }
 
@@ -289,10 +313,12 @@ export default function RegisterPage() {
 
   async function handleGoogleRegistration() {
     setError('')
+    setInvalidFields([])
     const { firstName, lastName } = nameParts(form.fullName)
 
     if (!firstName || !lastName) {
       setError('Enter your full name before continuing with Google.')
+      setInvalidFields(['fullName'])
       return
     }
 
@@ -394,6 +420,7 @@ export default function RegisterPage() {
               flow={flow}
               form={form}
               error={error}
+              invalidFields={invalidFields}
               isSubmitting={isSubmitting}
               showPassword={showPassword}
               showConfirmPassword={showConfirmPassword}
@@ -587,6 +614,7 @@ function AccountStep({
   flow,
   form,
   error,
+  invalidFields,
   isSubmitting,
   showPassword,
   showConfirmPassword,
@@ -648,6 +676,8 @@ function AccountStep({
           onChange={onFieldChange}
           autoComplete="name"
           disabled={isSubmitting}
+          invalid={invalidFields.includes('fullName')}
+          errorId="register-account-error"
         />
 
         <button
@@ -673,6 +703,8 @@ function AccountStep({
           onChange={onFieldChange}
           autoComplete="email"
           disabled={isSubmitting}
+          invalid={invalidFields.includes('email')}
+          errorId="register-account-error"
         />
 
         <PasswordField
@@ -685,6 +717,8 @@ function AccountStep({
           visible={showPassword}
           onToggle={onTogglePassword}
           disabled={isSubmitting}
+          invalid={invalidFields.includes('password')}
+          errorId="register-account-error"
         />
         <PasswordField
           label="Confirm password"
@@ -696,10 +730,16 @@ function AccountStep({
           visible={showConfirmPassword}
           onToggle={onToggleConfirmPassword}
           disabled={isSubmitting}
+          invalid={invalidFields.includes('confirmPassword')}
+          errorId="register-account-error"
         />
 
         {error && (
-          <div className="auth-error register-message" role="alert">
+          <div
+            className="auth-error register-message register-account-error"
+            id="register-account-error"
+            role="alert"
+          >
             {error}
           </div>
         )}
@@ -803,13 +843,20 @@ function ConfirmLocationStep({
   )
 }
 
-function RegisterField({ label, id, ...inputProps }) {
+function RegisterField({ label, id, invalid = false, errorId, ...inputProps }) {
   return (
     <div className="register-field">
       <span className="register-field-label" id={`${id}-label`}>
         {label}
       </span>
-      <input aria-labelledby={`${id}-label`} id={id} required {...inputProps} />
+      <input
+        aria-describedby={invalid ? errorId : undefined}
+        aria-invalid={invalid}
+        aria-labelledby={`${id}-label`}
+        id={id}
+        required
+        {...inputProps}
+      />
     </div>
   )
 }
@@ -820,6 +867,8 @@ function PasswordField({
   visible,
   onToggle,
   disabled,
+  invalid = false,
+  errorId,
   ...inputProps
 }) {
   return (
@@ -829,6 +878,8 @@ function PasswordField({
       </span>
       <div className="register-password-wrap">
         <input
+          aria-describedby={invalid ? errorId : undefined}
+          aria-invalid={invalid}
           aria-labelledby={`${id}-label`}
           id={id}
           type={visible ? 'text' : 'password'}
