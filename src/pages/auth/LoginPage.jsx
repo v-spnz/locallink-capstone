@@ -89,8 +89,12 @@ export default function LoginPage() {
         })
 
       if (signInError) {
-        setError('The email or password you entered is incorrect.')
-        setInvalidFields(['email', 'password'])
+        if (signInError.code === 'invalid_credentials') {
+          setError('The email or password you entered is incorrect.')
+          setInvalidFields(['email', 'password'])
+        } else {
+          setError('Unable to sign in right now. Please try again.')
+        }
         return
       }
 
