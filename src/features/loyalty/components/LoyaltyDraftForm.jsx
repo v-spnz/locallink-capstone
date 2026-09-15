@@ -10,6 +10,13 @@ import {
 } from 'lucide-react'
 import Button from '../../../components/ui/Button'
 import { sanitizeRewardThreshold } from '../businessLoyaltyValidation'
+import {
+  getCustomerReward,
+  getEarningRules,
+  getProgrammeTypeLabel,
+  getRewardTarget,
+  LOYALTY_TEMPLATES,
+} from '../businessLoyaltyTemplates'
 
 function FieldError({ id, children }) {
   return children ? (
@@ -107,17 +114,6 @@ function TextAreaField({
   )
 }
 
-function getTargetLabel(programme) {
-  if (!programme.rewardThreshold) return 'Set a reward target'
-  if (programme.programmeType === 'points') {
-    return `${programme.rewardThreshold} points`
-  }
-  if (programme.programmeType === 'stamp') {
-    return `${programme.rewardThreshold} stamps`
-  }
-  return programme.rewardThreshold
-}
-
 function formatAvailability(programme) {
   if (!programme.startDate) return 'Choose when the programme starts'
   if (!programme.endDate) return `Starts ${programme.startDate}`
@@ -139,10 +135,13 @@ export default function LoyaltyDraftForm({
     programme.name,
     programme.programmeType,
     programme.rewardThreshold,
-    programme.rewardDescription,
-    programme.earningRules,
+    programme.programmeType === 'spend_and_save'
+      ? programme.rewardValue
+      : programme.programmeType === 'spend_and_reward'
+        ? programme.rewardDescription
+        : programme.programmeType === 'stamp_card',
     programme.startDate,
-  ].filter((value) => String(value).trim()).length
+  ].filter(Boolean).length
 
   return (
     <form className="loyalty-draft-form" onSubmit={onSaveDraft} noValidate>
@@ -203,21 +202,9 @@ export default function LoyaltyDraftForm({
                 <span className="loyalty-required">Required to publish</span>
               </legend>
               <div className="loyalty-type-options">
-                {[
-                  {
-                    value: 'stamp',
-                    label: 'Stamps',
-                    description: 'One stamp for an eligible visit or purchase.',
-                    icon: Stamp,
-                  },
-                  {
-                    value: 'points',
-                    label: 'Points',
-                    description: 'Points build towards a reward target.',
-                    icon: CircleDollarSign,
-                  },
-                ].map((option) => {
-                  const Icon = option.icon
+                {LOYALTY_TEMPLATES.map((option) => {
+                  const Icon =
+                    option.value === 'stamp_card' ? Stamp : CircleDollarSign
                   return (
                     <label
                       className={
@@ -256,7 +243,7 @@ export default function LoyaltyDraftForm({
               </span>
               <div>
                 <h2 id="loyalty-reward-title">Reward and earning rules</h2>
-                <p>Describe the target and what the customer receives.</p>
+                <p>Choose a target and the reward customers receive.</p>
               </div>
             </div>
 
@@ -265,46 +252,61 @@ export default function LoyaltyDraftForm({
                 id="loyalty-reward-threshold"
                 label="Reward target"
                 helper={
-                  programme.programmeType === 'points'
-                    ? 'Number of points needed.'
-                    : programme.programmeType === 'stamp'
-                      ? 'Number of stamps needed.'
-                      : 'Choose stamps or points above.'
+                  programme.programmeType === 'stamp_card'
+                    ? 'Number of eligible purchases or visits.'
+                    : programme.programmeType
+                      ? 'Amount the customer must spend, in dollars.'
+                      : 'Choose a programme template above.'
                 }
                 placeholder="e.g. 8"
-                inputMode="numeric"
+                inputMode="decimal"
                 value={programme.rewardThreshold}
                 error={errors.rewardThreshold}
                 onChange={(value) =>
-                  onChange('rewardThreshold', sanitizeRewardThreshold(value))
+                  onChange(
+                    'rewardThreshold',
+                    programme.programmeType === 'stamp_card'
+                      ? sanitizeRewardThreshold(value).split('.')[0]
+                      : sanitizeRewardThreshold(value),
+                  )
                 }
                 requiredToPublish
               />
-              <FormField
-                id="loyalty-reward-description"
-                label="Customer reward"
-                helper="Keep the reward specific and easy to understand."
-                placeholder="e.g. One regular coffee"
-                maxLength="240"
-                value={programme.rewardDescription}
-                error={errors.rewardDescription}
-                onChange={(value) => onChange('rewardDescription', value)}
-                requiredToPublish
-              />
+              {programme.programmeType === 'spend_and_save' && (
+                <FormField
+                  id="loyalty-reward-value"
+                  label="Discount amount ($)"
+                  helper="The discount cannot exceed the spend target."
+                  placeholder="e.g. 5"
+                  inputMode="decimal"
+                  value={programme.rewardValue}
+                  error={errors.rewardValue}
+                  onChange={(value) =>
+                    onChange('rewardValue', sanitizeRewardThreshold(value))
+                  }
+                  requiredToPublish
+                />
+              )}
+              {programme.programmeType === 'spend_and_reward' && (
+                <FormField
+                  id="loyalty-reward-description"
+                  label="Free item"
+                  helper="Name the item the customer receives after reaching the target."
+                  placeholder="e.g. sandwich"
+                  maxLength="240"
+                  value={programme.rewardDescription}
+                  error={errors.rewardDescription}
+                  onChange={(value) => onChange('rewardDescription', value)}
+                  requiredToPublish
+                />
+              )}
             </div>
 
-            <TextAreaField
-              id="loyalty-earning-rules"
-              label="Earning rules"
-              helper="Explain which purchases or visits count."
-              placeholder="e.g. Earn one stamp with every hot drink purchased."
-              maxLength="500"
-              rows="4"
-              value={programme.earningRules}
-              error={errors.earningRules}
-              onChange={(value) => onChange('earningRules', value)}
-              requiredToPublish
-            />
+            <p className="loyalty-field-helper">
+              Customer-facing earning rules:{' '}
+              {getEarningRules(programme) ||
+                'Complete the template details to preview the rules.'}
+            </p>
 
             <TextAreaField
               id="loyalty-terms"
@@ -361,26 +363,20 @@ export default function LoyaltyDraftForm({
               <LockKeyhole aria-hidden="true" />
               Draft summary
             </span>
-            <strong>{filledFields} of 6 details added</strong>
+            <strong>{filledFields} of 5 details added</strong>
           </div>
           <div className="loyalty-preview-programme">
             <span className="loyalty-preview-icon" aria-hidden="true">
               <Gift />
             </span>
-            <small>
-              {programme.programmeType === 'points'
-                ? 'Points programme'
-                : programme.programmeType === 'stamp'
-                  ? 'Stamp programme'
-                  : 'Loyalty programme'}
-            </small>
+            <small>{getProgrammeTypeLabel(programme.programmeType)}</small>
             <h3>{programme.name || 'Untitled programme'}</h3>
-            <p>{getTargetLabel(programme)}</p>
+            <p>{getRewardTarget(programme)}</p>
           </div>
           <div className="loyalty-preview-reward">
             <span>Customer reward</span>
             <strong>
-              {programme.rewardDescription || 'Add a reward description'}
+              {getCustomerReward(programme) || 'Add the reward details'}
             </strong>
           </div>
           <p className="loyalty-preview-availability">

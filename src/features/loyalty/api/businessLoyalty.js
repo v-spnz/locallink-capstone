@@ -7,6 +7,7 @@ const PROGRAMME_FIELDS = `
   programme_type,
   reward_description,
   reward_threshold,
+  reward_value,
   earning_rules,
   terms,
   start_date,
@@ -31,6 +32,7 @@ export function mapBusinessLoyaltyProgramme(record) {
     rewardDescription: record.reward_description || '',
     rewardThreshold:
       record.reward_threshold == null ? '' : String(record.reward_threshold),
+    rewardValue: record.reward_value == null ? '' : String(record.reward_value),
     earningRules: record.earning_rules || '',
     terms: record.terms || '',
     startDate: record.start_date || '',
@@ -67,7 +69,7 @@ export async function saveBusinessLoyaltyProgramme({
     reward_threshold: programme.rewardThreshold
       ? Number(programme.rewardThreshold)
       : null,
-    earning_rules: nullableText(programme.earningRules),
+    reward_value: programme.rewardValue ? Number(programme.rewardValue) : null,
     terms: nullableText(programme.terms),
     start_date: programme.startDate || null,
     end_date: programme.endDate || null,
@@ -82,7 +84,7 @@ export async function saveBusinessLoyaltyProgramme({
       p_programme_type: payload.programme_type,
       p_reward_description: payload.reward_description,
       p_reward_threshold: payload.reward_threshold,
-      p_earning_rules: payload.earning_rules,
+      p_reward_value: payload.reward_value,
       p_terms: payload.terms,
       p_start_date: payload.start_date,
       p_end_date: payload.end_date,

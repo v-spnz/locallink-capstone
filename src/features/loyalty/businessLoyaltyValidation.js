@@ -1,4 +1,5 @@
 const MAX_REWARD_THRESHOLD = 1_000_000
+const TEMPLATE_TYPES = ['stamp_card', 'spend_and_save', 'spend_and_reward']
 
 function getAucklandToday() {
   const parts = new Intl.DateTimeFormat('en-NZ', {
@@ -13,8 +14,11 @@ function getAucklandToday() {
 
 export function sanitizeRewardThreshold(value) {
   return String(value ?? '')
-    .replace(/\D/g, '')
-    .slice(0, 7)
+    .replace(/[^\d.]/g, '')
+    .replace(/(\..*)\./g, '$1')
+    .replace(/^(\d{0,7})(?:\.(\d{0,2}))?.*$/, (_, whole, cents) =>
+      cents === undefined ? whole : `${whole}.${cents}`,
+    )
 }
 
 function requireText(errors, programme, field, label, minimum, maximum) {
@@ -34,9 +38,10 @@ export function validateLoyaltyProgramme(
   const errors = {}
   const name = String(programme.name ?? '').trim()
   const rewardDescription = String(programme.rewardDescription ?? '').trim()
-  const earningRules = String(programme.earningRules ?? '').trim()
   const terms = String(programme.terms ?? '').trim()
   const rewardThreshold = Number(programme.rewardThreshold)
+  const rewardValue = Number(programme.rewardValue)
+  const type = programme.programmeType
 
   if (forPublication) {
     requireText(errors, programme, 'name', 'Programme name', 3, 120)
@@ -48,12 +53,12 @@ export function validateLoyaltyProgramme(
     errors.programmeType = 'Choose how customers earn.'
   } else if (
     programme.programmeType &&
-    !['stamp', 'points'].includes(programme.programmeType)
+    !TEMPLATE_TYPES.includes(programme.programmeType)
   ) {
     errors.programmeType = 'Choose a valid programme type.'
   }
 
-  if (forPublication) {
+  if (forPublication && type === 'spend_and_reward') {
     requireText(
       errors,
       programme,
@@ -62,9 +67,13 @@ export function validateLoyaltyProgramme(
       3,
       240,
     )
-  } else if (rewardDescription && rewardDescription.length < 3) {
+  } else if (
+    type === 'spend_and_reward' &&
+    rewardDescription &&
+    rewardDescription.length < 3
+  ) {
     errors.rewardDescription = 'Use at least 3 characters.'
-  } else if (rewardDescription.length > 240) {
+  } else if (type === 'spend_and_reward' && rewardDescription.length > 240) {
     errors.rewardDescription = 'Keep the reward to 240 characters or fewer.'
   }
 
@@ -72,17 +81,32 @@ export function validateLoyaltyProgramme(
     errors.rewardThreshold = 'Enter the reward target.'
   } else if (
     programme.rewardThreshold &&
-    (!Number.isInteger(rewardThreshold) ||
+    (!Number.isFinite(rewardThreshold) ||
       rewardThreshold < 1 ||
-      rewardThreshold > MAX_REWARD_THRESHOLD)
+      rewardThreshold > MAX_REWARD_THRESHOLD ||
+      (type === 'stamp_card' && !Number.isInteger(rewardThreshold)) ||
+      (type !== 'stamp_card' && !Number.isInteger(rewardThreshold * 100)))
   ) {
-    errors.rewardThreshold = 'Use a whole number between 1 and 1,000,000.'
+    errors.rewardThreshold =
+      type === 'stamp_card'
+        ? 'Use a whole number between 1 and 1,000,000.'
+        : 'Use an amount between $1 and $1,000,000, with up to two decimal places.'
   }
 
-  if (forPublication) {
-    requireText(errors, programme, 'earningRules', 'Earning rules', 3, 500)
-  } else if (earningRules.length > 500) {
-    errors.earningRules = 'Keep the earning rules to 500 characters or fewer.'
+  if (type === 'spend_and_save') {
+    if (forPublication && !programme.rewardValue) {
+      errors.rewardValue = 'Enter the discount amount.'
+    } else if (
+      programme.rewardValue &&
+      (!Number.isFinite(rewardValue) ||
+        rewardValue < 0.01 ||
+        rewardValue > MAX_REWARD_THRESHOLD ||
+        !Number.isInteger(rewardValue * 100) ||
+        (programme.rewardThreshold && rewardValue > rewardThreshold))
+    ) {
+      errors.rewardValue =
+        'Use an amount of at least $0.01 that does not exceed the spend target.'
+    }
   }
 
   if (terms.length > 1000) {

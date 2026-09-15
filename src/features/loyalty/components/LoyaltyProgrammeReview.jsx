@@ -1,16 +1,11 @@
 import { CalendarDays, CheckCircle2, Eye, Gift, Stamp } from 'lucide-react'
 import Button from '../../../components/ui/Button'
-
-function getProgrammeTypeLabel(type) {
-  if (type === 'stamp') return 'Stamp programme'
-  if (type === 'points') return 'Points programme'
-  return 'Not set'
-}
-
-function getRewardTarget(programme) {
-  const unit = programme.programmeType === 'points' ? 'points' : 'stamps'
-  return `${programme.rewardThreshold} ${unit}`
-}
+import {
+  getCustomerReward,
+  getEarningRules,
+  getProgrammeTypeLabel,
+  getRewardTarget,
+} from '../businessLoyaltyTemplates'
 
 function formatDate(value) {
   if (!value) return ''
@@ -94,7 +89,7 @@ export default function LoyaltyProgrammeReview({
               />
               <ReviewRow
                 label="Customer reward"
-                value={programme.rewardDescription}
+                value={getCustomerReward(programme)}
               />
             </dl>
           </section>
@@ -110,7 +105,7 @@ export default function LoyaltyProgrammeReview({
             <dl className="loyalty-review-rows">
               <ReviewRow
                 label="How customers earn"
-                value={programme.earningRules}
+                value={getEarningRules(programme)}
               />
               <ReviewRow
                 label="Terms and conditions"
@@ -141,8 +136,8 @@ export default function LoyaltyProgrammeReview({
           <div>
             <strong>Ready to publish?</strong>
             <p>
-              The programme will move from Draft to Published and become visible
-              to customers.
+              The programme will become active on its start date and visible to
+              customers then.
             </p>
           </div>
         </aside>

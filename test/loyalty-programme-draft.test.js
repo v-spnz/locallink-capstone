@@ -11,7 +11,7 @@ const EMPTY_DRAFT = {
   programmeType: '',
   rewardDescription: '',
   rewardThreshold: '',
-  earningRules: '',
+  rewardValue: '',
   terms: '',
 }
 
@@ -145,5 +145,5 @@ test('draft validation identifies invalid values without requiring completion', 
   })
   assert.match(errors.name, /between 3 and 120/i)
   assert.match(errors.programmeType, /valid programme type/i)
-  assert.match(errors.rewardThreshold, /between 1 and 1,000,000/i)
+  assert.match(errors.rewardThreshold, /between \$1 and \$1,000,000/i)
 })

@@ -5,10 +5,10 @@ import { validateLoyaltyProgramme } from '../src/features/loyalty/businessLoyalt
 
 const COMPLETE_PROGRAMME = {
   name: 'Morning coffee rewards',
-  programmeType: 'stamp',
-  rewardDescription: 'One regular coffee',
+  programmeType: 'stamp_card',
+  rewardDescription: '',
   rewardThreshold: '8',
-  earningRules: 'Earn one stamp with every hot drink purchased.',
+  rewardValue: '',
   terms: 'One reward per customer.',
   startDate: '2099-01-01',
   endDate: '',
@@ -26,7 +26,7 @@ test('US0107 AC1-2: a complete programme can be reviewed and missing publication
       programmeType: '',
       rewardDescription: '',
       rewardThreshold: '',
-      earningRules: '',
+      rewardValue: '',
       terms: '',
       startDate: '',
       endDate: '',
@@ -36,10 +36,56 @@ test('US0107 AC1-2: a complete programme can be reviewed and missing publication
 
   assert.ok(errors.name)
   assert.ok(errors.programmeType)
-  assert.ok(errors.rewardDescription)
   assert.ok(errors.rewardThreshold)
-  assert.ok(errors.earningRules)
   assert.ok(errors.startDate)
+})
+
+test('structured templates require only their own reward fields', () => {
+  assert.deepEqual(
+    validateLoyaltyProgramme(
+      {
+        ...COMPLETE_PROGRAMME,
+        programmeType: 'spend_and_save',
+        rewardThreshold: '50',
+        rewardValue: '5',
+      },
+      { forPublication: true },
+    ),
+    {},
+  )
+  assert.ok(
+    validateLoyaltyProgramme(
+      {
+        ...COMPLETE_PROGRAMME,
+        programmeType: 'spend_and_save',
+        rewardThreshold: '5',
+        rewardValue: '10',
+      },
+      { forPublication: true },
+    ).rewardValue,
+  )
+  assert.deepEqual(
+    validateLoyaltyProgramme(
+      {
+        ...COMPLETE_PROGRAMME,
+        programmeType: 'spend_and_reward',
+        rewardThreshold: '25',
+        rewardDescription: 'sandwich',
+      },
+      { forPublication: true },
+    ),
+    {},
+  )
+  assert.ok(
+    validateLoyaltyProgramme(
+      {
+        ...COMPLETE_PROGRAMME,
+        programmeType: 'spend_and_reward',
+        rewardDescription: '',
+      },
+      { forPublication: true },
+    ).rewardDescription,
+  )
 })
 
 test('US0107 AC3-5: review, correction, persisted publication, and status tabs are wired together', async () => {

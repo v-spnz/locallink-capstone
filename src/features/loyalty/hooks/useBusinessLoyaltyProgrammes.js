@@ -12,6 +12,7 @@ export const EMPTY_LOYALTY_PROGRAMME = {
   programmeType: '',
   rewardDescription: '',
   rewardThreshold: '',
+  rewardValue: '',
   earningRules: '',
   terms: '',
   startDate: '',
@@ -92,8 +93,26 @@ export default function useBusinessLoyaltyProgrammes() {
   }, [hasUnsavedChanges, step])
 
   function setField(field, value) {
-    setForm((current) => ({ ...current, [field]: value }))
-    setErrors((current) => ({ ...current, [field]: '' }))
+    setForm((current) =>
+      field === 'programmeType' && current.programmeType !== value
+        ? {
+            ...current,
+            programmeType: value,
+            rewardDescription: '',
+            rewardValue: '',
+          }
+        : { ...current, [field]: value },
+    )
+    setErrors((current) =>
+      field === 'programmeType'
+        ? {
+            ...current,
+            programmeType: '',
+            rewardDescription: '',
+            rewardValue: '',
+          }
+        : { ...current, [field]: '' },
+    )
     setHasUnsavedChanges(true)
   }
 
