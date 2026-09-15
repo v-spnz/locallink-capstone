@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  BadgeCheck,
   Ban,
   Bookmark,
   Calendar,
@@ -176,7 +177,7 @@ export default function DealDetailModal({
           )}
         </div>
 
-        {endedEarly && isClaimed && (
+        {endedEarly && isClaimed && !isRedeemed && (
           <div className="mb-4 rounded-md border border-[#f1c7c7] bg-[#fff5f5] p-3 text-sm text-[var(--text)]">
             <strong className="block text-[var(--danger)]">
               Claim protected
@@ -306,7 +307,9 @@ export default function DealDetailModal({
       {showQrCode && isRedeemed && (
         <div className="flex flex-col items-center gap-2 border-t border-[var(--border)] bg-[#effaf3] px-6 py-6">
           <BadgeCheck size={40} className="text-[#087f5b]" aria-hidden="true" />
-          <p className="text-sm font-bold text-[#087f5b]">Deal redeemed</p>
+          <p className="text-sm font-bold text-[#087f5b]">
+            Deal has been Redeemed
+          </p>
           <p className="text-center text-xs text-[var(--text-muted)]">
             Recorded {new Date(claimRedeemedAt).toLocaleString('en-NZ')}.
           </p>
@@ -417,7 +420,7 @@ export default function DealDetailModal({
             {isClaiming
               ? 'Claiming…'
               : isRedeemed
-                ? 'Redeemed'
+                ? 'Deal has been Redeemed'
                 : showQrCode
                   ? 'Claim ready'
                   : isClaimed

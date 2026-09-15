@@ -171,6 +171,42 @@ export default function Deals() {
   const historicalClaims = customerClaims.filter(
     (claim) => !isClaimActive(claim, now),
   )
+  const hasRedeemableClaims = customerClaims.some(
+    (claim) =>
+      !claim.redeemed_at &&
+      claim.expires_at &&
+      new Date(claim.expires_at) > now,
+  )
+
+  useEffect(() => {
+    if (!user?.id || !hasRedeemableClaims) return undefined
+    let active = true
+
+    async function refreshClaims() {
+      try {
+        const claims = await fetchCustomerDealClaims()
+        if (!active) return
+        setCustomerClaims(claims)
+        setSelectedClaim((current) => {
+          if (!current) return current
+          const updated = claims.find((claim) => claim.claim_id === current.id)
+          if (!updated || updated.redeemed_at === current.redeemed_at)
+            return current
+          return { ...current, redeemed_at: updated.redeemed_at }
+        })
+      } catch (refreshError) {
+        console.error('Unable to refresh deal claims.', refreshError)
+      }
+    }
+
+    const interval = window.setInterval(refreshClaims, 5000)
+    window.addEventListener('focus', refreshClaims)
+    return () => {
+      active = false
+      window.clearInterval(interval)
+      window.removeEventListener('focus', refreshClaims)
+    }
+  }, [hasRedeemableClaims, user?.id])
 
   const openDeal = useCallback(
     async (business) => {
@@ -581,7 +617,7 @@ export default function Deals() {
                     </span>
                     <span className="customer-deal-claim-status">
                       {claim.redeemed_at
-                        ? 'Redeemed'
+                        ? 'Deal has been Redeemed'
                         : endedEarly
                           ? 'Claim remains redeemable'
                           : 'Expired'}

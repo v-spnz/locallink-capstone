@@ -62,14 +62,18 @@ export async function fetchDealClaim(customerId, dealId) {
   const { data, error } = await supabase
     .from('business_deal_claims')
     .select(
-      'id, deal_id, customer_id, claim_reference, redemption_code, claimed_at, expires_at',
+      'id, deal_id, customer_id, claim_reference, redemption_code, claimed_at, expires_at, business_deal_redemptions(redeemed_at)',
     )
     .eq('customer_id', customerId)
     .eq('deal_id', dealId)
     .maybeSingle()
 
   if (error) throw error
-  return data
+  if (!data) return null
+  return {
+    ...data,
+    redeemed_at: data.business_deal_redemptions?.redeemed_at ?? null,
+  }
 }
 
 export async function claimDeal(dealId) {
