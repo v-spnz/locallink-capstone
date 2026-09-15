@@ -34,6 +34,8 @@
 }
 
 .discovery-map {
+  position: relative;
+  z-index: 1;
   height: 330px;
   margin-bottom: 16px;
   overflow: hidden;
@@ -404,4 +406,223 @@
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.discovery-category-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.discovery-category-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.discovery-category-count {
+  margin-left: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.discovery-deal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.discovery-deal-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  transition: var(--transition);
+}
+
+.discovery-deal-list-item.is-clickable {
+  cursor: pointer;
+}
+
+.discovery-deal-list-item.is-clickable:hover {
+  border-color: #bac8ff;
+  box-shadow: var(--shadow);
+}
+
+.discovery-deal-list-icon {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  background: linear-gradient(135deg, #6d7dc9, #3f4f9e);
+  overflow: hidden;
+}
+
+.discovery-deal-list-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.discovery-deal-list-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.discovery-deal-list-text strong {
+  font-size: 13.5px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.discovery-deal-list-text small {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.discovery-deal-list-meta {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.discovery-sold-out-badge-inline {
+  position: static;
+}
+
+.discovery-save-btn-inline {
+  position: static;
+  width: 26px;
+  height: 26px;
+}
+
+.discovery-save-btn-inline svg {
+  width: 13px;
+  height: 13px;
+}
+
+.wallet-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.wallet-section-title {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.wallet-saved-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.wallet-saved-card {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.wallet-saved-card:hover {
+  border-color: #bac8ff;
+  box-shadow: var(--shadow-md);
+}
+
+.wallet-saved-media {
+  width: 100%;
+  height: 100px;
+  padding: 0;
+  border: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6d7dc9, #3f4f9e);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.wallet-saved-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wallet-saved-body {
+  padding: 12px 14px 14px;
+}
+
+.wallet-saved-business {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.wallet-saved-title {
+  margin-top: 2px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.wallet-saved-distance {
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.wallet-saved-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--blue);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.wallet-saved-remove svg {
+  width: 14px;
+  height: 14px;
+}
+
+.wallet-saved-remove:hover {
+  background: var(--white);
 }
