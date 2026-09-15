@@ -226,7 +226,11 @@ export default function Deals() {
       (claim) => claim.deal_id === requestedDealId,
     )
     if (!requestedClaim) return
-    openClaimedDeal(requestedClaim)
+
+    const timer = window.setTimeout(() => {
+      openClaimedDeal(requestedClaim)
+    }, 0)
+    return () => window.clearTimeout(timer)
   }, [routerLocation.search, customerClaims, user?.id])
 
   function closeDeal() {
