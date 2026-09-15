@@ -111,7 +111,7 @@ test('US0096: customers retain access to ended claims and their notification ope
   ])
 
   assert.match(customerApi, /rpc\('get_my_business_deal_claims'/)
-  assert.match(dealsPage, /Your claimed deals/)
+  assert.match(dealsPage, /Claim history/)
   assert.match(dealsPage, /Claim remains redeemable/)
   assert.match(dealsPage, /URLSearchParams[\s\S]*?\.get\(\s*'claim',?\s*\)/)
   assert.match(navigation, /deal_ended: BadgePercent/)
