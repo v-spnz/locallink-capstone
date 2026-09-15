@@ -1,0 +1,83 @@
+.active-claim-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 6px 20px;
+  border: none;
+  border-bottom: 1px solid #e4e9fb;
+  background: linear-gradient(135deg, #eef2ff 0%, #f5f7ff 100%);
+  color: #2f4ac4;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: background 160ms ease;
+}
+
+.active-claim-banner:hover {
+  background: linear-gradient(135deg, #e4e9fb 0%, #eef2ff 100%);
+}
+
+.active-claim-banner-group {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.active-claim-banner-text {
+  font-size: 11.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.active-claim-banner-text strong {
+  color: #202a3a;
+}
+
+.active-claim-banner-divider {
+  width: 1px;
+  height: 14px;
+  background: #c7d1f0;
+  flex-shrink: 0;
+}
+
+.active-claim-banner-cta {
+  flex-shrink: 0;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #2f4ac4;
+}
+
+.active-claim-banner-timer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.active-claim-banner-timer-label {
+  font-size: 10.5px;
+  color: #5568c9;
+}
+
+.active-claim-banner-countdown {
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .active-claim-banner {
+    gap: 8px;
+    padding: 6px 12px;
+  }
+
+  .active-claim-banner-timer-label {
+    display: none;
+  }
+}

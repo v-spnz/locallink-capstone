@@ -1,4 +1,4 @@
-import { BadgeCheck, Bookmark, Clock3, MapPin, TicketCheck } from 'lucide-react'
+import { Bookmark, MapPin } from 'lucide-react'
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import {
@@ -10,8 +10,8 @@ import {
   fetchDealClaim,
   fetchDealClaimCount,
   fetchCustomerDealClaims,
+  fetchMySavedDeals,
   fetchPublishedDealById,
-  fetchSavedDealIds,
   saveDeal,
   unsaveDeal,
 } from '../../features/deals/api/customerDeals'
@@ -19,8 +19,8 @@ import DealDetailModal from '../../features/deals/components/DealDetailModal'
 import Modal from '../../components/ui/Modal'
 import useAuth from '../../auth/useAuth'
 import { isClaimActive } from '../../features/deals/claimStatus'
-import { formatCountdown } from '../../features/deals/countdown'
 import '../../features/location/discovery.css'
+import '../../features/service-marketplace/ServiceMarketplace.css'
 
 const DiscoveryMap = lazy(
   () => import('../../features/location/components/DiscoveryMap'),
@@ -47,7 +47,7 @@ export default function Deals() {
   const [isLoadingLocation, setIsLoadingLocation] = useState(true)
   const [isSearching, setIsSearching] = useState(false)
   const [error, setError] = useState('')
-  const [savedDealIds, setSavedDealIds] = useState([])
+  const [savedDeals, setSavedDeals] = useState([])
   const [selectedDeal, setSelectedDeal] = useState(null)
   const [selectedBusinessRow, setSelectedBusinessRow] = useState(null)
   const [isDealLoading, setIsDealLoading] = useState(false)
@@ -103,9 +103,9 @@ export default function Deals() {
   useEffect(() => {
     let active = true
     if (!user?.id) return undefined
-    fetchSavedDealIds(user.id)
-      .then((ids) => {
-        if (active) setSavedDealIds(ids)
+    fetchMySavedDeals()
+      .then((deals) => {
+        if (active) setSavedDeals(deals)
       })
       .catch((savedError) => {
         console.error('Unable to load saved deals.', savedError)
@@ -121,34 +121,7 @@ export default function Deals() {
 
     fetchCustomerDealClaims()
       .then((claims) => {
-        if (!active) return
-        setCustomerClaims(claims)
-
-        const requestedDealId = new URLSearchParams(window.location.search).get(
-          'claim',
-        )
-        const requestedClaim = claims.find(
-          (claim) => claim.deal_id === requestedDealId,
-        )
-        if (requestedClaim) {
-          setSelectedDeal(requestedClaim)
-          setSelectedClaim({
-            id: requestedClaim.claim_id,
-            deal_id: requestedClaim.deal_id,
-            claim_reference: requestedClaim.claim_reference,
-            redemption_code: requestedClaim.redemption_code,
-            claimed_at: requestedClaim.claimed_at,
-            expires_at: requestedClaim.expires_at,
-            redeemed_at: requestedClaim.redeemed_at,
-          })
-          setSelectedBusinessRow({
-            business_name: requestedClaim.business_name,
-            formatted_address: requestedClaim.formatted_address,
-            category: requestedClaim.category,
-            suburb: requestedClaim.suburb,
-            distance_km: null,
-          })
-        }
+        if (active) setCustomerClaims(claims)
       })
       .catch((claimsError) => {
         console.error('Unable to load customer deal claims.', claimsError)
@@ -165,12 +138,10 @@ export default function Deals() {
     return () => clearInterval(interval)
   }, [])
 
-  const activeClaims = customerClaims.filter((claim) =>
-    isClaimActive(claim, now),
-  )
   const historicalClaims = customerClaims.filter(
     (claim) => !isClaimActive(claim, now),
   )
+  const savedDealIds = savedDeals.map((deal) => deal.deal_id)
 
   const openDeal = useCallback(
     async (business) => {
@@ -210,24 +181,6 @@ export default function Deals() {
     return () => window.clearTimeout(timer)
   }, [openDeal, routerLocation.state?.openDeal, user?.id])
 
-  function closeDeal() {
-    setSelectedDeal(null)
-    setSelectedBusinessRow(null)
-    setSelectedClaim(null)
-    setClaimError('')
-    const url = new URL(window.location.href)
-    let changed = false
-    if (url.searchParams.has('claim')) {
-      url.searchParams.delete('claim')
-      changed = true
-    }
-    if (url.searchParams.has('deal')) {
-      url.searchParams.delete('deal')
-      changed = true
-    }
-    if (changed) window.history.replaceState(window.history.state, '', url)
-  }
-
   async function openClaimedDeal(claim) {
     setSelectedDeal(claim)
     setSelectedClaim({
@@ -257,6 +210,66 @@ export default function Deals() {
       )
     } catch (claimCountError) {
       console.error('Unable to load claim count.', claimCountError)
+    }
+  }
+
+  // Reacts to the URL's ?claim= param on every navigation, not just mount —
+  // so clicking the global ActiveClaimBanner while already on this page
+  // still reopens the modal, since the route itself doesn't change.
+  useEffect(() => {
+    if (!user?.id) return
+    const requestedDealId = new URLSearchParams(routerLocation.search).get(
+      'claim',
+    )
+    if (!requestedDealId) return
+    const requestedClaim = customerClaims.find(
+      (claim) => claim.deal_id === requestedDealId,
+    )
+    if (!requestedClaim) return
+    openClaimedDeal(requestedClaim)
+  }, [routerLocation.search, customerClaims, user?.id])
+
+  function closeDeal() {
+    setSelectedDeal(null)
+    setSelectedBusinessRow(null)
+    setSelectedClaim(null)
+    setClaimError('')
+    const url = new URL(window.location.href)
+    let changed = false
+    if (url.searchParams.has('claim')) {
+      url.searchParams.delete('claim')
+      changed = true
+    }
+    if (url.searchParams.has('deal')) {
+      url.searchParams.delete('deal')
+      changed = true
+    }
+    if (changed) window.history.replaceState(window.history.state, '', url)
+  }
+
+  async function openSavedDeal(savedDeal) {
+    setSelectedBusinessRow({
+      business_name: savedDeal.business_name,
+      formatted_address: savedDeal.formatted_address,
+      category: savedDeal.category,
+      suburb: null,
+      distance_km: savedDeal.distance_km,
+    })
+    setIsDealLoading(true)
+    setClaimError('')
+    try {
+      const [fullDeal, existingClaim] = await Promise.all([
+        fetchPublishedDealById(savedDeal.deal_id),
+        fetchDealClaim(user.id, savedDeal.deal_id),
+      ])
+      setSelectedDeal(fullDeal)
+      setSelectedClaim(existingClaim)
+    } catch (dealError) {
+      console.error('Unable to load deal details.', dealError)
+      setError('Unable to load this deal right now.')
+      setSelectedBusinessRow(null)
+    } finally {
+      setIsDealLoading(false)
     }
   }
 
@@ -290,18 +303,14 @@ export default function Deals() {
   async function toggleSaveDeal(dealId) {
     if (!user?.id) return
     const wasSaved = savedDealIds.includes(dealId)
-    setSavedDealIds((current) =>
-      wasSaved ? current.filter((id) => id !== dealId) : [...current, dealId],
-    )
     try {
       if (wasSaved) await unsaveDeal(user.id, dealId)
       else await saveDeal(user.id, dealId)
       setError('')
+      const refreshed = await fetchMySavedDeals()
+      setSavedDeals(refreshed)
     } catch (saveError) {
       console.error('Unable to update saved deal.', saveError)
-      setSavedDealIds((current) =>
-        wasSaved ? [...current, dealId] : current.filter((id) => id !== dealId),
-      )
       setError(
         saveError.message?.includes('up to 3 deals')
           ? 'You can only save up to 3 deals at a time. Remove one to save another.'
@@ -328,34 +337,6 @@ export default function Deals() {
         )}
       </div>
 
-      {activeClaims.length > 0 && (
-        <section
-          className="active-claim-strip"
-          aria-label="Deals you're currently redeeming"
-        >
-          {activeClaims.map((claim) => {
-            const msRemaining =
-              new Date(claim.expires_at).getTime() - now.getTime()
-            return (
-              <button
-                type="button"
-                className="active-claim-row"
-                key={claim.claim_id}
-                onClick={() => openClaimedDeal(claim)}
-              >
-                <Clock3 size={16} aria-hidden="true" />
-                <span className="active-claim-text">
-                  Active claim: <strong>{claim.title}</strong>
-                </span>
-                <span className="active-claim-countdown">
-                  {formatCountdown(msRemaining)} remaining
-                </span>
-              </button>
-            )
-          })}
-        </section>
-      )}
-
       <div className="sm-tabs">
         <button
           type="button"
@@ -366,11 +347,10 @@ export default function Deals() {
         </button>
         <button
           type="button"
-          className={`sm-tab${activeTab === 'claims' ? ' sm-tab--active' : ''}`}
-          onClick={() => setActiveTab('claims')}
+          className={`sm-tab${activeTab === 'wallet' ? ' sm-tab--active' : ''}`}
+          onClick={() => setActiveTab('wallet')}
         >
-          My Claims
-          <span className="sm-tab-count">{historicalClaims.length}</span>
+          Wallet
         </button>
       </div>
 
@@ -438,100 +418,111 @@ export default function Deals() {
                 now.
               </div>
             ) : (
-              <div className="business-grid discovery-grid discovery-card-grid">
-                {businesses.map((business) => (
-                  <div
-                    className={`business-card discovery-business-card${business.deal_id ? ' business-card-clickable' : ''}`}
-                    key={business.business_id}
-                    onClick={() => openDeal(business)}
-                    role={business.deal_id ? 'button' : undefined}
-                    tabIndex={business.deal_id ? 0 : undefined}
-                  >
-                    <div className="discovery-card-media">
-                      {business.deal_image_url ? (
-                        <img
-                          src={business.deal_image_url}
-                          alt=""
-                          className="discovery-card-photo"
-                        />
-                      ) : (
-                        <span
-                          className="discovery-card-icon"
-                          aria-hidden="true"
+              <div className="discovery-category-sections">
+                {groupBusinessesByCategory(businesses).map(({ category, items }) => (
+                  <section className="discovery-category-section" key={category}>
+                    <h3 className="discovery-category-heading">
+                      <span aria-hidden="true">{getCategoryEmoji(category)}</span>
+                      {category}
+                      <span className="discovery-category-count">{items.length}</span>
+                    </h3>
+                    <div className="business-grid discovery-grid discovery-card-grid">
+                      {items.map((business) => (
+                        <div
+                          className={`business-card discovery-business-card${business.deal_id ? ' business-card-clickable' : ''}`}
+                          key={business.business_id}
+                          onClick={() => openDeal(business)}
+                          role={business.deal_id ? 'button' : undefined}
+                          tabIndex={business.deal_id ? 0 : undefined}
                         >
-                          {getCategoryEmoji(business.category)}
-                        </span>
-                      )}
-                      {business.deal_is_sold_out && (
-                        <span className="discovery-sold-out-badge">
-                          Sold out
-                        </span>
-                      )}
-                      {business.deal_id && (
-                        <button
-                          type="button"
-                          className={`discovery-save-btn${savedDealIds.includes(business.deal_id) ? ' is-saved' : ''}`}
-                          aria-label={
-                            savedDealIds.includes(business.deal_id)
-                              ? 'Remove from saved deals'
-                              : 'Save this deal'
-                          }
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            toggleSaveDeal(business.deal_id)
-                          }}
-                        >
-                          <Bookmark
-                            aria-hidden="true"
-                            fill={
-                              savedDealIds.includes(business.deal_id)
-                                ? 'currentColor'
-                                : 'none'
-                            }
-                          />
-                        </button>
-                      )}
-                    </div>
+                          <div className="discovery-card-media">
+                            {business.deal_image_url ? (
+                              <img
+                                src={business.deal_image_url}
+                                alt=""
+                                className="discovery-card-photo"
+                              />
+                            ) : (
+                              <span
+                                className="discovery-card-icon"
+                                aria-hidden="true"
+                              >
+                                {getCategoryEmoji(business.category)}
+                              </span>
+                            )}
+                            {business.deal_is_sold_out && (
+                              <span className="discovery-sold-out-badge">
+                                Sold out
+                              </span>
+                            )}
+                            {business.deal_id && (
+                              <button
+                                type="button"
+                                className={`discovery-save-btn${savedDealIds.includes(business.deal_id) ? ' is-saved' : ''}`}
+                                aria-label={
+                                  savedDealIds.includes(business.deal_id)
+                                    ? 'Remove from wallet'
+                                    : 'Save to wallet'
+                                }
+                                onClick={(event) => {
+                                  event.stopPropagation()
+                                  toggleSaveDeal(business.deal_id)
+                                }}
+                              >
+                                <Bookmark
+                                  aria-hidden="true"
+                                  fill={
+                                    savedDealIds.includes(business.deal_id)
+                                      ? 'currentColor'
+                                      : 'none'
+                                  }
+                                />
+                              </button>
+                            )}
+                          </div>
 
-                    <div className="business-card-body">
-                      <div className="business-card-name">
-                        {business.business_name}
-                      </div>
-                      <div className="business-card-category">
-                        {business.category}
-                      </div>
-                      <div className="business-card-desc">
-                        {business.deal_description || business.description}
-                      </div>
-                      {business.deal_title && (
-                        <div className="business-card-deal">
-                          Deal: {business.deal_title}
+                          <div className="business-card-body">
+                            <div className="business-card-name">
+                              {business.business_name}
+                            </div>
+                            <div className="business-card-category">
+                              {business.category}
+                            </div>
+                            <div className="business-card-desc">
+                              {business.deal_description || business.description}
+                            </div>
+                            {business.deal_title && (
+                              <div className="business-card-deal">
+                                Deal: {business.deal_title}
+                              </div>
+                            )}
+
+                            <div className="discovery-card-footer">
+                              <span className="business-card-address">
+                                {business.formatted_address}
+                              </span>
+                              <span className="business-card-distance discovery-distance-badge">
+                                {Number(business.distance_km).toFixed(1)} km
+                              </span>
+                            </div>
+
+                            {business.deal_id && (
+                              <button
+                                type="button"
+                                className="discovery-view-deal-btn"
+                                onClick={(event) => {
+                                  event.stopPropagation()
+                                  openDeal(business)
+                                }}
+                              >
+                                View Deal
+                              </button>
+                            )}
+                          </div>
                         </div>
-                      )}
-
-                      <div className="discovery-card-footer">
-                        <span className="business-card-address">
-                          {business.formatted_address}
-                        </span>
-                        <span className="business-card-distance discovery-distance-badge">
-                          {Number(business.distance_km).toFixed(1)} km
-                        </span>
-                      </div>
-
-                      {business.deal_id && (
-                        <button
-                          type="button"
-                          className="discovery-view-deal-btn"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            openDeal(business)
-                          }}
-                        >
-                          View Deal
-                        </button>
-                      )}
+                      ))}
                     </div>
-                  </div>
+                  </section>
                 ))}
               </div>
             )}
@@ -539,58 +530,111 @@ export default function Deals() {
         </>
       )}
 
-      {activeTab === 'claims' && (
-        <section
-          className="customer-deal-claims"
-          aria-labelledby="customer-deal-claims-title"
-        >
-          <div className="customer-deal-claims-heading">
-            <span aria-hidden="true">
-              <TicketCheck />
-            </span>
-            <div>
-              <h3 id="customer-deal-claims-title">Your claimed deals</h3>
-              <p>Claims and redemption records stay available here.</p>
-            </div>
-          </div>
-          {historicalClaims.length === 0 ? (
-            <div className="empty-state">
-              No past claims yet. Claims move here once they're redeemed,
-              expire, or the deal ends early.
-            </div>
-          ) : (
-            <div className="customer-deal-claim-list">
-              {historicalClaims.map((claim) => {
-                const endedEarly = claim.status === 'ended_early'
-                return (
-                  <button
-                    type="button"
-                    className={`customer-deal-claim${endedEarly ? ' is-ended-early' : ''}`}
-                    onClick={() => openClaimedDeal(claim)}
-                    key={claim.claim_id}
-                  >
-                    <span
-                      className="customer-deal-claim-icon"
-                      aria-hidden="true"
+      {activeTab === 'wallet' && (
+        <section className="wallet-section" aria-label="Your wallet">
+          <div className="wallet-section-block">
+            <h3 className="wallet-section-title">Saved deals</h3>
+            {savedDeals.length === 0 ? (
+              <div className="empty-state">
+                No saved deals yet. Tap the bookmark icon on a deal to save it
+                here.
+              </div>
+            ) : (
+              <div className="wallet-saved-grid">
+                {savedDeals.map((saved) => (
+                  <div className="wallet-saved-card" key={saved.deal_id}>
+                    <button
+                      type="button"
+                      className="wallet-saved-media"
+                      onClick={() => openSavedDeal(saved)}
+                      aria-label={`View ${saved.deal_title}`}
                     >
-                      {claim.redeemed_at ? <BadgeCheck /> : <Clock3 />}
-                    </span>
-                    <span>
-                      <strong>{claim.title}</strong>
-                      <small>{claim.business_name}</small>
-                    </span>
-                    <span className="customer-deal-claim-status">
-                      {claim.redeemed_at
-                        ? 'Redeemed'
-                        : endedEarly
-                          ? 'Claim remains redeemable'
-                          : 'Expired'}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          )}
+                      {saved.deal_image_url ? (
+                        <img src={saved.deal_image_url} alt="" />
+                      ) : (
+                        <span aria-hidden="true">
+                          {getCategoryEmoji(saved.category)}
+                        </span>
+                      )}
+                    </button>
+                    <div className="wallet-saved-body">
+                      <div className="wallet-saved-business">
+                        {saved.business_name}
+                      </div>
+                      <div className="wallet-saved-title">
+                        {saved.deal_title}
+                      </div>
+                      {saved.distance_km != null && (
+                        <div className="wallet-saved-distance">
+                          {Number(saved.distance_km).toFixed(1)} km
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      className="wallet-saved-remove"
+                      aria-label="Remove from wallet"
+                      onClick={() => toggleSaveDeal(saved.deal_id)}
+                    >
+                      <Bookmark aria-hidden="true" fill="currentColor" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="wallet-section-block">
+            <h3 className="wallet-section-title">Claim history</h3>
+            {historicalClaims.length === 0 ? (
+              <div className="empty-state">
+                No past claims yet. Claims move here once they're redeemed,
+                expire, or the deal ends early.
+              </div>
+            ) : (
+              <details className="sm-past-jobs">
+                <summary>
+                  <span className="sm-past-chev">▶</span> Past deals
+                </summary>
+                <div className="sm-past-jobs-body">
+                  {historicalClaims.map((claim) => {
+                    const endedEarly = claim.status === 'ended_early'
+                    return (
+                      <div
+                        className="sm-past-row"
+                        key={claim.claim_id}
+                        onClick={() => openClaimedDeal(claim)}
+                      >
+                        <span
+                          className="sm-past-icon sm-past-icon--default"
+                          aria-hidden="true"
+                        >
+                          {getCategoryEmoji(claim.category)}
+                        </span>
+                        <div className="sm-past-row-text">
+                          <div className="sm-past-row-title">
+                            {claim.title}
+                          </div>
+                          <div className="sm-past-row-sub">
+                            {claim.redeemed_at
+                              ? 'Redeemed'
+                              : endedEarly
+                                ? 'Claim remains redeemable'
+                                : 'Expired'}
+                            {' · '}
+                            {claim.business_name}
+                          </div>
+                        </div>
+                        <span className="sm-past-row-cat">
+                          {claim.category}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </details>
+            )}
+          </div>
         </section>
       )}
 
@@ -645,4 +689,23 @@ function getCategoryEmoji(category) {
     Entertainment: '🎟️',
   }
   return categoryIcons[category] || '📍'
+}
+
+function groupBusinessesByCategory(businesses) {
+  const groups = new Map()
+  businesses.forEach((business) => {
+    const category = business.category || 'Other'
+    if (!groups.has(category)) groups.set(category, [])
+    groups.get(category).push(business)
+  })
+
+  const ordered = []
+  FILTERS.filter((filter) => filter !== 'All').forEach((category) => {
+    if (groups.has(category)) {
+      ordered.push({ category, items: groups.get(category) })
+      groups.delete(category)
+    }
+  })
+  groups.forEach((items, category) => ordered.push({ category, items }))
+  return ordered
 }

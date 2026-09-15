@@ -406,7 +406,7 @@ export default function DealDetailModal({
               aria-hidden="true"
               fill={isSaved ? 'currentColor' : 'none'}
             />
-            {isSaved ? 'Saved' : 'Save'}
+            {isSaved ? 'In wallet' : 'Save to wallet'}
           </button>
           <button
             type="button"
@@ -429,7 +429,7 @@ export default function DealDetailModal({
         </div>
         {!isSaved && (
           <p className="mt-2 text-xs text-[var(--text-muted)]">
-            You can save up to 3 deals at a time.
+            You can keep up to 3 deals in your wallet at a time.
           </p>
         )}
       </div>
