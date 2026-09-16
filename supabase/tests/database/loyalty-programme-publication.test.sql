@@ -1,12 +1,12 @@
 begin;
 
-select plan(10);
+select plan(12);
 
 select has_function(
   'public',
   'save_business_loyalty_programme',
   array[
-    'uuid', 'uuid', 'text', 'text', 'text', 'integer', 'text', 'text',
+    'uuid', 'uuid', 'text', 'text', 'text', 'numeric', 'numeric', 'text',
     'date', 'date', 'text'
   ],
   'the atomic loyalty programme save and publication function exists'
@@ -25,10 +25,10 @@ select lives_ok(
       '47000000-0000-0000-0000-000000000107',
       '41000000-0000-0000-0000-000000000001',
       'Morning coffee rewards',
-      'stamp',
-      'One regular coffee',
+      'stamp_card',
+      null,
       8,
-      'Earn one stamp with every hot drink purchased.',
+      null,
       'One reward per customer.',
       (now() at time zone 'Pacific/Auckland')::date + 1,
       (now() at time zone 'Pacific/Auckland')::date + 30,
@@ -64,10 +64,10 @@ select lives_ok(
       '47000000-0000-0000-0000-000000000109',
       '41000000-0000-0000-0000-000000000001',
       'Active lunch rewards',
-      'points',
-      'A free lunch item',
-      500,
-      'Earn ten points for every dollar spent.',
+      'spend_and_save',
+      null,
+      50,
+      5,
       null,
       (now() at time zone 'Pacific/Auckland')::date,
       null,
@@ -87,15 +87,44 @@ select is(
   'a programme starting today is stored as Active'
 );
 
+select lives_ok(
+  $$
+    select public.save_business_loyalty_programme(
+      '47000000-0000-0000-0000-000000000110',
+      '41000000-0000-0000-0000-000000000001',
+      'Lunch reward',
+      'spend_and_reward',
+      'sandwich',
+      25,
+      null,
+      null,
+      (now() at time zone 'Pacific/Auckland')::date,
+      null,
+      'published'
+    )
+  $$,
+  'a spend-and-reward programme can be published'
+);
+
+select is(
+  (
+    select earning_rules
+    from public.business_loyalty_programmes
+    where id = '47000000-0000-0000-0000-000000000110'
+  ),
+  'Spend $25 to receive a free sandwich.',
+  'the customer-facing earning rules are generated from the template'
+);
+
 select throws_ok(
   $$
     select public.save_business_loyalty_programme(
       '47000000-0000-0000-0000-000000000108',
       '41000000-0000-0000-0000-000000000001',
       'Incomplete publication',
-      'stamp',
+      'stamp_card',
       null,
-      8,
+      null,
       null,
       null,
       (now() at time zone 'Pacific/Auckland')::date,
@@ -141,10 +170,11 @@ select is(
     from public.business_loyalty_programmes
     where id in (
       '47000000-0000-0000-0000-000000000107',
-      '47000000-0000-0000-0000-000000000109'
+      '47000000-0000-0000-0000-000000000109',
+      '47000000-0000-0000-0000-000000000110'
     )
   ),
-  2::bigint,
+  3::bigint,
   'a consumer can view active loyalty programmes'
 );
 

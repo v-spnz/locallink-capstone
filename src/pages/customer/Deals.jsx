@@ -142,6 +142,42 @@ export default function Deals() {
     (claim) => !isClaimActive(claim, now),
   )
   const savedDealIds = savedDeals.map((deal) => deal.deal_id)
+  const hasRedeemableClaims = customerClaims.some(
+    (claim) =>
+      !claim.redeemed_at &&
+      claim.expires_at &&
+      new Date(claim.expires_at) > now,
+  )
+
+  useEffect(() => {
+    if (!user?.id || !hasRedeemableClaims) return undefined
+    let active = true
+
+    async function refreshClaims() {
+      try {
+        const claims = await fetchCustomerDealClaims()
+        if (!active) return
+        setCustomerClaims(claims)
+        setSelectedClaim((current) => {
+          if (!current) return current
+          const updated = claims.find((claim) => claim.claim_id === current.id)
+          if (!updated || updated.redeemed_at === current.redeemed_at)
+            return current
+          return { ...current, redeemed_at: updated.redeemed_at }
+        })
+      } catch (refreshError) {
+        console.error('Unable to refresh deal claims.', refreshError)
+      }
+    }
+
+    const interval = window.setInterval(refreshClaims, 5000)
+    window.addEventListener('focus', refreshClaims)
+    return () => {
+      active = false
+      window.clearInterval(interval)
+      window.removeEventListener('focus', refreshClaims)
+    }
+  }, [hasRedeemableClaims, user?.id])
 
   const openDeal = useCallback(
     async (business) => {
@@ -639,6 +675,44 @@ export default function Deals() {
               </details>
             )}
           </div>
+          {historicalClaims.length === 0 ? (
+            <div className="empty-state">
+              No past claims yet. Claims move here once they're redeemed,
+              expire, or the deal ends early.
+            </div>
+          ) : (
+            <div className="customer-deal-claim-list">
+              {historicalClaims.map((claim) => {
+                const endedEarly = claim.status === 'ended_early'
+                return (
+                  <button
+                    type="button"
+                    className={`customer-deal-claim${endedEarly ? ' is-ended-early' : ''}`}
+                    onClick={() => openClaimedDeal(claim)}
+                    key={claim.claim_id}
+                  >
+                    <span
+                      className="customer-deal-claim-icon"
+                      aria-hidden="true"
+                    >
+                      {claim.redeemed_at ? <BadgeCheck /> : <Clock3 />}
+                    </span>
+                    <span>
+                      <strong>{claim.title}</strong>
+                      <small>{claim.business_name}</small>
+                    </span>
+                    <span className="customer-deal-claim-status">
+                      {claim.redeemed_at
+                        ? 'Deal has been Redeemed'
+                        : endedEarly
+                          ? 'Claim remains redeemable'
+                          : 'Expired'}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </section>
       )}
 

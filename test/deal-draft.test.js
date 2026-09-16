@@ -30,7 +30,7 @@ const VALID_DEAL = {
   conditions: 'Dine-in only.',
   claimLimit: '100',
   exclusions: 'Excludes public holidays.',
-  redemptionInstructions: 'Show the deal in LocalLink before ordering.',
+  redemptionInstructions: '',
 }
 
 test('AC1-6 and AC8-9: a complete agreed deal is valid for publication', () => {
@@ -108,13 +108,31 @@ test('AC1-6 and AC8-9: the form exposes every deal draft field', async () => {
     'Conditions',
     'Total claim limit',
     'Exclusions',
-    'Redemption instructions',
+    'Redemption method',
   ]) {
     assert.match(form, new RegExp(expected, 'i'))
   }
 
   assert.match(form, /include GST/i)
   assert.doesNotMatch(form, /GST excluded/i)
+  assert.doesNotMatch(form, /onChange\('redemptionInstructions'/)
+})
+
+test('the fixed in-store redemption method is supplied when a deal is saved', async () => {
+  const [form, api] = await Promise.all([
+    readFile(
+      new URL('../src/features/deals/components/DealForm.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/features/deals/api/businessDeals.js', import.meta.url),
+      'utf8',
+    ),
+  ])
+
+  assert.deepEqual(validateDeal(VALID_DEAL, { forPublication: true }), {})
+  assert.match(form, /DEAL_REDEMPTION_METHOD/)
+  assert.match(api, /redemption_instructions: DEAL_REDEMPTION_METHOD/)
 })
 
 test('the deal form automatically uses one concise business address', async () => {

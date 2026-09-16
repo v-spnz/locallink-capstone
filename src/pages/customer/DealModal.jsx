@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { X, CheckCircle2, Ban, Tag, CalendarDays, MapPin } from 'lucide-react'
+import { DEAL_REDEMPTION_METHOD } from '../../features/deals/constants'
 
 export default function DealModal({
   deal,
@@ -115,9 +116,9 @@ export default function DealModal({
           <div className="dd-redeem-box">
             <div className="dd-redeem-title">
               <Tag aria-hidden="true" />
-              How to redeem
+              Redemption method
             </div>
-            <p>{deal.howToRedeem}</p>
+            <p>{DEAL_REDEMPTION_METHOD}</p>
           </div>
 
           <div className="dd-conditions">

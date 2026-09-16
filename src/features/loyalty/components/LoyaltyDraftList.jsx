@@ -8,6 +8,11 @@ import {
 } from 'lucide-react'
 import localBusinessNeighbourhood from '../../../assets/images/local-business-neighbourhood.jpg'
 import Button from '../../../components/ui/Button'
+import {
+  getCustomerReward,
+  getProgrammeTypeLabel,
+  getRewardTarget,
+} from '../businessLoyaltyTemplates'
 
 function formatUpdatedAt(value) {
   if (!value) return 'Not saved yet'
@@ -17,12 +22,6 @@ function formatUpdatedAt(value) {
     month: 'short',
     year: 'numeric',
   }).format(new Date(value))
-}
-
-function getProgrammeTypeLabel(type) {
-  if (type === 'stamp') return 'Stamp programme'
-  if (type === 'points') return 'Points programme'
-  return 'Programme type not set'
 }
 
 function getStatusLabel(status) {
@@ -214,7 +213,7 @@ export default function LoyaltyDraftList({
                 <small>{getProgrammeTypeLabel(programme.programmeType)}</small>
                 <h3>{programme.name || 'Untitled loyalty programme'}</h3>
                 <p>
-                  {programme.rewardDescription ||
+                  {getCustomerReward(programme) ||
                     'Add the reward customers can work towards.'}
                 </p>
               </div>
@@ -223,7 +222,7 @@ export default function LoyaltyDraftList({
                   <dt>Target</dt>
                   <dd>
                     {programme.rewardThreshold
-                      ? `${programme.rewardThreshold} ${programme.programmeType === 'points' ? 'points' : 'stamps'}`
+                      ? getRewardTarget(programme)
                       : 'Not set'}
                   </dd>
                 </div>

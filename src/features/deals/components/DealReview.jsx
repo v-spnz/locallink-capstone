@@ -3,7 +3,11 @@ import Button from '../../../components/ui/Button'
 import GstIncluded from '../../../components/ui/GstIncluded'
 import Modal from '../../../components/ui/Modal'
 import { CalendarDays, CheckCircle2, MapPin, ReceiptText } from 'lucide-react'
-import { formatDealOffer, getOfferTypeLabel } from '../constants'
+import {
+  DEAL_REDEMPTION_METHOD,
+  formatDealOffer,
+  getOfferTypeLabel,
+} from '../constants'
 import { formatBusinessDealAddress } from '../businessLocation'
 
 function ReviewRow({ label, value }) {
@@ -141,10 +145,7 @@ export default function DealReview({
         <div className="deal-review-rows">
           <ReviewRow label="Conditions" value={deal.conditions} />
           <ReviewRow label="Exclusions" value={deal.exclusions} />
-          <ReviewRow
-            label="Redemption instructions"
-            value={deal.redemptionInstructions}
-          />
+          <ReviewRow label="Redemption method" value={DEAL_REDEMPTION_METHOD} />
         </div>
       </section>
       <div className="review-actions">

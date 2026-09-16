@@ -35,7 +35,7 @@
 
 .discovery-map {
   position: relative;
-  z-index: 1;
+  z-index: 0;
   height: 330px;
   margin-bottom: 16px;
   overflow: hidden;

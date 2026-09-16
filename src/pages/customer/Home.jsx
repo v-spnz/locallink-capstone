@@ -147,6 +147,28 @@ export default function Home() {
     isClaimActive(claim, now),
   )
 
+  useEffect(() => {
+    if (!user?.id || activeClaims.length === 0) return undefined
+    let active = true
+
+    async function refreshClaims() {
+      try {
+        const claims = await fetchCustomerDealClaims()
+        if (active) setCustomerClaims(claims)
+      } catch (error) {
+        console.error('Unable to refresh deal claims.', error)
+      }
+    }
+
+    const interval = window.setInterval(refreshClaims, 5000)
+    window.addEventListener('focus', refreshClaims)
+    return () => {
+      active = false
+      window.clearInterval(interval)
+      window.removeEventListener('focus', refreshClaims)
+    }
+  }, [activeClaims.length, user?.id])
+
   const displayedJobs = user ? accountJobs : previewJobs
 
   const suburbBusinesses = suburbResults
