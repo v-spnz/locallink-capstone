@@ -10,6 +10,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '../../../components/ui/Button'
+import { DEAL_REDEMPTION_METHOD } from '../constants'
 
 function formatDateTime(value) {
   if (!value) return 'Not recorded'
@@ -252,12 +253,10 @@ export default function DealRedemptionPanel({
                 value={claim.claimReference}
               />
             </dl>
-            {claim.redemptionInstructions && (
-              <p className="deal-redemption-instructions">
-                <strong>Redemption instructions</strong>
-                {claim.redemptionInstructions}
-              </p>
-            )}
+            <p className="deal-redemption-instructions">
+              <strong>Redemption method</strong>
+              {DEAL_REDEMPTION_METHOD}
+            </p>
             <div className="deal-redemption-review-actions">
               <Button
                 variant="secondary"

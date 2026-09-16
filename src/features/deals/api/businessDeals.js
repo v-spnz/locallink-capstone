@@ -1,5 +1,6 @@
 import { supabase } from '../../../lib/supabase'
 import { selectBusinessDealLocation } from '../businessLocation'
+import { DEAL_REDEMPTION_METHOD } from '../constants'
 
 const DEAL_FIELDS = `
   id,
@@ -147,7 +148,7 @@ export async function saveBusinessDeal({ businessId, deal, status = 'draft' }) {
     conditions: nullableText(deal.conditions),
     claim_limit: deal.claimLimit ? Number(deal.claimLimit) : null,
     exclusions: nullableText(deal.exclusions),
-    redemption_instructions: nullableText(deal.redemptionInstructions),
+    redemption_instructions: DEAL_REDEMPTION_METHOD,
   }
 
   const { data: savedDealId, error: saveError } = await supabase.rpc(

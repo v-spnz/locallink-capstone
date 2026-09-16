@@ -8,6 +8,8 @@ export const DEAL_CATEGORIES = [
   'Other',
 ]
 
+export const DEAL_REDEMPTION_METHOD = 'Redeem with code or QR in store.'
+
 export const DEAL_OFFER_TYPES = [
   { value: 'percentage_discount', label: 'Percentage discount' },
   { value: 'fixed_discount', label: 'Fixed dollar discount' },

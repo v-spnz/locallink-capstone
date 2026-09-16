@@ -149,22 +149,5 @@ export function validateDeal(deal, { forPublication = false } = {}) {
       errors[field] = `${label} cannot exceed 1,000 characters.`
   }
 
-  if (forPublication)
-    requireText(
-      errors,
-      deal,
-      'redemptionInstructions',
-      'Redemption instructions',
-      3,
-      1000,
-    )
-  else if (
-    deal.redemptionInstructions &&
-    (deal.redemptionInstructions.trim().length < 3 ||
-      deal.redemptionInstructions.length > 1000)
-  )
-    errors.redemptionInstructions =
-      'Redemption instructions must be between 3 and 1,000 characters.'
-
   return errors
 }

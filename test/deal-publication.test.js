@@ -90,7 +90,7 @@ test('US0091: preview includes the consumer-facing details and an explicit confi
     'Business address',
     'Deal period',
     'Conditions',
-    'Redemption instructions',
+    'Redemption method',
   ]) {
     assert.match(review, new RegExp(expected, 'i'))
   }
@@ -201,10 +201,7 @@ test('business deals uses accessible management controls with responsive loading
   assert.match(list, /aria-pressed=/)
   assert.match(list, /deal-filter-actions[\s\S]*?New deal/)
   assert.match(list, /deal-list-pagination[\s\S]*?Showing[\s\S]*?Show more/)
-  assert.match(
-    styles,
-    /\.deal-filter-bar \{[\s\S]*?align-items: flex-start/,
-  )
+  assert.match(styles, /\.deal-filter-bar \{[\s\S]*?align-items: flex-start/)
   assert.match(list, /Ending soon/)
   assert.match(list, /deal-campaign-table/)
   assert.match(page, /<DealListSkeleton \/>/)

@@ -10,6 +10,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { useState } from 'react'
+import { DEAL_REDEMPTION_METHOD } from '../constants'
 
 function DetailRow({ label, value }) {
   return (
@@ -100,8 +101,8 @@ export default function DealDetails({
                 value={deal.claimLimit ? `${deal.claimLimit} total claims` : ''}
               />
               <DetailRow
-                label="How to redeem"
-                value={deal.redemptionInstructions}
+                label="Redemption method"
+                value={DEAL_REDEMPTION_METHOD}
               />
               {deal.endedAt && (
                 <DetailRow

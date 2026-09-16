@@ -277,6 +277,17 @@ body.business-surface .deal-status.is-ended_early {
   line-height: 1.5;
 }
 
+.deal-fixed-redemption {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  background: var(--bg);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 .deal-gst-policy {
   margin: 8px 0 0;
   color: var(--text-muted);

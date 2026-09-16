@@ -17,6 +17,7 @@ import { formatBusinessDealAddress } from '../businessLocation'
 import {
   DEAL_CATEGORIES,
   DEAL_OFFER_TYPES,
+  DEAL_REDEMPTION_METHOD,
   formatDealOffer,
 } from '../constants'
 import {
@@ -310,7 +311,7 @@ export default function DealForm({
       id: 'deal-redemption-section',
       label: 'Redemption',
       icon: LockKeyhole,
-      isComplete: Boolean(deal.claimLimit && deal.redemptionInstructions),
+      isComplete: Boolean(deal.claimLimit),
     },
   ]
   const completedSections = sectionProgress.filter(
@@ -603,7 +604,7 @@ export default function DealForm({
               </span>
               <div>
                 <h3 id="deal-redemption-heading">Conditions and redemption</h3>
-                <p>Set fair limits and explain how customers claim the deal.</p>
+                <p>Set fair limits for claims and redemptions.</p>
               </div>
             </div>
             <TextAreaField
@@ -636,15 +637,10 @@ export default function DealForm({
                 error={errors.exclusions}
               />
             </div>
-            <TextAreaField
-              id="deal-redemption"
-              label="Redemption instructions"
-              value={deal.redemptionInstructions}
-              onChange={(value) => onChange('redemptionInstructions', value)}
-              placeholder="Tell staff and customers exactly how this deal is claimed."
-              error={errors.redemptionInstructions}
-              required
-            />
+            <div className="form-group">
+              <span className="form-label">Redemption method</span>
+              <p className="deal-fixed-redemption">{DEAL_REDEMPTION_METHOD}</p>
+            </div>
           </section>
         </div>
       </div>

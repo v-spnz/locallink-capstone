@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import Modal from '../../../components/ui/Modal'
+import { DEAL_REDEMPTION_METHOD } from '../constants'
 import { formatCountdown } from '../countdown'
 import {
   formatRedemptionCode,
@@ -214,23 +215,21 @@ export default function DealDetailModal({
           </div>
         )}
 
-        {deal.redemption_instructions && (
-          <div className="mb-4 flex items-start gap-2 rounded-md bg-[var(--blue-light)] p-3">
-            <Tag
-              size={15}
-              className="mt-0.5 shrink-0 text-[var(--blue)]"
-              aria-hidden="true"
-            />
-            <div>
-              <div className="text-sm font-semibold text-[var(--text)]">
-                How to redeem
-              </div>
-              <p className="whitespace-pre-line text-sm text-[var(--text)]">
-                {deal.redemption_instructions}
-              </p>
+        <div className="mb-4 flex items-start gap-2 rounded-md bg-[var(--blue-light)] p-3">
+          <Tag
+            size={15}
+            className="mt-0.5 shrink-0 text-[var(--blue)]"
+            aria-hidden="true"
+          />
+          <div>
+            <div className="text-sm font-semibold text-[var(--text)]">
+              Redemption method
             </div>
+            <p className="whitespace-pre-line text-sm text-[var(--text)]">
+              {DEAL_REDEMPTION_METHOD}
+            </p>
           </div>
-        )}
+        </div>
 
         {deal.exclusions && (
           <div className="mb-4 rounded-md bg-[var(--bg)] p-3">
