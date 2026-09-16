@@ -141,6 +141,7 @@ export default function Deals() {
   const historicalClaims = customerClaims.filter(
     (claim) => !isClaimActive(claim, now),
   )
+  const savedDealIds = savedDeals.map((deal) => deal.deal_id)
   const hasRedeemableClaims = customerClaims.some(
     (claim) =>
       !claim.redeemed_at &&
