@@ -54,3 +54,57 @@ test('deal campaign rows retain the readable Services marketplace type scale', a
     /\.deal-card-timing > small \{[\s\S]*?font-size: 13px/,
   )
 })
+
+test('loyalty typography follows the Deals page type hierarchy', async () => {
+  const [loyaltyStyles, portalStyles] = await Promise.all([
+    readFile(
+      new URL('../src/features/loyalty/BusinessLoyalty.css', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/pages/business/BusinessPortal.css', import.meta.url),
+      'utf8',
+    ),
+  ])
+
+  assert.match(
+    loyaltyStyles,
+    /\.business-loyalty-page,[\s\S]*?font-family: var\(--font-ui\)/,
+  )
+  assert.match(
+    loyaltyStyles,
+    /\.business-loyalty-heading p \{[\s\S]*?font-size: 16px;[\s\S]*?line-height: 1\.55/,
+  )
+  assert.match(
+    loyaltyStyles,
+    /\.loyalty-list-toolbar h2 \{[\s\S]*?font-size: 22px/,
+  )
+  assert.match(
+    loyaltyStyles,
+    /\.loyalty-status-tabs button \{[\s\S]*?font-size: 14px/,
+  )
+  assert.match(
+    loyaltyStyles,
+    /\.loyalty-draft-card-copy h3 \{[\s\S]*?font-size: 20px;[\s\S]*?font-weight: 650/,
+  )
+  assert.match(
+    loyaltyStyles,
+    /\.loyalty-draft-card-copy p \{[\s\S]*?font-size: 14px;[\s\S]*?line-height: 1\.6/,
+  )
+  assert.match(
+    loyaltyStyles,
+    /\.loyalty-form-section-heading h2 \{[\s\S]*?font-size: 19px;[\s\S]*?font-weight: 750/,
+  )
+  assert.match(
+    loyaltyStyles,
+    /\.loyalty-review-heading h2 \{[\s\S]*?font-size: 25px/,
+  )
+  assert.match(
+    loyaltyStyles,
+    /\.loyalty-review-section-heading h3 \{[\s\S]*?font-size: 17px/,
+  )
+  assert.match(
+    portalStyles,
+    /\.portal-main-content:has\(> \.business-loyalty-page\) \{\s*max-width: 1080px/,
+  )
+})

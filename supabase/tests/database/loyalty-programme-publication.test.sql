@@ -1,6 +1,6 @@
 begin;
 
-select plan(12);
+select plan(18);
 
 select has_function(
   'public',
@@ -58,6 +58,26 @@ select is(
   'publication creates exactly one programme'
 );
 
+select is(
+  (
+    select earning_rules
+    from public.business_loyalty_programmes
+    where id = '47000000-0000-0000-0000-000000000107'
+  ),
+  'Complete 8 purchases or visits to receive the next one free.',
+  'US0104: stamp cards store a complete customer-facing earning condition'
+);
+
+select is(
+  (
+    select reward_description
+    from public.business_loyalty_programmes
+    where id = '47000000-0000-0000-0000-000000000107'
+  ),
+  'Next purchase or visit free',
+  'US0104: stamp card rewards are derived from the structured template'
+);
+
 select lives_ok(
   $$
     select public.save_business_loyalty_programme(
@@ -87,6 +107,26 @@ select is(
   'a programme starting today is stored as Active'
 );
 
+select is(
+  (
+    select earning_rules
+    from public.business_loyalty_programmes
+    where id = '47000000-0000-0000-0000-000000000109'
+  ),
+  'Spend $50 to receive $5 off.',
+  'US0104: spend-and-save programmes store the target and fixed discount'
+);
+
+select is(
+  (
+    select reward_description
+    from public.business_loyalty_programmes
+    where id = '47000000-0000-0000-0000-000000000109'
+  ),
+  '$5 off',
+  'US0104: spend-and-save rewards are derived from structured values'
+);
+
 select lives_ok(
   $$
     select public.save_business_loyalty_programme(
@@ -114,6 +154,37 @@ select is(
   ),
   'Spend $25 to receive a free sandwich.',
   'the customer-facing earning rules are generated from the template'
+);
+
+select throws_ok(
+  $$
+    select public.save_business_loyalty_programme(
+      '47000000-0000-0000-0000-000000000111',
+      '41000000-0000-0000-0000-000000000001',
+      'Invalid spend and save reward',
+      'spend_and_save',
+      null,
+      80,
+      100,
+      null,
+      (now() at time zone 'Pacific/Auckland')::date,
+      null,
+      'published'
+    )
+  $$,
+  '23514',
+  'Complete every required loyalty programme field before publishing',
+  'US0104: a discount greater than its spend target cannot be confirmed'
+);
+
+select is(
+  (
+    select count(*)
+    from public.business_loyalty_programmes
+    where id = '47000000-0000-0000-0000-000000000111'
+  ),
+  0::bigint,
+  'US0104: a rejected earning condition is not saved to another programme'
 );
 
 select throws_ok(

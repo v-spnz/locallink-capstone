@@ -339,10 +339,6 @@ export default function DealForm({
         <div className="deal-form-heading">
           <div>
             <h2>Draft your deal</h2>
-            <p>
-              Add the details customers need, choose the dates, then check the
-              finished deal before publishing.
-            </p>
           </div>
         </div>
       )}

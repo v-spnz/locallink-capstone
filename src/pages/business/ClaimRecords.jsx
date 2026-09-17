@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import BusinessPageLoader from '../../components/ui/BusinessPageLoader'
 import useBusinessDealRedemption from '../../features/deals/hooks/useBusinessDealRedemption'
 import { formatClaimReference } from '../../features/deals/claimReference'
 import '../../features/deals/DealRedemption.css'
@@ -129,12 +130,7 @@ export default function ClaimRecords() {
           </div>
 
           {records.isHistoryLoading ? (
-            <div className="deal-redemption-history-skeleton" role="status">
-              <span />
-              <span />
-              <span />
-              <span className="sr-only">Loading claim records</span>
-            </div>
+            <BusinessPageLoader contained label="Loading claim records…" />
           ) : records.historyError ? (
             <div className="deal-redemption-history-error" role="alert">
               <p>{records.historyError}</p>

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import localBusinessNeighbourhood from '../../../assets/images/local-business-neighbourhood.jpg'
 import Button from '../../../components/ui/Button'
+import BusinessPageLoader from '../../../components/ui/BusinessPageLoader'
 import {
   getCustomerReward,
   getProgrammeTypeLabel,
@@ -40,28 +41,7 @@ function getAvailabilityLabel(programme) {
 }
 
 export function LoyaltyDraftListSkeleton() {
-  return (
-    <section
-      className="loyalty-draft-list loyalty-draft-list-skeleton"
-      role="status"
-      aria-label="Loading loyalty programme drafts"
-    >
-      <div className="loyalty-list-toolbar" aria-hidden="true">
-        <span className="loyalty-skeleton-line is-heading" />
-        <span className="loyalty-skeleton-button" />
-      </div>
-      <div className="loyalty-draft-grid" aria-hidden="true">
-        {[0, 1].map((item) => (
-          <span className="loyalty-skeleton-card" key={item}>
-            <span className="loyalty-skeleton-line is-label" />
-            <span className="loyalty-skeleton-line is-title" />
-            <span className="loyalty-skeleton-line is-copy" />
-          </span>
-        ))}
-      </div>
-      <span className="sr-only">Loading loyalty programme drafts</span>
-    </section>
-  )
+  return <BusinessPageLoader label="Loading loyalty programmes…" />
 }
 
 const STATUS_TABS = [

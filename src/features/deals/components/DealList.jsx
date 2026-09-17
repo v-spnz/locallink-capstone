@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Button from '../../../components/ui/Button'
+import BusinessPageLoader from '../../../components/ui/BusinessPageLoader'
 import localBusinessNeighbourhood from '../../../assets/images/local-business-neighbourhood.jpg'
 import {
   ArrowRight,
@@ -195,42 +196,7 @@ function DealRow({
 }
 
 export function DealListSkeleton() {
-  return (
-    <section
-      className="placeholder-section deal-list-panel deal-list-skeleton"
-      role="status"
-      aria-label="Loading deals"
-    >
-      <div className="deal-list-header" aria-hidden="true">
-        <div>
-          <span className="deal-skeleton-line is-heading" />
-          <span className="deal-skeleton-line is-copy" />
-        </div>
-        <span className="deal-skeleton-button" />
-      </div>
-      <div className="deal-filter-bar" aria-hidden="true">
-        <div className="deal-filters deal-skeleton-filters">
-          {DEAL_STATUS_FILTERS.map(({ value }) => (
-            <span className="deal-skeleton-filter" key={value} />
-          ))}
-        </div>
-      </div>
-      <div className="deal-card-list" aria-hidden="true">
-        {[0, 1, 2].map((item) => (
-          <span className="deal-skeleton-row" key={item}>
-            <span className="deal-skeleton-image" />
-            <span className="deal-skeleton-copy">
-              <span className="deal-skeleton-line is-label" />
-              <span className="deal-skeleton-line is-title" />
-              <span className="deal-skeleton-line is-copy" />
-            </span>
-            <span className="deal-skeleton-line is-offer" />
-            <span className="deal-skeleton-line is-status" />
-          </span>
-        ))}
-      </div>
-    </section>
-  )
+  return <BusinessPageLoader label="Loading deals…" />
 }
 
 export default function DealList({

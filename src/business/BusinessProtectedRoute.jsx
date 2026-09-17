@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import useAuth from '../auth/useAuth'
+import BusinessPageLoader from '../components/ui/BusinessPageLoader'
 import useBusiness from './useBusiness'
 
 const CAPABILITY_FIELDS = {
@@ -23,7 +24,7 @@ export default function BusinessProtectedRoute({
   const location = useLocation()
 
   if (isAuthLoading || isBusinessLoading) {
-    return <div className="business-route-state">Loading business…</div>
+    return <BusinessPageLoader label="Loading your business…" fullPage />
   }
 
   if (!user) {

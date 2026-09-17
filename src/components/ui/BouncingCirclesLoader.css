@@ -1,0 +1,38 @@
+.bouncing-circles-loader {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.bouncing-circles-loader-dot {
+  flex: 0 0 auto;
+  margin: 2px;
+  border-radius: 999px;
+  animation-name: bouncing-circles-loader-bounce;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes bouncing-circles-loader-bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bouncing-circles-loader-dot {
+    animation: none;
+    opacity: 1;
+    transform: scale(0.72);
+  }
+}

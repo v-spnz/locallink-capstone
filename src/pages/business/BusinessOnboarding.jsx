@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import AuthPageHeader from '../../components/auth/AuthPageHeader'
+import BusinessPageLoader from '../../components/ui/BusinessPageLoader'
 import useBusiness from '../../business/useBusiness'
 import { supabase } from '../../lib/supabase'
 import AddressAutocomplete from '../../features/location/components/AddressAutocomplete'
@@ -265,7 +266,7 @@ export default function BusinessOnboarding() {
   }
 
   if (isLoading) {
-    return <div className="business-onboarding-state">Loading account…</div>
+    return <BusinessPageLoader label="Loading your account…" fullPage />
   }
 
   if (membership) {

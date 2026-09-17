@@ -1,6 +1,7 @@
 import { useLayoutEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import BusinessNavigation from '../../components/navigation/BusinessNavigation'
+import BusinessPageLoader from '../../components/ui/BusinessPageLoader'
 import PortalLayout from '../../layouts/PortalLayout'
 import ProtectedRoute from '../../auth/ProtectedRoute'
 import BusinessProvider from '../../business/BusinessProvider'
@@ -40,7 +41,11 @@ export default function BusinessPortal() {
         <Route
           path="onboarding"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute
+              loadingFallback={
+                <BusinessPageLoader label="Loading your account…" fullPage />
+              }
+            >
               <BusinessOnboarding />
             </ProtectedRoute>
           }
