@@ -1,13 +1,15 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import useAuth from './useAuth'
 
-export default function ProtectedRoute({ children }) {
+export default function ProtectedRoute({ children, loadingFallback }) {
   const { user, isLoading } = useAuth()
   const location = useLocation()
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: 'center', padding: 40 }}>Loading account…</div>
+      loadingFallback ?? (
+        <div style={{ textAlign: 'center', padding: 40 }}>Loading account…</div>
+      )
     )
   }
 

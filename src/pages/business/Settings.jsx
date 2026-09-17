@@ -22,6 +22,7 @@ import {
   useNavigate,
 } from 'react-router-dom'
 import useBusiness from '../../business/useBusiness'
+import BusinessPageLoader from '../../components/ui/BusinessPageLoader'
 import { supabase } from '../../lib/supabase'
 import { fetchManagedBusinessLocations } from '../../features/location/api/locations'
 import ClaimRecords from './ClaimRecords'
@@ -201,6 +202,7 @@ export default function Settings() {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState('')
   const [businessLocations, setBusinessLocations] = useState([])
+  const [areLocationsLoading, setAreLocationsLoading] = useState(true)
   const {
     business,
     membership,
@@ -265,6 +267,8 @@ export default function Settings() {
         if (active) setBusinessLocations(locations)
       } catch (error) {
         console.error('Unable to load business locations.', error)
+      } finally {
+        if (active) setAreLocationsLoading(false)
       }
     }
     loadLocations()
@@ -287,6 +291,10 @@ export default function Settings() {
     }
 
     navigate('/login', { replace: true })
+  }
+
+  if (areLocationsLoading) {
+    return <BusinessPageLoader label="Loading settings…" />
   }
 
   return (

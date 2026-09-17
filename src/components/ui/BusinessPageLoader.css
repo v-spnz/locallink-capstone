@@ -1,0 +1,26 @@
+.business-page-loader {
+  display: grid;
+  min-height: min(58dvh, 520px);
+  place-content: center;
+  justify-items: center;
+  gap: 1rem;
+  color: var(--business-muted, #69758a);
+}
+
+.business-page-loader.is-full-page {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 50% 44%, rgb(63 91 211 / 9%), transparent 28rem),
+    var(--business-canvas, #f7f8fb);
+}
+
+.business-page-loader.is-contained {
+  min-height: 20rem;
+}
+
+.business-page-loader p {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}

@@ -14,6 +14,7 @@ import {
 import { useEffect, useRef } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import useBusiness from '../../business/useBusiness'
+import BusinessPageLoader from '../../components/ui/BusinessPageLoader'
 import useBusinessMarketplace from '../../features/service-marketplace/hooks/useBusinessMarketplace'
 import { ServiceMarketplaceContent } from './ServiceMarketplacePage'
 
@@ -121,6 +122,10 @@ export default function Services() {
       icon: BriefcaseBusiness,
     },
   ]
+
+  if (Object.values(marketplaces).some(({ isLoading }) => isLoading)) {
+    return <BusinessPageLoader label="Loading services…" />
+  }
 
   function selectTab(type) {
     setSearchParams(type === 'leads' ? {} : { tab: type })

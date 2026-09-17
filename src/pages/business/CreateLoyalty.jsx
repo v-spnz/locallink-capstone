@@ -22,9 +22,6 @@ export default function CreateLoyalty() {
               ? 'Review loyalty programme'
               : 'Loyalty programmes'}
         </h1>
-        {loyalty.step === 'form' && (
-          <p>Build the programme at your pace and save it privately.</p>
-        )}
         {loyalty.step === 'review' && (
           <p>Confirm the reward details before customers can see them.</p>
         )}

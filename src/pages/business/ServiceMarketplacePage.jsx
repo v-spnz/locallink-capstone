@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { Check, ChevronDown, Funnel, Search, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import ActionToast from '../../components/ui/ActionToast'
+import BusinessPageLoader from '../../components/ui/BusinessPageLoader'
 import localBusinessNeighbourhood from '../../assets/images/local-business-neighbourhood.jpg'
 import ActiveJobCard from '../../features/service-marketplace/components/ActiveJobCard'
 import BusinessQuoteCard from '../../features/service-marketplace/components/BusinessQuoteCard'
@@ -406,23 +407,10 @@ export function ServiceMarketplaceContent({
         aria-busy={marketplace.isLoading}
       >
         {marketplace.isLoading && (
-          <div className="marketplace-loading" role="status">
-            <span className="marketplace-sr-only">
-              Loading {type === 'history' ? 'job history' : type}…
-            </span>
-            {[0, 1, 2].map((item) => (
-              <div
-                className="marketplace-skeleton"
-                key={item}
-                aria-hidden="true"
-              >
-                <span />
-                <span />
-                <span />
-                <span />
-              </div>
-            ))}
-          </div>
+          <BusinessPageLoader
+            contained
+            label={`Loading ${type === 'history' ? 'job history' : type}…`}
+          />
         )}
         {!marketplace.isLoading &&
           !marketplace.error &&
