@@ -15,7 +15,7 @@ export default function CreateLoyalty() {
   const activity = useBusinessLoyaltyActivity()
 
   return (
-    <div className="business-loyalty-page">
+    <div className="business-loyalty-page business-deals-page">
       <header className="page-header business-loyalty-heading">
         <h1>
           {loyalty.step === 'form'
