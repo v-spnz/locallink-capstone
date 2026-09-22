@@ -1,6 +1,5 @@
 import ActionToast from '../../components/ui/ActionToast'
 import LoyaltyActivityFeed from '../../features/loyalty/components/LoyaltyActivityFeed'
-import UnsavedChangesDialog from '../../components/ui/UnsavedChangesDialog'
 import LoyaltyDraftForm from '../../features/loyalty/components/LoyaltyDraftForm'
 import LoyaltyDraftList, {
   LoyaltyDraftListSkeleton,
@@ -9,38 +8,25 @@ import LoyaltyProgrammeReview from '../../features/loyalty/components/LoyaltyPro
 import useBusinessLoyaltyActivity from '../../features/loyalty/hooks/useBusinessLoyaltyActivity'
 import useBusinessLoyaltyProgrammes from '../../features/loyalty/hooks/useBusinessLoyaltyProgrammes'
 import '../../features/loyalty/BusinessLoyalty.css'
-import '../../features/deals/CreateDeal.css'
 
 export default function CreateLoyalty() {
   const loyalty = useBusinessLoyaltyProgrammes()
   const activity = useBusinessLoyaltyActivity()
 
   return (
-    <div className="business-loyalty-page business-deals-page">
+    <div className="business-loyalty-page">
       <header className="page-header business-loyalty-heading">
         <h1>
-          {loyalty.step === 'list'
-            ? 'Your loyalty programmes'
-            : loyalty.step === 'form'
-              ? loyalty.form.id
-                ? 'Edit programme'
-                : 'Create a loyalty programme'
-              : 'Review your loyalty programme'}
+          {loyalty.step === 'form'
+            ? loyalty.form.id
+              ? 'Edit loyalty programme'
+              : 'Create a loyalty programme'
+            : loyalty.step === 'review'
+              ? 'Review loyalty programme'
+              : 'Loyalty programmes'}
         </h1>
-        {loyalty.step !== 'list' && (
-          <>
-            {loyalty.step === 'form' && !loyalty.form.id && (
-              <p>
-                Shape the reward, set its dates, and preview it as you work.
-              </p>
-            )}
-            {loyalty.step === 'review' && (
-              <p>
-                Check the customer-facing details before the programme goes
-                live.
-              </p>
-            )}
-          </>
+        {loyalty.step === 'review' && (
+          <p>Confirm the reward details before customers can see them.</p>
         )}
       </header>
 
@@ -58,14 +44,22 @@ export default function CreateLoyalty() {
         )}
 
       {!loyalty.isLoading && loyalty.step === 'list' && (
-        <LoyaltyDraftList
-          programmes={loyalty.visibleProgrammes}
-          programmeCounts={loyalty.programmeCounts}
-          activeStatus={loyalty.activeStatus}
-          onStatusChange={loyalty.setActiveStatus}
-          onCreate={loyalty.handleStartNewProgramme}
-          onEdit={loyalty.handleEditProgramme}
-        />
+        <>
+          <LoyaltyDraftList
+            programmes={loyalty.visibleProgrammes}
+            programmeCounts={loyalty.programmeCounts}
+            activeStatus={loyalty.activeStatus}
+            onStatusChange={loyalty.setActiveStatus}
+            onCreate={loyalty.handleStartNewProgramme}
+            onEdit={loyalty.handleEditProgramme}
+          />
+          <LoyaltyActivityFeed
+            activity={activity.activity}
+            isLoading={activity.isLoading}
+            requestError={activity.requestError}
+            onRefresh={activity.loadActivity}
+          />
+        </>
       )}
 
       {loyalty.step === 'form' && (
@@ -97,15 +91,6 @@ export default function CreateLoyalty() {
           message={loyalty.feedback.message}
           variant={loyalty.feedback.variant}
           onDismiss={loyalty.dismissFeedback}
-        />
-      )}
-      {loyalty.isLeaveConfirmationOpen && (
-        <UnsavedChangesDialog
-          itemName="loyalty programme draft"
-          isSaving={loyalty.isSaving}
-          onCancel={loyalty.cancelLeave}
-          onDiscard={loyalty.discardAndLeave}
-          onSave={loyalty.saveDraftAndLeave}
         />
       )}
     </div>
