@@ -675,12 +675,14 @@ body.business-surface .deal-form-heading p {
 
 .deal-form-workspace {
   display: grid;
-  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 280px);
   align-items: start;
   gap: 24px;
 }
 
 .deal-draft-rail {
+  grid-column: 2;
+  grid-row: 1;
   position: sticky;
   top: 94px;
   display: grid;
@@ -917,6 +919,8 @@ body.business-surface .deal-form-heading p {
 }
 
 .deal-form-content {
+  grid-column: 1;
+  grid-row: 1;
   min-width: 0;
   display: grid;
   gap: 18px;
@@ -1080,9 +1084,16 @@ body.business-surface .business-deals-page .deal-form-actions {
   }
 
   .deal-draft-rail {
+    grid-column: 1;
+    grid-row: 2;
     position: static;
     grid-template-columns: minmax(0, 0.9fr) minmax(260px, 1.1fr);
     align-items: start;
+  }
+
+  .deal-form-content {
+    grid-column: 1;
+    grid-row: 1;
   }
 
   .deal-draft-nav {

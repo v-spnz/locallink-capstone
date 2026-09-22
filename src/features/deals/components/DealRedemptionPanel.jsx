@@ -1,15 +1,14 @@
 import {
   ArrowUpRight,
   BadgeCheck,
-  Camera,
   RotateCcw,
   ScanLine,
   ShieldCheck,
-  X,
 } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '../../../components/ui/Button'
+import CodeScanner from '../../../components/ui/CodeScanner'
 import { DEAL_REDEMPTION_METHOD } from '../constants'
 
 function formatDateTime(value) {
@@ -48,108 +47,6 @@ function ClaimDetail({ label, value }) {
     <div>
       <dt>{label}</dt>
       <dd>{value}</dd>
-    </div>
-  )
-}
-
-function CodeScanner({ onCodeScanned, onClose }) {
-  const videoRef = useRef(null)
-  const onCodeScannedRef = useRef(onCodeScanned)
-  const [scannerError, setScannerError] = useState('')
-
-  useEffect(() => {
-    onCodeScannedRef.current = onCodeScanned
-  }, [onCodeScanned])
-
-  useEffect(() => {
-    let stream
-    let animationFrame
-    let isActive = true
-    const videoElement = videoRef.current
-
-    async function beginScanning() {
-      if (!window.BarcodeDetector || !navigator.mediaDevices?.getUserMedia) {
-        setScannerError(
-          'QR scanning is not available in this browser. Enter the code instead.',
-        )
-        return
-      }
-
-      try {
-        const detector = new window.BarcodeDetector({ formats: ['qr_code'] })
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' } },
-          audio: false,
-        })
-        if (!isActive || !videoElement) {
-          stream.getTracks().forEach((track) => track.stop())
-          return
-        }
-
-        videoElement.srcObject = stream
-        await videoElement.play()
-
-        async function detectCode() {
-          if (!isActive) return
-
-          try {
-            const codes = await detector.detect(videoElement)
-            if (codes[0]?.rawValue) {
-              await onCodeScannedRef.current(codes[0].rawValue)
-              if (isActive) onClose()
-              return
-            }
-          } catch {
-            // A frame can fail while the camera is starting. The next frame retries.
-          }
-
-          animationFrame = window.requestAnimationFrame(detectCode)
-        }
-
-        animationFrame = window.requestAnimationFrame(detectCode)
-      } catch {
-        if (isActive) {
-          setScannerError(
-            'Camera access was unavailable. Enter the redemption code instead.',
-          )
-        }
-      }
-    }
-
-    beginScanning()
-
-    return () => {
-      isActive = false
-      if (animationFrame) window.cancelAnimationFrame(animationFrame)
-      stream?.getTracks().forEach((track) => track.stop())
-      if (videoElement) videoElement.srcObject = null
-    }
-  }, [onClose])
-
-  return (
-    <div className="deal-code-scanner">
-      <div className="deal-code-scanner-heading">
-        <div>
-          <strong>Scan customer QR code</strong>
-          <span>Hold the code inside the camera frame.</span>
-        </div>
-        <button type="button" onClick={onClose} aria-label="Close scanner">
-          <X aria-hidden="true" />
-        </button>
-      </div>
-      {scannerError ? (
-        <div className="deal-code-scanner-error" role="alert">
-          <Camera aria-hidden="true" />
-          <p>{scannerError}</p>
-        </div>
-      ) : (
-        <div className="deal-code-camera-frame">
-          <video ref={videoRef} muted playsInline aria-label="QR code camera" />
-          <span aria-hidden="true">
-            <ScanLine />
-          </span>
-        </div>
-      )}
     </div>
   )
 }
@@ -222,6 +119,8 @@ export default function DealRedemptionPanel({
           <CodeScanner
             onCodeScanned={redemption.handleScannedCode}
             onClose={closeScanner}
+            title="Scan customer QR code"
+            cameraErrorMessage="Camera access was unavailable. Enter the redemption code instead."
           />
         )}
 

@@ -174,6 +174,7 @@ export default function BusinessNavigation() {
       to: '/business/create-loyalty',
       label: 'Loyalty',
       icon: <Gift aria-hidden="true" />,
+      activePaths: ['/business/create-loyalty', '/business/loyalty'],
     })
   }
 
@@ -207,13 +208,16 @@ export default function BusinessNavigation() {
         />
 
         <div className="nav-links">
-          {navigationItems.map(({ to, label, icon }) => {
+          {navigationItems.map(({ to, label, icon, activePaths }) => {
             return (
               <NavLink
                 key={to}
-                className={({ isActive }) =>
-                  `nav-btn${isActive ? ' active' : ''}`
-                }
+                className={({ isActive }) => {
+                  const isSectionActive = activePaths?.some((path) =>
+                    location.pathname.startsWith(path),
+                  )
+                  return `nav-btn${isActive || isSectionActive ? ' active' : ''}`
+                }}
                 to={to}
               >
                 {icon}

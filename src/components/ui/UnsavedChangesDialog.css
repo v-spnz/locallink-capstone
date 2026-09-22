@@ -1,0 +1,65 @@
+.unsaved-changes-dialog {
+  padding: 28px;
+}
+
+.unsaved-changes-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff4e6;
+  color: #c45d00;
+}
+
+.unsaved-changes-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.unsaved-changes-dialog h2 {
+  margin: 18px 0 8px;
+  color: var(--business-ink, var(--text));
+  font-size: 23px;
+  letter-spacing: -0.025em;
+}
+
+.unsaved-changes-dialog p {
+  max-width: 52ch;
+  margin: 0;
+  color: var(--business-muted, var(--text-muted));
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.unsaved-changes-actions {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.unsaved-changes-actions .unsaved-changes-discard {
+  border-color: #ffc9c9;
+  color: #c92a2a;
+}
+
+.unsaved-changes-actions .unsaved-changes-discard:hover:not(:disabled) {
+  border-color: #fa5252;
+  background: #fff5f5;
+}
+
+@media (max-width: 640px) {
+  .unsaved-changes-dialog {
+    padding: 24px 20px;
+  }
+
+  .unsaved-changes-actions {
+    display: grid;
+  }
+
+  .unsaved-changes-actions button {
+    width: 100%;
+  }
+}

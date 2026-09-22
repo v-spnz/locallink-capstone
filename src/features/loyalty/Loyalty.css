@@ -209,6 +209,122 @@
   text-align: center;
 }
 
+.ly-card .ly-redeem-btn {
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ly-card .ly-redeem-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.ly-card .ly-redeem-btn:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.loyalty-qr-error {
+  margin: 10px 0 0;
+  color: #c92a2a;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.loyalty-qr-dialog {
+  position: relative;
+  padding: 28px;
+  color: var(--text);
+  text-align: center;
+}
+
+.loyalty-qr-dialog h2 {
+  margin: 12px 0 6px;
+  font-size: 24px;
+  letter-spacing: -0.025em;
+}
+
+.loyalty-qr-dialog > p {
+  max-width: 42ch;
+  margin: 0 auto;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.loyalty-qr-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.loyalty-qr-close:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.loyalty-qr-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.loyalty-qr-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.loyalty-qr-status svg {
+  width: 15px;
+  height: 15px;
+}
+
+.loyalty-qr-code {
+  width: fit-content;
+  margin: 24px auto 16px;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.loyalty-qr-code svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.loyalty-qr-manual-label,
+.loyalty-qr-dialog > small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.loyalty-qr-dialog > code {
+  margin: 6px 0 10px;
+  display: block;
+  color: var(--blue);
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
 .ly-redeem-btn {
   width: 100%;
   transition:

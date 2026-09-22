@@ -1,106 +1,64 @@
 import { useEffect, useMemo, useState } from 'react'
-import useAuth from '../../../auth/useAuth'
-import loyaltyPrograms from '../../../data/loyaltyPrograms'
-import { fetchRewardRedemptions, redeemLoyaltyReward } from '../api/loyaltyApi'
-
-function getPercent(program) {
-  if (program.type === 'stamp')
-    return Math.round((program.stampsEarned / program.stampsRequired) * 100)
-  return Math.round((program.points / program.pointsRequired) * 100)
-}
+import { fetchMyLoyaltyRecords } from '../api/loyaltyApi'
 
 export default function useLoyaltyPrograms() {
-  const { user } = useAuth()
   const [tab, setTab] = useState('inprogress')
   const [search, setSearch] = useState('')
-  const [programs, setPrograms] = useState(loyaltyPrograms)
+  const [programs, setPrograms] = useState([])
   const [error, setError] = useState('')
-  const [isRedeeming, setIsRedeeming] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     let active = true
 
-    async function loadRedemptions() {
+    async function loadPrograms() {
+      setIsLoading(true)
+      setError('')
       try {
-        const redemptions = await fetchRewardRedemptions(user.id)
-        if (!active) return
-        const redemptionByProgramme = new Map(
-          redemptions.map((item) => [item.mock_programme_id, item.redeemed_at]),
-        )
-        setPrograms(
-          loyaltyPrograms.map((program) => {
-            const redeemedAt = redemptionByProgramme.get(program.id)
-            return redeemedAt
-              ? { ...program, redeemed: true, completedOn: redeemedAt }
-              : program
-          }),
-        )
-      } catch {
-        if (active) setError('Unable to load your saved redemptions right now.')
+        const records = await fetchMyLoyaltyRecords()
+        if (active) setPrograms(records)
+      } catch (loadError) {
+        console.error('Unable to load loyalty programmes.', loadError)
+        if (active)
+          setError('Unable to load your loyalty programmes right now.')
+      } finally {
+        if (active) setIsLoading(false)
       }
     }
 
-    loadRedemptions()
+    loadPrograms()
     return () => {
       active = false
     }
-  }, [user.id])
+  }, [])
 
-  const totalPoints = useMemo(
-    () =>
-      programs.reduce(
-        (sum, program) =>
-          sum + (program.type === 'points' ? program.points : 0),
-        0,
-      ),
-    [programs],
+  const filteredPrograms = useMemo(() => {
+    const query = search.trim().toLowerCase()
+    if (!query) return programs
+    return programs.filter(
+      (program) =>
+        program.business.toLowerCase().includes(query) ||
+        program.programmeName.toLowerCase().includes(query),
+    )
+  }, [programs, search])
+
+  const inProgress = filteredPrograms.filter(
+    (program) => !program.rewardEligible,
   )
-
-  const filteredPrograms = programs.filter((program) =>
-    program.business.toLowerCase().includes(search.toLowerCase()),
+  const rewardReady = filteredPrograms.filter(
+    (program) => program.rewardEligible,
   )
-  const inProgress = filteredPrograms
-    .filter((program) => program.status === 'active')
-    .sort((a, b) => getPercent(b) - getPercent(a))
-  const completed = filteredPrograms
-    .filter((program) => program.status === 'completed')
-    .sort((a, b) => new Date(b.completedOn) - new Date(a.completedOn))
-
-  async function handleRedeem(programId) {
-    setError('')
-    setIsRedeeming(programId)
-    try {
-      const redemption = await redeemLoyaltyReward(programId)
-      setPrograms((previous) =>
-        previous.map((program) =>
-          program.id === programId
-            ? {
-                ...program,
-                redeemed: true,
-                completedOn: redemption.redeemed_at,
-              }
-            : program,
-        ),
-      )
-    } catch {
-      setError('Unable to redeem this reward. Please try again.')
-    } finally {
-      setIsRedeeming(null)
-    }
-  }
 
   return {
     tab,
     search,
     programs,
-    totalPoints,
     inProgress,
-    completed,
-    list: tab === 'inprogress' ? inProgress : completed,
+    rewardReady,
+    list: tab === 'inprogress' ? inProgress : rewardReady,
     error,
-    isRedeeming,
+    isLoading,
     setTab,
     setSearch,
-    handleRedeem,
   }
 }
