@@ -236,6 +236,10 @@ select is(
   (
     select count(*)
     from public.customer_loyalty_records
+    where id in (
+      '48000000-0000-0000-0000-000000000209',
+      '58000000-0000-0000-0000-000000000109'
+    )
   ),
   1::bigint,
   'a customer can view only their own loyalty records'
@@ -245,6 +249,10 @@ select is(
   (
     select count(*)
     from public.get_my_loyalty_records()
+    where loyalty_record_id in (
+      '48000000-0000-0000-0000-000000000209',
+      '58000000-0000-0000-0000-000000000109'
+    )
   ),
   1::bigint,
   'the customer QR feed returns only the signed-in customer records'
