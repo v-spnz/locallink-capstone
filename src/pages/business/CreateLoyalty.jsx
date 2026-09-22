@@ -1,14 +1,17 @@
 import ActionToast from '../../components/ui/ActionToast'
+import LoyaltyActivityFeed from '../../features/loyalty/components/LoyaltyActivityFeed'
 import LoyaltyDraftForm from '../../features/loyalty/components/LoyaltyDraftForm'
 import LoyaltyDraftList, {
   LoyaltyDraftListSkeleton,
 } from '../../features/loyalty/components/LoyaltyDraftList'
 import LoyaltyProgrammeReview from '../../features/loyalty/components/LoyaltyProgrammeReview'
+import useBusinessLoyaltyActivity from '../../features/loyalty/hooks/useBusinessLoyaltyActivity'
 import useBusinessLoyaltyProgrammes from '../../features/loyalty/hooks/useBusinessLoyaltyProgrammes'
 import '../../features/loyalty/BusinessLoyalty.css'
 
 export default function CreateLoyalty() {
   const loyalty = useBusinessLoyaltyProgrammes()
+  const activity = useBusinessLoyaltyActivity()
 
   return (
     <div className="business-loyalty-page">

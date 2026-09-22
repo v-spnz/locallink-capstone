@@ -459,111 +459,121 @@ export default function Deals() {
               </div>
             ) : (
               <div className="discovery-category-sections">
-                {groupBusinessesByCategory(businesses).map(({ category, items }) => (
-                  <section className="discovery-category-section" key={category}>
-                    <h3 className="discovery-category-heading">
-                      <span aria-hidden="true">{getCategoryEmoji(category)}</span>
-                      {category}
-                      <span className="discovery-category-count">{items.length}</span>
-                    </h3>
-                    <div className="business-grid discovery-grid discovery-card-grid">
-                      {items.map((business) => (
-                        <div
-                          className={`business-card discovery-business-card${business.deal_id ? ' business-card-clickable' : ''}`}
-                          key={business.business_id}
-                          onClick={() => openDeal(business)}
-                          role={business.deal_id ? 'button' : undefined}
-                          tabIndex={business.deal_id ? 0 : undefined}
-                        >
-                          <div className="discovery-card-media">
-                            {business.deal_image_url ? (
-                              <img
-                                src={business.deal_image_url}
-                                alt=""
-                                className="discovery-card-photo"
-                              />
-                            ) : (
-                              <span
-                                className="discovery-card-icon"
-                                aria-hidden="true"
-                              >
-                                {getCategoryEmoji(business.category)}
-                              </span>
-                            )}
-                            {business.deal_is_sold_out && (
-                              <span className="discovery-sold-out-badge">
-                                Sold out
-                              </span>
-                            )}
-                            {business.deal_id && (
-                              <button
-                                type="button"
-                                className={`discovery-save-btn${savedDealIds.includes(business.deal_id) ? ' is-saved' : ''}`}
-                                aria-label={
-                                  savedDealIds.includes(business.deal_id)
-                                    ? 'Remove from wallet'
-                                    : 'Save to wallet'
-                                }
-                                onClick={(event) => {
-                                  event.stopPropagation()
-                                  toggleSaveDeal(business.deal_id)
-                                }}
-                              >
-                                <Bookmark
-                                  aria-hidden="true"
-                                  fill={
-                                    savedDealIds.includes(business.deal_id)
-                                      ? 'currentColor'
-                                      : 'none'
-                                  }
+                {groupBusinessesByCategory(businesses).map(
+                  ({ category, items }) => (
+                    <section
+                      className="discovery-category-section"
+                      key={category}
+                    >
+                      <h3 className="discovery-category-heading">
+                        <span aria-hidden="true">
+                          {getCategoryEmoji(category)}
+                        </span>
+                        {category}
+                        <span className="discovery-category-count">
+                          {items.length}
+                        </span>
+                      </h3>
+                      <div className="business-grid discovery-grid discovery-card-grid">
+                        {items.map((business) => (
+                          <div
+                            className={`business-card discovery-business-card${business.deal_id ? ' business-card-clickable' : ''}`}
+                            key={business.business_id}
+                            onClick={() => openDeal(business)}
+                            role={business.deal_id ? 'button' : undefined}
+                            tabIndex={business.deal_id ? 0 : undefined}
+                          >
+                            <div className="discovery-card-media">
+                              {business.deal_image_url ? (
+                                <img
+                                  src={business.deal_image_url}
+                                  alt=""
+                                  className="discovery-card-photo"
                                 />
-                              </button>
-                            )}
-                          </div>
+                              ) : (
+                                <span
+                                  className="discovery-card-icon"
+                                  aria-hidden="true"
+                                >
+                                  {getCategoryEmoji(business.category)}
+                                </span>
+                              )}
+                              {business.deal_is_sold_out && (
+                                <span className="discovery-sold-out-badge">
+                                  Sold out
+                                </span>
+                              )}
+                              {business.deal_id && (
+                                <button
+                                  type="button"
+                                  className={`discovery-save-btn${savedDealIds.includes(business.deal_id) ? ' is-saved' : ''}`}
+                                  aria-label={
+                                    savedDealIds.includes(business.deal_id)
+                                      ? 'Remove from wallet'
+                                      : 'Save to wallet'
+                                  }
+                                  onClick={(event) => {
+                                    event.stopPropagation()
+                                    toggleSaveDeal(business.deal_id)
+                                  }}
+                                >
+                                  <Bookmark
+                                    aria-hidden="true"
+                                    fill={
+                                      savedDealIds.includes(business.deal_id)
+                                        ? 'currentColor'
+                                        : 'none'
+                                    }
+                                  />
+                                </button>
+                              )}
+                            </div>
 
-                          <div className="business-card-body">
-                            <div className="business-card-name">
-                              {business.business_name}
-                            </div>
-                            <div className="business-card-category">
-                              {business.category}
-                            </div>
-                            <div className="business-card-desc">
-                              {business.deal_description || business.description}
-                            </div>
-                            {business.deal_title && (
-                              <div className="business-card-deal">
-                                Deal: {business.deal_title}
+                            <div className="business-card-body">
+                              <div className="business-card-name">
+                                {business.business_name}
                               </div>
-                            )}
+                              <div className="business-card-category">
+                                {business.category}
+                              </div>
+                              <div className="business-card-desc">
+                                {business.deal_description ||
+                                  business.description}
+                              </div>
+                              {business.deal_title && (
+                                <div className="business-card-deal">
+                                  Deal: {business.deal_title}
+                                </div>
+                              )}
 
-                            <div className="discovery-card-footer">
-                              <span className="business-card-address">
-                                {business.formatted_address}
-                              </span>
-                              <span className="business-card-distance discovery-distance-badge">
-                                {Number(business.distance_km).toFixed(1)} km
-                              </span>
+                              <div className="discovery-card-footer">
+                                <span className="business-card-address">
+                                  {business.formatted_address}
+                                </span>
+                                <span className="business-card-distance discovery-distance-badge">
+                                  {Number(business.distance_km).toFixed(1)} km
+                                </span>
+                              </div>
+
+                              {business.deal_id && (
+                                <button
+                                  type="button"
+                                  className="discovery-view-deal-btn"
+                                  onClick={(event) => {
+                                    event.stopPropagation()
+                                    openDeal(business)
+                                  }}
+                                >
+                                  View Deal
+                                </button>
+                              )}
                             </div>
-
-                            {business.deal_id && (
-                              <button
-                                type="button"
-                                className="discovery-view-deal-btn"
-                                onClick={(event) => {
-                                  event.stopPropagation()
-                                  openDeal(business)
-                                }}
-                              >
-                                View Deal
-                              </button>
-                            )}
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                ))}
+                        ))}
+                      </div>
+                    </section>
+                  ),
+                )}
               </div>
             )}
           </div>
@@ -652,9 +662,7 @@ export default function Deals() {
                           {getCategoryEmoji(claim.category)}
                         </span>
                         <div className="sm-past-row-text">
-                          <div className="sm-past-row-title">
-                            {claim.title}
-                          </div>
+                          <div className="sm-past-row-title">{claim.title}</div>
                           <div className="sm-past-row-sub">
                             {claim.redeemed_at
                               ? 'Redeemed'

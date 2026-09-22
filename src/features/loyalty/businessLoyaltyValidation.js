@@ -1,13 +1,13 @@
 const MAX_REWARD_THRESHOLD = 1_000_000
 const TEMPLATE_TYPES = ['stamp_card', 'spend_and_save', 'spend_and_reward']
 
-function getAucklandToday() {
+export function getAucklandToday(now = new Date()) {
   const parts = new Intl.DateTimeFormat('en-NZ', {
     timeZone: 'Pacific/Auckland',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-  }).formatToParts(new Date())
+  }).formatToParts(now)
   const valueFor = (type) => parts.find((part) => part.type === type)?.value
   return `${valueFor('year')}-${valueFor('month')}-${valueFor('day')}`
 }

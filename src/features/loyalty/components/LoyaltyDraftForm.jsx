@@ -13,6 +13,7 @@ import { sanitizeRewardThreshold } from '../businessLoyaltyValidation'
 import {
   getCustomerReward,
   getEarningRules,
+  getProgrammeAvailability,
   getProgrammeTypeLabel,
   getRewardTarget,
   LOYALTY_TEMPLATES,
@@ -142,6 +143,9 @@ export default function LoyaltyDraftForm({
         : programme.programmeType === 'stamp_card',
     programme.startDate,
   ].filter(Boolean).length
+  const availabilityOnPublish = programme.startDate
+    ? getProgrammeAvailability({ ...programme, status: 'published' })
+    : null
 
   return (
     <form className="loyalty-draft-form" onSubmit={onSaveDraft} noValidate>
@@ -336,7 +340,7 @@ export default function LoyaltyDraftForm({
               <FormField
                 id="loyalty-start-date"
                 label="Start date"
-                helper="A future date will schedule the programme."
+                helper="Before this date the programme is scheduled and cannot record loyalty activity."
                 type="date"
                 value={programme.startDate}
                 error={errors.startDate}
@@ -346,7 +350,7 @@ export default function LoyaltyDraftForm({
               <FormField
                 id="loyalty-end-date"
                 label="End date"
-                helper="Optional. Leave blank for no planned end date."
+                helper="Optional. After this date the programme stops accepting new loyalty activity. Leave blank to keep it running."
                 type="date"
                 min={programme.startDate || undefined}
                 value={programme.endDate}
@@ -383,6 +387,12 @@ export default function LoyaltyDraftForm({
             <CalendarDays aria-hidden="true" />
             {formatAvailability(programme)}
           </p>
+          {availabilityOnPublish && (
+            <p className="loyalty-preview-note">
+              Once published: <strong>{availabilityOnPublish.label}</strong>.{' '}
+              {availabilityOnPublish.description}
+            </p>
+          )}
           <p className="loyalty-preview-note">
             Customers cannot see or use this programme while it is a draft.
           </p>
@@ -390,7 +400,12 @@ export default function LoyaltyDraftForm({
       </div>
 
       <div className="loyalty-form-actions">
-        <Button variant="secondary" onClick={onBack} disabled={isSaving}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onBack}
+          disabled={isSaving}
+        >
           Cancel
         </Button>
         <div className="loyalty-form-primary-actions">
@@ -398,7 +413,7 @@ export default function LoyaltyDraftForm({
             <Save aria-hidden="true" />
             {isSaving ? 'Saving...' : 'Save draft'}
           </Button>
-          <Button onClick={onReview} disabled={isSaving}>
+          <Button type="button" onClick={onReview} disabled={isSaving}>
             Review and publish
             <Send aria-hidden="true" />
           </Button>

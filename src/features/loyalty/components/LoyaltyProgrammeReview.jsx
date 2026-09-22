@@ -3,6 +3,7 @@ import Button from '../../../components/ui/Button'
 import {
   getCustomerReward,
   getEarningRules,
+  getProgrammeAvailability,
   getProgrammeTypeLabel,
   getRewardTarget,
 } from '../businessLoyaltyTemplates'
@@ -39,6 +40,11 @@ export default function LoyaltyProgrammeReview({
   onBack,
   onConfirm,
 }) {
+  const availability = getProgrammeAvailability({
+    ...programme,
+    status: 'published',
+  })
+
   return (
     <section className="loyalty-review" aria-labelledby="loyalty-review-title">
       <div className="loyalty-review-heading">
@@ -134,11 +140,8 @@ export default function LoyaltyProgrammeReview({
         <aside className="loyalty-publish-note">
           <CheckCircle2 aria-hidden="true" />
           <div>
-            <strong>Ready to publish?</strong>
-            <p>
-              The programme will become active on its start date and visible to
-              customers then.
-            </p>
+            <strong>Once published: {availability.label}</strong>
+            <p>{availability.description}</p>
           </div>
         </aside>
       </div>

@@ -29,9 +29,7 @@ export default function ActiveClaimBanner() {
       <span className="active-claim-banner-cta">Claim now</span>
       <span className="active-claim-banner-divider" aria-hidden="true" />
       <span className="active-claim-banner-timer">
-        <span className="active-claim-banner-timer-label">
-          Time remaining
-        </span>
+        <span className="active-claim-banner-timer-label">Time remaining</span>
         <span className="active-claim-banner-countdown">
           {formatCountdown(msRemaining)}
         </span>

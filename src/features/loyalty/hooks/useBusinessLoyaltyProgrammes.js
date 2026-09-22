@@ -173,12 +173,18 @@ export default function useBusinessLoyaltyProgrammes() {
     setRequestError('')
     setFeedback(null)
 
-    const programmeForSave = form.id
-      ? form
-      : { ...form, id: crypto.randomUUID() }
-    if (!form.id) setForm(programmeForSave)
-
     try {
+      const programmeForSave = form.id
+        ? form
+        : {
+            ...form,
+            id:
+              typeof crypto !== 'undefined' && crypto.randomUUID
+                ? crypto.randomUUID()
+                : `local-${Date.now()}-${Math.round(Math.random() * 1e6)}`,
+          }
+      if (!form.id) setForm(programmeForSave)
+
       const saved = await saveBusinessLoyaltyProgramme({
         businessId: business.id,
         programme: programmeForSave,

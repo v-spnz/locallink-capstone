@@ -92,7 +92,10 @@ export async function saveBusinessLoyaltyProgramme({
     },
   )
 
-  if (saveError) throw saveError
+  if (saveError) {
+    console.error('save_business_loyalty_programme failed:', saveError)
+    throw saveError
+  }
 
   const { data, error } = await supabase
     .from('business_loyalty_programmes')
@@ -103,4 +106,19 @@ export async function saveBusinessLoyaltyProgramme({
 
   if (error) throw error
   return mapBusinessLoyaltyProgramme(data)
+}
+
+export async function recordBusinessLoyaltyActivity({
+  businessId,
+  programmeId,
+  customerLabel,
+  detail,
+}) {
+  const { error } = await supabase.rpc('record_business_loyalty_activity', {
+    p_business_id: businessId,
+    p_programme_id: programmeId,
+    p_customer_label: customerLabel.trim(),
+    p_detail: detail?.trim() || null,
+  })
+  if (error) throw error
 }
