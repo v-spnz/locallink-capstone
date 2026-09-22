@@ -8,6 +8,7 @@ import LoyaltyProgrammeReview from '../../features/loyalty/components/LoyaltyPro
 import useBusinessLoyaltyActivity from '../../features/loyalty/hooks/useBusinessLoyaltyActivity'
 import useBusinessLoyaltyProgrammes from '../../features/loyalty/hooks/useBusinessLoyaltyProgrammes'
 import '../../features/loyalty/BusinessLoyalty.css'
+import '../../features/deals/CreateDeal.css'
 
 export default function CreateLoyalty() {
   const loyalty = useBusinessLoyaltyProgrammes()
