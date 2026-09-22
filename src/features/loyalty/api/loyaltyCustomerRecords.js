@@ -1,13 +1,10 @@
 import { supabase } from '../../../lib/supabase'
 
-export async function fetchMyLoyaltyRecords() {
-  const { data, error } = await supabase.rpc('get_my_loyalty_records')
-  if (error) throw error
-
-  return (data ?? []).map((record) => ({
+function mapLoyaltyRecord(record) {
+  return {
     id: record.loyalty_record_id,
     loyaltyIdentifier: record.loyalty_identifier,
-    business: record.business_name,
+    customerDisplayName: record.customer_display_name,
     programmeId: record.programme_id,
     programmeName: record.programme_name,
     programmeType: record.programme_type,
@@ -20,20 +17,21 @@ export async function fetchMyLoyaltyRecords() {
     earningRules: record.earning_rules,
     rewardEligible: record.reward_eligible,
     updatedAt: record.updated_at,
-  }))
+  }
 }
 
-export async function createMyLoyaltyScanCode(loyaltyRecordId) {
+export async function lookupBusinessLoyaltyRecord(
+  businessId,
+  loyaltyIdentifier,
+) {
   const { data, error } = await supabase
-    .rpc('create_my_loyalty_scan_code', {
-      p_loyalty_record_id: loyaltyRecordId,
+    .rpc('lookup_business_loyalty_record', {
+      p_business_id: businessId,
+      p_loyalty_identifier: loyaltyIdentifier,
     })
     .maybeSingle()
 
   if (error) throw error
-  if (!data) throw new Error('LOYALTY_SCAN_CODE_UNAVAILABLE')
-  return {
-    scanCode: data.scan_code,
-    expiresAt: data.expires_at,
-  }
+  if (!data) throw new Error('LOYALTY_RECORD_NOT_FOUND')
+  return mapLoyaltyRecord(data)
 }

@@ -159,7 +159,8 @@ test('US0104 AC5: the generated earning condition is reviewed before publication
     ),
   ])
 
-  assert.match(form, /Customer-facing earning rules:/)
+  assert.doesNotMatch(form, /Customer-facing earning rules:/)
+  assert.match(form, /getEarningRules\(programme\)/)
   assert.match(form, /Review and publish/)
   assert.match(review, /label="How customers earn"/)
   assert.match(review, /value=\{getEarningRules\(programme\)\}/)

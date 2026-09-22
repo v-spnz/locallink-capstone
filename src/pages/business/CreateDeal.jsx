@@ -7,6 +7,7 @@ import DealRedemptionPanel from '../../features/deals/components/DealRedemptionP
 import useBusinessDeals from '../../features/deals/hooks/useBusinessDeals'
 import useBusinessDealRedemption from '../../features/deals/hooks/useBusinessDealRedemption'
 import ActionToast from '../../components/ui/ActionToast'
+import UnsavedChangesDialog from '../../components/ui/UnsavedChangesDialog'
 import { useSearchParams } from 'react-router-dom'
 import '../../features/deals/CreateDeal.css'
 import '../../features/deals/DealRedemption.css'
@@ -103,6 +104,15 @@ export default function CreateDeal() {
           message={deals.feedback.message}
           variant={deals.feedback.variant}
           onDismiss={deals.dismissFeedback}
+        />
+      )}
+      {deals.isLeaveConfirmationOpen && (
+        <UnsavedChangesDialog
+          itemName="deal draft"
+          isSaving={deals.isSaving}
+          onCancel={deals.cancelLeave}
+          onDiscard={deals.discardAndLeave}
+          onSave={deals.saveDraftAndLeave}
         />
       )}
     </div>

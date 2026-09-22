@@ -9,6 +9,7 @@ import BusinessProtectedRoute from '../../business/BusinessProtectedRoute'
 import Dashboard from './Dashboard'
 import CreateDeal from './CreateDeal'
 import CreateLoyalty from './CreateLoyalty'
+import LoyaltyCustomerLookup from './LoyaltyCustomerLookup'
 import Settings from './Settings'
 import BusinessOnboarding from './BusinessOnboarding'
 import Services from './Services'
@@ -71,6 +72,14 @@ export default function BusinessPortal() {
           element={
             <BusinessPage capability="loyalty">
               <CreateLoyalty />
+            </BusinessPage>
+          }
+        />
+        <Route
+          path="loyalty/customers"
+          element={
+            <BusinessPage capability="loyalty">
+              <LoyaltyCustomerLookup />
             </BusinessPage>
           }
         />

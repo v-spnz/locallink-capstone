@@ -1750,6 +1750,46 @@ set
 from ranked_deliveries as ranked
 where delivery.id = ranked.id;
 
+-- ============================================================
+-- Loyalty programme and customer visit lookup
+-- ============================================================
+
+insert into public.business_loyalty_programmes (
+  id,
+  business_id,
+  name,
+  programme_type,
+  reward_threshold,
+  terms,
+  start_date,
+  status
+)
+values (
+  '47000000-0000-0000-0000-000000000105',
+  '41000000-0000-0000-0000-000000000001',
+  'Morning coffee rewards',
+  'stamp_card',
+  8,
+  'One reward per customer per completed card.',
+  (now() at time zone 'Pacific/Auckland')::date,
+  'published'
+);
+
+insert into public.customer_loyalty_records (
+  id,
+  programme_id,
+  customer_id,
+  loyalty_identifier,
+  current_progress
+)
+values (
+  '48000000-0000-0000-0000-000000000109',
+  '47000000-0000-0000-0000-000000000105',
+  '10000000-0000-0000-0000-000000000001',
+  'LL-DEMO-0109',
+  6
+);
+
 -- Local-development helper for exercising the real deadline reminder flow
 -- from the notification dropdown. Seed files are not deployed by db push.
 create or replace function public.create_seed_quote_deadline_reminder(

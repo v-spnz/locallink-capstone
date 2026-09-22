@@ -55,6 +55,7 @@ export default function DateRangeCalendar({
   endError,
   onChange,
   required = false,
+  endOptional = false,
 }) {
   const from = parseDateKey(startDate)
   const to = parseDateKey(endDate)
@@ -67,7 +68,9 @@ export default function DateRangeCalendar({
   const selectionMessage = !from
     ? 'Choose a start date, then choose an end date.'
     : !to
-      ? `${formatDate(from)} selected as the start. Now choose an end date.`
+      ? endOptional
+        ? `${formatDate(from)} selected. Choose an end date or leave it open-ended.`
+        : `${formatDate(from)} selected as the start. Now choose an end date.`
       : `${formatDate(from)} to ${formatDate(to)} selected.`
 
   function handleSelect(nextRange) {
@@ -86,7 +89,8 @@ export default function DateRangeCalendar({
         {label} {required && <span className="deal-required">Required</span>}
       </legend>
       <p className="date-range-instructions" id={`${id}-instructions`}>
-        Select the first day, then the last day of the deal.
+        Select the first day, then the last day.
+        {endOptional && ' The end date is optional.'}
       </p>
 
       <div
@@ -103,7 +107,13 @@ export default function DateRangeCalendar({
         <ArrowRight className="date-range-arrow" aria-hidden="true" />
         <span className="date-range-value">
           <small>{endLabel}</small>
-          <strong>{to ? formatDate(to) : 'Select end'}</strong>
+          <strong>
+            {to
+              ? formatDate(to)
+              : endOptional
+                ? 'No planned end'
+                : 'Select end'}
+          </strong>
         </span>
       </div>
 

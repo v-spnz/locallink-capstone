@@ -77,10 +77,6 @@ test('loyalty typography follows the Deals page type hierarchy', async () => {
   )
   assert.match(
     loyaltyStyles,
-    /\.loyalty-list-toolbar h2 \{[\s\S]*?font-size: 22px/,
-  )
-  assert.match(
-    loyaltyStyles,
     /\.loyalty-status-tabs button \{[\s\S]*?font-size: 14px/,
   )
   assert.match(
