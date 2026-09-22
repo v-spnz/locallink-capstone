@@ -1,24 +1,16 @@
-import LoyaltySummary from '../../features/loyalty/components/LoyaltySummary'
 import ProgramCard from '../../features/loyalty/components/ProgramCard'
 import useLoyaltyPrograms from '../../features/loyalty/hooks/useLoyaltyPrograms'
 import '../../features/loyalty/Loyalty.css'
 
 export default function Loyalty() {
   const loyalty = useLoyaltyPrograms()
-  const pointsProgramCount = loyalty.programs.filter(
-    (program) => program.type === 'points',
-  ).length
 
   return (
     <>
       <div className="page-header">
         <h2>Loyalty Programmes</h2>
-        <p>Track your stamp cards and points across local businesses.</p>
+        <p>Track your rewards and show your loyalty QR when you visit.</p>
       </div>
-      <LoyaltySummary
-        totalPoints={loyalty.totalPoints}
-        pointsProgramCount={pointsProgramCount}
-      />
 
       <input
         type="text"
@@ -36,10 +28,10 @@ export default function Loyalty() {
           In Progress ({loyalty.inProgress.length})
         </button>
         <button
-          className={`tab-btn${loyalty.tab === 'completed' ? ' active' : ''}`}
-          onClick={() => loyalty.setTab('completed')}
+          className={`tab-btn${loyalty.tab === 'ready' ? ' active' : ''}`}
+          onClick={() => loyalty.setTab('ready')}
         >
-          Completed ({loyalty.completed.length})
+          Reward ready ({loyalty.rewardReady.length})
         </button>
       </div>
 
@@ -49,26 +41,24 @@ export default function Loyalty() {
         </div>
       )}
 
-      {loyalty.list.length > 0 ? (
+      {loyalty.isLoading ? (
+        <div className="loyalty-empty-state">Loading your programmes…</div>
+      ) : loyalty.list.length > 0 ? (
         <div className="loyalty-program-grid">
           {loyalty.list.map((program, index) => (
-            <ProgramCard
-              key={program.id}
-              program={program}
-              onRedeem={loyalty.handleRedeem}
-              index={index}
-              isRedeeming={loyalty.isRedeeming === program.id}
-            />
+            <ProgramCard key={program.id} program={program} index={index} />
           ))}
         </div>
       ) : (
         <div className="loyalty-empty-state">
-          <div>{loyalty.tab === 'inprogress' ? '☕' : '🎉'}</div>
+          <div aria-hidden="true">
+            {loyalty.tab === 'inprogress' ? '☕' : '🎉'}
+          </div>
           {loyalty.tab === 'inprogress'
             ? loyalty.search
               ? 'No active programmes match your search.'
               : 'No active programmes yet — start collecting!'
-            : 'No completed programmes yet — keep going!'}
+            : 'No rewards are ready yet — keep going!'}
         </div>
       )}
     </>

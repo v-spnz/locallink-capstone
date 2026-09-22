@@ -232,8 +232,8 @@ test('deal management cards omit location and GST metadata', async () => {
   assert.ok(details.indexOf('Delete draft') < details.indexOf('Continue draft'))
 })
 
-test('AC11-12: draft saving and unsaved-change protection are wired into the flow', async () => {
-  const [form, hook] = await Promise.all([
+test('AC11-12: draft saving and custom unsaved-change protection are wired into the flow', async () => {
+  const [form, hook, page, dialog, styles] = await Promise.all([
     readFile(
       new URL('../src/features/deals/components/DealForm.jsx', import.meta.url),
       'utf8',
@@ -245,12 +245,34 @@ test('AC11-12: draft saving and unsaved-change protection are wired into the flo
       ),
       'utf8',
     ),
+    readFile(
+      new URL('../src/pages/business/CreateDeal.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/components/ui/UnsavedChangesDialog.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/features/deals/CreateDeal.css', import.meta.url),
+      'utf8',
+    ),
   ])
 
   assert.match(form, /Save Draft/)
+  assert.match(
+    styles,
+    /grid-template-columns:\s*minmax\(0, 1fr\)\s+minmax\(240px, 280px\)/,
+  )
+  assert.match(styles, /\.deal-draft-rail\s*\{[\s\S]*?grid-column:\s*2/)
   assert.match(hook, /persist\('draft'\)/)
   assert.match(hook, /beforeunload/)
-  assert.match(hook, /Leave without saving your deal draft\?/)
+  assert.doesNotMatch(hook, /window\.confirm/)
+  assert.match(hook, /isLeaveConfirmationOpen/)
+  assert.match(page, /UnsavedChangesDialog/)
+  assert.match(dialog, /Save draft/)
+  assert.match(dialog, /Leave without saving/)
+  assert.match(dialog, /Continue editing/)
 })
 
 test('AC13: consumer visibility is restricted to published database deals', async () => {

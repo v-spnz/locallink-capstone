@@ -34,26 +34,28 @@
 }
 
 .loyalty-list-toolbar {
-  margin-bottom: 20px;
-  align-items: flex-end;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
 }
 
-.loyalty-list-toolbar h2 {
-  margin: 0;
-  color: var(--business-ink);
-  font-size: 22px;
+.loyalty-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.loyalty-list-toolbar p {
-  margin: 5px 0 0;
-  color: var(--business-muted);
-  font-size: 14px;
-  line-height: 1.5;
+.loyalty-list-actions .btn-secondary {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
 }
 
 .loyalty-status-tabs {
   width: fit-content;
-  margin-bottom: 22px;
+  margin: 0;
   padding: 4px;
   border: 1px solid var(--business-border);
   border-radius: 11px;
@@ -420,6 +422,26 @@
   color: var(--business-muted);
   font-size: 12px;
   line-height: 1.45;
+}
+
+.loyalty-input-with-prefix {
+  position: relative;
+}
+
+.loyalty-input-with-prefix > span {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  z-index: 1;
+  color: var(--business-ink-soft);
+  font-size: 15px;
+  font-weight: 700;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+body.business-surface .loyalty-input-with-prefix .form-input {
+  padding-left: 40px;
 }
 
 .loyalty-required {
@@ -879,6 +901,55 @@
   text-decoration: underline;
 }
 
+.loyalty-live-preview-media {
+  background:
+    radial-gradient(circle at 74% 22%, rgb(63 91 211 / 20%), transparent 34%),
+    linear-gradient(145deg, #e9eeff, #f8f9fd);
+}
+
+.loyalty-live-preview-media .deal-live-preview-placeholder {
+  color: var(--business-accent-strong);
+  font-weight: 700;
+}
+
+.loyalty-live-preview-media .deal-live-preview-placeholder svg {
+  width: 30px;
+  height: 30px;
+}
+
+.loyalty-fixed-check-in {
+  padding: 18px;
+  border: 1px solid #dbe2f3;
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  background: var(--business-surface-soft);
+}
+
+.loyalty-fixed-check-in > svg {
+  width: 22px;
+  height: 22px;
+  color: var(--business-accent);
+}
+
+.loyalty-fixed-check-in strong {
+  color: var(--business-ink);
+  font-size: 14px;
+}
+
+.loyalty-fixed-check-in p {
+  margin: 5px 0 0;
+  color: var(--business-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.loyalty-review-programme-type strong {
+  font-size: 17px;
+}
+
 .loyalty-skeleton-line,
 .loyalty-skeleton-button,
 .loyalty-skeleton-card {
@@ -959,7 +1030,13 @@
     flex-direction: column;
   }
 
-  .loyalty-list-toolbar .btn-primary {
+  .loyalty-list-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .loyalty-list-toolbar .btn-primary,
+  .loyalty-list-toolbar .btn-secondary {
     width: 100%;
   }
 

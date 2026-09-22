@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import useBusiness from '../../../business/useBusiness'
 import {
   fetchBusinessLoyaltyProgrammes,
@@ -29,6 +30,7 @@ function newProgramme() {
 
 export default function useBusinessLoyaltyProgrammes() {
   const { business } = useBusiness()
+  const navigate = useNavigate()
   const [programmes, setProgrammes] = useState([])
   const [form, setForm] = useState(newProgramme)
   const [errors, setErrors] = useState({})
@@ -40,7 +42,10 @@ export default function useBusinessLoyaltyProgrammes() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [isLeaveConfirmationOpen, setIsLeaveConfirmationOpen] = useState(false)
   const saveInProgressRef = useRef(false)
+  const pendingLeaveActionRef = useRef(null)
+  const pendingLeaveIsNavigationRef = useRef(false)
 
   const loadProgrammes = useCallback(async () => {
     setIsLoading(true)
@@ -74,14 +79,33 @@ export default function useBusinessLoyaltyProgrammes() {
 
     function warnBeforeInternalNavigation(event) {
       const link = event.target.closest?.('a[href]')
+      const href = link?.getAttribute('href')
       if (
         !link ||
-        window.confirm('Leave without saving your loyalty programme draft?')
+        !href ||
+        href.startsWith('#') ||
+        link.target === '_blank' ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
       )
         return
 
       event.preventDefault()
       event.stopPropagation()
+      const destination = new URL(link.href, window.location.href)
+      pendingLeaveActionRef.current = () => {
+        if (destination.origin === window.location.origin) {
+          navigate(
+            `${destination.pathname}${destination.search}${destination.hash}`,
+          )
+        } else {
+          window.location.assign(destination.href)
+        }
+      }
+      pendingLeaveIsNavigationRef.current = true
+      setIsLeaveConfirmationOpen(true)
     }
 
     window.addEventListener('beforeunload', warnBeforeUnload)
@@ -90,7 +114,7 @@ export default function useBusinessLoyaltyProgrammes() {
       window.removeEventListener('beforeunload', warnBeforeUnload)
       document.removeEventListener('click', warnBeforeInternalNavigation, true)
     }
-  }, [hasUnsavedChanges, step])
+  }, [hasUnsavedChanges, navigate, step])
 
   function setField(field, value) {
     setForm((current) =>
@@ -139,18 +163,49 @@ export default function useBusinessLoyaltyProgrammes() {
     setStep('form')
   }
 
-  function handleBackToList() {
-    if (
-      hasUnsavedChanges &&
-      !window.confirm('Leave without saving your loyalty programme draft?')
-    )
-      return
-
+  function leaveToList() {
     setHasUnsavedChanges(false)
     setErrors({})
     setRequestError('')
     setReviewAttempted(false)
     setStep('list')
+  }
+
+  function handleBackToList() {
+    if (!hasUnsavedChanges) {
+      leaveToList()
+      return
+    }
+
+    pendingLeaveActionRef.current = leaveToList
+    pendingLeaveIsNavigationRef.current = false
+    setIsLeaveConfirmationOpen(true)
+  }
+
+  function cancelLeave() {
+    pendingLeaveActionRef.current = null
+    pendingLeaveIsNavigationRef.current = false
+    setIsLeaveConfirmationOpen(false)
+  }
+
+  function discardAndLeave() {
+    const leave = pendingLeaveActionRef.current
+    pendingLeaveActionRef.current = null
+    pendingLeaveIsNavigationRef.current = false
+    setIsLeaveConfirmationOpen(false)
+    setHasUnsavedChanges(false)
+    leave?.()
+  }
+
+  async function saveDraftAndLeave() {
+    const leave = pendingLeaveActionRef.current
+    const shouldNavigate = pendingLeaveIsNavigationRef.current
+    const saved = await persist('draft')
+    if (!saved) return
+    pendingLeaveActionRef.current = null
+    pendingLeaveIsNavigationRef.current = false
+    setIsLeaveConfirmationOpen(false)
+    if (shouldNavigate) leave?.()
   }
 
   async function persist(status) {
@@ -276,6 +331,7 @@ export default function useBusinessLoyaltyProgrammes() {
     reviewAttempted,
     isLoading,
     isSaving,
+    isLeaveConfirmationOpen,
     loadProgrammes,
     setField,
     setActiveStatus,
@@ -283,6 +339,9 @@ export default function useBusinessLoyaltyProgrammes() {
     handleStartNewProgramme,
     handleEditProgramme,
     handleBackToList,
+    cancelLeave,
+    discardAndLeave,
+    saveDraftAndLeave,
     handleBackToEdit,
     handleSaveDraft,
     handleConfirmPublish: () => persist('published'),

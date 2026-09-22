@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import useBusiness from '../../../business/useBusiness'
 import {
   deleteBusinessDeal,
@@ -41,6 +42,7 @@ function newDeal() {
 
 export default function useBusinessDeals() {
   const { business } = useBusiness()
+  const navigate = useNavigate()
   const [form, setForm] = useState(newDeal)
   const [errors, setErrors] = useState({})
   const [deals, setDeals] = useState([])
@@ -56,8 +58,11 @@ export default function useBusinessDeals() {
   const [deleteConfirmationId, setDeleteConfirmationId] = useState(null)
   const [deletingDealId, setDeletingDealId] = useState(null)
   const [cancelingDealId, setCancelingDealId] = useState(null)
+  const [isLeaveConfirmationOpen, setIsLeaveConfirmationOpen] = useState(false)
   const saveInProgressRef = useRef(false)
   const endInProgressRef = useRef(false)
+  const pendingLeaveActionRef = useRef(null)
+  const pendingLeaveIsNavigationRef = useRef(false)
 
   const loadDeals = useCallback(async () => {
     setIsLoading(true)
@@ -89,10 +94,33 @@ export default function useBusinessDeals() {
 
     function warnBeforeInternalNavigation(event) {
       const link = event.target.closest?.('a[href]')
-      if (!link || window.confirm('Leave without saving your deal draft?'))
+      const href = link?.getAttribute('href')
+      if (
+        !link ||
+        !href ||
+        href.startsWith('#') ||
+        link.target === '_blank' ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      )
         return
+
       event.preventDefault()
       event.stopPropagation()
+      const destination = new URL(link.href, window.location.href)
+      pendingLeaveActionRef.current = () => {
+        if (destination.origin === window.location.origin) {
+          navigate(
+            `${destination.pathname}${destination.search}${destination.hash}`,
+          )
+        } else {
+          window.location.assign(destination.href)
+        }
+      }
+      pendingLeaveIsNavigationRef.current = true
+      setIsLeaveConfirmationOpen(true)
     }
 
     window.addEventListener('beforeunload', warnBeforeUnload)
@@ -101,7 +129,7 @@ export default function useBusinessDeals() {
       window.removeEventListener('beforeunload', warnBeforeUnload)
       document.removeEventListener('click', warnBeforeInternalNavigation, true)
     }
-  }, [hasUnsavedChanges, step])
+  }, [hasUnsavedChanges, navigate, step])
 
   function setField(field, value) {
     setForm((current) => ({ ...current, [field]: value }))
@@ -211,17 +239,49 @@ export default function useBusinessDeals() {
     setStep('form')
   }
 
-  function handleBackToList() {
-    if (
-      hasUnsavedChanges &&
-      !window.confirm('Leave without saving your deal draft?')
-    )
-      return
+  function leaveToList() {
     setHasUnsavedChanges(false)
     setErrors({})
     setFeedback(null)
     setRequestError('')
     setStep('list')
+  }
+
+  function handleBackToList() {
+    if (!hasUnsavedChanges) {
+      leaveToList()
+      return
+    }
+
+    pendingLeaveActionRef.current = leaveToList
+    pendingLeaveIsNavigationRef.current = false
+    setIsLeaveConfirmationOpen(true)
+  }
+
+  function cancelLeave() {
+    pendingLeaveActionRef.current = null
+    pendingLeaveIsNavigationRef.current = false
+    setIsLeaveConfirmationOpen(false)
+  }
+
+  function discardAndLeave() {
+    const leave = pendingLeaveActionRef.current
+    pendingLeaveActionRef.current = null
+    pendingLeaveIsNavigationRef.current = false
+    setIsLeaveConfirmationOpen(false)
+    setHasUnsavedChanges(false)
+    leave?.()
+  }
+
+  async function saveDraftAndLeave() {
+    const leave = pendingLeaveActionRef.current
+    const shouldNavigate = pendingLeaveIsNavigationRef.current
+    const saved = await persist('draft')
+    if (!saved) return
+    pendingLeaveActionRef.current = null
+    pendingLeaveIsNavigationRef.current = false
+    setIsLeaveConfirmationOpen(false)
+    if (shouldNavigate) leave?.()
   }
 
   async function handleDeleteDraft(dealId) {
@@ -316,6 +376,7 @@ export default function useBusinessDeals() {
     editingDealId: form.id,
     isLoading,
     isSaving,
+    isLeaveConfirmationOpen,
     endingDealId,
     hasUnsavedChanges,
     deleteConfirmationId,
@@ -336,6 +397,9 @@ export default function useBusinessDeals() {
     handleCloseDetails: () => setSelectedDealId(null),
     handleBackToEdit: () => setStep('form'),
     handleBackToList,
+    cancelLeave,
+    discardAndLeave,
+    saveDraftAndLeave,
     handleDeleteDraft,
     handleCancelScheduledPublication,
     dismissFeedback: () => setFeedback(null),

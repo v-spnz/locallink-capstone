@@ -7,7 +7,9 @@ import {
   LockKeyhole,
   PencilLine,
   Plus,
+  ScanLine,
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import localBusinessNeighbourhood from '../../../assets/images/local-business-neighbourhood.jpg'
 import Button from '../../../components/ui/Button'
 import BusinessPageLoader from '../../../components/ui/BusinessPageLoader'
@@ -221,45 +223,43 @@ export default function LoyaltyDraftList({
   }
 
   return (
-    <section
-      className="loyalty-draft-list"
-      aria-labelledby="loyalty-list-title"
-    >
+    <section className="loyalty-draft-list" aria-label="Loyalty programmes">
       <div className="loyalty-list-toolbar">
-        <div>
-          <h2 id="loyalty-list-title">Your loyalty programmes</h2>
-          <p>Prepare private drafts and publish when they are ready.</p>
+        <div
+          className="loyalty-status-tabs"
+          role="tablist"
+          aria-label="Programme status"
+        >
+          {STATUS_TABS.map((tab, index) => (
+            <button
+              aria-controls="loyalty-programme-panel"
+              aria-selected={activeStatus === tab.key}
+              className={activeStatus === tab.key ? 'is-active' : ''}
+              id={`loyalty-${tab.key}-tab`}
+              key={tab.key}
+              onClick={() => onStatusChange(tab.key)}
+              onKeyDown={(event) => handleTabKeyDown(event, index)}
+              role="tab"
+              tabIndex={activeStatus === tab.key ? 0 : -1}
+              type="button"
+            >
+              {tab.label}
+              <span>{programmeCounts[tab.key]}</span>
+            </button>
+          ))}
         </div>
-        {totalProgrammes > 0 && (
-          <Button onClick={onCreate}>
-            <Plus aria-hidden="true" />
-            New programme
-          </Button>
-        )}
-      </div>
-
-      <div
-        className="loyalty-status-tabs"
-        role="tablist"
-        aria-label="Programme status"
-      >
-        {STATUS_TABS.map((tab, index) => (
-          <button
-            aria-controls="loyalty-programme-panel"
-            aria-selected={activeStatus === tab.key}
-            className={activeStatus === tab.key ? 'is-active' : ''}
-            id={`loyalty-${tab.key}-tab`}
-            key={tab.key}
-            onClick={() => onStatusChange(tab.key)}
-            onKeyDown={(event) => handleTabKeyDown(event, index)}
-            role="tab"
-            tabIndex={activeStatus === tab.key ? 0 : -1}
-            type="button"
-          >
-            {tab.label}
-            <span>{programmeCounts[tab.key]}</span>
-          </button>
-        ))}
+        <div className="loyalty-list-actions">
+          <Link className="btn-secondary" to="/business/loyalty/customers">
+            <ScanLine aria-hidden="true" />
+            Identify customer
+          </Link>
+          {totalProgrammes > 0 && (
+            <Button onClick={onCreate}>
+              <Plus aria-hidden="true" />
+              New programme
+            </Button>
+          )}
+        </div>
       </div>
 
       {totalProgrammes === 0 ? (
