@@ -7,6 +7,7 @@ import {
   getEarningRules,
   getProgrammeTypeLabel,
   getRewardTarget,
+  LOYALTY_REDEMPTION_METHOD,
 } from '../businessLoyaltyTemplates'
 
 function formatDate(value) {
@@ -129,6 +130,10 @@ export default function LoyaltyProgrammeReview({
           <ReviewRow
             label="Terms and conditions"
             value={programme.terms || 'No additional terms'}
+          />
+          <ReviewRow
+            label="Redemption method"
+            value={LOYALTY_REDEMPTION_METHOD}
           />
         </div>
       </section>

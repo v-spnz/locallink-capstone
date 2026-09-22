@@ -6,6 +6,7 @@ import LoyaltyDraftList, {
 } from '../../features/loyalty/components/LoyaltyDraftList'
 import LoyaltyProgrammeReview from '../../features/loyalty/components/LoyaltyProgrammeReview'
 import useBusinessLoyaltyProgrammes from '../../features/loyalty/hooks/useBusinessLoyaltyProgrammes'
+import LoyaltyCustomerLookup from './LoyaltyCustomerLookup'
 import '../../features/loyalty/BusinessLoyalty.css'
 import '../../features/deals/CreateDeal.css'
 
@@ -55,14 +56,17 @@ export default function CreateLoyalty() {
         )}
 
       {!loyalty.isLoading && loyalty.step === 'list' && (
-        <LoyaltyDraftList
-          programmes={loyalty.visibleProgrammes}
-          programmeCounts={loyalty.programmeCounts}
-          activeStatus={loyalty.activeStatus}
-          onStatusChange={loyalty.setActiveStatus}
-          onCreate={loyalty.handleStartNewProgramme}
-          onEdit={loyalty.handleEditProgramme}
-        />
+        <>
+          <LoyaltyCustomerLookup />
+          <LoyaltyDraftList
+            programmes={loyalty.visibleProgrammes}
+            programmeCounts={loyalty.programmeCounts}
+            activeStatus={loyalty.activeStatus}
+            onStatusChange={loyalty.setActiveStatus}
+            onCreate={loyalty.handleStartNewProgramme}
+            onEdit={loyalty.handleEditProgramme}
+          />
+        </>
       )}
 
       {loyalty.step === 'form' && (

@@ -113,8 +113,8 @@ select is(
     from public.business_loyalty_programmes
     where id = '47000000-0000-0000-0000-000000000109'
   ),
-  'Spend $50 to receive $5 off.',
-  'US0104: spend-and-save programmes store the target and fixed discount'
+  'Spend $50 to receive 5% off.',
+  'US0104: spend-and-save programmes store the target and percentage discount'
 );
 
 select is(
@@ -123,7 +123,7 @@ select is(
     from public.business_loyalty_programmes
     where id = '47000000-0000-0000-0000-000000000109'
   ),
-  '$5 off',
+  '5% off',
   'US0104: spend-and-save rewards are derived from structured values'
 );
 
@@ -165,7 +165,7 @@ select throws_ok(
       'spend_and_save',
       null,
       80,
-      100,
+      12,
       null,
       (now() at time zone 'Pacific/Auckland')::date,
       null,
@@ -174,7 +174,7 @@ select throws_ok(
   $$,
   '23514',
   'Complete every required loyalty programme field before publishing',
-  'US0104: a discount greater than its spend target cannot be confirmed'
+  'US0104: a percentage outside the five-point options cannot be confirmed'
 );
 
 select is(
