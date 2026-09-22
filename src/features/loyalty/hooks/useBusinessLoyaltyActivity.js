@@ -11,7 +11,11 @@ export default function useBusinessLoyaltyActivity() {
   const [isLoading, setIsLoading] = useState(true)
   const [requestError, setRequestError] = useState('')
 
-  const loadActivity = useCallback(async () => {
+    const loadActivity = useCallback(async () => {
+    if (!business.id) {
+      setIsLoading(false)
+      return
+    }
     setIsLoading(true)
     setRequestError('')
     try {
@@ -26,8 +30,31 @@ export default function useBusinessLoyaltyActivity() {
   }, [business.id])
 
   useEffect(() => {
-    loadActivity()
-  }, [loadActivity])
+    let cancelled = false
+
+    async function loadInitialActivity() {
+      if (!business.id) {
+        setIsLoading(false)
+        return
+      }
+      try {
+        const data = await fetchBusinessLoyaltyActivity(business.id)
+        if (!cancelled) setActivity(data)
+      } catch (error) {
+        console.error('Unable to load loyalty activity.', error)
+        if (!cancelled) {
+          setRequestError('Unable to load recent activity. Please try again.')
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false)
+      }
+    }
+
+    loadInitialActivity()
+    return () => {
+      cancelled = true
+    }
+  }, [business.id])
 
   useEffect(() => {
     if (!business.id) return undefined
