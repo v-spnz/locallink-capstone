@@ -1,4 +1,4 @@
-import { getAucklandToday } from './businessLoyaltyValidation'
+import { getAucklandToday } from './businessLoyaltyValidation.js'
 export const LOYALTY_TEMPLATES = [
   {
     value: 'stamp_card',
