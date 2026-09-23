@@ -1,4 +1,4 @@
-import { Bookmark, MapPin } from 'lucide-react'
+import { Bookmark, MapPin, Clock3, BadgeCheck } from 'lucide-react'
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import {
