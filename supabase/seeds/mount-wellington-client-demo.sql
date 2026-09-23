@@ -1,6 +1,9 @@
 -- Mount Wellington businesses, deals, and loyalty for the local client meeting.
 -- Safe to rerun: fixed IDs and conflict handling prevent duplicate markers.
-begin;
+-- Keep temporary-table creation and use in one statement so the seed runner
+-- cannot prepare dependent statements before their temporary tables exist.
+do $mount_wellington_seed$
+begin
 
 update public.profiles
 set
@@ -270,4 +273,5 @@ join auth.users as customer
   on customer.id = '10000000-0000-0000-0000-000000000001'
 on conflict (programme_id, customer_id) do nothing;
 
-commit;
+end;
+$mount_wellington_seed$;
