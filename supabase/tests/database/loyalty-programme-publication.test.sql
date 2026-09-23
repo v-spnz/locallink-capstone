@@ -173,7 +173,7 @@ select throws_ok(
     )
   $$,
   '23514',
-  'Complete every required loyalty programme field before publishing',
+  'new row for relation "business_loyalty_programmes" violates check constraint "business_loyalty_programmes_reward_value_check"',
   'US0104: a percentage outside the five-point options cannot be confirmed'
 );
 
