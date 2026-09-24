@@ -8,17 +8,23 @@ export default function useLoyaltyPrograms() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
 
-  const loadPrograms = useCallback(async () => {
-    setIsLoading(true)
-    setError('')
+  const loadPrograms = useCallback(async ({ silent = false } = {}) => {
+    // Background polling must not toggle isLoading — doing so swaps the
+    // entire rendered list out for the loading message on every poll,
+    // unmounting every card (and any modal open on one) every few
+    // seconds, regardless of whether anything actually changed.
+    if (!silent) setIsLoading(true)
+    if (!silent) setError('')
     try {
       const records = await fetchMyLoyaltyRecords()
       setPrograms(records)
     } catch (loadError) {
       console.error('Unable to load loyalty programmes.', loadError)
-      setError('Unable to load your loyalty programmes right now.')
+      if (!silent) {
+        setError('Unable to load your loyalty programmes right now.')
+      }
     } finally {
-      setIsLoading(false)
+      if (!silent) setIsLoading(false)
     }
   }, [])
 

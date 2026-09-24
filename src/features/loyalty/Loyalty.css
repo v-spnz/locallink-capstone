@@ -133,99 +133,6 @@
   background: var(--bg);
 }
 
-.ly-discover-card {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.ly-discover-card-heading {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.ly-discover-card-icon {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--blue-light);
-  color: var(--blue);
-  flex-shrink: 0;
-}
-
-.ly-discover-card-heading small {
-  display: block;
-  color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.ly-discover-card-heading strong {
-  display: block;
-  font-size: 15px;
-}
-
-.ly-discover-card-heading span {
-  display: block;
-  color: var(--text-muted);
-  font-size: 13px;
-}
-
-.ly-discover-card-reward {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: var(--bg);
-}
-
-.ly-discover-card-reward span {
-  color: var(--text-muted);
-  font-size: 12px;
-}
-
-.ly-discover-card-reward strong {
-  color: var(--emerald);
-  font-size: 14px;
-}
-
-.ly-discover-card-earning {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.ly-discover-card-location {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--text-muted);
-  font-size: 12px;
-}
-
-.ly-discover-card-location strong {
-  margin-left: auto;
-  color: var(--text);
-}
-
-.ly-discover-card-joined {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px;
-  border-radius: 8px;
-  background: var(--emerald-light);
-  color: var(--emerald);
-  font-size: 13px;
-  font-weight: 700;
-}
-
 .loyalty-error {
   margin-top: 16px;
 }
@@ -482,6 +389,94 @@
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.08em;
+}
+
+.loyalty-qr-back {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.loyalty-qr-back:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.loyalty-qr-back svg {
+  width: 18px;
+  height: 18px;
+}
+
+.loyalty-details-dialog {
+  position: relative;
+  padding: 24px;
+}
+
+.loyalty-details-header {
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.loyalty-details-header .loyalty-stamp-ring {
+  width: 72px;
+  height: 72px;
+}
+
+.loyalty-details-header .loyalty-business-avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+}
+
+.loyalty-details-badge {
+  width: fit-content;
+  margin-bottom: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.loyalty-details-badge svg {
+  width: 13px;
+  height: 13px;
+}
+
+.loyalty-details-list {
+  margin: 16px 0 18px;
+}
+
+.loyalty-details-list > div {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.loyalty-details-list dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.loyalty-details-list dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 13.5px;
+  line-height: 1.55;
 }
 
 .ly-redeem-btn {

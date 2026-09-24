@@ -4,7 +4,8 @@ import ActiveClaimBanner from '../components/navigation/ActiveClaimBanner'
 export default function PortalLayout({ navigation, children }) {
   const location = useLocation()
   const hideBanner =
-    location.pathname === '/profile' || location.pathname.startsWith('/business')
+    location.pathname === '/profile' ||
+    location.pathname.startsWith('/business')
 
   return (
     <>

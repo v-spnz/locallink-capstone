@@ -1,8 +1,6 @@
 export function normaliseJoinCode(value) {
   const presented = String(value ?? '')
-  const code = presented.includes(':')
-    ? presented.split(':').at(-1)
-    : presented
+  const code = presented.includes(':') ? presented.split(':').at(-1) : presented
   return code
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, '')

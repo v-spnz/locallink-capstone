@@ -57,8 +57,7 @@ export async function joinLoyaltyProgramme(joinCode) {
     currentProgress: Number(data.current_progress),
     rewardThreshold: Number(data.reward_threshold),
     rewardDescription: data.reward_description,
-    rewardValue:
-      data.reward_value == null ? null : Number(data.reward_value),
+    rewardValue: data.reward_value == null ? null : Number(data.reward_value),
     earningRules: data.earning_rules,
     rewardEligible: data.reward_eligible,
     updatedAt: data.updated_at,

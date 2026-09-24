@@ -39,10 +39,18 @@ function LoyaltyRecord({
   isAddingStamp,
   stampError,
   stampSuccess,
+  onRedeem,
+  isRedeeming,
+  redeemError,
+  redeemSuccess,
 }) {
   const progress = getLoyaltyProgressPresentation(record)
   const eligibilityLabel = getLoyaltyEligibilityLabel(record)
-  const isPoints = record.programmeType === 'points'
+  // Fixed: this previously checked for 'points', a value that no longer
+  // exists — the app uses stamp_card/spend_and_save/spend_and_reward, so
+  // every dollar-based programme was silently always treated as a stamp
+  // card, always adding a flat 1 instead of a dollar amount.
+  const isPoints = record.programmeType !== 'stamp_card'
   const [pointsAmount, setPointsAmount] = useState('1')
 
   return (
@@ -128,6 +136,30 @@ function LoyaltyRecord({
       </dl>
 
       <section className="loyalty-customer-add-progress">
+        {record.rewardEligible && (
+          <>
+            <Button
+              variant="success"
+              className="loyalty-customer-redeem-btn"
+              onClick={onRedeem}
+              disabled={isRedeeming}
+            >
+              <Gift aria-hidden="true" />
+              {isRedeeming ? 'Redeeming…' : 'Redeem reward'}
+            </Button>
+            {redeemError && (
+              <p className="auth-error loyalty-stamp-error" role="alert">
+                {redeemError}
+              </p>
+            )}
+            {redeemSuccess && !redeemError && (
+              <p className="loyalty-stamp-success" role="status">
+                Reward redeemed.
+              </p>
+            )}
+          </>
+        )}
+
         {isPoints ? (
           <div className="loyalty-customer-points-row">
             <label htmlFor="loyalty-points-amount">Points to add</label>
@@ -250,6 +282,10 @@ export default function LoyaltyCustomerLookup() {
             isAddingStamp={lookup.isAddingStamp}
             stampError={lookup.stampError}
             stampSuccess={lookup.stampSuccess}
+            onRedeem={lookup.redeemReward}
+            isRedeeming={lookup.isRedeeming}
+            redeemError={lookup.redeemError}
+            redeemSuccess={lookup.redeemSuccess}
           />
         )}
 

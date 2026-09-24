@@ -1,7 +1,10 @@
 import { CheckCircle2, Gift, MapPin, UserPlus } from 'lucide-react'
 import { useState } from 'react'
 import Button from '../../../components/ui/Button'
-import { getCustomerReward, getProgrammeTypeLabel } from '../businessLoyaltyTemplates'
+import {
+  getCustomerReward,
+  getProgrammeTypeLabel,
+} from '../businessLoyaltyTemplates'
 
 export default function DiscoverLoyaltyCard({ business, onJoin }) {
   const [isJoining, setIsJoining] = useState(false)

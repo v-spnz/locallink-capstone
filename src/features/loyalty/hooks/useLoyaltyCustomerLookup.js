@@ -3,6 +3,7 @@ import useBusiness from '../../../business/useBusiness'
 import {
   addLoyaltyProgress,
   lookupBusinessLoyaltyRecord,
+  redeemLoyaltyReward,
 } from '../api/loyaltyCustomerRecords'
 import {
   formatLoyaltyLookupCode,
@@ -19,6 +20,9 @@ export default function useLoyaltyCustomerLookup() {
   const [isAddingStamp, setIsAddingStamp] = useState(false)
   const [stampError, setStampError] = useState('')
   const [stampSuccess, setStampSuccess] = useState(false)
+  const [isRedeeming, setIsRedeeming] = useState(false)
+  const [redeemError, setRedeemError] = useState('')
+  const [redeemSuccess, setRedeemSuccess] = useState(false)
   const lookupInProgressRef = useRef(false)
 
   function updateIdentifier(value) {
@@ -27,6 +31,8 @@ export default function useLoyaltyCustomerLookup() {
     setError('')
     setStampError('')
     setStampSuccess(false)
+    setRedeemError('')
+    setRedeemSuccess(false)
   }
 
   async function lookupRecord(value = identifier) {
@@ -38,6 +44,8 @@ export default function useLoyaltyCustomerLookup() {
     setError('')
     setStampError('')
     setStampSuccess(false)
+    setRedeemError('')
+    setRedeemSuccess(false)
 
     if (!isCompleteLoyaltyLookupCode(normalised)) {
       setError('Enter the complete customer loyalty code.')
@@ -91,12 +99,33 @@ export default function useLoyaltyCustomerLookup() {
     }
   }
 
+  async function redeemReward() {
+    if (!record || isRedeeming) return false
+    setIsRedeeming(true)
+    setRedeemError('')
+    setRedeemSuccess(false)
+    try {
+      const updated = await redeemLoyaltyReward(record.id)
+      setRecord(updated)
+      setRedeemSuccess(true)
+      return true
+    } catch (redeemErr) {
+      console.error('Unable to redeem loyalty reward.', redeemErr)
+      setRedeemError('Unable to redeem this reward. Please try again.')
+      return false
+    } finally {
+      setIsRedeeming(false)
+    }
+  }
+
   function clearLookup() {
     setIdentifier('')
     setRecord(null)
     setError('')
     setStampError('')
     setStampSuccess(false)
+    setRedeemError('')
+    setRedeemSuccess(false)
   }
 
   return {
@@ -107,10 +136,14 @@ export default function useLoyaltyCustomerLookup() {
     isAddingStamp,
     stampError,
     stampSuccess,
+    isRedeeming,
+    redeemError,
+    redeemSuccess,
     updateIdentifier,
     handleLookup,
     handleScannedCode,
     addStamp,
+    redeemReward,
     clearLookup,
   }
 }

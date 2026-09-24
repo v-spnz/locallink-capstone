@@ -451,6 +451,12 @@
   gap: 8px;
 }
 
+.loyalty-customer-redeem-btn {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--business-border);
+}
+
 .loyalty-customer-points-row {
   display: flex;
   align-items: center;

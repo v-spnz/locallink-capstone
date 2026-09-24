@@ -7,10 +7,9 @@ import {
   UserPlus,
   X,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Button from '../../components/ui/Button'
 import QrCodeScanner from '../../components/ui/QrCodeScanner'
-import DiscoverLoyaltyCard from '../../features/loyalty/components/DiscoverLoyaltyCard'
 import ProgramCard from '../../features/loyalty/components/ProgramCard'
 import useJoinLoyaltyProgramme from '../../features/loyalty/hooks/useJoinLoyaltyProgramme'
 import useLoyaltyDiscovery from '../../features/loyalty/hooks/useLoyaltyDiscovery'
@@ -22,6 +21,7 @@ export default function Loyalty() {
   const [activeTab, setActiveTab] = useState('discover')
   const discovery = useLoyaltyDiscovery()
   const loyalty = useLoyaltyPrograms()
+  const { reload: reloadLoyaltyPrograms } = loyalty
   const [isCodeFormOpen, setIsCodeFormOpen] = useState(false)
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const join = useJoinLoyaltyProgramme(() => {
@@ -30,6 +30,18 @@ export default function Loyalty() {
     discovery.reload()
     loyalty.reload()
   })
+
+  // A business could add a stamp at any moment while the customer is just
+  // browsing this tab, with no modal open at all — poll for fresh progress
+  // while "Your Loyalty Cards" is the active tab, rather than only when a
+  // specific card's QR view happens to be open.
+  useEffect(() => {
+    if (activeTab !== 'cards') return undefined
+    const interval = window.setInterval(() => {
+      reloadLoyaltyPrograms({ silent: true })
+    }, 5000)
+    return () => window.clearInterval(interval)
+  }, [activeTab, reloadLoyaltyPrograms])
 
   async function handleDiscoverJoin(joinCode) {
     const joined = await join.handleScannedCode(joinCode)
@@ -43,25 +55,28 @@ export default function Loyalty() {
     return join.error || 'Unable to join right now. Please try again.'
   }
 
-  // A joined-but-not-yet-stamped card (progress still at 0) stays visible
-  // in Discover ("Joined — 0/X"), but doesn't clutter this tab until the
-  // customer has actually gained some progress.
+  // Discover only shows programmes you haven't started yet — once joined,
+  // a programme moves entirely into "Your Loyalty Cards" instead of also
+  // lingering here.
+  const notStartedBusinesses = discovery.businesses.filter(
+    (business) => !business.isJoined,
+  )
+
+  // "Your Loyalty Cards" = joined + the programme is still active, at any
+  // progress level (including 0 — joining alone counts as "started").
   const activePrograms = loyalty.programs.filter(
-    (program) =>
-      program.programmeStatus === 'active' && program.currentProgress > 0,
+    (program) => program.programmeStatus === 'active',
   )
-  const pastPrograms = loyalty.programs.filter(
-    (program) =>
-      program.programmeStatus !== 'active' && program.currentProgress > 0,
+  const completedPrograms = loyalty.programs.filter(
+    (program) => program.programmeStatus !== 'active',
   )
-  const activeInProgress = activePrograms.filter(
-    (program) => !program.rewardEligible,
+  // Reward-eligible cards stay in this same list (surfaced first), rather
+  // than a separate sub-tab — moving a card to a different list the
+  // instant it becomes reward-eligible would unmount it mid-interaction,
+  // closing any modal the customer had open on it.
+  const sortedActivePrograms = [...activePrograms].sort(
+    (a, b) => (b.rewardEligible ? 1 : 0) - (a.rewardEligible ? 1 : 0),
   )
-  const activeRewardReady = activePrograms.filter(
-    (program) => program.rewardEligible,
-  )
-  const cardsList =
-    loyalty.tab === 'inprogress' ? activeInProgress : activeRewardReady
 
   return (
     <>
@@ -90,9 +105,6 @@ export default function Loyalty() {
         >
           <Award aria-hidden="true" />
           Your Loyalty Cards
-          <span className="marketplace-tab-count">
-            {activePrograms.length}
-          </span>
         </button>
         <button
           type="button"
@@ -102,8 +114,7 @@ export default function Loyalty() {
           onClick={() => setActiveTab('past')}
         >
           <BadgeCheck aria-hidden="true" />
-          Past Loyalty Cards
-          <span className="marketplace-tab-count">{pastPrograms.length}</span>
+          Completed
         </button>
       </div>
 
@@ -191,12 +202,13 @@ export default function Loyalty() {
             <div className="loyalty-empty-state">
               Loading loyalty programmes near you…
             </div>
-          ) : discovery.businesses.length > 0 ? (
+          ) : notStartedBusinesses.length > 0 ? (
             <div className="loyalty-program-grid">
-              {discovery.businesses.map((business) => (
-                <DiscoverLoyaltyCard
+              {notStartedBusinesses.map((business, index) => (
+                <ProgramCard
                   key={business.programmeId}
-                  business={business}
+                  program={business}
+                  index={index}
                   onJoin={handleDiscoverJoin}
                 />
               ))}
@@ -206,7 +218,7 @@ export default function Loyalty() {
               <div aria-hidden="true">
                 <Gift />
               </div>
-              No loyalty programmes are active in your suburb right now.
+              No new loyalty programmes to start in your suburb right now.
             </div>
           )}
         </>
@@ -222,21 +234,6 @@ export default function Loyalty() {
             onChange={(event) => loyalty.setSearch(event.target.value)}
           />
 
-          <div className="tab-row">
-            <button
-              className={`tab-btn${loyalty.tab === 'inprogress' ? ' active' : ''}`}
-              onClick={() => loyalty.setTab('inprogress')}
-            >
-              In Progress ({activeInProgress.length})
-            </button>
-            <button
-              className={`tab-btn${loyalty.tab === 'ready' ? ' active' : ''}`}
-              onClick={() => loyalty.setTab('ready')}
-            >
-              Reward ready ({activeRewardReady.length})
-            </button>
-          </div>
-
           {loyalty.error && (
             <div className="auth-error loyalty-error" role="alert">
               {loyalty.error}
@@ -244,23 +241,17 @@ export default function Loyalty() {
           )}
 
           {loyalty.isLoading ? (
-            <div className="loyalty-empty-state">
-              Loading your programmes…
-            </div>
-          ) : cardsList.length > 0 ? (
+            <div className="loyalty-empty-state">Loading your programmes…</div>
+          ) : sortedActivePrograms.length > 0 ? (
             <div className="loyalty-program-grid">
-              {cardsList.map((program, index) => (
+              {sortedActivePrograms.map((program, index) => (
                 <ProgramCard key={program.id} program={program} index={index} />
               ))}
             </div>
           ) : (
             <div className="loyalty-empty-state">
-              <div aria-hidden="true">
-                {loyalty.tab === 'inprogress' ? '☕' : '🎉'}
-              </div>
-              {loyalty.tab === 'inprogress'
-                ? 'No active programmes yet — join one from Discover!'
-                : 'No rewards are ready yet — keep going!'}
+              <div aria-hidden="true">☕</div>
+              No active programmes yet — join one from Discover!
             </div>
           )}
         </>
@@ -269,12 +260,10 @@ export default function Loyalty() {
       {activeTab === 'past' && (
         <>
           {loyalty.isLoading ? (
-            <div className="loyalty-empty-state">
-              Loading your programmes…
-            </div>
-          ) : pastPrograms.length > 0 ? (
+            <div className="loyalty-empty-state">Loading your programmes…</div>
+          ) : completedPrograms.length > 0 ? (
             <div className="loyalty-program-grid">
-              {pastPrograms.map((program, index) => (
+              {completedPrograms.map((program, index) => (
                 <ProgramCard key={program.id} program={program} index={index} />
               ))}
             </div>
@@ -283,7 +272,7 @@ export default function Loyalty() {
               <div aria-hidden="true">
                 <BadgeCheck />
               </div>
-              No past loyalty cards yet — cards move here once a programme
+              No completed programmes yet — cards move here once a programme
               ends.
             </div>
           )}

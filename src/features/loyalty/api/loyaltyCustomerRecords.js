@@ -48,3 +48,15 @@ export async function addLoyaltyProgress(loyaltyRecordId, amount = 1) {
   if (!data) throw new Error('LOYALTY_RECORD_NOT_FOUND')
   return mapLoyaltyRecord(data)
 }
+
+export async function redeemLoyaltyReward(loyaltyRecordId) {
+  const { data, error } = await supabase
+    .rpc('redeem_loyalty_reward', {
+      p_loyalty_record_id: loyaltyRecordId,
+    })
+    .maybeSingle()
+
+  if (error) throw error
+  if (!data) throw new Error('LOYALTY_RECORD_NOT_FOUND')
+  return mapLoyaltyRecord(data)
+}

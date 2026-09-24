@@ -46,9 +46,7 @@ export default function useJoinLoyaltyProgramme(onJoined) {
       // already human-readable (e.g. "No active loyalty programme matches
       // this code") — surface that directly instead of a hardcoded
       // generic string that hides what actually went wrong.
-      setError(
-        joinError?.message || 'No active programme matches this code.',
-      )
+      setError(joinError?.message || 'No active programme matches this code.')
       return false
     } finally {
       joinInProgressRef.current = false
