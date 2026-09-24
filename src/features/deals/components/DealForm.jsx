@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import Button from '../../../components/ui/Button'
 import DateRangeCalendar from '../../../components/ui/DateRangeCalendar'
+import RedemptionMethodField from '../../../components/ui/RedemptionMethodField'
 import GstIncluded from '../../../components/ui/GstIncluded'
 import { formatBusinessDealAddress } from '../businessLocation'
 import {
@@ -633,10 +634,9 @@ export default function DealForm({
                 error={errors.exclusions}
               />
             </div>
-            <div className="form-group">
-              <span className="form-label">Redemption method</span>
-              <p className="deal-fixed-redemption">{DEAL_REDEMPTION_METHOD}</p>
-            </div>
+            <RedemptionMethodField label="Redemption method">
+              {DEAL_REDEMPTION_METHOD}
+            </RedemptionMethodField>
           </section>
         </div>
       </div>

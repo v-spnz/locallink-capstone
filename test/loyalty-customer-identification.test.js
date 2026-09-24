@@ -122,7 +122,7 @@ test('US0109 AC1-3: the protected business workflow finds and presents its match
   assert.match(hook, /handleScannedCode/)
   assert.match(portal, /path="loyalty\/customers"/)
   assert.match(portal, /capability="loyalty"/)
-  assert.match(list, /Identify customer/)
+  assert.doesNotMatch(list, /\/business\/loyalty\/customers/)
   assert.doesNotMatch(list, /Your loyalty programmes/)
   assert.doesNotMatch(list, /Prepare private drafts/)
   assert.ok(

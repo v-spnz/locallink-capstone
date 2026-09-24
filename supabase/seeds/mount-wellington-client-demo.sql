@@ -1,6 +1,9 @@
--- Mount Wellington businesses and deals for the local client meeting.
+-- Mount Wellington businesses, deals, and loyalty for the local client meeting.
 -- Safe to rerun: fixed IDs and conflict handling prevent duplicate markers.
-begin;
+-- Keep temporary-table creation and use in one statement so the seed runner
+-- cannot prepare dependent statements before their temporary tables exist.
+do $mount_wellington_seed$
+begin
 
 update public.profiles
 set
@@ -164,4 +167,111 @@ where deal.id = (
   and demo.offer_type is not null
   and deal.status = 'draft';
 
-commit;
+-- Four loyalty examples, shared by the business workspace and consumer wallet.
+create temporary table mount_wellington_loyalty_demo (
+  demo_number integer primary key,
+  programme_name text,
+  programme_type text,
+  reward_threshold numeric,
+  reward_value numeric,
+  reward_description text,
+  current_progress numeric
+) on commit drop;
+
+insert into mount_wellington_loyalty_demo values
+  (101, 'Maungarei coffee club', 'stamp_card', 8, null, null, 5),
+  (102, 'Lunn Lane bakery regulars', 'stamp_card', 6, null, null, 6),
+  (104, 'Corner Grocer savings', 'spend_and_save', 100, 10, null, 65),
+  (105, 'Maungarei reading rewards', 'spend_and_reward', 80, null, 'bookmark and reading journal', 80);
+
+update public.business_capabilities as capability
+set loyalty_enabled = true
+from mount_wellington_loyalty_demo as demo
+where capability.business_id = (
+  'b0000000-0000-0000-0000-' || lpad(demo.demo_number::text, 12, '0')
+)::uuid;
+
+-- Dedicated demo owners: mtw101/102/104/105@test.locallink.nz.
+-- Same local-demo password as seed.sql: LocalLink123!
+insert into auth.users (
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+  confirmation_token, email_change, email_change_token_new, recovery_token
+)
+select
+  '00000000-0000-0000-0000-000000000000'::uuid,
+  ('b5000000-0000-0000-0000-' || lpad(demo_number::text, 12, '0'))::uuid,
+  'authenticated', 'authenticated',
+  'mtw' || demo_number || '@test.locallink.nz',
+  extensions.crypt('LocalLink123!', extensions.gen_salt('bf')),
+  now(),
+  '{"provider":"email","providers":["email"]}'::jsonb,
+  jsonb_build_object('first_name', 'Mount Wellington', 'last_name', 'Demo ' || demo_number),
+  now(), now(), '', '', '', ''
+from mount_wellington_loyalty_demo
+on conflict (id) do nothing;
+
+insert into auth.identities (
+  id, user_id, provider_id, identity_data, provider,
+  last_sign_in_at, created_at, updated_at
+)
+select
+  ('b6000000-0000-0000-0000-' || lpad(demo_number::text, 12, '0'))::uuid,
+  ('b5000000-0000-0000-0000-' || lpad(demo_number::text, 12, '0'))::uuid,
+  'b5000000-0000-0000-0000-' || lpad(demo_number::text, 12, '0'),
+  jsonb_build_object(
+    'sub', 'b5000000-0000-0000-0000-' || lpad(demo_number::text, 12, '0'),
+    'email', 'mtw' || demo_number || '@test.locallink.nz',
+    'email_verified', true
+  ),
+  'email', now(), now(), now()
+from mount_wellington_loyalty_demo
+on conflict (id) do nothing;
+
+insert into public.business_members (business_id, profile_id, role)
+select
+  ('b0000000-0000-0000-0000-' || lpad(demo.demo_number::text, 12, '0'))::uuid,
+  profile.id,
+  'owner'
+from mount_wellington_loyalty_demo as demo
+join public.profiles as profile
+  on profile.id = (
+    'b5000000-0000-0000-0000-' || lpad(demo.demo_number::text, 12, '0')
+  )::uuid
+on conflict (business_id, profile_id) do nothing;
+
+insert into public.business_loyalty_programmes (
+  id, business_id, name, programme_type, reward_threshold, reward_value,
+  reward_description, terms, start_date, end_date, status
+)
+select
+  ('b3000000-0000-0000-0000-' || lpad(demo_number::text, 12, '0'))::uuid,
+  ('b0000000-0000-0000-0000-' || lpad(demo_number::text, 12, '0'))::uuid,
+  programme_name,
+  programme_type,
+  reward_threshold,
+  reward_value,
+  reward_description,
+  'Available in store at this Mount Wellington business. One reward per completed target.',
+  (now() at time zone 'Pacific/Auckland')::date - 7,
+  (now() at time zone 'Pacific/Auckland')::date + 90,
+  'published'
+from mount_wellington_loyalty_demo
+on conflict (id) do nothing;
+
+insert into public.customer_loyalty_records (
+  id, programme_id, customer_id, loyalty_identifier, current_progress
+)
+select
+  ('b4000000-0000-0000-0000-' || lpad(demo.demo_number::text, 12, '0'))::uuid,
+  ('b3000000-0000-0000-0000-' || lpad(demo.demo_number::text, 12, '0'))::uuid,
+  customer.id,
+  'LL-MTWL-' || lpad(demo.demo_number::text, 4, '0'),
+  demo.current_progress
+from mount_wellington_loyalty_demo as demo
+join auth.users as customer
+  on customer.id = '10000000-0000-0000-0000-000000000001'
+on conflict (programme_id, customer_id) do nothing;
+
+end;
+$mount_wellington_seed$;
