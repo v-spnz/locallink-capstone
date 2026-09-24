@@ -1,6 +1,9 @@
 -- Mount Wellington businesses and deals for the local client meeting.
 -- Safe to rerun: fixed IDs and conflict handling prevent duplicate markers.
-begin;
+-- Keep the staging relation and all of its consumers in one statement because
+-- the Supabase CLI parses seed batches before executing their earlier DDL.
+do $mount_wellington_seed$
+begin
 
 update public.profiles
 set
@@ -164,4 +167,5 @@ where deal.id = (
   and demo.offer_type is not null
   and deal.status = 'draft';
 
-commit;
+end;
+$mount_wellington_seed$;
