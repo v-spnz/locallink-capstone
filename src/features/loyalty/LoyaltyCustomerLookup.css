@@ -437,6 +437,60 @@
   line-height: 1.5;
 }
 
+.loyalty-customer-add-progress {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--business-border);
+}
+
+.loyalty-customer-add-progress > button {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.loyalty-customer-points-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.loyalty-customer-points-row label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--business-muted);
+  white-space: nowrap;
+}
+
+.loyalty-customer-points-row input {
+  width: 72px;
+  padding: 8px 10px;
+  border: 1px solid var(--business-border);
+  border-radius: var(--business-radius-control, 10px);
+  font: inherit;
+}
+
+.loyalty-customer-points-row > button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.loyalty-stamp-error {
+  margin: 10px 0 0;
+}
+
+.loyalty-stamp-success {
+  margin: 10px 0 0;
+  color: var(--business-success, var(--emerald));
+  font-size: 13px;
+  font-weight: 700;
+}
+
 @media (max-width: 860px) {
   .loyalty-customer-layout {
     grid-template-columns: 1fr;

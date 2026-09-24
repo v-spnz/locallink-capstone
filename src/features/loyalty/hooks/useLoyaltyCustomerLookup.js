@@ -1,6 +1,9 @@
 import { useRef, useState } from 'react'
 import useBusiness from '../../../business/useBusiness'
-import { lookupBusinessLoyaltyRecord } from '../api/loyaltyCustomerRecords'
+import {
+  addLoyaltyProgress,
+  lookupBusinessLoyaltyRecord,
+} from '../api/loyaltyCustomerRecords'
 import {
   formatLoyaltyLookupCode,
   isCompleteLoyaltyLookupCode,
@@ -13,12 +16,17 @@ export default function useLoyaltyCustomerLookup() {
   const [record, setRecord] = useState(null)
   const [error, setError] = useState('')
   const [isLookingUp, setIsLookingUp] = useState(false)
+  const [isAddingStamp, setIsAddingStamp] = useState(false)
+  const [stampError, setStampError] = useState('')
+  const [stampSuccess, setStampSuccess] = useState(false)
   const lookupInProgressRef = useRef(false)
 
   function updateIdentifier(value) {
     setIdentifier(formatLoyaltyLookupCode(value))
     setRecord(null)
     setError('')
+    setStampError('')
+    setStampSuccess(false)
   }
 
   async function lookupRecord(value = identifier) {
@@ -28,6 +36,8 @@ export default function useLoyaltyCustomerLookup() {
     setIdentifier(formatLoyaltyLookupCode(normalised))
     setRecord(null)
     setError('')
+    setStampError('')
+    setStampSuccess(false)
 
     if (!isCompleteLoyaltyLookupCode(normalised)) {
       setError('Enter the complete customer loyalty code.')
@@ -62,10 +72,31 @@ export default function useLoyaltyCustomerLookup() {
     return lookupRecord(value)
   }
 
+  async function addStamp(amount = 1) {
+    if (!record || isAddingStamp) return false
+    setIsAddingStamp(true)
+    setStampError('')
+    setStampSuccess(false)
+    try {
+      const updated = await addLoyaltyProgress(record.id, amount)
+      setRecord(updated)
+      setStampSuccess(true)
+      return true
+    } catch (stampErr) {
+      console.error('Unable to add loyalty progress.', stampErr)
+      setStampError('Unable to add this stamp. Please try again.')
+      return false
+    } finally {
+      setIsAddingStamp(false)
+    }
+  }
+
   function clearLookup() {
     setIdentifier('')
     setRecord(null)
     setError('')
+    setStampError('')
+    setStampSuccess(false)
   }
 
   return {
@@ -73,9 +104,13 @@ export default function useLoyaltyCustomerLookup() {
     record,
     error,
     isLookingUp,
+    isAddingStamp,
+    stampError,
+    stampSuccess,
     updateIdentifier,
     handleLookup,
     handleScannedCode,
+    addStamp,
     clearLookup,
   }
 }

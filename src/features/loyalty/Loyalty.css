@@ -67,6 +67,165 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
+.ly-join-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 9px 14px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ly-join-toggle:hover {
+  border-color: var(--blue);
+  background: var(--blue-light);
+}
+
+.ly-join-form {
+  margin-bottom: 16px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--white);
+}
+
+.ly-join-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.ly-join-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ly-join-controls input {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+}
+
+.ly-join-close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.ly-join-close:hover {
+  background: var(--bg);
+}
+
+.ly-discover-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ly-discover-card-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.ly-discover-card-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--blue-light);
+  color: var(--blue);
+  flex-shrink: 0;
+}
+
+.ly-discover-card-heading small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ly-discover-card-heading strong {
+  display: block;
+  font-size: 15px;
+}
+
+.ly-discover-card-heading span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.ly-discover-card-reward {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.ly-discover-card-reward span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.ly-discover-card-reward strong {
+  color: var(--emerald);
+  font-size: 14px;
+}
+
+.ly-discover-card-earning {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ly-discover-card-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.ly-discover-card-location strong {
+  margin-left: auto;
+  color: var(--text);
+}
+
+.ly-discover-card-joined {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--emerald-light);
+  color: var(--emerald);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .loyalty-error {
   margin-top: 16px;
 }
