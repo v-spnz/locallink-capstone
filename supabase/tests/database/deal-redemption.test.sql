@@ -1,6 +1,20 @@
 begin;
 
-select plan(32);
+select plan(39);
+
+select has_column(
+  'public',
+  'business_deal_redemptions',
+  'transaction_amount_cents',
+  'a redemption can record its transaction value'
+);
+
+select has_column(
+  'public',
+  'business_deal_redemptions',
+  'savings_amount_cents',
+  'a redemption can record customer savings'
+);
 
 select has_column(
   'public',
@@ -47,7 +61,7 @@ select has_function(
 select has_function(
   'public',
   'redeem_business_deal_claim_by_code',
-  array['text'],
+  array['text', 'integer', 'integer'],
   'a business can confirm a redemption by code'
 );
 
@@ -163,6 +177,15 @@ values
     'EXPIRED09700',
     now() - interval '20 minutes',
     now() - interval '5 minutes'
+  ),
+  (
+    '28000000-0000-0000-0000-000000000099',
+    '27000000-0000-0000-0000-000000000098',
+    '30000000-0000-0000-0000-000000000001',
+    'LL-A097-0003',
+    'VALUE0097001',
+    now() - interval '1 minute',
+    now() + interval '14 minutes'
   );
 
 select ok(
@@ -309,6 +332,58 @@ select ok(
     where claim_id = '28000000-0000-0000-0000-000000000097'
   ),
   'confirming redemption records its date and time'
+);
+
+select ok(
+  (
+    select transaction_amount_cents is null
+      and savings_amount_cents is null
+    from public.business_deal_redemptions
+    where claim_id = '28000000-0000-0000-0000-000000000097'
+  ),
+  'the existing one-argument redemption flow preserves unknown values as null'
+);
+
+select lives_ok(
+  $$
+    select *
+    from public.redeem_business_deal_claim_by_code(
+      'VALUE0097001',
+      12500,
+      2500
+    )
+  $$,
+  'redemption can record optional transaction and savings values'
+);
+
+select is(
+  (
+    select transaction_amount_cents
+    from public.business_deal_redemptions
+    where claim_id = '28000000-0000-0000-0000-000000000099'
+  ),
+  12500,
+  'the transaction value is stored in cents'
+);
+
+select is(
+  (
+    select savings_amount_cents
+    from public.business_deal_redemptions
+    where claim_id = '28000000-0000-0000-0000-000000000099'
+  ),
+  2500,
+  'the customer savings value is stored in cents'
+);
+
+select is(
+  (
+    select count(*)
+    from public.business_deal_redemptions
+    where claim_id = '28000000-0000-0000-0000-000000000099'
+  ),
+  1::bigint,
+  'a valued redemption is still recorded exactly once'
 );
 
 select ok(
