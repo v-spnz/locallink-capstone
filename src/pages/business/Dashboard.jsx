@@ -1,12 +1,17 @@
+import { useMemo } from 'react'
 import {
+  Activity,
   ArrowUpRight,
   ArrowRight,
   BadgePercent,
+  BarChart3,
   BriefcaseBusiness,
   Building2,
+  CalendarDays,
   CheckCircle2,
   Gift,
   MapPin,
+  RefreshCw,
   ScanLine,
   Settings,
   ShieldCheck,
@@ -14,6 +19,86 @@ import {
 import { Link } from 'react-router-dom'
 import localBusinessNeighbourhood from '../../assets/images/local-business-neighbourhood.jpg'
 import useBusiness from '../../business/useBusiness'
+import {
+  formatDashboardCount,
+  formatDashboardDateRange,
+  formatDashboardPercentage,
+  formatRecordedCurrency,
+  getDefaultDashboardDateRange,
+  hasDealActivity,
+  hasLoyaltyActivity,
+  hasMarketplaceActivity,
+} from '../../features/dashboard/dashboardPresentation'
+import useBusinessDashboardAnalytics from '../../features/dashboard/hooks/useBusinessDashboardAnalytics'
+
+function PerformanceMetric({ label, value, detail, unavailable = false }) {
+  return (
+    <div className={unavailable ? 'is-unavailable' : undefined}>
+      <dt>{label}</dt>
+      <dd>{value}</dd>
+      {detail && <small>{detail}</small>}
+    </div>
+  )
+}
+
+function PerformanceSection({
+  className,
+  icon,
+  title,
+  description,
+  to,
+  actionLabel,
+  children,
+}) {
+  const Icon = icon
+
+  return (
+    <article className={`business-performance-card ${className}`}>
+      <div className="business-performance-card-heading">
+        <span className="business-performance-card-icon">
+          <Icon aria-hidden="true" />
+        </span>
+        <div>
+          <h3>{title}</h3>
+          <p>{description}</p>
+        </div>
+        <Link to={to}>
+          {actionLabel}
+          <ArrowUpRight aria-hidden="true" />
+        </Link>
+      </div>
+      <dl className="business-performance-metrics">{children}</dl>
+    </article>
+  )
+}
+
+function PerformanceEmpty({ children }) {
+  return (
+    <div className="business-performance-empty">
+      <dt>No recent activity</dt>
+      <dd>{children}</dd>
+    </div>
+  )
+}
+
+function PerformanceSkeleton({ capabilityCount }) {
+  return (
+    <div
+      className="business-performance-skeleton"
+      aria-label="Loading business performance"
+      aria-busy="true"
+    >
+      {Array.from({ length: Math.max(capabilityCount, 1) }, (_, index) => (
+        <span key={index} aria-hidden="true">
+          <i />
+          <i />
+          <i />
+          <i />
+        </span>
+      ))}
+    </div>
+  )
+}
 
 export default function Dashboard() {
   const {
@@ -24,6 +109,9 @@ export default function Dashboard() {
     serviceCategories,
     serviceAreas,
   } = useBusiness()
+  const analyticsPeriod = useMemo(() => getDefaultDashboardDateRange(), [])
+  const { metrics, isLoading, error, reload } =
+    useBusinessDashboardAnalytics(analyticsPeriod)
   const verificationLabel = business.verification_status
     .replaceAll('_', ' ')
     .replace(/^\w/, (character) => character.toUpperCase())
@@ -53,16 +141,36 @@ export default function Dashboard() {
       className: 'is-services',
     },
   ].filter(Boolean)
+  const recordedTransactionValue = formatRecordedCurrency(
+    metrics?.recordedTransactionValueCents,
+  )
+  const recordedCustomerSavings = formatRecordedCurrency(
+    metrics?.recordedCustomerSavingsCents,
+  )
 
   return (
     <div className="business-dashboard">
       <header className="page-header business-dashboard-header">
         <div className="business-dashboard-header-copy">
-          <h1>{business.business_name}</h1>
-          <span className="business-role-badge">
-            <CheckCircle2 aria-hidden="true" />
-            {membership.role} access
+          <span className="business-dashboard-eyebrow">
+            <BarChart3 aria-hidden="true" />
+            Business performance
           </span>
+          <h1>{business.business_name}</h1>
+          <p>
+            See how customers are using the LocalLink tools enabled for your
+            business.
+          </p>
+          <div className="business-dashboard-header-meta">
+            <span className="business-role-badge">
+              <CheckCircle2 aria-hidden="true" />
+              {membership.role} access
+            </span>
+            <span>
+              <CalendarDays aria-hidden="true" />
+              Last 30 days
+            </span>
+          </div>
         </div>
         <figure className="business-dashboard-hero-art">
           <img
@@ -71,6 +179,195 @@ export default function Dashboard() {
           />
         </figure>
       </header>
+
+      <section
+        className="business-dashboard-section business-performance-section"
+        aria-labelledby="business-performance-title"
+      >
+        <div className="business-section-heading business-performance-heading">
+          <div>
+            <span>Performance overview</span>
+            <h2 id="business-performance-title">Your LocalLink activity</h2>
+            <p>{formatDashboardDateRange(analyticsPeriod)}</p>
+          </div>
+          <button
+            type="button"
+            className="business-performance-refresh"
+            onClick={reload}
+            disabled={isLoading}
+          >
+            <RefreshCw aria-hidden="true" />
+            Refresh
+          </button>
+        </div>
+
+        {isLoading && <PerformanceSkeleton capabilityCount={modules.length} />}
+
+        {!isLoading && error && (
+          <div className="business-performance-error" role="alert">
+            <div>
+              <strong>Performance information is unavailable</strong>
+              <p>{error}</p>
+            </div>
+            <button type="button" onClick={reload}>
+              Try again
+            </button>
+          </div>
+        )}
+
+        {!isLoading && !error && metrics && (
+          <div className="business-performance-list">
+            {capabilities.deals_enabled && (
+              <PerformanceSection
+                className="is-deals"
+                icon={BadgePercent}
+                title="Deals & Discovery"
+                description="Claims, in-store redemptions and recorded sales from your deals."
+                to="/business/create-deal"
+                actionLabel="View deals"
+              >
+                <PerformanceMetric
+                  label="Claims"
+                  value={formatDashboardCount(metrics.dealClaims)}
+                />
+                <PerformanceMetric
+                  label="Redemptions"
+                  value={formatDashboardCount(metrics.dealRedemptions)}
+                />
+                <PerformanceMetric
+                  label="Claim conversion"
+                  value={formatDashboardPercentage(
+                    metrics.dealClaimToRedemptionRate,
+                  )}
+                />
+                <PerformanceMetric
+                  label="Recorded sales value"
+                  value={recordedTransactionValue ?? 'Not recorded'}
+                  detail={
+                    metrics.dealRedemptions > 0
+                      ? `${formatDashboardCount(metrics.redemptionsWithTransactionValue)} of ${formatDashboardCount(metrics.dealRedemptions)} redemptions valued`
+                      : 'No valued redemptions'
+                  }
+                  unavailable={recordedTransactionValue == null}
+                />
+                <PerformanceMetric
+                  label="Deal customers"
+                  value={formatDashboardCount(metrics.uniqueDealCustomers)}
+                />
+                <PerformanceMetric
+                  label="Recorded customer savings"
+                  value={recordedCustomerSavings ?? 'Not recorded'}
+                  unavailable={recordedCustomerSavings == null}
+                />
+                {!hasDealActivity(metrics) && (
+                  <PerformanceEmpty>
+                    No deal claims or redemptions were recorded in this period.
+                  </PerformanceEmpty>
+                )}
+              </PerformanceSection>
+            )}
+
+            {capabilities.loyalty_enabled && (
+              <PerformanceSection
+                className="is-loyalty"
+                icon={Gift}
+                title="Loyalty"
+                description="Customer participation and reward activity across your programmes."
+                to="/business/create-loyalty"
+                actionLabel="View loyalty"
+              >
+                <PerformanceMetric
+                  label="Loyalty customers"
+                  value={formatDashboardCount(metrics.loyaltyCustomers)}
+                />
+                <PerformanceMetric
+                  label="Active customers"
+                  value={formatDashboardCount(metrics.activeLoyaltyCustomers)}
+                />
+                <PerformanceMetric
+                  label="Activity events"
+                  value={formatDashboardCount(metrics.loyaltyActivityEvents)}
+                />
+                <PerformanceMetric
+                  label="Rewards earned"
+                  value={formatDashboardCount(metrics.loyaltyRewardsEarned)}
+                />
+                <PerformanceMetric
+                  label="Rewards redeemed"
+                  value={formatDashboardCount(metrics.loyaltyRewardsRedeemed)}
+                />
+                {!hasLoyaltyActivity(metrics) && (
+                  <PerformanceEmpty>
+                    No loyalty activity was recorded in this period.
+                  </PerformanceEmpty>
+                )}
+              </PerformanceSection>
+            )}
+
+            {capabilities.service_marketplace_enabled && (
+              <PerformanceSection
+                className="is-services"
+                icon={BriefcaseBusiness}
+                title="Service Marketplace"
+                description="Matched opportunities, quotes and jobs connected through LocalLink."
+                to="/business/services"
+                actionLabel="View services"
+              >
+                <PerformanceMetric
+                  label="Matched leads"
+                  value={formatDashboardCount(metrics.marketplaceMatchedLeads)}
+                />
+                <PerformanceMetric
+                  label="Quotes submitted"
+                  value={formatDashboardCount(
+                    metrics.marketplaceQuotesSubmitted,
+                  )}
+                />
+                <PerformanceMetric
+                  label="Jobs won"
+                  value={formatDashboardCount(metrics.marketplaceJobsWon)}
+                />
+                <PerformanceMetric
+                  label="Completed jobs"
+                  value={formatDashboardCount(metrics.marketplaceCompletedJobs)}
+                />
+                <PerformanceMetric
+                  label="Lead to quote"
+                  value={formatDashboardPercentage(
+                    metrics.marketplaceLeadToQuoteRate,
+                  )}
+                />
+                <PerformanceMetric
+                  label="Lead to job"
+                  value={formatDashboardPercentage(
+                    metrics.marketplaceLeadToJobRate,
+                  )}
+                />
+                {!hasMarketplaceActivity(metrics) && (
+                  <PerformanceEmpty>
+                    No marketplace leads, quotes or jobs were recorded in this
+                    period.
+                  </PerformanceEmpty>
+                )}
+              </PerformanceSection>
+            )}
+
+            {modules.length === 0 && (
+              <div className="business-performance-no-capabilities">
+                <Activity aria-hidden="true" />
+                <div>
+                  <strong>No business tools are enabled</strong>
+                  <p>
+                    Enable a LocalLink capability to begin collecting relevant
+                    performance information.
+                  </p>
+                </div>
+                <Link to="/business/settings/overview">Review settings</Link>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
 
       {capabilities.deals_enabled && (
         <section
