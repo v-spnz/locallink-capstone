@@ -49,6 +49,9 @@ const NOTIFICATION_ICONS = {
   in_progress: LoaderCircle,
   quote_deadline_reminder: Clock,
   deal_ended: BadgePercent,
+  loyalty_reward_close: Gift,
+  loyalty_programme_ending_soon: Clock,
+  saved_deal_ending_soon: Clock,
 }
 
 function getConsumerInitials(user) {

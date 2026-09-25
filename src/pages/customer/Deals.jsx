@@ -1,4 +1,4 @@
-import { BadgeCheck, Bookmark, Clock3, MapPin } from 'lucide-react'
+import { Bookmark, MapPin } from 'lucide-react'
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import {
@@ -708,44 +708,6 @@ export default function Deals() {
               </details>
             )}
           </div>
-          {historicalClaims.length === 0 ? (
-            <div className="empty-state">
-              No past claims yet. Claims move here once they're redeemed,
-              expire, or the deal ends early.
-            </div>
-          ) : (
-            <div className="customer-deal-claim-list">
-              {historicalClaims.map((claim) => {
-                const endedEarly = claim.status === 'ended_early'
-                return (
-                  <button
-                    type="button"
-                    className={`customer-deal-claim${endedEarly ? ' is-ended-early' : ''}`}
-                    onClick={() => openClaimedDeal(claim)}
-                    key={claim.claim_id}
-                  >
-                    <span
-                      className="customer-deal-claim-icon"
-                      aria-hidden="true"
-                    >
-                      {claim.redeemed_at ? <BadgeCheck /> : <Clock3 />}
-                    </span>
-                    <span>
-                      <strong>{claim.title}</strong>
-                      <small>{claim.business_name}</small>
-                    </span>
-                    <span className="customer-deal-claim-status">
-                      {claim.redeemed_at
-                        ? 'Deal has been Redeemed'
-                        : endedEarly
-                          ? 'Claim remains redeemable'
-                          : 'Expired'}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          )}
         </section>
       )}
 
