@@ -29,6 +29,8 @@ function mapRedemption(record) {
     claimedAt: record.claimed_at,
     redeemedAt: record.redeemed_at,
     redeemedByName: record.redeemed_by_name,
+    transactionAmountCents: record.transaction_amount_cents,
+    savingsAmountCents: record.savings_amount_cents,
     redemptionStatus: 'redeemed',
   }
 }
@@ -55,16 +57,23 @@ export async function validateBusinessDealRedemptionCode(redemptionCode) {
   return mapClaim(data, redemptionCode)
 }
 
-export async function redeemBusinessDealClaim(redemptionCode) {
+export async function redeemBusinessDealClaim(
+  redemptionCode,
+  { transactionAmountCents = null, savingsAmountCents = null } = {},
+) {
   const { data, error } = await supabase
     .rpc('redeem_business_deal_claim_by_code', {
       p_redemption_code: redemptionCode,
+      p_transaction_amount_cents: transactionAmountCents,
+      p_savings_amount_cents: savingsAmountCents,
     })
     .single()
 
   if (error) throw error
   return {
     redeemedAt: data.redeemed_at,
+    transactionAmountCents: data.transaction_amount_cents,
+    savingsAmountCents: data.savings_amount_cents,
   }
 }
 

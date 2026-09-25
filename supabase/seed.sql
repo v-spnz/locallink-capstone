@@ -933,7 +933,7 @@ values
   (
     '40000000-0000-0000-0000-000000000021',
     '10000000-0000-0000-0000-000000000001',
-    'Accepted quote for bathroom renovation plumbing',
+    'Completed bathroom renovation plumbing',
     'Install new shower, vanity, and toilet plumbing for a bathroom renovation.',
     'Plumbing',
     'Plumbing',
@@ -941,11 +941,11 @@ values
     'Grey Lynn',
     5,
     'Normal',
-    now() + interval '3 days',
+    now() - interval '40 days',
     3,
-    'in_progress',
-    now() - interval '4 days',
-    now() - interval '1 day'
+    'completed',
+    now() - interval '45 days',
+    now() - interval '30 days'
   ),
   (
     '40000000-0000-0000-0000-000000000022',
@@ -1163,15 +1163,15 @@ values
     '21000000-0000-0000-0000-000000000001',
     'fixed',
     285000,
-    current_date + 1,
+    current_date - 38,
     '8:00-9:00 AM',
     'Bathroom plumbing installation described in the request.',
     'Customer-supplied fixtures must be onsite before arrival.',
     'Three working days',
     'The bathroom plumbing work is booked and ready to begin.',
     'accepted',
-    now() - interval '2 days',
-    now() - interval '1 day'
+    now() - interval '40 days',
+    now() - interval '39 days'
   ),
   (
     '50000000-0000-0000-0000-000000000005',
@@ -1242,12 +1242,34 @@ values
 -- Job lifecycle, notification, and loyalty history
 -- ============================================================
 
+-- Requests seeded directly in a later lifecycle state did not pass through
+-- the open-request trigger, so record their original durable matches here.
+insert into public.business_job_lead_matches (
+  business_id,
+  job_request_id,
+  matched_at
+)
+values
+  (
+    '21000000-0000-0000-0000-000000000001',
+    '40000000-0000-0000-0000-000000000021',
+    now() - interval '44 days'
+  ),
+  (
+    '31000000-0000-0000-0000-000000000001',
+    '40000000-0000-0000-0000-000000000024',
+    now() - interval '5 days'
+  )
+on conflict (business_id, job_request_id) do nothing;
+
 insert into public.job_status_history (job_request_id, status, updated_at)
 values
-  ('40000000-0000-0000-0000-000000000021', 'accepted', now() - interval '3 days'),
-  ('40000000-0000-0000-0000-000000000021', 'scheduled', now() - interval '2 days 12 hours'),
-  ('40000000-0000-0000-0000-000000000021', 'on_the_way', now() - interval '1 day 4 hours'),
-  ('40000000-0000-0000-0000-000000000021', 'in_progress', now() - interval '1 day'),
+  ('40000000-0000-0000-0000-000000000021', 'accepted', now() - interval '39 days'),
+  ('40000000-0000-0000-0000-000000000021', 'scheduled', now() - interval '37 days'),
+  ('40000000-0000-0000-0000-000000000021', 'on_the_way', now() - interval '35 days'),
+  ('40000000-0000-0000-0000-000000000021', 'in_progress', now() - interval '34 days'),
+  ('40000000-0000-0000-0000-000000000021', 'pending_completion', now() - interval '31 days'),
+  ('40000000-0000-0000-0000-000000000021', 'completed', now() - interval '30 days'),
   ('40000000-0000-0000-0000-000000000024', 'accepted', now() - interval '4 days'),
   ('40000000-0000-0000-0000-000000000024', 'scheduled', now() - interval '3 days'),
   ('40000000-0000-0000-0000-000000000024', 'on_the_way', now() - interval '1 day 6 hours'),
@@ -1326,7 +1348,7 @@ values
     '41000000-0000-0000-0000-000000000001',
     '20% off weekday brunch',
     'Enjoy a complete weekday brunch at our Ponsonby cafe with twenty percent off.',
-    'Food and drink',
+    'Food & Drink',
     '/src/assets/images/local-business-neighbourhood.jpg',
     'percentage_discount',
     20,
@@ -1350,7 +1372,7 @@ values
     '51000000-0000-0000-0000-000000000001',
     '$45 seasonal bouquet',
     'Pick up a hand-tied seasonal bouquet prepared fresh by our Grey Lynn florists.',
-    'Flowers and gifts',
+    'Retail',
     '/src/assets/images/local-neighbourhood-street.jpg',
     'special_price',
     null,
@@ -1359,22 +1381,22 @@ values
     4500,
     null,
     true,
-    current_date - 1,
+    current_date - 20,
     current_date + 14,
     'One bouquet per customer while seasonal flowers are available.',
     40,
     'Vases, delivery, and custom flower requests are excluded.',
     'Present the LocalLink claim code when collecting your bouquet.',
     'draft',
-    now() - interval '2 days',
-    now() - interval '1 day'
+    now() - interval '21 days',
+    now() - interval '20 days'
   ),
   (
     'd0000000-0000-0000-0000-000000000003',
     '21000000-0000-0000-0000-000000000001',
     '$50 off a plumbing callout',
     'Save fifty dollars on a scheduled residential plumbing callout in central Auckland.',
-    'Home services',
+    'Trades',
     '/src/assets/images/local-business-neighbourhood.jpg',
     'fixed_discount',
     null,
@@ -1398,7 +1420,7 @@ values
     '41000000-0000-0000-0000-000000000001',
     'Buy one coffee, get one free',
     'Bring a neighbour and receive a second barista-made coffee at no extra charge.',
-    'Food and drink',
+    'Food & Drink',
     '/src/assets/images/local-business-neighbourhood.jpg',
     'buy_one_get_one',
     null,
@@ -1422,7 +1444,7 @@ values
     '61000000-0000-0000-0000-000000000001',
     'Free garden consultation',
     'Book a complimentary thirty-minute garden consultation with our local landscaping team.',
-    'Home and garden',
+    'Services',
     '/src/assets/images/local-neighbourhood-street.jpg',
     'other',
     null,
@@ -1446,7 +1468,7 @@ values
     '41000000-0000-0000-0000-000000000001',
     '15% off local lunch',
     'Receive fifteen percent off a cafe lunch made with locally sourced ingredients.',
-    'Food and drink',
+    'Food & Drink',
     '/src/assets/images/local-business-neighbourhood.jpg',
     'percentage_discount',
     15,
@@ -1470,7 +1492,7 @@ values
     '51000000-0000-0000-0000-000000000001',
     'Draft workshop flower bundle',
     'A complete but unpublished draft for testing the business deal editor workflow.',
-    'Flowers and gifts',
+    'Retail',
     '/src/assets/images/local-neighbourhood-street.jpg',
     'fixed_discount',
     null,
@@ -1549,26 +1571,83 @@ values
     '70000000-0000-0000-0000-000000000001',
     now() - interval '3 days',
     now() - interval '3 days' + interval '15 minutes'
+  ),
+  (
+    'c0000000-0000-0000-0000-000000000005',
+    'd0000000-0000-0000-0000-000000000001',
+    '70000000-0000-0000-0000-000000000001',
+    now() - interval '1 day',
+    now() - interval '1 day' + interval '15 minutes'
+  ),
+  (
+    'c0000000-0000-0000-0000-000000000006',
+    'd0000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000001',
+    now() - interval '6 hours',
+    now() - interval '6 hours' + interval '15 minutes'
+  ),
+  (
+    'c0000000-0000-0000-0000-000000000007',
+    'd0000000-0000-0000-0000-000000000002',
+    '10000000-0000-0000-0000-000000000001',
+    now() - interval '10 days',
+    now() - interval '10 days' + interval '15 minutes'
+  ),
+  (
+    'c0000000-0000-0000-0000-000000000008',
+    'd0000000-0000-0000-0000-000000000004',
+    '10000000-0000-0000-0000-000000000001',
+    now() - interval '20 days',
+    now() - interval '20 days' + interval '15 minutes'
+  ),
+  (
+    'c0000000-0000-0000-0000-000000000009',
+    'd0000000-0000-0000-0000-000000000004',
+    '70000000-0000-0000-0000-000000000001',
+    now() - interval '10 days',
+    now() - interval '10 days' + interval '15 minutes'
   );
 
 insert into public.business_deal_redemptions (
   id,
   claim_id,
   redeemed_by,
-  redeemed_at
+  redeemed_at,
+  transaction_amount_cents,
+  savings_amount_cents
 )
 values
   (
     'b0000000-0000-0000-0000-000000000001',
     'c0000000-0000-0000-0000-000000000001',
     '40000000-0000-0000-0000-000000000001',
-    now() - interval '1 day'
+    now() - interval '2 days' + interval '8 minutes',
+    4800,
+    1200
   ),
   (
     'b0000000-0000-0000-0000-000000000002',
     'c0000000-0000-0000-0000-000000000004',
     '40000000-0000-0000-0000-000000000001',
-    now() - interval '2 days'
+    now() - interval '3 days' + interval '10 minutes',
+    null,
+    null
+  ),
+  (
+    'b0000000-0000-0000-0000-000000000003',
+    'c0000000-0000-0000-0000-000000000005',
+    '40000000-0000-0000-0000-000000000001',
+    now() - interval '1 day' + interval '6 minutes',
+    3200,
+    800
+  ),
+  (
+    'b0000000-0000-0000-0000-000000000004',
+    'c0000000-0000-0000-0000-000000000002',
+    '50000000-0000-0000-0000-000000000001',
+    now() - interval '12 hours' + interval '7 minutes',
+    4500,
+    2000
   );
 
 insert into public.saved_deals (customer_id, deal_id, created_at)
@@ -1760,20 +1839,34 @@ insert into public.business_loyalty_programmes (
   name,
   programme_type,
   reward_threshold,
+  reward_value,
   terms,
   start_date,
   status
 )
-values (
-  '47000000-0000-0000-0000-000000000105',
-  '41000000-0000-0000-0000-000000000001',
-  'Morning coffee rewards',
-  'stamp_card',
-  8,
-  'One reward per customer per completed card.',
-  (now() at time zone 'Pacific/Auckland')::date,
-  'published'
-);
+values
+  (
+    '47000000-0000-0000-0000-000000000105',
+    '41000000-0000-0000-0000-000000000001',
+    'Morning coffee rewards',
+    'stamp_card',
+    8,
+    null,
+    'One reward per customer per completed card.',
+    (now() at time zone 'Pacific/Auckland')::date - 30,
+    'published'
+  ),
+  (
+    '57000000-0000-0000-0000-000000000105',
+    '51000000-0000-0000-0000-000000000001',
+    'Seasonal flower savings',
+    'spend_and_save',
+    50,
+    5,
+    'One five-dollar reward per completed fifty-dollar spend target.',
+    (now() at time zone 'Pacific/Auckland')::date - 60,
+    'published'
+  );
 
 insert into public.customer_loyalty_records (
   id,
@@ -1782,13 +1875,115 @@ insert into public.customer_loyalty_records (
   loyalty_identifier,
   current_progress
 )
-values (
-  '48000000-0000-0000-0000-000000000109',
-  '47000000-0000-0000-0000-000000000105',
-  '10000000-0000-0000-0000-000000000001',
-  'LL-DEMO-0109',
-  6
-);
+values
+  (
+    '48000000-0000-0000-0000-000000000109',
+    '47000000-0000-0000-0000-000000000105',
+    '10000000-0000-0000-0000-000000000001',
+    'LL-DEMO-0109',
+    6
+  ),
+  (
+    '48000000-0000-0000-0000-000000000110',
+    '47000000-0000-0000-0000-000000000105',
+    '70000000-0000-0000-0000-000000000001',
+    'LL-DEMO-0110',
+    1
+  ),
+  (
+    '59000000-0000-0000-0000-000000000109',
+    '57000000-0000-0000-0000-000000000105',
+    '10000000-0000-0000-0000-000000000001',
+    'LL-DEMO-0201',
+    60
+  ),
+  (
+    '59000000-0000-0000-0000-000000000110',
+    '57000000-0000-0000-0000-000000000105',
+    '70000000-0000-0000-0000-000000000001',
+    'LL-DEMO-0202',
+    0
+  );
+
+insert into public.loyalty_activity (
+  loyalty_record_id,
+  activity_type,
+  amount,
+  created_at
+)
+values
+  (
+    '48000000-0000-0000-0000-000000000109',
+    'progress_added',
+    2,
+    now() - interval '20 days'
+  ),
+  (
+    '48000000-0000-0000-0000-000000000109',
+    'progress_added',
+    2,
+    now() - interval '10 days'
+  ),
+  (
+    '48000000-0000-0000-0000-000000000109',
+    'progress_added',
+    2,
+    now() - interval '2 days'
+  ),
+  (
+    '48000000-0000-0000-0000-000000000110',
+    'progress_added',
+    8,
+    now() - interval '15 days'
+  ),
+  (
+    '48000000-0000-0000-0000-000000000110',
+    'reward_earned',
+    null,
+    now() - interval '15 days' + interval '1 minute'
+  ),
+  (
+    '48000000-0000-0000-0000-000000000110',
+    'reward_redeemed',
+    null,
+    now() - interval '14 days'
+  ),
+  (
+    '48000000-0000-0000-0000-000000000110',
+    'progress_added',
+    1,
+    now() - interval '1 day'
+  ),
+  (
+    '59000000-0000-0000-0000-000000000109',
+    'progress_added',
+    60,
+    now() - interval '35 days'
+  ),
+  (
+    '59000000-0000-0000-0000-000000000109',
+    'reward_earned',
+    null,
+    now() - interval '35 days' + interval '1 minute'
+  ),
+  (
+    '59000000-0000-0000-0000-000000000110',
+    'progress_added',
+    50,
+    now() - interval '25 days'
+  ),
+  (
+    '59000000-0000-0000-0000-000000000110',
+    'reward_earned',
+    null,
+    now() - interval '25 days' + interval '1 minute'
+  ),
+  (
+    '59000000-0000-0000-0000-000000000110',
+    'reward_redeemed',
+    null,
+    now() - interval '24 days'
+  );
 
 -- Local-development helper for exercising the real deadline reminder flow
 -- from the notification dropdown. Seed files are not deployed by db push.
