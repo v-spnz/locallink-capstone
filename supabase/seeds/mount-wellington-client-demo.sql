@@ -1,4 +1,4 @@
--- Mount Wellington businesses and deals for the local client meeting.
+-- Mount Wellington businesses, deals, and loyalty for the local client meeting.
 -- Safe to rerun: fixed IDs and conflict handling prevent duplicate markers.
 -- Keep the staging relation and all of its consumers in one statement because
 -- the Supabase CLI parses seed batches before executing their earlier DDL.

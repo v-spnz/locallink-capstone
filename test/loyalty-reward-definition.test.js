@@ -4,8 +4,12 @@ import test from 'node:test'
 import {
   getCustomerReward,
   getEarningRules,
+  LOYALTY_DISCOUNT_PERCENTAGES,
 } from '../src/features/loyalty/businessLoyaltyTemplates.js'
-import { validateLoyaltyProgramme } from '../src/features/loyalty/businessLoyaltyValidation.js'
+import {
+  sanitizeDiscountPercentage,
+  validateLoyaltyProgramme,
+} from '../src/features/loyalty/businessLoyaltyValidation.js'
 
 const BASE_PROGRAMME = {
   id: '47000000-0000-0000-0000-000000000105',
@@ -69,7 +73,7 @@ test('US0105 AC3: a programme cannot be published without its defined reward', (
     },
     { forPublication: true },
   )
-  assert.match(discountErrors.rewardValue, /discount amount/i)
+  assert.match(discountErrors.rewardValue, /discount percentage/i)
 })
 
 test('US0105 AC4: review presents reward and earning requirements together', async () => {
@@ -110,33 +114,65 @@ test('US0105 AC5: saved reward information is mapped back into the draft', async
   assert.match(hook, /setForm\(\{ \.\.\.programme \}\)/)
 })
 
-test('US0105: spend rewards use currency input and the Deals calendar', async () => {
-  const [form, page, hook, loyaltyStyles] = await Promise.all([
-    readFile(
-      new URL(
-        '../src/features/loyalty/components/LoyaltyDraftForm.jsx',
-        import.meta.url,
+test('US0105: spend rewards use a filtered percentage picker and the Deals calendar', async () => {
+  const [form, percentagePicker, page, hook, loyaltyStyles] = await Promise.all(
+    [
+      readFile(
+        new URL(
+          '../src/features/loyalty/components/LoyaltyDraftForm.jsx',
+          import.meta.url,
+        ),
+        'utf8',
       ),
-      'utf8',
-    ),
-    readFile(
-      new URL('../src/pages/business/CreateLoyalty.jsx', import.meta.url),
-      'utf8',
-    ),
-    readFile(
-      new URL(
-        '../src/features/loyalty/hooks/useBusinessLoyaltyProgrammes.js',
-        import.meta.url,
+      readFile(
+        new URL(
+          '../src/features/loyalty/components/DiscountPercentageCombobox.jsx',
+          import.meta.url,
+        ),
+        'utf8',
       ),
-      'utf8',
-    ),
-    readFile(
-      new URL('../src/features/loyalty/BusinessLoyalty.css', import.meta.url),
-      'utf8',
-    ),
-  ])
+      readFile(
+        new URL('../src/pages/business/CreateLoyalty.jsx', import.meta.url),
+        'utf8',
+      ),
+      readFile(
+        new URL(
+          '../src/features/loyalty/hooks/useBusinessLoyaltyProgrammes.js',
+          import.meta.url,
+        ),
+        'utf8',
+      ),
+      readFile(
+        new URL('../src/features/loyalty/BusinessLoyalty.css', import.meta.url),
+        'utf8',
+      ),
+    ],
+  )
 
-  assert.match(form, /prefix=\{[\s\S]*programmeType !== 'stamp_card'/)
+  assert.match(form, /DiscountPercentageCombobox/)
+  assert.doesNotMatch(form, /Discount amount \(\$\)/)
+  assert.match(percentagePicker, /LOYALTY_DISCOUNT_PERCENTAGES\.filter/)
+  assert.match(percentagePicker, /role="combobox"/)
+  assert.match(percentagePicker, /role="listbox"/)
+  assert.deepEqual(
+    LOYALTY_DISCOUNT_PERCENTAGES,
+    [
+      5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95,
+      100,
+    ],
+  )
+  assert.equal(sanitizeDiscountPercentage('$1x05%'), '105')
+  assert.deepEqual(
+    validateLoyaltyProgramme(
+      {
+        ...BASE_PROGRAMME,
+        programmeType: 'spend_and_save',
+        rewardValue: '25',
+      },
+      { forPublication: true },
+    ),
+    {},
+  )
   assert.match(form, /<DateRangeCalendar/)
   assert.match(form, /endOptional/)
   assert.doesNotMatch(form, /Customer-facing earning rules:/)

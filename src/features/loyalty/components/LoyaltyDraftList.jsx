@@ -1,13 +1,12 @@
 import {
   ArrowRight,
+  CalendarDays,
   CheckCircle2,
+  ChevronRight,
   Gift,
   LockKeyhole,
-  PencilLine,
   Plus,
-  ScanLine,
 } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import localBusinessNeighbourhood from '../../../assets/images/local-business-neighbourhood.jpg'
 import Button from '../../../components/ui/Button'
 import BusinessPageLoader from '../../../components/ui/BusinessPageLoader'
@@ -86,7 +85,7 @@ export default function LoyaltyDraftList({
     <section className="loyalty-draft-list" aria-label="Loyalty programmes">
       <div className="loyalty-list-toolbar">
         <div
-          className="loyalty-status-tabs"
+          className="deal-filters loyalty-programme-filters"
           role="tablist"
           aria-label="Programme status"
         >
@@ -103,16 +102,12 @@ export default function LoyaltyDraftList({
               tabIndex={activeStatus === tab.key ? 0 : -1}
               type="button"
             >
-              {tab.label}
-              <span>{programmeCounts[tab.key]}</span>
+              <span>{tab.label}</span>
+              <strong>{programmeCounts[tab.key]}</strong>
             </button>
           ))}
         </div>
         <div className="loyalty-list-actions">
-          <Link className="btn-secondary" to="/business/loyalty/customers">
-            <ScanLine aria-hidden="true" />
-            Identify customer
-          </Link>
           {totalProgrammes > 0 && (
             <Button onClick={onCreate}>
               <Plus aria-hidden="true" />
@@ -172,69 +167,85 @@ export default function LoyaltyDraftList({
       ) : (
         <div
           aria-labelledby={`loyalty-${activeStatus}-tab`}
-          className="loyalty-draft-grid"
+          className="deal-campaign-table loyalty-programme-table"
           id="loyalty-programme-panel"
           role="tabpanel"
         >
-          {programmes.map((programme) => (
-            <article className="loyalty-draft-card" key={programme.id}>
-              <div className="loyalty-draft-card-heading">
-                <span className={`loyalty-draft-status is-${programme.status}`}>
-                  {programme.status !== 'draft' ? (
-                    <CheckCircle2 aria-hidden="true" />
-                  ) : (
-                    <LockKeyhole aria-hidden="true" />
-                  )}
-                  {getStatusLabel(programme.status)}
-                </span>
-                <span>Updated {formatUpdatedAt(programme.updatedAt)}</span>
-              </div>
-              <div className="loyalty-draft-card-copy">
-                <small>{getProgrammeTypeLabel(programme.programmeType)}</small>
-                <h3>{programme.name || 'Untitled loyalty programme'}</h3>
-                <p>
-                  {getCustomerReward(programme) ||
-                    'Add the reward customers can work towards.'}
-                </p>
-              </div>
-              <dl className="loyalty-draft-summary">
-                <div>
-                  <dt>Target</dt>
-                  <dd>
-                    {programme.rewardThreshold
-                      ? getRewardTarget(programme)
-                      : 'Not set'}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Availability</dt>
-                  <dd>{getAvailabilityLabel(programme)}</dd>
-                </div>
-                <div>
-                  <dt>Visibility</dt>
-                  <dd>
-                    {programme.status === 'active'
-                      ? 'Visible to customers'
-                      : programme.status === 'scheduled'
-                        ? 'Visible from start date'
-                        : programme.status === 'expired'
-                          ? 'No longer visible'
-                          : 'Private'}
-                  </dd>
-                </div>
-              </dl>
-              {programme.status === 'draft' && (
-                <Button
-                  variant="secondary"
-                  className="loyalty-edit-draft"
-                  onClick={() => onEdit(programme.id)}
+          <div className="deal-table-heading" aria-hidden="true">
+            <span />
+            <span>Programme</span>
+            <span>Reward target</span>
+            <span>Status and dates</span>
+            <span />
+          </div>
+          <div className="deal-card-list">
+            {programmes.map((programme) => {
+              const isDraft = programme.status === 'draft'
+              const Row = isDraft ? 'button' : 'div'
+
+              return (
+                <article
+                  className="deal-management-card loyalty-programme-row"
+                  key={programme.id}
                 >
-                  <PencilLine aria-hidden="true" />
-                  Continue editing
-                </Button>
-              )}
-            </article>
-          ))}
+                  <Row
+                    className="deal-list-row"
+                    {...(isDraft
+                      ? {
+                          type: 'button',
+                          onClick: () => onEdit(programme.id),
+                          'aria-label': `Continue editing ${programme.name || 'untitled loyalty programme'}`,
+                        }
+                      : {})}
+                  >
+                    <span className="deal-card-media" aria-hidden="true">
+                      <Gift />
+                    </span>
+
+                    <span className="deal-card-copy">
+                      <small>
+                        {getProgrammeTypeLabel(programme.programmeType)}
+                      </small>
+                      <strong className="deal-card-title">
+                        {programme.name || 'Untitled loyalty programme'}
+                      </strong>
+                      <span className="deal-card-description">
+                        {getCustomerReward(programme) ||
+                          'Add the reward customers can work towards.'}
+                      </span>
+                    </span>
+
+                    <span className="deal-card-offer">
+                      <small>Target</small>
+                      <strong>
+                        {programme.rewardThreshold
+                          ? getRewardTarget(programme)
+                          : 'Not set'}
+                      </strong>
+                    </span>
+
+                    <span className="deal-card-timing">
+                      <span className={`deal-status is-${programme.status}`}>
+                        {getStatusLabel(programme.status)}
+                      </span>
+                      <span className="deal-card-expiry">
+                        <CalendarDays aria-hidden="true" />
+                        {getAvailabilityLabel(programme)}
+                      </span>
+                      <small>
+                        Updated {formatUpdatedAt(programme.updatedAt)}
+                      </small>
+                    </span>
+
+                    <span className="deal-card-disclosure" aria-hidden="true">
+                      <span>{isDraft ? 'Edit' : 'Published'}</span>
+                      {isDraft ? <ChevronRight /> : <CheckCircle2 />}
+                    </span>
+                  </Row>
+                </article>
+              )
+            })}
+          </div>
         </div>
       )}
     </section>
