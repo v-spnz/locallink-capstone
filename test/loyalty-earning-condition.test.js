@@ -36,8 +36,8 @@ const TEMPLATE_CASES = [
       rewardThreshold: '100',
       rewardValue: '10',
     },
-    earningRules: 'Spend $100 to receive $10 off.',
-    customerReward: '$10 off',
+    earningRules: 'Spend $100 to receive 10% off.',
+    customerReward: '10% off',
   },
   {
     programme: {
@@ -88,7 +88,7 @@ test('US0104 AC3: incomplete or invalid earning conditions cannot be confirmed',
       ...BASE_PROGRAMME,
       programmeType: 'spend_and_save',
       rewardThreshold: '80',
-      rewardValue: '100',
+      rewardValue: '12',
     },
     {
       ...BASE_PROGRAMME,
@@ -107,7 +107,7 @@ test('US0104 AC3: incomplete or invalid earning conditions cannot be confirmed',
 })
 
 test('US0104 AC4: the earning condition is saved against the selected loyalty programme', async () => {
-  const [api, migration] = await Promise.all([
+  const [api, saveMigration, percentageMigration] = await Promise.all([
     readFile(
       new URL(
         '../src/features/loyalty/api/businessLoyalty.js',
@@ -122,6 +122,13 @@ test('US0104 AC4: the earning condition is saved against the selected loyalty pr
       ),
       'utf8',
     ),
+    readFile(
+      new URL(
+        '../supabase/migrations/20260923000000_use_percentage_spend_and_save_rewards.sql',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
   ])
 
   assert.match(api, /p_programme_id: payload\.id/)
@@ -129,9 +136,10 @@ test('US0104 AC4: the earning condition is saved against the selected loyalty pr
   assert.match(api, /p_programme_type: payload\.programme_type/)
   assert.match(api, /p_reward_threshold: payload\.reward_threshold/)
   assert.match(api, /p_reward_value: payload\.reward_value/)
-  assert.match(migration, /where id = p_programme_id/)
-  assert.match(migration, /and business_id = p_business_id/)
-  assert.match(migration, /new\.earning_rules := case/)
+  assert.match(saveMigration, /where id = p_programme_id/)
+  assert.match(saveMigration, /and business_id = p_business_id/)
+  assert.match(percentageMigration, /new\.earning_rules := case/)
+  assert.match(percentageMigration, /Spend \$%s to receive %s%% off\./)
 })
 
 test('US0104 AC5: the generated earning condition is reviewed before publication', async () => {

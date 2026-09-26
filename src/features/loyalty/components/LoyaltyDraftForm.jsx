@@ -11,11 +11,14 @@ import {
 } from 'lucide-react'
 import Button from '../../../components/ui/Button'
 import DateRangeCalendar from '../../../components/ui/DateRangeCalendar'
+import RedemptionMethodField from '../../../components/ui/RedemptionMethodField'
 import { sanitizeRewardThreshold } from '../businessLoyaltyValidation'
+import DiscountPercentageCombobox from './DiscountPercentageCombobox'
 import {
   getCustomerReward,
   getEarningRules,
   getProgrammeTypeLabel,
+  LOYALTY_REDEMPTION_METHOD,
   LOYALTY_TEMPLATES,
 } from '../businessLoyaltyTemplates'
 
@@ -397,19 +400,10 @@ export default function LoyaltyDraftForm({
                 requiredToPublish
               />
               {programme.programmeType === 'spend_and_save' && (
-                <FormField
-                  id="loyalty-reward-value"
-                  label="Discount amount ($)"
-                  helper="The discount cannot exceed the spend target."
-                  placeholder="e.g. 5"
-                  inputMode="decimal"
-                  prefix="$"
+                <DiscountPercentageCombobox
                   value={programme.rewardValue}
                   error={errors.rewardValue}
-                  onChange={(value) =>
-                    onChange('rewardValue', sanitizeRewardThreshold(value))
-                  }
-                  requiredToPublish
+                  onChange={(value) => onChange('rewardValue', value)}
                 />
               )}
               {programme.programmeType === 'spend_and_reward' && (
@@ -483,20 +477,16 @@ export default function LoyaltyDraftForm({
                 <QrCode />
               </span>
               <div>
-                <h3 id="loyalty-check-in-title">Customer check-in</h3>
-                <p>The identification method staff will use at the counter.</p>
+                <h3 id="loyalty-check-in-title">Redemption</h3>
+                <p>How staff identify the customer and apply their reward.</p>
               </div>
             </div>
-            <div className="loyalty-fixed-check-in">
-              <QrCode aria-hidden="true" />
-              <div>
-                <strong>Customer-presented loyalty QR</strong>
-                <p>
-                  Customers show a programme-specific QR code. Staff scan it to
-                  open the correct loyalty record, with a manual code fallback.
-                </p>
-              </div>
-            </div>
+            <RedemptionMethodField
+              label="Redemption method"
+              ariaLabel="Customer-presented loyalty QR redemption method"
+            >
+              {LOYALTY_REDEMPTION_METHOD}
+            </RedemptionMethodField>
           </section>
         </div>
       </div>
