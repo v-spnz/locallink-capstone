@@ -231,8 +231,8 @@ export default function DealList({
       ).length,
     ]),
   )
-  const visibleRecords = records.filter(
-    ({ lifecycle }) => matchesDealStatusFilter(lifecycle.value, activeFilter),
+  const visibleRecords = records.filter(({ lifecycle }) =>
+    matchesDealStatusFilter(lifecycle.value, activeFilter),
   )
   const displayedRecords = visibleRecords.slice(0, visibleDealCount)
   const hasMoreDeals = displayedRecords.length < visibleRecords.length
@@ -274,9 +274,7 @@ export default function DealList({
               className={`deal-filters-overflow-trigger${
                 isOverflowOpen ? ' is-open' : ''
               }${
-                overflowFilters.some(
-                  ({ value }) => value === activeFilter,
-                )
+                overflowFilters.some(({ value }) => value === activeFilter)
                   ? ' is-active'
                   : ''
               }`}
