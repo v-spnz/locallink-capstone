@@ -59,7 +59,7 @@ test('structured templates require only their own reward fields', () => {
         ...COMPLETE_PROGRAMME,
         programmeType: 'spend_and_save',
         rewardThreshold: '5',
-        rewardValue: '10',
+        rewardValue: '12',
       },
       { forPublication: true },
     ).rewardValue,
@@ -139,13 +139,17 @@ test('US0107 AC3-5: review, correction, persisted publication, and status tabs a
   ])
 
   assert.match(form, /Review and publish/)
+  assert.match(form, /Redemption method/)
   assert.match(page, /LoyaltyProgrammeReview/)
   assert.match(review, /How customers earn/)
   assert.match(review, /Programme period/)
+  assert.match(review, /Redemption method/)
   assert.match(review, /Back to edit/)
   assert.match(review, /Confirm and publish/)
   assert.match(list, /role="tablist"/)
   assert.match(list, /Published/)
+  assert.match(list, /deal-management-card loyalty-programme-row/)
+  assert.match(list, /className="deal-list-row"/)
   assert.match(hook, /setStep\('review'\)/)
   assert.match(hook, /persist\('published'\)/)
   assert.match(hook, /setActiveStatus\(status === 'draft'/)

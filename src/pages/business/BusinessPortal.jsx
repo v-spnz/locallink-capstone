@@ -1,5 +1,5 @@
 import { useLayoutEffect } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import BusinessNavigation from '../../components/navigation/BusinessNavigation'
 import BusinessPageLoader from '../../components/ui/BusinessPageLoader'
 import PortalLayout from '../../layouts/PortalLayout'
@@ -9,7 +9,6 @@ import BusinessProtectedRoute from '../../business/BusinessProtectedRoute'
 import Dashboard from './Dashboard'
 import CreateDeal from './CreateDeal'
 import CreateLoyalty from './CreateLoyalty'
-import LoyaltyCustomerLookup from './LoyaltyCustomerLookup'
 import Settings from './Settings'
 import BusinessOnboarding from './BusinessOnboarding'
 import Services from './Services'
@@ -28,6 +27,7 @@ function BusinessPage({ children, capability, roles }) {
 }
 
 export default function BusinessPortal() {
+  const { search } = useLocation()
   useLayoutEffect(() => {
     document.body.classList.add('business-surface')
 
@@ -79,7 +79,7 @@ export default function BusinessPortal() {
           path="loyalty/customers"
           element={
             <BusinessPage capability="loyalty">
-              <LoyaltyCustomerLookup />
+              <Navigate to={`/business/create-loyalty${search}`} replace />
             </BusinessPage>
           }
         />

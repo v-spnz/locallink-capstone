@@ -1,3 +1,5 @@
+import { LOYALTY_DISCOUNT_PERCENTAGES } from './businessLoyaltyTemplates.js'
+
 const MAX_REWARD_THRESHOLD = 1_000_000
 const TEMPLATE_TYPES = ['stamp_card', 'spend_and_save', 'spend_and_reward']
 
@@ -19,6 +21,12 @@ export function sanitizeRewardThreshold(value) {
     .replace(/^(\d{0,7})(?:\.(\d{0,2}))?.*$/, (_, whole, cents) =>
       cents === undefined ? whole : `${whole}.${cents}`,
     )
+}
+
+export function sanitizeDiscountPercentage(value) {
+  return String(value ?? '')
+    .replace(/\D/g, '')
+    .slice(0, 3)
 }
 
 function requireText(errors, programme, field, label, minimum, maximum) {
@@ -95,17 +103,13 @@ export function validateLoyaltyProgramme(
 
   if (type === 'spend_and_save') {
     if (forPublication && !programme.rewardValue) {
-      errors.rewardValue = 'Enter the discount amount.'
+      errors.rewardValue = 'Choose the discount percentage.'
     } else if (
       programme.rewardValue &&
       (!Number.isFinite(rewardValue) ||
-        rewardValue < 0.01 ||
-        rewardValue > MAX_REWARD_THRESHOLD ||
-        !Number.isInteger(rewardValue * 100) ||
-        (programme.rewardThreshold && rewardValue > rewardThreshold))
+        !LOYALTY_DISCOUNT_PERCENTAGES.includes(rewardValue))
     ) {
-      errors.rewardValue =
-        'Use an amount of at least $0.01 that does not exceed the spend target.'
+      errors.rewardValue = 'Choose a percentage from 5% to 100% in steps of 5.'
     }
   }
 

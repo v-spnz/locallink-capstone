@@ -8,7 +8,7 @@ export const LOYALTY_TEMPLATES = [
   {
     value: 'spend_and_save',
     label: 'Spend and save',
-    description: 'Spend a set amount to receive money off.',
+    description: 'Spend a set amount to receive a percentage discount.',
   },
   {
     value: 'spend_and_reward',
@@ -16,6 +16,14 @@ export const LOYALTY_TEMPLATES = [
     description: 'Spend a set amount to receive a free item.',
   },
 ]
+
+export const LOYALTY_DISCOUNT_PERCENTAGES = Array.from(
+  { length: 20 },
+  (_, index) => (index + 1) * 5,
+)
+
+export const LOYALTY_REDEMPTION_METHOD =
+  'Redeem with the customer loyalty QR or manual code in store.'
 
 export function getProgrammeTypeLabel(type) {
   return (
@@ -40,7 +48,7 @@ export function getCustomerReward(programme) {
     return 'Next purchase or visit free'
   if (programme.programmeType === 'spend_and_save')
     return programme.rewardValue
-      ? `$${formatNumber(programme.rewardValue)} off`
+      ? `${formatNumber(programme.rewardValue)}% off`
       : ''
   return programme.rewardDescription || ''
 }
@@ -50,7 +58,7 @@ export function getEarningRules(programme) {
   if (programme.programmeType === 'stamp_card')
     return `Complete ${formatNumber(programme.rewardThreshold)} purchases or visits to receive the next one free.`
   if (programme.programmeType === 'spend_and_save' && programme.rewardValue)
-    return `Spend $${formatNumber(programme.rewardThreshold)} to receive $${formatNumber(programme.rewardValue)} off.`
+    return `Spend $${formatNumber(programme.rewardThreshold)} to receive ${formatNumber(programme.rewardValue)}% off.`
   if (
     programme.programmeType === 'spend_and_reward' &&
     programme.rewardDescription

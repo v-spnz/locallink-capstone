@@ -8,6 +8,7 @@ import {
   getEarningRules,
   getProgrammeTypeLabel,
   getRewardTarget,
+  LOYALTY_REDEMPTION_METHOD,
 } from '../businessLoyaltyTemplates'
 
 function formatDate(value) {
@@ -139,6 +140,32 @@ export default function LoyaltyProgrammeReview({
               />
             </dl>
           </section>
+      <section
+        className="deal-review-section"
+        aria-labelledby="loyalty-review-rules-heading"
+      >
+        <div className="deal-review-section-heading">
+          <Eye aria-hidden="true" />
+          <div>
+            <h3 id="loyalty-review-rules-heading">Earning and use</h3>
+            <p>The rules customers should know before taking part.</p>
+          </div>
+        </div>
+        <div className="deal-review-rows">
+          <ReviewRow
+            label="How customers earn"
+            value={getEarningRules(programme)}
+          />
+          <ReviewRow
+            label="Terms and conditions"
+            value={programme.terms || 'No additional terms'}
+          />
+          <ReviewRow
+            label="Redemption method"
+            value={LOYALTY_REDEMPTION_METHOD}
+          />
+        </div>
+      </section>
 
           <section aria-labelledby="loyalty-review-availability-heading">
             <div className="loyalty-review-section-heading">

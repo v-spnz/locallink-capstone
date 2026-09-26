@@ -38,6 +38,23 @@
   flex-wrap: wrap;
 }
 
+.loyalty-programme-filters {
+  width: fit-content;
+}
+
+.loyalty-programme-table .deal-card-list {
+  gap: 16px;
+}
+
+.loyalty-programme-row .deal-list-row:not(button) {
+  cursor: default;
+}
+
+.loyalty-programme-row .deal-card-disclosure > svg {
+  width: 15px;
+  height: 15px;
+}
+
 .loyalty-list-actions {
   display: flex;
   align-items: center;
@@ -442,6 +459,111 @@
 
 body.business-surface .loyalty-input-with-prefix .form-input {
   padding-left: 40px;
+}
+
+.loyalty-percentage-combobox {
+  position: relative;
+}
+
+.loyalty-percentage-combobox .form-input {
+  padding-right: 78px;
+  font-variant-numeric: tabular-nums;
+}
+
+.loyalty-percentage-suffix {
+  position: absolute;
+  top: 50%;
+  right: 45px;
+  color: var(--business-muted);
+  font-size: 14px;
+  font-weight: 700;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.loyalty-percentage-toggle {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 38px;
+  height: calc(100% - 2px);
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--business-border);
+  border-radius: 0 9px 9px 0;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: var(--business-muted);
+  cursor: pointer;
+}
+
+.loyalty-percentage-toggle:hover,
+.loyalty-percentage-toggle:focus-visible {
+  background: var(--business-accent-soft);
+  color: var(--business-accent-strong);
+  outline: 0;
+}
+
+.loyalty-percentage-toggle svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 160ms ease;
+}
+
+.loyalty-percentage-toggle[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+.loyalty-percentage-options {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  z-index: 20;
+  max-height: 220px;
+  padding: 5px;
+  border: 1px solid var(--business-border-strong);
+  border-radius: 10px;
+  overflow-y: auto;
+  background: var(--business-surface);
+  box-shadow: var(--business-shadow-md);
+}
+
+.loyalty-percentage-options button {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  color: var(--business-ink-soft);
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+
+.loyalty-percentage-options button:hover,
+.loyalty-percentage-options button.is-highlighted {
+  background: var(--business-accent-soft);
+  color: var(--business-accent-strong);
+}
+
+.loyalty-percentage-options button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.loyalty-percentage-options p {
+  margin: 0;
+  padding: 10px;
+  color: var(--business-muted);
+  font-size: 13px;
 }
 
 .loyalty-required {
@@ -1041,6 +1163,10 @@ body.business-surface .loyalty-input-with-prefix .form-input {
   }
 
   .loyalty-status-tabs {
+    width: 100%;
+  }
+
+  .loyalty-programme-filters {
     width: 100%;
   }
 
