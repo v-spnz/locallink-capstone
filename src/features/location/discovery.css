@@ -644,3 +644,184 @@
 .wallet-saved-remove:hover {
   background: var(--white);
 }
+
+
+/* Deals & Discovery empty states — own styling, not the shared shared-ui.css .empty-state */
+.dd-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 36px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow);
+  color: var(--text-muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.dd-empty-state-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #eef2ff;
+  color: var(--blue);
+}
+
+.dd-empty-state-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.dd-empty-state p {
+  margin: 0;
+  max-width: 320px;
+}
+
+
+/* Discover / Wallet tabs — decoupled from ServiceMarketplace.css .sm-tabs/.sm-tab */
+.dd-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.dd-tab {
+  background: none;
+  border: none;
+  padding: 0 0 12px;
+  font-size: 14px;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dd-tab--active {
+  color: var(--blue);
+  font-weight: 700;
+  border-bottom-color: var(--blue);
+}
+
+/* Past deals dropdown — decoupled from ServiceMarketplace.css .sm-past-* */
+details.dd-past-deals {
+  margin-top: 14px;
+}
+
+details.dd-past-deals summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 2px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+details.dd-past-deals summary::-webkit-details-marker {
+  display: none;
+}
+
+.dd-past-chev {
+  display: inline-flex;
+  transition: transform 150ms ease;
+}
+
+details.dd-past-deals[open] .dd-past-chev {
+  transform: rotate(90deg);
+}
+
+.dd-past-deals-body {
+  margin-top: 8px;
+}
+
+.dd-past-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 6px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 150ms ease;
+}
+
+.dd-past-row:hover {
+  opacity: 1;
+}
+
+.dd-past-row:last-child {
+  border-bottom: 0;
+}
+
+.dd-past-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.dd-past-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.dd-past-icon--default {
+  background: var(--bg);
+  color: var(--text-muted);
+}
+
+.dd-past-row-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.dd-past-row-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.dd-past-row-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.dd-past-row-cat {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: #eceef1;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+
+.dd-claim-history-empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.dd-claim-history-empty svg {
+  flex-shrink: 0;
+  color: var(--blue);
+}

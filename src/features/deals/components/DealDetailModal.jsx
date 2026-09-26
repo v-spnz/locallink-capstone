@@ -91,6 +91,7 @@ export default function DealDetailModal({
   const endedEarly = deal.status === 'ended_early'
   const windowExpired = msRemaining != null && msRemaining <= 0
   const isRedeemed = Boolean(claimRedeemedAt)
+  const isPastDealReadOnly = deal.status === 'expired' || deal.status === 'ended_early'
   const claimsRemaining =
     deal.claim_limit != null
       ? Math.max(0, deal.claim_limit - (deal.claims_used ?? 0))
@@ -178,7 +179,7 @@ export default function DealDetailModal({
           )}
         </div>
 
-        {endedEarly && isClaimed && !isRedeemed && (
+        {endedEarly && isClaimed && !isRedeemed && !windowExpired && (
           <div className="mb-4 rounded-md border border-[#f1c7c7] bg-[#fff5f5] p-3 text-sm text-[var(--text)]">
             <strong className="block text-[var(--danger)]">
               Claim protected
@@ -386,55 +387,56 @@ export default function DealDetailModal({
         </div>
       )}
 
-      <div className="border-t border-[var(--border)] px-6 py-5">
-        {claimError && (
-          <p className="auth-error mb-3" role="alert">
-            {claimError}
-          </p>
-        )}
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onToggleSave(deal.id)}
-            className={
-              'flex items-center gap-1.5 rounded-md border px-5 py-2 text-sm font-semibold transition ' +
-              (isSaved
-                ? 'border-[var(--blue)] bg-[var(--blue-light)] text-[var(--blue)]'
-                : 'border-[var(--border)] text-[var(--text)] hover:border-[var(--blue)]')
-            }
-          >
-            <Bookmark
-              size={16}
-              aria-hidden="true"
-              fill={isSaved ? 'currentColor' : 'none'}
-            />
-            {isSaved ? 'In wallet' : 'Save to wallet'}
-          </button>
-          <button
-            type="button"
-            onClick={handleClaim}
-            disabled={isClaiming || showQrCode || showConfirm || isSoldOut}
-            className="flex-1 rounded-md bg-[var(--blue)] py-2 text-sm font-semibold text-white hover:bg-[var(--blue-dark)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-[var(--blue)]"
-          >
-            {isClaiming
-              ? 'Claiming…'
-              : isRedeemed
-                ? 'Deal has been Redeemed'
-                : showQrCode
-                  ? 'Claim ready'
-                  : isClaimed
-                    ? 'View claim'
-                    : isSoldOut
-                      ? 'Fully claimed'
-                      : 'Claim deal'}
-          </button>
+      {isPastDealReadOnly ? (
+        <div className="border-t border-[var(--border)] px-6 py-4 text-center text-xs text-[var(--text-muted)]">
+          This deal has expired.
         </div>
-        {!isSaved && (
-          <p className="mt-2 text-xs text-[var(--text-muted)]">
-            You can keep up to 3 deals in your wallet at a time.
-          </p>
-        )}
-      </div>
+      ) : (
+        <div className="border-t border-[var(--border)] px-6 py-5">
+          {claimError && (
+            <p className="auth-error mb-3" role="alert">
+              {claimError}
+            </p>
+          )}
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => onToggleSave(deal.id)}
+              className={
+                'flex items-center gap-1.5 rounded-md border px-5 py-2 text-sm font-semibold transition ' +
+                (isSaved
+                  ? 'border-[var(--blue)] bg-[var(--blue-light)] text-[var(--blue)]'
+                  : 'border-[var(--border)] text-[var(--text)] hover:border-[var(--blue)]')
+              }
+            >
+              <Bookmark
+                size={16}
+                aria-hidden="true"
+                fill={isSaved ? 'currentColor' : 'none'}
+              />
+              {isSaved ? 'In wallet' : 'Save to wallet'}
+            </button>
+            <button
+              type="button"
+              onClick={handleClaim}
+              disabled={isClaiming || showQrCode || showConfirm || isSoldOut}
+              className="flex-1 rounded-md bg-[var(--blue)] py-2 text-sm font-semibold text-white hover:bg-[var(--blue-dark)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-[var(--blue)]"
+            >
+              {isClaiming
+                ? 'Claiming…'
+                : isRedeemed
+                  ? 'Deal has been Redeemed'
+                  : showQrCode
+                    ? 'Claim ready'
+                    : isClaimed
+                      ? 'View claim'
+                      : isSoldOut
+                        ? 'Fully claimed'
+                        : 'Claim deal'}
+            </button>
+          </div>
+        </div>
+      )}
     </Modal>
   )
 }
