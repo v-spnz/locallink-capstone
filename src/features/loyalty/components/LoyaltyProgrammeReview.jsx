@@ -133,6 +133,10 @@ export default function LoyaltyProgrammeReview({
                 label="Terms and conditions"
                 value={programme.terms || 'No additional terms'}
               />
+              <ReviewRow
+                label="Redemption method"
+                value={LOYALTY_REDEMPTION_METHOD}
+              />
             </dl>
           </section>
 

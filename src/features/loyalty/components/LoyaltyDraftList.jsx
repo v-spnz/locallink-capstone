@@ -173,6 +173,10 @@ function ProgrammeDetails({ id, programme, availability }) {
   )
 }
 
+function getStatusLabel(status) {
+  return status === 'published' ? 'Published' : 'Draft'
+}
+
 function getAvailabilityLabel(programme) {
   if (!programme.startDate) return 'Not set'
   if (programme.endDate) {
