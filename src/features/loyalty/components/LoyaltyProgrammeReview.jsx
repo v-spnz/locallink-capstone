@@ -1,5 +1,7 @@
 import { CalendarDays, CheckCircle2, Eye, Gift, Stamp } from 'lucide-react'
+import { useState } from 'react'
 import Button from '../../../components/ui/Button'
+import Modal from '../../../components/ui/Modal'
 import { getProgrammeAvailability } from '../businessLoyaltyTemplates'
 import {
   getCustomerReward,
@@ -44,9 +46,23 @@ export default function LoyaltyProgrammeReview({
     ...programme,
     status: 'published',
   })
+  const [isConfirming, setIsConfirming] = useState(false)
+
+  function handleDeclinePublication() {
+    if (isSaving) return
+    setIsConfirming(false)
+  }
+
+  async function handleConfirmPublication() {
+    const published = await onConfirm()
+    if (!published) setIsConfirming(false)
+  }
 
   return (
-    <section className="loyalty-review" aria-labelledby="loyalty-review-title">
+    <section
+      className="placeholder-section deal-review loyalty-review"
+      aria-labelledby="loyalty-review-title"
+    >
       <div className="loyalty-review-heading">
         <div>
           <span className="loyalty-review-status">
@@ -154,10 +170,44 @@ export default function LoyaltyProgrammeReview({
         <Button variant="secondary" onClick={onBack} disabled={isSaving}>
           Back to edit
         </Button>
-        <Button onClick={onConfirm} disabled={isSaving}>
-          {isSaving ? 'Publishing...' : 'Confirm and publish'}
+        <Button onClick={() => setIsConfirming(true)} disabled={isSaving}>
+          Confirm and publish
         </Button>
       </div>
+      {isConfirming && (
+        <Modal onClose={handleDeclinePublication} maxWidthClassName="max-w-lg">
+          <section
+            className="deal-publish-confirmation"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="loyalty-publish-confirmation-title"
+          >
+            <span className="deal-publish-confirmation-icon">
+              <CheckCircle2 aria-hidden="true" />
+            </span>
+            <h2 id="loyalty-publish-confirmation-title">
+              Publish this loyalty programme?
+            </h2>
+            <p>
+              Customers will be able to join and earn rewards once the
+              programme is live. You can continue editing if anything needs
+              changing.
+            </p>
+            <div className="deal-publish-confirmation-actions">
+              <Button
+                variant="secondary"
+                onClick={handleDeclinePublication}
+                disabled={isSaving}
+              >
+                Continue editing
+              </Button>
+              <Button onClick={handleConfirmPublication} disabled={isSaving}>
+                {isSaving ? 'Publishing…' : 'Publish programme'}
+              </Button>
+            </div>
+          </section>
+        </Modal>
+      )}
     </section>
   )
 }

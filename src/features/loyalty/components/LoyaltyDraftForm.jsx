@@ -4,16 +4,18 @@ import {
   CircleDollarSign,
   Gift,
   LockKeyhole,
+  QrCode,
   Save,
   Send,
   Stamp,
 } from 'lucide-react'
 import Button from '../../../components/ui/Button'
+import DateRangeCalendar from '../../../components/ui/DateRangeCalendar'
 import { sanitizeRewardThreshold } from '../businessLoyaltyValidation'
 import {
   getCustomerReward,
   getEarningRules,
-  //getProgrammeAvailability,
+  getProgrammeAvailability,
   getProgrammeTypeLabel,
   getRewardTarget,
   LOYALTY_TEMPLATES,
@@ -35,6 +37,7 @@ function FormField({
   value,
   onChange,
   requiredToPublish = false,
+  prefix,
   ...inputProps
 }) {
   const descriptionIds = [
@@ -52,15 +55,22 @@ function FormField({
           <span className="loyalty-required">Required to publish</span>
         )}
       </label>
-      <input
-        {...inputProps}
-        aria-describedby={descriptionIds || undefined}
-        aria-invalid={Boolean(error)}
-        className="form-input"
-        id={id}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      />
+      <div className={prefix ? 'loyalty-input-with-prefix' : undefined}>
+        {prefix && (
+          <span className="loyalty-input-prefix" aria-hidden="true">
+            {prefix}
+          </span>
+        )}
+        <input
+          {...inputProps}
+          aria-describedby={descriptionIds || undefined}
+          aria-invalid={Boolean(error)}
+          className="form-input"
+          id={id}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      </div>
       {helper && (
         <span className="loyalty-field-helper" id={`${id}-helper`}>
           {helper}
@@ -144,11 +154,11 @@ export default function LoyaltyDraftForm({
     programme.startDate,
   ].filter(Boolean).length
   const availabilityOnPublish = programme.startDate
-    ? formatAvailability({ ...programme, status: 'published' })
+    ? getProgrammeAvailability({ ...programme, status: 'published' })
     : null
 
   return (
-    <form className="loyalty-draft-form" onSubmit={onSaveDraft} noValidate>
+    <form className="deal-form loyalty-draft-form" onSubmit={onSaveDraft} noValidate>
       <div className="loyalty-form-toolbar">
         <Button variant="secondary" onClick={onBack}>
           <ArrowLeft aria-hidden="true" />
@@ -175,7 +185,7 @@ export default function LoyaltyDraftForm({
         </div>
       )}
 
-      <div className="loyalty-form-layout">
+      <div className="deal-form-workspace loyalty-form-layout">
         <div className="loyalty-form-fields">
           <section aria-labelledby="loyalty-basics-title">
             <div className="loyalty-form-section-heading">
@@ -264,6 +274,9 @@ export default function LoyaltyDraftForm({
                 }
                 placeholder="e.g. 8"
                 inputMode="decimal"
+                prefix={
+                  programme.programmeType !== 'stamp_card' ? '$' : undefined
+                }
                 value={programme.rewardThreshold}
                 error={errors.rewardThreshold}
                 onChange={(value) =>
@@ -283,6 +296,9 @@ export default function LoyaltyDraftForm({
                   helper="The discount cannot exceed the spend target."
                   placeholder="e.g. 5"
                   inputMode="decimal"
+                  prefix={
+                    programme.programmeType !== 'stamp_card' ? '$' : undefined
+                  }
                   value={programme.rewardValue}
                   error={errors.rewardValue}
                   onChange={(value) =>
@@ -305,12 +321,6 @@ export default function LoyaltyDraftForm({
                 />
               )}
             </div>
-
-            <p className="loyalty-field-helper">
-              Customer-facing earning rules:{' '}
-              {getEarningRules(programme) ||
-                'Complete the template details to preview the rules.'}
-            </p>
 
             <TextAreaField
               id="loyalty-terms"
@@ -336,32 +346,51 @@ export default function LoyaltyDraftForm({
               </div>
             </div>
 
-            <div className="loyalty-availability-grid">
-              <FormField
-                id="loyalty-start-date"
-                label="Start date"
-                helper="Before this date the programme is scheduled and cannot record loyalty activity."
-                type="date"
-                value={programme.startDate}
-                error={errors.startDate}
-                onChange={(value) => onChange('startDate', value)}
-                requiredToPublish
-              />
-              <FormField
-                id="loyalty-end-date"
-                label="End date"
-                helper="Optional. After this date the programme stops accepting new loyalty activity. Leave blank to keep it running."
-                type="date"
-                min={programme.startDate || undefined}
-                value={programme.endDate}
-                error={errors.endDate}
-                onChange={(value) => onChange('endDate', value)}
-              />
+            <DateRangeCalendar
+              id="loyalty-availability"
+              label="Programme period"
+              startLabel="Start date"
+              endLabel="End date"
+              startDate={programme.startDate}
+              endDate={programme.endDate}
+              startError={errors.startDate}
+              endError={errors.endDate}
+                            onChange={(range) => {
+                onChange('startDate', range.startDate)
+                onChange('endDate', range.endDate)
+              }}
+              required
+              endOptional
+            />
+          </section>
+
+          <section aria-labelledby="loyalty-check-in-title">
+            <div className="loyalty-form-section-heading">
+              <span aria-hidden="true">
+                <QrCode />
+              </span>
+              <div>
+                <h2 id="loyalty-check-in-title">Customer check-in</h2>
+                <p>The identification method staff will use at the counter.</p>
+              </div>
+            </div>
+            <div className="loyalty-fixed-check-in">
+              <QrCode aria-hidden="true" />
+              <div>
+                <strong>Customer-presented loyalty QR</strong>
+                <p>
+                  Customers show a programme-specific QR code. Staff scan it to
+                  open the correct loyalty record, with a manual code fallback.
+                </p>
+              </div>
             </div>
           </section>
         </div>
 
-        <aside className="loyalty-draft-preview" aria-label="Draft summary">
+        <aside className="deal-draft-rail loyalty-draft-preview deal-live-preview" aria-label="Draft summary">
+          <div className="deal-live-preview-heading">
+            <strong>Customer Preview</strong>
+          </div>
           <div className="loyalty-preview-heading">
             <span>
               <LockKeyhole aria-hidden="true" />
@@ -383,6 +412,10 @@ export default function LoyaltyDraftForm({
               {getCustomerReward(programme) || 'Add the reward details'}
             </strong>
           </div>
+          <p className="loyalty-field-helper">
+            {getEarningRules(programme) ||
+              'Complete the template details to preview the rules.'}
+          </p>
           <p className="loyalty-preview-availability">
             <CalendarDays aria-hidden="true" />
             {formatAvailability(programme)}

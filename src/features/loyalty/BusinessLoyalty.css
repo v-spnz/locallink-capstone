@@ -1411,3 +1411,51 @@ body.business-surface .loyalty-input-with-prefix .form-input {
     grid-template-columns: 1fr;
   }
 }
+
+.loyalty-input-with-prefix {
+  position: relative;
+}
+
+.loyalty-input-with-prefix .form-input {
+  padding-left: 40px;
+}
+
+.loyalty-input-prefix {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: var(--business-muted);
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.loyalty-fixed-check-in {
+  padding: 14px;
+  border: 1px solid var(--business-border);
+  border-radius: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--business-surface-soft);
+}
+
+.loyalty-fixed-check-in > svg {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  color: var(--business-accent);
+}
+
+.loyalty-fixed-check-in strong {
+  color: var(--business-ink);
+  font-size: 14px;
+}
+
+.loyalty-fixed-check-in p {
+  margin: 4px 0 0;
+  color: var(--business-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}

@@ -1,4 +1,5 @@
 import ActionToast from '../../components/ui/ActionToast'
+import UnsavedChangesDialog from '../../components/ui/UnsavedChangesDialog'
 import LoyaltyActivityFeed from '../../features/loyalty/components/LoyaltyActivityFeed'
 import LoyaltyDraftForm from '../../features/loyalty/components/LoyaltyDraftForm'
 import LoyaltyDraftList, {
@@ -92,6 +93,15 @@ export default function CreateLoyalty() {
           message={loyalty.feedback.message}
           variant={loyalty.feedback.variant}
           onDismiss={loyalty.dismissFeedback}
+        />
+      )}
+      {loyalty.isLeaveConfirmationOpen && (
+        <UnsavedChangesDialog
+          itemName="loyalty programme draft"
+          isSaving={loyalty.isSaving}
+          onCancel={loyalty.cancelLeave}
+          onDiscard={loyalty.discardAndLeave}
+          onSave={loyalty.saveDraftAndLeave}
         />
       )}
     </div>
