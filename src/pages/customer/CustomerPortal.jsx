@@ -46,7 +46,7 @@ export default function CustomerPortal() {
           }
         />
         <Route
-          path="profile"
+          path="profile/*"
           element={
             <ProtectedRoute>
               <Profile />
