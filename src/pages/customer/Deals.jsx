@@ -1,4 +1,4 @@
-import { Bookmark, MapPin } from 'lucide-react'
+import { Bookmark, MapPin, Clock3, BadgeCheck } from 'lucide-react'
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import {
@@ -20,7 +20,6 @@ import Modal from '../../components/ui/Modal'
 import useAuth from '../../auth/useAuth'
 import { isClaimActive } from '../../features/deals/claimStatus'
 import '../../features/location/discovery.css'
-import '../../features/service-marketplace/ServiceMarketplace.css'
 
 const DiscoveryMap = lazy(
   () => import('../../features/location/components/DiscoveryMap'),
@@ -139,7 +138,7 @@ export default function Deals() {
     return () => clearInterval(interval)
   }, [])
 
-  const historicalClaims = customerClaims.filter(
+  const pastClaims = customerClaims.filter(
     (claim) => !isClaimActive(claim, now),
   )
   const savedDealIds = savedDeals.map((deal) => deal.deal_id)
@@ -352,11 +351,7 @@ export default function Deals() {
       setSavedDeals(refreshed)
     } catch (saveError) {
       console.error('Unable to update saved deal.', saveError)
-      setError(
-        saveError.message?.includes('up to 3 deals')
-          ? 'You can only save up to 3 deals at a time. Remove one to save another.'
-          : 'Unable to update saved deal. Please try again.',
-      )
+      setError('Unable to update saved deal. Please try again.')
     }
   }
 
@@ -389,17 +384,17 @@ export default function Deals() {
         )}
       </div>
 
-      <div className="sm-tabs">
+      <div className="dd-tabs">
         <button
           type="button"
-          className={`sm-tab${activeTab === 'discover' ? ' sm-tab--active' : ''}`}
+          className={`dd-tab${activeTab === 'discover' ? ' dd-tab--active' : ''}`}
           onClick={() => setActiveTab('discover')}
         >
           Discover
         </button>
         <button
           type="button"
-          className={`sm-tab${activeTab === 'wallet' ? ' sm-tab--active' : ''}`}
+          className={`dd-tab${activeTab === 'wallet' ? ' dd-tab--active' : ''}`}
           onClick={() => setActiveTab('wallet')}
         >
           Wallet
@@ -473,14 +468,22 @@ export default function Deals() {
               </span>
             </div>
             {!location ? (
-              <div className="empty-state">
-                Add your suburb in Profile to discover local businesses.
+              <div className="dd-empty-state">
+                <span className="dd-empty-state-icon" aria-hidden="true">
+                  <MapPin />
+                </span>
+                <p>Add your suburb in Profile to discover local businesses.</p>
               </div>
             ) : !isSearching && searchedBusinesses.length === 0 ? (
-              <div className="empty-state">
-                {discoverySearch.trim()
-                  ? `No businesses or deals match "${discoverySearch.trim()}".`
-                  : `No businesses or deals are available in ${location.suburb} right now.`}
+              <div className="dd-empty-state">
+                <span className="dd-empty-state-icon" aria-hidden="true">
+                  <MapPin />
+                </span>
+                <p>
+                  {discoverySearch.trim()
+                    ? `No businesses or deals match "${discoverySearch.trim()}".`
+                    : `No businesses or deals are available in ${location.suburb} right now.`}
+                </p>
               </div>
             ) : (
               <div className="discovery-category-sections">
@@ -610,9 +613,14 @@ export default function Deals() {
           <div className="wallet-section-block">
             <h3 className="wallet-section-title">Saved deals</h3>
             {savedDeals.length === 0 ? (
-              <div className="empty-state">
-                No saved deals yet. Tap the bookmark icon on a deal to save it
-                here.
+              <div className="dd-empty-state">
+                <span className="dd-empty-state-icon" aria-hidden="true">
+                  <Bookmark />
+                </span>
+                <p>
+                  No saved deals yet. Tap the bookmark icon on a deal to keep it
+                  here for later.
+                </p>
               </div>
             ) : (
               <div className="wallet-saved-grid">
@@ -661,44 +669,48 @@ export default function Deals() {
 
           <div className="wallet-section-block">
             <h3 className="wallet-section-title">Claim history</h3>
-            {historicalClaims.length === 0 ? (
-              <div className="empty-state">
-                No past claims yet. Claims move here once they're redeemed,
-                expire, or the deal ends early.
+            {pastClaims.length === 0 ? (
+              <div className="dd-claim-history-empty">
+                <Clock3 aria-hidden="true" size={16} />
+                <span>
+                  No past deals yet. Deals move here once you've claimed them.
+                </span>
               </div>
             ) : (
-              <details className="sm-past-jobs">
+              <details className="dd-past-deals">
                 <summary>
-                  <span className="sm-past-chev">▶</span> Past deals
+                  <span className="dd-past-chev">▶</span> Past deals
                 </summary>
-                <div className="sm-past-jobs-body">
-                  {historicalClaims.map((claim) => {
+                <div className="dd-past-deals-body">
+                  {pastClaims.map((claim) => {
                     const endedEarly = claim.status === 'ended_early'
                     return (
                       <div
-                        className="sm-past-row"
+                        className="dd-past-row"
                         key={claim.claim_id}
                         onClick={() => openClaimedDeal(claim)}
                       >
                         <span
-                          className="sm-past-icon sm-past-icon--default"
+                          className="dd-past-icon dd-past-icon--default"
                           aria-hidden="true"
                         >
                           {getCategoryEmoji(claim.category)}
                         </span>
-                        <div className="sm-past-row-text">
-                          <div className="sm-past-row-title">{claim.title}</div>
-                          <div className="sm-past-row-sub">
+                        <div className="dd-past-row-text">
+                          <div className="dd-past-row-title">{claim.title}</div>
+                          <div className="dd-past-row-sub">
                             {claim.redeemed_at
-                              ? 'Redeemed'
-                              : endedEarly
+                              ? `Redeemed ${formatClaimDate(claim.redeemed_at)}`
+                              : endedEarly &&
+                                  claim.expires_at &&
+                                  new Date(claim.expires_at) > now
                                 ? 'Claim remains redeemable'
                                 : 'Expired'}
                             {' · '}
                             {claim.business_name}
                           </div>
                         </div>
-                        <span className="sm-past-row-cat">
+                        <span className="dd-past-row-cat">
                           {claim.category}
                         </span>
                       </div>
@@ -750,6 +762,15 @@ const resultCountStyles = {
   color: 'var(--text-muted)',
   textTransform: 'none',
   letterSpacing: 'normal',
+}
+
+function formatClaimDate(value) {
+  if (!value) return ''
+  return new Date(value).toLocaleDateString('en-NZ', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
 }
 
 function getCategoryEmoji(category) {
