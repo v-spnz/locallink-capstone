@@ -233,7 +233,23 @@ export default function ProgramCard({ program, index, onJoin }) {
               )}
             </dl>
 
-            {isJoined ? (
+            {!isJoined ? (
+              <>
+                <Button
+                  className="ly-redeem-btn"
+                  onClick={handleJoin}
+                  disabled={isJoining}
+                >
+                  <UserPlus aria-hidden="true" />
+                  {isJoining ? 'Joining…' : 'Join'}
+                </Button>
+                {joinError && (
+                  <p className="loyalty-qr-error" role="alert">
+                    {joinError}
+                  </p>
+                )}
+              </>
+            ) : program.programmeStatus === 'active' ? (
               <>
                 <Button
                   className="ly-redeem-btn"
@@ -250,21 +266,9 @@ export default function ProgramCard({ program, index, onJoin }) {
                 )}
               </>
             ) : (
-              <>
-                <Button
-                  className="ly-redeem-btn"
-                  onClick={handleJoin}
-                  disabled={isJoining}
-                >
-                  <UserPlus aria-hidden="true" />
-                  {isJoining ? 'Joining…' : 'Join'}
-                </Button>
-                {joinError && (
-                  <p className="loyalty-qr-error" role="alert">
-                    {joinError}
-                  </p>
-                )}
-              </>
+              <p className="loyalty-ended-note">
+                This programme has ended and can no longer be used.
+              </p>
             )}
           </section>
         </Modal>

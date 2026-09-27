@@ -113,7 +113,7 @@ const [activeTab, setActiveTab] = useState('cards')
         onClick={() => setActiveTab('past')}
       >
         <BadgeCheck aria-hidden="true" />
-        Completed
+        Previous Loyalty Programmes
       </button>
     </div>
 
