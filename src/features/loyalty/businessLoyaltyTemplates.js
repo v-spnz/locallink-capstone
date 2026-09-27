@@ -1,3 +1,4 @@
+import { getAucklandToday } from './businessLoyaltyValidation.js'
 export const LOYALTY_TEMPLATES = [
   {
     value: 'stamp_card',
@@ -64,4 +65,46 @@ export function getEarningRules(programme) {
   )
     return `Spend $${formatNumber(programme.rewardThreshold)} to receive a free ${programme.rewardDescription.trim()}.`
   return ''
+}
+
+const PROGRAMME_AVAILABILITY = {
+  draft: {
+    value: 'draft',
+    label: 'Draft',
+    description: 'Private. Customers cannot see it or earn rewards.',
+  },
+  scheduled: {
+    value: 'scheduled',
+    label: 'Scheduled',
+    description:
+      'Not started yet. It cannot record loyalty activity until its start date.',
+  },
+  active: {
+    value: 'active',
+    label: 'Active',
+    description: 'Running now. Customers can earn rewards.',
+  },
+  expired: {
+    value: 'expired',
+    label: 'Expired',
+    description: 'Ended. It no longer accepts new loyalty activity.',
+  },
+}
+
+export function getProgrammeAvailability(programme, now = new Date()) {
+  if (!programme.status || programme.status === 'draft') {
+    return PROGRAMME_AVAILABILITY.draft
+  }
+  const today = getAucklandToday(now)
+  if (programme.startDate && programme.startDate > today) {
+    return PROGRAMME_AVAILABILITY.scheduled
+  }
+  if (programme.endDate && programme.endDate < today) {
+    return PROGRAMME_AVAILABILITY.expired
+  }
+  return PROGRAMME_AVAILABILITY.active
+}
+
+export function isProgrammeAcceptingActivity(programme, now = new Date()) {
+  return getProgrammeAvailability(programme, now).value === 'active'
 }
