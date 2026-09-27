@@ -67,7 +67,7 @@ const [activeTab, setActiveTab] = useState('cards')
     (program) => program.programmeStatus === 'active',
   )
   const completedPrograms = loyalty.programs.filter(
-    (program) => program.programmeStatus !== 'active',
+    (program) => program.programmeStatus === 'expired',
   )
   // Reward-eligible cards stay in this same list (surfaced first), rather
   // than a separate sub-tab — moving a card to a different list the
