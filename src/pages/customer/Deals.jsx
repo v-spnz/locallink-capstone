@@ -618,8 +618,8 @@ export default function Deals() {
                   <Bookmark />
                 </span>
                 <p>
-                  No saved deals yet. Tap the bookmark icon on a deal to keep
-                  it here for later.
+                  No saved deals yet. Tap the bookmark icon on a deal to keep it
+                  here for later.
                 </p>
               </div>
             ) : (
@@ -673,8 +673,7 @@ export default function Deals() {
               <div className="dd-claim-history-empty">
                 <Clock3 aria-hidden="true" size={16} />
                 <span>
-                  No past deals yet. Deals move here once you've claimed
-                  them.
+                  No past deals yet. Deals move here once you've claimed them.
                 </span>
               </div>
             ) : (
@@ -702,7 +701,9 @@ export default function Deals() {
                           <div className="dd-past-row-sub">
                             {claim.redeemed_at
                               ? `Redeemed ${formatClaimDate(claim.redeemed_at)}`
-                              : endedEarly && claim.expires_at && new Date(claim.expires_at) > now
+                              : endedEarly &&
+                                  claim.expires_at &&
+                                  new Date(claim.expires_at) > now
                                 ? 'Claim remains redeemable'
                                 : 'Expired'}
                             {' · '}

@@ -91,7 +91,8 @@ export default function DealDetailModal({
   const endedEarly = deal.status === 'ended_early'
   const windowExpired = msRemaining != null && msRemaining <= 0
   const isRedeemed = Boolean(claimRedeemedAt)
-  const isPastDealReadOnly = deal.status === 'expired' || deal.status === 'ended_early'
+  const isPastDealReadOnly =
+    deal.status === 'expired' || deal.status === 'ended_early'
   const claimsRemaining =
     deal.claim_limit != null
       ? Math.max(0, deal.claim_limit - (deal.claims_used ?? 0))
