@@ -1,6 +1,7 @@
 import {
   CheckCircle2,
   Gift,
+  PlusCircle,
   ScanLine,
   Search,
   ShieldCheck,
@@ -31,9 +32,26 @@ function formatUpdatedAt(value) {
   }).format(new Date(value))
 }
 
-function LoyaltyRecord({ record, onClear }) {
+function LoyaltyRecord({
+  record,
+  onClear,
+  onAddStamp,
+  isAddingStamp,
+  stampError,
+  stampSuccess,
+  onRedeem,
+  isRedeeming,
+  redeemError,
+  redeemSuccess,
+}) {
   const progress = getLoyaltyProgressPresentation(record)
   const eligibilityLabel = getLoyaltyEligibilityLabel(record)
+  // Fixed: this previously checked for 'points', a value that no longer
+  // exists — the app uses stamp_card/spend_and_save/spend_and_reward, so
+  // every dollar-based programme was silently always treated as a stamp
+  // card, always adding a flat 1 instead of a dollar amount.
+  const isPoints = record.programmeType !== 'stamp_card'
+  const [pointsAmount, setPointsAmount] = useState('1')
 
   return (
     <article
@@ -116,6 +134,69 @@ function LoyaltyRecord({ record, onClear }) {
           <dd>{formatUpdatedAt(record.updatedAt)}</dd>
         </div>
       </dl>
+
+      <section className="loyalty-customer-add-progress">
+        {record.rewardEligible && (
+          <>
+            <Button
+              variant="success"
+              className="loyalty-customer-redeem-btn"
+              onClick={onRedeem}
+              disabled={isRedeeming}
+            >
+              <Gift aria-hidden="true" />
+              {isRedeeming ? 'Redeeming…' : 'Redeem reward'}
+            </Button>
+            {redeemError && (
+              <p className="auth-error loyalty-stamp-error" role="alert">
+                {redeemError}
+              </p>
+            )}
+            {redeemSuccess && !redeemError && (
+              <p className="loyalty-stamp-success" role="status">
+                Reward redeemed.
+              </p>
+            )}
+          </>
+        )}
+
+        {isPoints ? (
+          <div className="loyalty-customer-points-row">
+            <label htmlFor="loyalty-points-amount">Points to add</label>
+            <input
+              id="loyalty-points-amount"
+              type="number"
+              min="1"
+              step="1"
+              value={pointsAmount}
+              onChange={(event) => setPointsAmount(event.target.value)}
+              disabled={isAddingStamp}
+            />
+            <Button
+              onClick={() => onAddStamp(Number(pointsAmount) || 1)}
+              disabled={isAddingStamp || !Number(pointsAmount)}
+            >
+              <PlusCircle aria-hidden="true" />
+              {isAddingStamp ? 'Adding…' : 'Add points'}
+            </Button>
+          </div>
+        ) : (
+          <Button onClick={() => onAddStamp(1)} disabled={isAddingStamp}>
+            <PlusCircle aria-hidden="true" />
+            {isAddingStamp ? 'Adding…' : 'Add stamp'}
+          </Button>
+        )}
+        {stampError && (
+          <p className="auth-error loyalty-stamp-error" role="alert">
+            {stampError}
+          </p>
+        )}
+        {stampSuccess && !stampError && (
+          <p className="loyalty-stamp-success" role="status">
+            {isPoints ? 'Points added.' : 'Stamp added.'}
+          </p>
+        )}
+      </section>
     </article>
   )
 }
@@ -194,7 +275,18 @@ export default function LoyaltyCustomerLookup() {
         )}
 
         {lookup.record && (
-          <LoyaltyRecord record={lookup.record} onClear={lookup.clearLookup} />
+          <LoyaltyRecord
+            record={lookup.record}
+            onClear={lookup.clearLookup}
+            onAddStamp={lookup.addStamp}
+            isAddingStamp={lookup.isAddingStamp}
+            stampError={lookup.stampError}
+            stampSuccess={lookup.stampSuccess}
+            onRedeem={lookup.redeemReward}
+            isRedeeming={lookup.isRedeeming}
+            redeemError={lookup.redeemError}
+            redeemSuccess={lookup.redeemSuccess}
+          />
         )}
 
         <div className="loyalty-customer-privacy-note">

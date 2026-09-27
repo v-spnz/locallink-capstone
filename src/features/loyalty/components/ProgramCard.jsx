@@ -1,4 +1,14 @@
-import { CheckCircle2, QrCode, ShieldCheck, X } from 'lucide-react'
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ClipboardList,
+  MapPin,
+  QrCode,
+  ShieldCheck,
+  Tag,
+  UserPlus,
+  X,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import Button from '../../../components/ui/Button'
@@ -6,6 +16,7 @@ import Modal from '../../../components/ui/Modal'
 import {
   getCustomerReward,
   getProgrammeTypeLabel,
+  LOYALTY_REDEMPTION_METHOD,
 } from '../businessLoyaltyTemplates'
 import {
   formatLoyaltyLookupCode,
@@ -16,14 +27,21 @@ import { createMyLoyaltyScanCode } from '../api/loyaltyApi'
 import BusinessAvatar from './BusinessAvatar'
 import StampRing from './StampRing'
 
-export default function ProgramCard({ program, index }) {
-  const [isQrOpen, setIsQrOpen] = useState(false)
+// program.isJoined defaults to true: every record from "Your Loyalty" and
+// "Completed" is joined by definition (get_my_loyalty_records only returns
+// joined records at all). Only Discover rows carry isJoined explicitly.
+export default function ProgramCard({ program, index, onJoin }) {
+  const isJoined = program.isJoined ?? true
+  const [view, setView] = useState(null) // null | 'details' | 'qr'
   const [scanSession, setScanSession] = useState(null)
   const [isCreatingCode, setIsCreatingCode] = useState(false)
   const [qrError, setQrError] = useState('')
+  const [isJoining, setIsJoining] = useState(false)
+  const [joinError, setJoinError] = useState('')
   const [secondsRemaining, setSecondsRemaining] = useState(0)
   const progress = getLoyaltyProgressPresentation(program)
   const isStampCard = program.programmeType === 'stamp_card'
+  const businessName = program.business ?? program.businessName
 
   useEffect(() => {
     if (!scanSession?.expiresAt) return undefined
@@ -50,7 +68,7 @@ export default function ProgramCard({ program, index }) {
     try {
       const session = await createMyLoyaltyScanCode(program.id)
       setScanSession(session)
-      setIsQrOpen(true)
+      setView('qr')
     } catch (error) {
       console.error('Unable to create loyalty scan code.', error)
       setQrError(
@@ -61,9 +79,19 @@ export default function ProgramCard({ program, index }) {
     }
   }
 
-  function closeQr() {
-    setIsQrOpen(false)
+  async function handleJoin() {
+    setJoinError('')
+    setIsJoining(true)
+    const result = await onJoin(program.joinCode)
+    if (result !== true) setJoinError(result)
+    setIsJoining(false)
+  }
+
+  function closeModal() {
+    setView(null)
     setScanSession(null)
+    setQrError('')
+    setJoinError('')
   }
 
   const countdownMinutes = Math.floor(secondsRemaining / 60)
@@ -73,16 +101,25 @@ export default function ProgramCard({ program, index }) {
     <>
       <article
         className="ly-card card"
-        style={{ animationDelay: `${index * 40}ms` }}
+        style={{ animationDelay: `${index * 40}ms`, cursor: 'pointer' }}
+        onClick={() => setView('details')}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            setView('details')
+          }
+        }}
       >
         <div className="loyalty-program-header">
           {isStampCard ? (
             <StampRing earned={progress.progress} required={progress.target} />
           ) : (
-            <BusinessAvatar name={program.business} />
+            <BusinessAvatar name={businessName} />
           )}
           <div className="loyalty-program-business">
-            <strong>{program.business}</strong>
+            <strong>{businessName}</strong>
             <span>{program.programmeName}</span>
           </div>
           {program.rewardEligible && (
@@ -106,24 +143,135 @@ export default function ProgramCard({ program, index }) {
           <span>Reward</span>
           <strong>{getCustomerReward(program)}</strong>
         </div>
-
-        <Button
-          className="ly-redeem-btn"
-          onClick={handleShowQr}
-          disabled={isCreatingCode}
-        >
-          <QrCode aria-hidden="true" />
-          {isCreatingCode ? 'Creating QR…' : 'Show loyalty QR'}
-        </Button>
-        {qrError && (
-          <p className="loyalty-qr-error" role="alert">
-            {qrError}
-          </p>
-        )}
       </article>
 
-      {isQrOpen && scanSession && (
-        <Modal onClose={closeQr} maxWidthClassName="max-w-md">
+      {view === 'details' && (
+        <Modal onClose={closeModal} maxWidthClassName="max-w-md">
+          <section
+            className="loyalty-details-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`loyalty-details-title-${program.id}`}
+          >
+            <button
+              className="loyalty-qr-close"
+              type="button"
+              onClick={closeModal}
+              aria-label="Close loyalty programme details"
+            >
+              <X aria-hidden="true" />
+            </button>
+
+            <div className="loyalty-details-header">
+              {isStampCard ? (
+                <StampRing
+                  earned={progress.progress}
+                  required={progress.target}
+                />
+              ) : (
+                <BusinessAvatar name={businessName} />
+              )}
+              <div className="loyalty-program-business">
+                <strong id={`loyalty-details-title-${program.id}`}>
+                  {businessName}
+                </strong>
+                <span>{program.programmeName}</span>
+              </div>
+            </div>
+
+            {!isStampCard && (
+              <div className="loyalty-points-progress">
+                <div className="progress-bar-track">
+                  <div
+                    className="progress-bar-fill ly-bar-fill"
+                    style={{ width: `${progress.percentage}%` }}
+                  />
+                </div>
+                <span>{progress.progressLabel}</span>
+              </div>
+            )}
+
+            {program.rewardEligible && (
+              <span className="ly-badge-pulse loyalty-details-badge">
+                <CheckCircle2 aria-hidden="true" />
+                Reward ready
+              </span>
+            )}
+
+            <div className="loyalty-reward">
+              <span>Reward</span>
+              <strong>{getCustomerReward(program)}</strong>
+            </div>
+
+            <dl className="loyalty-details-list">
+              <div>
+                <dt>
+                  <ClipboardList aria-hidden="true" size={14} />
+                  How you earn
+                </dt>
+                <dd>{program.earningRules}</dd>
+              </div>
+              <div>
+                <dt>
+                  <Tag aria-hidden="true" size={14} />
+                  Redemption method
+                </dt>
+                <dd>{LOYALTY_REDEMPTION_METHOD}</dd>
+              </div>
+              {!isJoined && program.formattedAddress && (
+                <div>
+                  <dt>
+                    <MapPin aria-hidden="true" size={14} />
+                    Location
+                  </dt>
+                  <dd>
+                    {program.formattedAddress}
+                    {program.distanceKm != null &&
+                      ` · ${program.distanceKm.toFixed(1)} km away`}
+                  </dd>
+                </div>
+              )}
+            </dl>
+
+            {isJoined ? (
+              <>
+                <Button
+                  className="ly-redeem-btn"
+                  onClick={handleShowQr}
+                  disabled={isCreatingCode}
+                >
+                  <QrCode aria-hidden="true" />
+                  {isCreatingCode ? 'Creating QR…' : 'Show loyalty QR'}
+                </Button>
+                {qrError && (
+                  <p className="loyalty-qr-error" role="alert">
+                    {qrError}
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                <Button
+                  className="ly-redeem-btn"
+                  onClick={handleJoin}
+                  disabled={isJoining}
+                >
+                  <UserPlus aria-hidden="true" />
+                  {isJoining ? 'Joining…' : 'Join'}
+                </Button>
+                {joinError && (
+                  <p className="loyalty-qr-error" role="alert">
+                    {joinError}
+                  </p>
+                )}
+              </>
+            )}
+          </section>
+        </Modal>
+      )}
+
+      {view === 'qr' && scanSession && (
+        <Modal onClose={closeModal} maxWidthClassName="max-w-md">
           <section
             className="loyalty-qr-dialog"
             role="dialog"
@@ -131,9 +279,17 @@ export default function ProgramCard({ program, index }) {
             aria-labelledby={`loyalty-qr-title-${program.id}`}
           >
             <button
+              className="loyalty-qr-back"
+              type="button"
+              onClick={() => setView('details')}
+              aria-label="Back to programme details"
+            >
+              <ArrowLeft aria-hidden="true" />
+            </button>
+            <button
               className="loyalty-qr-close"
               type="button"
-              onClick={closeQr}
+              onClick={closeModal}
               aria-label="Close loyalty QR code"
             >
               <X aria-hidden="true" />
@@ -152,8 +308,8 @@ export default function ProgramCard({ program, index }) {
               {program.programmeName}
             </h2>
             <p>
-              Show this code to {program.business}. They will scan it to find
-              your programme and current progress.
+              Show this code to {businessName}. They will scan it to find your
+              programme and current progress.
             </p>
             <div className="loyalty-qr-code">
               <QRCodeSVG
@@ -161,7 +317,7 @@ export default function ProgramCard({ program, index }) {
                 size={220}
                 level="M"
                 marginSize={2}
-                title={`${program.business} loyalty QR code`}
+                title={`${businessName} loyalty QR code`}
               />
             </div>
             <span className="loyalty-qr-manual-label">Or enter this code</span>

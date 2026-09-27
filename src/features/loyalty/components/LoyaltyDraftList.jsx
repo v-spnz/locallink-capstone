@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
+  Copy,
   Gift,
   LockKeyhole,
   Plus,
@@ -472,6 +473,21 @@ export default function LoyaltyDraftList({
                       <small>
                         Updated {formatUpdatedAt(programme.updatedAt)}
                       </small>
+                      {!isDraft && programme.joinCode && (
+                        <button
+                          type="button"
+                          className="loyalty-join-code"
+                          onClick={(event) => {
+                            event.preventDefault()
+                            event.stopPropagation()
+                            navigator.clipboard?.writeText(programme.joinCode)
+                          }}
+                          title="Copy join code — give this to customers so they can join"
+                        >
+                          <Copy aria-hidden="true" />
+                          {programme.joinCode}
+                        </button>
+                      )}
                     </span>
 
                     <span className="deal-card-disclosure" aria-hidden="true">

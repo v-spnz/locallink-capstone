@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { fetchMyLoyaltyRecords } from '../api/loyaltyApi'
 
 export default function useLoyaltyPrograms() {
@@ -8,29 +8,32 @@ export default function useLoyaltyPrograms() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    let active = true
-
-    async function loadPrograms() {
-      setIsLoading(true)
-      setError('')
-      try {
-        const records = await fetchMyLoyaltyRecords()
-        if (active) setPrograms(records)
-      } catch (loadError) {
-        console.error('Unable to load loyalty programmes.', loadError)
-        if (active)
-          setError('Unable to load your loyalty programmes right now.')
-      } finally {
-        if (active) setIsLoading(false)
+  const loadPrograms = useCallback(async ({ silent = false } = {}) => {
+    // Background polling must not toggle isLoading — doing so swaps the
+    // entire rendered list out for the loading message on every poll,
+    // unmounting every card (and any modal open on one) every few
+    // seconds, regardless of whether anything actually changed.
+    if (!silent) setIsLoading(true)
+    if (!silent) setError('')
+    try {
+      const records = await fetchMyLoyaltyRecords()
+      setPrograms(records)
+    } catch (loadError) {
+      console.error('Unable to load loyalty programmes.', loadError)
+      if (!silent) {
+        setError('Unable to load your loyalty programmes right now.')
       }
-    }
-
-    loadPrograms()
-    return () => {
-      active = false
+    } finally {
+      if (!silent) setIsLoading(false)
     }
   }, [])
+
+  useEffect(() => {
+    // Mount-time fetch from an external system (the API) — the loading
+    // state's setState is the expected first synchronous act here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadPrograms()
+  }, [loadPrograms])
 
   const filteredPrograms = useMemo(() => {
     const query = search.trim().toLowerCase()
@@ -60,5 +63,6 @@ export default function useLoyaltyPrograms() {
     isLoading,
     setTab,
     setSearch,
+    reload: loadPrograms,
   }
 }

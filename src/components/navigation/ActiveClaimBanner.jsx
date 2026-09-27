@@ -20,7 +20,7 @@ export default function ActiveClaimBanner() {
       onClick={() => navigate(`/deals?claim=${claim.deal_id}`)}
     >
       <span className="active-claim-banner-group">
-        <Clock3 size={13} aria-hidden="true" />
+        <Clock3 size={18} aria-hidden="true" />
         <span className="active-claim-banner-text">
           Redeeming <strong>{claim.title}</strong> at {claim.business_name}
         </span>

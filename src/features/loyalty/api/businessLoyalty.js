@@ -13,6 +13,7 @@ const PROGRAMME_FIELDS = `
   start_date,
   end_date,
   status,
+  join_code,
   published_at,
   created_at,
   updated_at
@@ -38,6 +39,7 @@ export function mapBusinessLoyaltyProgramme(record) {
     startDate: record.start_date || '',
     endDate: record.end_date || '',
     status: record.status || 'draft',
+    joinCode: record.join_code || '',
     publishedAt: record.published_at,
     createdAt: record.created_at,
     updatedAt: record.updated_at,
