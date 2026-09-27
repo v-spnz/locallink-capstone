@@ -351,11 +351,7 @@ export default function Deals() {
       setSavedDeals(refreshed)
     } catch (saveError) {
       console.error('Unable to update saved deal.', saveError)
-      setError(
-        saveError.message?.includes('up to 3 deals')
-          ? 'You can only save up to 3 deals at a time. Remove one to save another.'
-          : 'Unable to update saved deal. Please try again.',
-      )
+      setError('Unable to update saved deal. Please try again.')
     }
   }
 
