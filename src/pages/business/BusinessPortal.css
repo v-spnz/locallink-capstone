@@ -557,6 +557,162 @@ body.business-surface .business-account-dropdown > a {
   font-variant-numeric: tabular-nums;
 }
 
+.business-performance-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 9px;
+}
+
+.business-reporting-period {
+  display: grid;
+  gap: 5px;
+}
+
+.business-reporting-period > span:first-child {
+  color: var(--business-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+}
+
+.business-reporting-period-select {
+  position: relative;
+  min-width: 184px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--business-border-strong);
+  border-radius: var(--business-radius-control);
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 8px;
+  background: var(--business-surface);
+  color: var(--business-accent-strong);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.business-reporting-period-select:focus-within {
+  border-color: var(--business-accent);
+  box-shadow: 0 0 0 3px rgb(63 91 211 / 12%);
+}
+
+.business-reporting-period-select > svg:last-child {
+  pointer-events: none;
+}
+
+.business-reporting-period-select svg {
+  width: 15px;
+  height: 15px;
+}
+
+.business-reporting-period-select select {
+  min-width: 0;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  appearance: none;
+  background: transparent;
+  color: var(--business-ink-soft);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  outline: 0;
+}
+
+.business-reporting-period-select:has(select:disabled) {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.business-custom-period {
+  margin: 0 0 14px;
+  padding: 16px 18px;
+  border: 1px solid #d8e0f9;
+  border-radius: 13px;
+  display: grid;
+  grid-template-columns:
+    minmax(190px, 1fr) repeat(2, minmax(150px, 0.62fr))
+    auto;
+  align-items: end;
+  gap: 12px;
+  background:
+    radial-gradient(circle at 0 0, rgb(63 91 211 / 8%), transparent 20rem),
+    #fafbff;
+}
+
+.business-custom-period-copy,
+.business-custom-period label {
+  display: grid;
+  gap: 5px;
+}
+
+.business-custom-period-copy strong {
+  color: var(--business-ink);
+  font-size: 14px;
+}
+
+.business-custom-period-copy span {
+  color: var(--business-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.business-custom-period label > span {
+  color: var(--business-ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.business-custom-period input {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid var(--business-border-strong);
+  border-radius: 9px;
+  background: var(--business-surface);
+  color: var(--business-ink);
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.business-custom-period button {
+  min-height: 40px;
+  padding: 9px 15px;
+  border: 1px solid var(--business-accent);
+  border-radius: 9px;
+  background: var(--business-accent);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  white-space: nowrap;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.business-custom-period button:hover {
+  background: var(--business-accent-strong);
+}
+
+.business-custom-period button:active {
+  transform: translateY(1px);
+}
+
+.business-custom-period > p {
+  margin: 0;
+  grid-column: 2 / -1;
+  color: var(--business-danger);
+  font-size: 12px;
+  font-weight: 650;
+}
+
 .business-performance-refresh,
 .business-performance-error button {
   min-height: 40px;
@@ -609,6 +765,85 @@ body.business-surface .business-account-dropdown > a {
 .business-performance-list {
   display: grid;
   gap: 14px;
+}
+
+.business-deal-snapshot {
+  margin-bottom: 14px;
+  padding: 16px 18px;
+  border: 1px solid #dbe1ec;
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: 22px;
+  background: #f8f9fc;
+}
+
+.business-deal-snapshot-heading {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+}
+
+.business-deal-snapshot-heading > span {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: #e8ebf2;
+  color: var(--business-ink-soft);
+}
+
+.business-deal-snapshot-heading svg {
+  width: 17px;
+  height: 17px;
+}
+
+.business-deal-snapshot h3 {
+  margin: 0;
+  color: var(--business-ink);
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+.business-deal-snapshot p {
+  margin: 3px 0 0;
+  color: var(--business-muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.business-deal-snapshot dl {
+  min-width: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.business-deal-snapshot dl > div {
+  min-width: 0;
+  padding: 3px 12px;
+  border-left: 1px solid var(--business-border);
+}
+
+.business-deal-snapshot dt {
+  color: var(--business-muted);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.business-deal-snapshot dd {
+  margin: 6px 0 0;
+  color: var(--business-ink);
+  font-size: 19px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+  line-height: 1;
 }
 
 .business-performance-card {
@@ -3412,6 +3647,28 @@ body.business-surface .business-onboarding-submit {
     border-bottom: 1px solid var(--business-border);
   }
 
+  .business-custom-period {
+    grid-template-columns: minmax(190px, 1fr) repeat(2, minmax(145px, 0.8fr));
+  }
+
+  .business-custom-period button {
+    width: fit-content;
+    grid-column: 2 / -1;
+  }
+
+  .business-custom-period > p {
+    grid-column: 2 / -1;
+  }
+
+  .business-deal-snapshot {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .business-deal-snapshot dl > div:first-child {
+    border-left: 0;
+  }
+
   .service-profile-context {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -3479,6 +3736,16 @@ body.business-surface .business-onboarding-submit {
 
   .business-performance-heading {
     align-items: flex-start;
+  }
+
+  .business-custom-period {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .business-custom-period-copy,
+  .business-custom-period button,
+  .business-custom-period > p {
+    grid-column: 1 / -1;
   }
 
   .business-performance-metrics {
@@ -3732,8 +3999,47 @@ body.business-surface .business-onboarding-submit {
     gap: 13px;
   }
 
+  .business-performance-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .business-reporting-period-select {
+    width: 100%;
+  }
+
   .business-performance-refresh {
     align-self: flex-start;
+  }
+
+  .business-custom-period {
+    padding: 15px;
+    grid-template-columns: 1fr;
+  }
+
+  .business-custom-period > * {
+    grid-column: 1 !important;
+  }
+
+  .business-custom-period button {
+    width: 100%;
+  }
+
+  .business-deal-snapshot {
+    padding: 15px;
+  }
+
+  .business-deal-snapshot-heading {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .business-deal-snapshot dl {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 14px;
+  }
+
+  .business-deal-snapshot dl > div:nth-child(4) {
+    border-left: 0;
   }
 
   .business-performance-card-heading {

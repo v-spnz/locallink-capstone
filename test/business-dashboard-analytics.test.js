@@ -2,10 +2,13 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import {
+  DASHBOARD_REPORTING_PERIODS,
   formatDashboardCount,
   formatDashboardDateRange,
   formatDashboardPercentage,
   formatRecordedCurrency,
+  getDashboardDateRange,
+  getDashboardDateRangeError,
   getDefaultDashboardDateRange,
   hasDealActivity,
   hasLoyaltyActivity,
@@ -65,6 +68,89 @@ test('the dashboard uses an inclusive 30-day Auckland reporting period', () => {
     endDate: '2026-09-25',
   })
   assert.equal(formatDashboardDateRange(period), '27 Aug 2026 – 25 Sept 2026')
+})
+
+test('reporting-period presets produce inclusive Auckland date ranges', () => {
+  const referenceDate = new Date('2026-09-24T12:00:00.000Z')
+
+  assert.deepEqual(getDashboardDateRange('last-7-days', referenceDate), {
+    startDate: '2026-09-19',
+    endDate: '2026-09-25',
+  })
+  assert.deepEqual(getDashboardDateRange('last-30-days', referenceDate), {
+    startDate: '2026-08-27',
+    endDate: '2026-09-25',
+  })
+  assert.deepEqual(getDashboardDateRange('last-6-months', referenceDate), {
+    startDate: '2026-03-26',
+    endDate: '2026-09-25',
+  })
+  assert.deepEqual(getDashboardDateRange('last-12-months', referenceDate), {
+    startDate: '2025-09-26',
+    endDate: '2026-09-25',
+  })
+  assert.deepEqual(
+    DASHBOARD_REPORTING_PERIODS.map(({ label }) => label),
+    [
+      'Last 7 days',
+      'Last 30 days',
+      'Last 6 months',
+      'Last 12 months',
+      'Custom range',
+    ],
+  )
+})
+
+test('custom reporting ranges require valid chronological dates', () => {
+  assert.equal(
+    getDashboardDateRangeError({ startDate: '', endDate: '2026-09-25' }),
+    'Choose both a start date and an end date.',
+  )
+  assert.equal(
+    getDashboardDateRangeError({
+      startDate: '2026-09-26',
+      endDate: '2026-09-25',
+    }),
+    'End date cannot be earlier than the start date.',
+  )
+  assert.equal(
+    getDashboardDateRangeError({
+      startDate: '2026-09-01',
+      endDate: '2026-09-25',
+    }),
+    '',
+  )
+})
+
+test('the dashboard applies one selected period to every historical metric', async () => {
+  const dashboard = await readFile(
+    new URL('../src/pages/business/Dashboard.jsx', import.meta.url),
+    'utf8',
+  )
+
+  assert.match(dashboard, /<select[\s\S]*?aria-label="Reporting period"/)
+  assert.match(dashboard, /DASHBOARD_REPORTING_PERIODS\.map/)
+  assert.match(dashboard, /reportingPeriod === 'custom'/)
+  assert.match(dashboard, /type="date"/)
+  assert.match(dashboard, /min=\{customPeriod\.startDate/)
+  assert.match(dashboard, /getDashboardDateRangeError\(customPeriod\)/)
+  assert.match(dashboard, /setAnalyticsPeriod\(customPeriod\)/)
+  assert.match(dashboard, /useBusinessDashboardAnalytics\(analyticsPeriod\)/)
+})
+
+test('current deal statuses are explicitly separated from period activity', async () => {
+  const dashboard = await readFile(
+    new URL('../src/pages/business/Dashboard.jsx', import.meta.url),
+    'utf8',
+  )
+
+  assert.match(dashboard, /Current deal status/)
+  assert.match(dashboard, /Live totals, not affected by the reporting period\./)
+  assert.match(dashboard, /\['Total deals', metrics\.totalDeals\]/)
+  assert.match(dashboard, /metrics\.activeDeals/)
+  assert.match(dashboard, /metrics\.scheduledDeals/)
+  assert.match(dashboard, /metrics\.draftDeals/)
+  assert.match(dashboard, /metrics\.expiredDeals/)
 })
 
 test('dashboard values format real zeroes while unknown sales stay unavailable', () => {

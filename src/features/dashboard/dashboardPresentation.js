@@ -22,6 +22,14 @@ function formatIsoDate(date) {
   return date.toISOString().slice(0, 10)
 }
 
+export const DASHBOARD_REPORTING_PERIODS = [
+  { value: 'last-7-days', label: 'Last 7 days' },
+  { value: 'last-30-days', label: 'Last 30 days' },
+  { value: 'last-6-months', label: 'Last 6 months' },
+  { value: 'last-12-months', label: 'Last 12 months' },
+  { value: 'custom', label: 'Custom range' },
+]
+
 function getAucklandCalendarDate(referenceDate) {
   const parts = new Intl.DateTimeFormat('en-CA', {
     year: 'numeric',
@@ -39,15 +47,73 @@ function getAucklandCalendarDate(referenceDate) {
   return new Date(Date.UTC(values.year, values.month - 1, values.day))
 }
 
-export function getDefaultDashboardDateRange(referenceDate = new Date()) {
+function subtractCalendarMonths(date, monthCount) {
+  const result = new Date(date)
+  const originalDay = result.getUTCDate()
+
+  result.setUTCDate(1)
+  result.setUTCMonth(result.getUTCMonth() - monthCount)
+  const daysInTargetMonth = new Date(
+    Date.UTC(result.getUTCFullYear(), result.getUTCMonth() + 1, 0),
+  ).getUTCDate()
+  result.setUTCDate(Math.min(originalDay, daysInTargetMonth))
+
+  return result
+}
+
+export function getDashboardDateRange(
+  period = 'last-30-days',
+  referenceDate = new Date(),
+) {
   const end = getAucklandCalendarDate(referenceDate)
   const start = new Date(end)
-  start.setUTCDate(start.getUTCDate() - 29)
+
+  if (period === 'last-7-days') {
+    start.setUTCDate(start.getUTCDate() - 6)
+  } else if (period === 'last-6-months') {
+    const sixMonthsAgo = subtractCalendarMonths(end, 6)
+    start.setTime(sixMonthsAgo.getTime())
+    start.setUTCDate(start.getUTCDate() + 1)
+  } else if (period === 'last-12-months') {
+    const twelveMonthsAgo = subtractCalendarMonths(end, 12)
+    start.setTime(twelveMonthsAgo.getTime())
+    start.setUTCDate(start.getUTCDate() + 1)
+  } else {
+    start.setUTCDate(start.getUTCDate() - 29)
+  }
 
   return {
     startDate: formatIsoDate(start),
     endDate: formatIsoDate(end),
   }
+}
+
+export function getDefaultDashboardDateRange(referenceDate = new Date()) {
+  return getDashboardDateRange('last-30-days', referenceDate)
+}
+
+export function getDashboardPeriodLabel(period) {
+  return (
+    DASHBOARD_REPORTING_PERIODS.find((option) => option.value === period)
+      ?.label ?? 'Reporting period'
+  )
+}
+
+function isIsoCalendarDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const date = new Date(`${value}T00:00:00Z`)
+  return !Number.isNaN(date.getTime()) && formatIsoDate(date) === value
+}
+
+export function getDashboardDateRangeError({ startDate, endDate }) {
+  if (!startDate || !endDate) return 'Choose both a start date and an end date.'
+  if (!isIsoCalendarDate(startDate) || !isIsoCalendarDate(endDate)) {
+    return 'Choose valid start and end dates.'
+  }
+  if (endDate < startDate) {
+    return 'End date cannot be earlier than the start date.'
+  }
+  return ''
 }
 
 export function formatDashboardDateRange({ startDate, endDate }) {
