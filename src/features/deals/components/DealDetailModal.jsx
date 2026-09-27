@@ -429,11 +429,6 @@ export default function DealDetailModal({
                       : 'Claim deal'}
           </button>
         </div>
-        {!isSaved && (
-          <p className="mt-2 text-xs text-[var(--text-muted)]">
-            You can keep up to 3 deals in your wallet at a time.
-          </p>
-        )}
       </div>
     </Modal>
   )
