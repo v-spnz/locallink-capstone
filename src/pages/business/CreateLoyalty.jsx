@@ -48,7 +48,7 @@ export default function CreateLoyalty() {
 
       {!loyalty.isLoading && loyalty.step === 'list' && (
         <>
-          <LoyaltyCustomerLookup />
+          <LoyaltyCustomerLookup onActivityRecorded={activity.loadActivity} />
           <LoyaltyDraftList
             programmes={loyalty.visibleProgrammes}
             programmeCounts={loyalty.programmeCounts}

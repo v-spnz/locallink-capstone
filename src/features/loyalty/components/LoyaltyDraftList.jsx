@@ -1,9 +1,7 @@
-import { useState } from 'react'
 import {
   ArrowRight,
   CalendarDays,
   CheckCircle2,
-  ChevronDown,
   ChevronRight,
   Copy,
   Gift,
@@ -13,11 +11,8 @@ import {
 import localBusinessNeighbourhood from '../../../assets/images/local-business-neighbourhood.jpg'
 import Button from '../../../components/ui/Button'
 import BusinessPageLoader from '../../../components/ui/BusinessPageLoader'
-import useBusiness from '../../../business/useBusiness'
-import { recordBusinessLoyaltyActivity } from '../api/businessLoyalty'
 import {
   getCustomerReward,
-  getEarningRules,
   getProgrammeAvailability,
   getProgrammeTypeLabel,
   getRewardTarget,
@@ -31,150 +26,6 @@ function formatUpdatedAt(value) {
     month: 'short',
     year: 'numeric',
   }).format(new Date(value))
-}
-
-function formatDate(value) {
-  if (!value) return ''
-  const [year, month, day] = value.split('-').map(Number)
-  return new Intl.DateTimeFormat('en-NZ', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(year, month - 1, day))
-}
-
-function DetailRow({ label, value }) {
-  return (
-    <div className="loyalty-detail-row">
-      <dt>{label}</dt>
-      <dd>{value || 'Not set'}</dd>
-    </div>
-  )
-}
-
-function RecordActivityForm({ programmeId }) {
-  const { business } = useBusiness()
-  const [customerLabel, setCustomerLabel] = useState('')
-  const [detail, setDetail] = useState('')
-  const [isSaving, setIsSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-
-  async function handleSubmit(event) {
-    event.preventDefault()
-    if (!customerLabel.trim()) {
-      setError('Enter a customer name or reference.')
-      return
-    }
-    setError('')
-    setSuccess('')
-    setIsSaving(true)
-    try {
-      await recordBusinessLoyaltyActivity({
-        businessId: business.id,
-        programmeId,
-        customerLabel,
-        detail,
-      })
-      setCustomerLabel('')
-      setDetail('')
-      setSuccess('Activity recorded.')
-    } catch {
-      setError(
-        'Unable to record this activity. The programme may no longer be accepting activity.',
-      )
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  return (
-    <form className="loyalty-record-activity" onSubmit={handleSubmit}>
-      <h4>Record customer activity</h4>
-      {error && (
-        <p className="field-error" role="alert">
-          {error}
-        </p>
-      )}
-      {success && <p className="loyalty-record-success">{success}</p>}
-      <div className="loyalty-record-activity-grid">
-        <label>
-          <span>Customer</span>
-          <input
-            type="text"
-            value={customerLabel}
-            onChange={(event) => setCustomerLabel(event.target.value)}
-            placeholder="Name, phone, or reference"
-            disabled={isSaving}
-          />
-        </label>
-        <label>
-          <span>Note (optional)</span>
-          <input
-            type="text"
-            value={detail}
-            onChange={(event) => setDetail(event.target.value)}
-            placeholder="e.g. Stamp 3 of 8"
-            disabled={isSaving}
-          />
-        </label>
-      </div>
-      <Button type="submit" disabled={isSaving}>
-        {isSaving ? 'Recording…' : 'Record activity'}
-      </Button>
-    </form>
-  )
-}
-
-function ProgrammeDetails({ id, programme, availability }) {
-  return (
-    <section
-      className="loyalty-programme-details"
-      id={id}
-      aria-label={`Details for ${programme.name || 'loyalty programme'}`}
-    >
-      <div className={`loyalty-availability-banner is-${availability.value}`}>
-        <strong>{availability.label}</strong>
-        <span>{availability.description}</span>
-      </div>
-      <dl className="loyalty-detail-rows">
-        <DetailRow
-          label="Programme type"
-          value={getProgrammeTypeLabel(programme.programmeType)}
-        />
-        <DetailRow
-          label="Reward target"
-          value={programme.rewardThreshold ? getRewardTarget(programme) : ''}
-        />
-        <DetailRow
-          label="Customer reward"
-          value={getCustomerReward(programme)}
-        />
-        <DetailRow
-          label="How customers earn"
-          value={getEarningRules(programme)}
-        />
-        <DetailRow label="Starts" value={formatDate(programme.startDate)} />
-        <DetailRow
-          label="Stops accepting activity"
-          value={
-            programme.endDate ? formatDate(programme.endDate) : 'No end date'
-          }
-        />
-        <DetailRow
-          label="Terms and conditions"
-          value={programme.terms || 'No additional terms'}
-        />
-      </dl>
-      {availability.value === 'active' && (
-        <RecordActivityForm programmeId={programme.id} />
-      )}
-    </section>
-  )
-}
-
-function getStatusLabel(status) {
-  return status === 'published' ? 'Published' : 'Draft'
 }
 
 function getAvailabilityLabel(programme) {
@@ -203,7 +54,6 @@ export default function LoyaltyDraftList({
   onEdit,
 }) {
   const totalProgrammes = programmeCounts.draft + programmeCounts.published
-  const [selectedId, setSelectedId] = useState(null)
 
   function handleTabKeyDown(event, currentIndex) {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
@@ -316,99 +166,6 @@ export default function LoyaltyDraftList({
           id="loyalty-programme-panel"
           role="tabpanel"
         >
-          {programmes.map((programme) => {
-            const availability = getProgrammeAvailability(programme)
-            const isSelected = selectedId === programme.id
-            const detailsId = `loyalty-details-${programme.id}`
-
-            return (
-              <article
-                className={`loyalty-draft-card${isSelected ? ' is-expanded' : ''}`}
-                key={programme.id}
-              >
-                <div className="loyalty-draft-card-heading">
-                  <span
-                    className={`loyalty-draft-status is-${availability.value}`}
-                  >
-                    {availability.value !== 'draft' ? (
-                      <CheckCircle2 aria-hidden="true" />
-                    ) : (
-                      <LockKeyhole aria-hidden="true" />
-                    )}
-                    {availability.label}
-                  </span>
-                  <span>Updated {formatUpdatedAt(programme.updatedAt)}</span>
-                </div>
-                <div className="loyalty-draft-card-copy">
-                  <small>
-                    {getProgrammeTypeLabel(programme.programmeType)}
-                  </small>
-                  <h3>{programme.name || 'Untitled loyalty programme'}</h3>
-                  <p>
-                    {getCustomerReward(programme) ||
-                      'Add the reward customers can work towards.'}
-                  </p>
-                </div>
-                <dl className="loyalty-draft-summary">
-                  <div>
-                    <dt>Target</dt>
-                    <dd>
-                      {programme.rewardThreshold
-                        ? getRewardTarget(programme)
-                        : 'Not set'}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Availability</dt>
-                    <dd>{getAvailabilityLabel(programme)}</dd>
-                  </div>
-                  <div>
-                    <dt>Visibility</dt>
-                    <dd>
-                      {availability.value === 'active'
-                        ? 'Visible to customers'
-                        : availability.value === 'scheduled'
-                          ? 'Visible from start date'
-                          : availability.value === 'expired'
-                            ? 'No longer visible'
-                            : 'Private'}
-                    </dd>
-                  </div>
-                </dl>
-                <div className="loyalty-card-actions">
-                  <Button
-                    variant="secondary"
-                    className="loyalty-card-toggle"
-                    aria-expanded={isSelected}
-                    aria-controls={detailsId}
-                    onClick={() =>
-                      setSelectedId(isSelected ? null : programme.id)
-                    }
-                  >
-                    {isSelected ? 'Hide details' : 'View details'}
-                    <ChevronDown aria-hidden="true" />
-                  </Button>
-                  {programme.status === 'draft' && (
-                    <Button
-                      variant="secondary"
-                      className="loyalty-edit-draft"
-                      onClick={() => onEdit(programme.id)}
-                    >
-                      <PencilLine aria-hidden="true" />
-                      Continue editing
-                    </Button>
-                  )}
-                </div>
-                {isSelected && (
-                  <ProgrammeDetails
-                    id={detailsId}
-                    programme={programme}
-                    availability={availability}
-                  />
-                )}
-              </article>
-            )
-          })}
           <div className="deal-table-heading" aria-hidden="true">
             <span />
             <span>Programme</span>
@@ -418,6 +175,7 @@ export default function LoyaltyDraftList({
           </div>
           <div className="deal-card-list">
             {programmes.map((programme) => {
+              const availability = getProgrammeAvailability(programme)
               const isDraft = programme.status === 'draft'
               const Row = isDraft ? 'button' : 'div'
 
@@ -463,8 +221,8 @@ export default function LoyaltyDraftList({
                     </span>
 
                     <span className="deal-card-timing">
-                      <span className={`deal-status is-${programme.status}`}>
-                        {getStatusLabel(programme.status)}
+                      <span className={`deal-status is-${availability.value}`}>
+                        {availability.label}
                       </span>
                       <span className="deal-card-expiry">
                         <CalendarDays aria-hidden="true" />
@@ -482,7 +240,7 @@ export default function LoyaltyDraftList({
                             event.stopPropagation()
                             navigator.clipboard?.writeText(programme.joinCode)
                           }}
-                          title="Copy join code — give this to customers so they can join"
+                          title="Copy customer join code"
                         >
                           <Copy aria-hidden="true" />
                           {programme.joinCode}
@@ -491,7 +249,7 @@ export default function LoyaltyDraftList({
                     </span>
 
                     <span className="deal-card-disclosure" aria-hidden="true">
-                      <span>{isDraft ? 'Edit' : 'Published'}</span>
+                      <span>{isDraft ? 'Edit' : availability.label}</span>
                       {isDraft ? <ChevronRight /> : <CheckCircle2 />}
                     </span>
                   </Row>

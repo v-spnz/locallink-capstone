@@ -70,21 +70,24 @@ export default function LoyaltyActivityFeed({
       {!isLoading &&
         activity.map((item) => (
           <div className="loyalty-activity-row" key={item.id}>
-            <span className={`loyalty-activity-badge is-${item.type}`}>
-              {item.type === 'redeem' ? (
+            <span
+              className={`loyalty-activity-badge is-${item.type === 'reward_redeemed' ? 'redeem' : 'earn'}`}
+            >
+              {item.type === 'reward_redeemed' ? (
                 <Gift size={14} aria-hidden="true" />
               ) : (
                 <Sparkles size={14} aria-hidden="true" />
               )}
-              {item.type === 'redeem' ? 'Redeemed' : 'Earned'}
+              {item.type === 'reward_redeemed'
+                ? 'Redeemed'
+                : item.type === 'reward_earned'
+                  ? 'Reward earned'
+                  : 'Progress added'}
             </span>
             <div className="loyalty-activity-main">
               <p className="loyalty-activity-programme">{item.programmeName}</p>
               <p className="loyalty-activity-detail">
-                {item.detail ||
-                  (item.type === 'redeem'
-                    ? 'Reward redeemed'
-                    : 'Activity recorded')}
+                {item.detail}
                 {' · '}
                 {item.customerLabel}
               </p>

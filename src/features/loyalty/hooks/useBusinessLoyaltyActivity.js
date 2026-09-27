@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import useBusiness from '../../../business/useBusiness'
-import {
-  fetchBusinessLoyaltyActivity,
-  subscribeToBusinessLoyaltyActivity,
-} from '../api/loyaltyActivityApi'
+import { fetchBusinessLoyaltyActivity } from '../api/loyaltyActivityApi'
 
 export default function useBusinessLoyaltyActivity() {
   const { business } = useBusiness()
@@ -11,7 +8,7 @@ export default function useBusinessLoyaltyActivity() {
   const [isLoading, setIsLoading] = useState(true)
   const [requestError, setRequestError] = useState('')
 
-    const loadActivity = useCallback(async () => {
+  const loadActivity = useCallback(async () => {
     if (!business.id) {
       setIsLoading(false)
       return
@@ -54,17 +51,6 @@ export default function useBusinessLoyaltyActivity() {
     return () => {
       cancelled = true
     }
-  }, [business.id])
-
-  useEffect(() => {
-    if (!business.id) return undefined
-    const unsubscribe = subscribeToBusinessLoyaltyActivity(
-      business.id,
-      (newRecord) => {
-        setActivity((current) => [newRecord, ...current])
-      },
-    )
-    return unsubscribe
   }, [business.id])
 
   return {

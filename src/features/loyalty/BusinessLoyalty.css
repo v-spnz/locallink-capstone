@@ -1482,62 +1482,6 @@ body.business-surface .loyalty-input-with-prefix .form-input {
   }
 }
 
-.loyalty-record-activity {
-  margin-top: 4px;
-  padding: 16px;
-  border: 1px solid var(--business-border);
-  border-radius: 10px;
-  display: grid;
-  gap: 10px;
-  background: var(--business-surface-soft);
-}
-
-.loyalty-record-activity h4 {
-  margin: 0;
-  color: var(--business-ink);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.loyalty-record-activity-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.loyalty-record-activity label {
-  display: grid;
-  gap: 5px;
-}
-
-.loyalty-record-activity label > span {
-  color: var(--business-muted);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.loyalty-record-activity input {
-  padding: 9px 11px;
-  border: 1px solid var(--business-border);
-  border-radius: 8px;
-  font: inherit;
-  font-size: 13px;
-}
-
-.loyalty-record-success {
-  margin: 0;
-  color: #087f5b;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-@media (max-width: 760px) {
-  .loyalty-record-activity-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 .loyalty-input-with-prefix {
   position: relative;
 }
