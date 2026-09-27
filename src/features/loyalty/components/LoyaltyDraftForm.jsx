@@ -1,12 +1,12 @@
 import {
   ArrowLeft,
   CalendarDays,
-  Check,
-  ChevronRight,
   CircleDollarSign,
   Gift,
   LockKeyhole,
   QrCode,
+  Save,
+  Send,
   Stamp,
 } from 'lucide-react'
 import Button from '../../../components/ui/Button'
@@ -17,7 +17,9 @@ import DiscountPercentageCombobox from './DiscountPercentageCombobox'
 import {
   getCustomerReward,
   getEarningRules,
+  getProgrammeAvailability,
   getProgrammeTypeLabel,
+  getRewardTarget,
   LOYALTY_REDEMPTION_METHOD,
   LOYALTY_TEMPLATES,
 } from '../businessLoyaltyTemplates'
@@ -57,7 +59,11 @@ function FormField({
         )}
       </label>
       <div className={prefix ? 'loyalty-input-with-prefix' : undefined}>
-        {prefix && <span aria-hidden="true">{prefix}</span>}
+        {prefix && (
+          <span className="loyalty-input-prefix" aria-hidden="true">
+            {prefix}
+          </span>
+        )}
         <input
           {...inputProps}
           aria-describedby={descriptionIds || undefined}
@@ -139,62 +145,36 @@ export default function LoyaltyDraftForm({
   onReview,
   onSaveDraft,
 }) {
-  const rewardIsComplete = Boolean(
-    programme.rewardThreshold &&
-    (programme.programmeType === 'stamp_card' ||
-      (programme.programmeType === 'spend_and_save' && programme.rewardValue) ||
-      (programme.programmeType === 'spend_and_reward' &&
-        programme.rewardDescription)),
-  )
-  const sectionProgress = [
-    {
-      id: 'loyalty-basics-section',
-      label: 'Programme basics',
-      icon: Gift,
-      isComplete: Boolean(programme.name && programme.programmeType),
-    },
-    {
-      id: 'loyalty-reward-section',
-      label: 'Reward and earning',
-      icon: Stamp,
-      isComplete: rewardIsComplete,
-    },
-    {
-      id: 'loyalty-availability-section',
-      label: 'Availability',
-      icon: CalendarDays,
-      isComplete: Boolean(programme.startDate),
-    },
-    {
-      id: 'loyalty-check-in-section',
-      label: 'Customer check-in',
-      icon: QrCode,
-      isComplete: true,
-    },
-  ]
-  const completedSections = sectionProgress.filter(
-    (section) => section.isComplete,
-  ).length
+  const filledFields = [
+    programme.name,
+    programme.programmeType,
+    programme.rewardThreshold,
+    programme.programmeType === 'spend_and_save'
+      ? programme.rewardValue
+      : programme.programmeType === 'spend_and_reward'
+        ? programme.rewardDescription
+        : programme.programmeType === 'stamp_card',
+    programme.startDate,
+  ].filter(Boolean).length
+  const availabilityOnPublish = programme.startDate
+    ? getProgrammeAvailability({ ...programme, status: 'published' })
+    : null
 
   return (
     <form
       className="deal-form loyalty-draft-form"
-      onSubmit={onReview}
+      onSubmit={onSaveDraft}
       noValidate
     >
-      <div className="deal-form-toolbar">
-        <Button variant="secondary" className="deal-back" onClick={onBack}>
+      <div className="loyalty-form-toolbar">
+        <Button variant="secondary" onClick={onBack}>
           <ArrowLeft aria-hidden="true" />
           Back to programmes
         </Button>
-        <span className="deal-draft-state">
+        <span className="loyalty-private-state">
           <LockKeyhole aria-hidden="true" />
           Private draft
         </span>
-      </div>
-
-      <div className="deal-form-heading">
-        <h2>Draft your loyalty programme</h2>
       </div>
 
       {requestError && (
@@ -212,91 +192,15 @@ export default function LoyaltyDraftForm({
         </div>
       )}
 
-      <div className="deal-form-workspace">
-        <aside
-          className="deal-draft-rail"
-          aria-label="Loyalty programme draft overview"
-        >
-          <div
-            className={`deal-draft-progress is-progress-${completedSections}`}
-            aria-live="polite"
-          >
-            <span>{completedSections} of 4</span>
-            <div>
-              <strong>Sections filled</strong>
-              <small>
-                {completedSections === 4
-                  ? 'All required details are in place'
-                  : 'Your draft saves whenever you choose'}
-              </small>
-            </div>
-          </div>
-
-          <nav className="deal-draft-nav" aria-label="Programme sections">
-            {sectionProgress.map((section) => {
-              const Icon = section.icon
-              return (
-                <a
-                  href={`#${section.id}`}
-                  key={section.id}
-                  aria-label={`${section.label}, ${section.isComplete ? 'filled' : 'not filled'}`}
-                  className={section.isComplete ? 'is-complete' : ''}
-                >
-                  <span className="deal-draft-nav-icon" aria-hidden="true">
-                    {section.isComplete ? <Check /> : <Icon />}
-                  </span>
-                  <span>{section.label}</span>
-                  <ChevronRight aria-hidden="true" />
-                </a>
-              )
-            })}
-          </nav>
-
-          <article className="deal-live-preview" aria-label="Customer Preview">
-            <div className="deal-live-preview-heading">
-              <strong>Customer Preview</strong>
-            </div>
-            <div className="deal-live-preview-media loyalty-live-preview-media">
-              <div className="deal-live-preview-placeholder">
-                <Gift aria-hidden="true" />
-                <span>Your loyalty programme</span>
-              </div>
-            </div>
-            <div className="deal-live-preview-body">
-              <span className="deal-live-preview-category">
-                {getProgrammeTypeLabel(programme.programmeType)}
-              </span>
-              <h3>{programme.name || 'Your programme name'}</h3>
-              <strong className="deal-live-preview-offer">
-                {getCustomerReward(programme) || 'Your reward will appear here'}
-              </strong>
-              <div className="deal-live-preview-detail">
-                <Stamp aria-hidden="true" />
-                <span>
-                  {getEarningRules(programme) ||
-                    'Earning rules will appear here'}
-                </span>
-              </div>
-              <div className="deal-live-preview-detail">
-                <CalendarDays aria-hidden="true" />
-                <span>{formatAvailability(programme)}</span>
-              </div>
-            </div>
-          </article>
-        </aside>
-
-        <div className="deal-form-content">
-          <section
-            className="deal-form-section"
-            id="loyalty-basics-section"
-            aria-labelledby="loyalty-basics-title"
-          >
-            <div className="deal-form-section-heading">
+      <div className="deal-form-workspace loyalty-form-layout">
+        <div className="loyalty-form-fields">
+          <section aria-labelledby="loyalty-basics-title">
+            <div className="loyalty-form-section-heading">
               <span aria-hidden="true">
                 <Gift />
               </span>
               <div>
-                <h3 id="loyalty-basics-title">Programme basics</h3>
+                <h2 id="loyalty-basics-title">Programme basics</h2>
                 <p>You can save before every detail is complete.</p>
               </div>
             </div>
@@ -353,17 +257,13 @@ export default function LoyaltyDraftForm({
             </fieldset>
           </section>
 
-          <section
-            className="deal-form-section"
-            id="loyalty-reward-section"
-            aria-labelledby="loyalty-reward-title"
-          >
-            <div className="deal-form-section-heading">
+          <section aria-labelledby="loyalty-reward-title">
+            <div className="loyalty-form-section-heading">
               <span aria-hidden="true">
                 <Stamp />
               </span>
               <div>
-                <h3 id="loyalty-reward-title">Reward and earning rules</h3>
+                <h2 id="loyalty-reward-title">Reward and earning rules</h2>
                 <p>Choose a target and the reward customers receive.</p>
               </div>
             </div>
@@ -382,10 +282,7 @@ export default function LoyaltyDraftForm({
                 placeholder="e.g. 8"
                 inputMode="decimal"
                 prefix={
-                  programme.programmeType &&
-                  programme.programmeType !== 'stamp_card'
-                    ? '$'
-                    : undefined
+                  programme.programmeType !== 'stamp_card' ? '$' : undefined
                 }
                 value={programme.rewardThreshold}
                 error={errors.rewardThreshold}
@@ -434,17 +331,13 @@ export default function LoyaltyDraftForm({
             />
           </section>
 
-          <section
-            className="deal-form-section"
-            id="loyalty-availability-section"
-            aria-labelledby="loyalty-availability-title"
-          >
-            <div className="deal-form-section-heading">
+          <section aria-labelledby="loyalty-availability-title">
+            <div className="loyalty-form-section-heading">
               <span aria-hidden="true">
                 <CalendarDays />
               </span>
               <div>
-                <h3 id="loyalty-availability-title">Availability</h3>
+                <h2 id="loyalty-availability-title">Availability</h2>
                 <p>Choose when customers can use the programme.</p>
               </div>
             </div>
@@ -467,12 +360,8 @@ export default function LoyaltyDraftForm({
             />
           </section>
 
-          <section
-            className="deal-form-section"
-            id="loyalty-check-in-section"
-            aria-labelledby="loyalty-check-in-title"
-          >
-            <div className="deal-form-section-heading">
+          <section aria-labelledby="loyalty-check-in-title">
+            <div className="loyalty-form-section-heading">
               <span aria-hidden="true">
                 <QrCode />
               </span>
@@ -489,19 +378,72 @@ export default function LoyaltyDraftForm({
             </RedemptionMethodField>
           </section>
         </div>
+
+        <aside
+          className="deal-draft-rail loyalty-draft-preview deal-live-preview"
+          aria-label="Draft summary"
+        >
+          <div className="deal-live-preview-heading">
+            <strong>Customer Preview</strong>
+          </div>
+          <div className="loyalty-preview-heading">
+            <span>
+              <LockKeyhole aria-hidden="true" />
+              Draft summary
+            </span>
+            <strong>{filledFields} of 5 details added</strong>
+          </div>
+          <div className="loyalty-preview-programme">
+            <span className="loyalty-preview-icon" aria-hidden="true">
+              <Gift />
+            </span>
+            <small>{getProgrammeTypeLabel(programme.programmeType)}</small>
+            <h3>{programme.name || 'Untitled programme'}</h3>
+            <p>{getRewardTarget(programme)}</p>
+          </div>
+          <div className="loyalty-preview-reward">
+            <span>Customer reward</span>
+            <strong>
+              {getCustomerReward(programme) || 'Add the reward details'}
+            </strong>
+          </div>
+          <p className="loyalty-field-helper">
+            {getEarningRules(programme) ||
+              'Complete the template details to preview the rules.'}
+          </p>
+          <p className="loyalty-preview-availability">
+            <CalendarDays aria-hidden="true" />
+            {formatAvailability(programme)}
+          </p>
+          {availabilityOnPublish && (
+            <p className="loyalty-preview-note">
+              Once published: <strong>{availabilityOnPublish.label}</strong>.{' '}
+              {availabilityOnPublish.description}
+            </p>
+          )}
+          <p className="loyalty-preview-note">
+            Customers cannot see or use this programme while it is a draft.
+          </p>
+        </aside>
       </div>
 
-      <div className="deal-form-actions">
-        <span className="deal-form-actions-note">
-          <LockKeyhole aria-hidden="true" />
-          Customers cannot see or use this programme while it is a draft.
-        </span>
-        <div>
-          <Button variant="secondary" onClick={onSaveDraft} disabled={isSaving}>
-            {isSaving ? 'Saving…' : 'Save draft'}
+      <div className="loyalty-form-actions">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onBack}
+          disabled={isSaving}
+        >
+          Cancel
+        </Button>
+        <div className="loyalty-form-primary-actions">
+          <Button variant="secondary" type="submit" disabled={isSaving}>
+            <Save aria-hidden="true" />
+            {isSaving ? 'Saving...' : 'Save draft'}
           </Button>
-          <Button type="submit" disabled={isSaving}>
+          <Button type="button" onClick={onReview} disabled={isSaving}>
             Review and publish
+            <Send aria-hidden="true" />
           </Button>
         </div>
       </div>

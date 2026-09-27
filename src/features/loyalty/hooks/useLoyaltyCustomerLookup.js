@@ -11,7 +11,7 @@ import {
   normaliseLoyaltyLookupCode,
 } from '../loyaltyIdentifier'
 
-export default function useLoyaltyCustomerLookup() {
+export default function useLoyaltyCustomerLookup(onActivityRecorded) {
   const { business } = useBusiness()
   const [identifier, setIdentifier] = useState('')
   const [record, setRecord] = useState(null)
@@ -89,6 +89,7 @@ export default function useLoyaltyCustomerLookup() {
       const updated = await addLoyaltyProgress(record.id, amount)
       setRecord(updated)
       setStampSuccess(true)
+      void onActivityRecorded?.()
       return true
     } catch (stampErr) {
       console.error('Unable to add loyalty progress.', stampErr)
@@ -108,6 +109,7 @@ export default function useLoyaltyCustomerLookup() {
       const updated = await redeemLoyaltyReward(record.id)
       setRecord(updated)
       setRedeemSuccess(true)
+      void onActivityRecorded?.()
       return true
     } catch (redeemErr) {
       console.error('Unable to redeem loyalty reward.', redeemErr)

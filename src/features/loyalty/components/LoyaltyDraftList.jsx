@@ -13,6 +13,7 @@ import Button from '../../../components/ui/Button'
 import BusinessPageLoader from '../../../components/ui/BusinessPageLoader'
 import {
   getCustomerReward,
+  getProgrammeAvailability,
   getProgrammeTypeLabel,
   getRewardTarget,
 } from '../businessLoyaltyTemplates'
@@ -25,13 +26,6 @@ function formatUpdatedAt(value) {
     month: 'short',
     year: 'numeric',
   }).format(new Date(value))
-}
-
-function getStatusLabel(status) {
-  if (status === 'scheduled') return 'Scheduled'
-  if (status === 'active') return 'Active'
-  if (status === 'expired') return 'Expired'
-  return 'Draft'
 }
 
 function getAvailabilityLabel(programme) {
@@ -118,7 +112,7 @@ export default function LoyaltyDraftList({
         </div>
       </div>
 
-      {totalProgrammes === 0 && activeStatus === 'draft' ? (
+      {totalProgrammes === 0 ? (
         <div
           aria-labelledby={`loyalty-${activeStatus}-tab`}
           className="loyalty-draft-empty"
@@ -181,6 +175,7 @@ export default function LoyaltyDraftList({
           </div>
           <div className="deal-card-list">
             {programmes.map((programme) => {
+              const availability = getProgrammeAvailability(programme)
               const isDraft = programme.status === 'draft'
               const Row = isDraft ? 'button' : 'div'
 
@@ -226,8 +221,8 @@ export default function LoyaltyDraftList({
                     </span>
 
                     <span className="deal-card-timing">
-                      <span className={`deal-status is-${programme.status}`}>
-                        {getStatusLabel(programme.status)}
+                      <span className={`deal-status is-${availability.value}`}>
+                        {availability.label}
                       </span>
                       <span className="deal-card-expiry">
                         <CalendarDays aria-hidden="true" />
@@ -245,7 +240,7 @@ export default function LoyaltyDraftList({
                             event.stopPropagation()
                             navigator.clipboard?.writeText(programme.joinCode)
                           }}
-                          title="Copy join code — give this to customers so they can join"
+                          title="Copy customer join code"
                         >
                           <Copy aria-hidden="true" />
                           {programme.joinCode}
@@ -254,7 +249,7 @@ export default function LoyaltyDraftList({
                     </span>
 
                     <span className="deal-card-disclosure" aria-hidden="true">
-                      <span>{isDraft ? 'Edit' : 'Published'}</span>
+                      <span>{isDraft ? 'Edit' : availability.label}</span>
                       {isDraft ? <ChevronRight /> : <CheckCircle2 />}
                     </span>
                   </Row>

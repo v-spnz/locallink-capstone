@@ -46,12 +46,9 @@ function LoyaltyRecord({
 }) {
   const progress = getLoyaltyProgressPresentation(record)
   const eligibilityLabel = getLoyaltyEligibilityLabel(record)
-  // Fixed: this previously checked for 'points', a value that no longer
-  // exists — the app uses stamp_card/spend_and_save/spend_and_reward, so
-  // every dollar-based programme was silently always treated as a stamp
-  // card, always adding a flat 1 instead of a dollar amount.
-  const isPoints = record.programmeType !== 'stamp_card'
-  const [pointsAmount, setPointsAmount] = useState('1')
+  const isProgrammeActive = record.programmeStatus === 'active'
+  const isSpendProgramme = record.programmeType !== 'stamp_card'
+  const [spendAmount, setSpendAmount] = useState('1')
 
   return (
     <article
@@ -136,7 +133,13 @@ function LoyaltyRecord({
       </dl>
 
       <section className="loyalty-customer-add-progress">
-        {record.rewardEligible && (
+        {!isProgrammeActive && (
+          <p className="auth-error loyalty-stamp-error" role="status">
+            This programme is not active. Progress and rewards cannot be
+            recorded.
+          </p>
+        )}
+        {isProgrammeActive && record.rewardEligible && (
           <>
             <Button
               variant="success"
@@ -160,28 +163,33 @@ function LoyaltyRecord({
           </>
         )}
 
-        {isPoints ? (
+        {isSpendProgramme ? (
           <div className="loyalty-customer-points-row">
-            <label htmlFor="loyalty-points-amount">Points to add</label>
+            <label htmlFor="loyalty-spend-amount">Purchase amount</label>
             <input
-              id="loyalty-points-amount"
+              id="loyalty-spend-amount"
               type="number"
-              min="1"
-              step="1"
-              value={pointsAmount}
-              onChange={(event) => setPointsAmount(event.target.value)}
-              disabled={isAddingStamp}
+              min="0.01"
+              step="0.01"
+              value={spendAmount}
+              onChange={(event) => setSpendAmount(event.target.value)}
+              disabled={!isProgrammeActive || isAddingStamp}
             />
             <Button
-              onClick={() => onAddStamp(Number(pointsAmount) || 1)}
-              disabled={isAddingStamp || !Number(pointsAmount)}
+              onClick={() => onAddStamp(Number(spendAmount) || 1)}
+              disabled={
+                !isProgrammeActive || isAddingStamp || Number(spendAmount) <= 0
+              }
             >
               <PlusCircle aria-hidden="true" />
-              {isAddingStamp ? 'Adding…' : 'Add points'}
+              {isAddingStamp ? 'Adding…' : 'Add purchase'}
             </Button>
           </div>
         ) : (
-          <Button onClick={() => onAddStamp(1)} disabled={isAddingStamp}>
+          <Button
+            onClick={() => onAddStamp(1)}
+            disabled={!isProgrammeActive || isAddingStamp}
+          >
             <PlusCircle aria-hidden="true" />
             {isAddingStamp ? 'Adding…' : 'Add stamp'}
           </Button>
@@ -193,7 +201,7 @@ function LoyaltyRecord({
         )}
         {stampSuccess && !stampError && (
           <p className="loyalty-stamp-success" role="status">
-            {isPoints ? 'Points added.' : 'Stamp added.'}
+            {isSpendProgramme ? 'Purchase added.' : 'Stamp added.'}
           </p>
         )}
       </section>
@@ -201,9 +209,9 @@ function LoyaltyRecord({
   )
 }
 
-export default function LoyaltyCustomerLookup() {
+export default function LoyaltyCustomerLookup({ onActivityRecorded }) {
   const [searchParams] = useSearchParams()
-  const lookup = useLoyaltyCustomerLookup()
+  const lookup = useLoyaltyCustomerLookup(onActivityRecorded)
   const [isScannerOpen, setIsScannerOpen] = useState(
     () => searchParams.get('identify') === 'scan',
   )

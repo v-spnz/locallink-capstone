@@ -94,7 +94,10 @@ export async function saveBusinessLoyaltyProgramme({
     },
   )
 
-  if (saveError) throw saveError
+  if (saveError) {
+    console.error('save_business_loyalty_programme failed:', saveError)
+    throw saveError
+  }
 
   const { data, error } = await supabase
     .from('business_loyalty_programmes')
