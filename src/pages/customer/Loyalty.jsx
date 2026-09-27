@@ -15,10 +15,9 @@ import useJoinLoyaltyProgramme from '../../features/loyalty/hooks/useJoinLoyalty
 import useLoyaltyDiscovery from '../../features/loyalty/hooks/useLoyaltyDiscovery'
 import useLoyaltyPrograms from '../../features/loyalty/hooks/useLoyaltyPrograms'
 import '../../features/loyalty/Loyalty.css'
-import '../../features/service-marketplace/ServiceMarketplace.css'
 
 export default function Loyalty() {
-  const [activeTab, setActiveTab] = useState('discover')
+const [activeTab, setActiveTab] = useState('cards')
   const discovery = useLoyaltyDiscovery()
   const loyalty = useLoyaltyPrograms()
   const { reload: reloadLoyaltyPrograms } = loyalty
@@ -85,38 +84,38 @@ export default function Loyalty() {
         <p>Track your rewards and show your loyalty QR when you visit.</p>
       </div>
 
-      <div className="sm-tabs" role="tablist" aria-label="Loyalty">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'discover'}
-          className={activeTab === 'discover' ? 'active' : ''}
-          onClick={() => setActiveTab('discover')}
-        >
-          <Search aria-hidden="true" />
-          Discover
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'cards'}
-          className={activeTab === 'cards' ? 'active' : ''}
-          onClick={() => setActiveTab('cards')}
-        >
-          <Award aria-hidden="true" />
-          Your Loyalty Cards
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'past'}
-          className={activeTab === 'past' ? 'active' : ''}
-          onClick={() => setActiveTab('past')}
-        >
-          <BadgeCheck aria-hidden="true" />
-          Completed
-        </button>
-      </div>
+    <div className="ly-tabs" role="tablist" aria-label="Loyalty">
+      <button
+        type="button"
+        role="tab"
+        aria-selected={activeTab === 'discover'}
+        className={`ly-tab${activeTab === 'discover' ? ' ly-tab--active' : ''}`}
+        onClick={() => setActiveTab('discover')}
+      >
+        <Search aria-hidden="true" />
+        Discover
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={activeTab === 'cards'}
+        className={`ly-tab${activeTab === 'cards' ? ' ly-tab--active' : ''}`}
+        onClick={() => setActiveTab('cards')}
+      >
+        <Award aria-hidden="true" />
+        Your Loyalty Cards
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={activeTab === 'past'}
+        className={`ly-tab${activeTab === 'past' ? ' ly-tab--active' : ''}`}
+        onClick={() => setActiveTab('past')}
+      >
+        <BadgeCheck aria-hidden="true" />
+        Completed
+      </button>
+    </div>
 
       {activeTab === 'discover' && (
         <>
