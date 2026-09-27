@@ -1,0 +1,332 @@
+.account-settings-shell {
+  display: grid;
+  grid-template-columns: 264px minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.account-settings-sidebar {
+  position: sticky;
+  top: 96px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.account-settings-sidebar nav {
+  padding: 4px 0 17px;
+}
+
+.account-settings-sidebar nav > p {
+  margin: 0 8px 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.account-settings-nav-list {
+  display: grid;
+  gap: 3px;
+}
+
+.account-settings-nav-list a {
+  min-height: 44px;
+  padding: 10px 10px;
+  border-radius: 9px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.account-settings-nav-list a > svg:first-child {
+  width: 17px;
+  height: 17px;
+}
+
+.account-settings-nav-list a > svg:last-child {
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+  opacity: 0;
+  transform: translateX(-3px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.account-settings-nav-list a:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.account-settings-nav-list a:hover > svg:last-child,
+.account-settings-nav-list a.is-active > svg:last-child {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.account-settings-nav-list a.is-active {
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.account-settings-content {
+  min-width: 0;
+  min-height: 480px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.account-settings-section {
+  min-width: 0;
+  padding: 34px 38px 40px;
+}
+
+.account-settings-section-heading {
+  margin-bottom: 26px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.account-settings-section-heading > span {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.account-settings-section-heading > span svg {
+  width: 18px;
+  height: 18px;
+}
+
+.account-settings-section-heading h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 24px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.account-settings-detail-list {
+  margin: 0;
+}
+
+.account-settings-detail-list > div {
+  min-width: 0;
+  padding: 18px 0;
+  display: grid;
+  grid-template-columns: minmax(150px, 0.36fr) minmax(0, 0.64fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.account-settings-detail-list > div + div {
+  border-top: 1px solid var(--border);
+}
+
+.account-settings-detail-list dt,
+.account-settings-detail-list dd {
+  margin: 0;
+}
+
+.account-settings-detail-list dt {
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.account-settings-detail-list dd {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.account-settings-callout {
+  max-width: 650px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 11px;
+  background: var(--blue-light);
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.account-settings-callout svg {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  color: var(--blue);
+}
+
+.account-settings-callout strong {
+  margin-bottom: 3px;
+  display: block;
+  color: var(--text);
+}
+
+.account-settings-actions {
+  margin-top: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.account-settings-empty {
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.account-history-list {
+  max-height: 390px;
+  padding-right: 4px;
+  display: grid;
+  gap: 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.account-history-row {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.account-history-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.account-history-icon.is-job {
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.account-history-icon.is-deal {
+  background: var(--purple-light, var(--blue-light));
+  color: var(--purple, var(--blue));
+}
+
+.account-history-icon.is-loyalty {
+  background: var(--emerald-light);
+  color: var(--emerald);
+}
+
+.account-history-text {
+  min-width: 0;
+}
+
+.account-history-title {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-history-sub {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.account-history-date {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .account-settings-shell {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .account-settings-sidebar {
+    position: static;
+    padding: 13px;
+  }
+
+  .account-settings-sidebar nav {
+    padding: 13px 0 0;
+  }
+
+  .account-settings-sidebar nav > p {
+    display: none;
+  }
+
+  .account-settings-nav-list {
+    margin-inline: -3px;
+    padding: 3px;
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+  }
+
+  .account-settings-nav-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .account-settings-nav-list a {
+    min-width: max-content;
+    min-height: 40px;
+    padding: 9px 11px;
+    display: inline-flex;
+  }
+
+  .account-settings-nav-list a > svg:last-child {
+    display: none;
+  }
+
+  .account-settings-section {
+    padding: 24px 20px 30px;
+  }
+
+  .account-history-row {
+    grid-template-columns: auto 1fr;
+  }
+
+  .account-history-date {
+    grid-column: 2;
+  }
+}

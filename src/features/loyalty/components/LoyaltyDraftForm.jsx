@@ -161,7 +161,11 @@ export default function LoyaltyDraftForm({
     : null
 
   return (
-    <form className="deal-form loyalty-draft-form" onSubmit={onSaveDraft} noValidate>
+    <form
+      className="deal-form loyalty-draft-form"
+      onSubmit={onSaveDraft}
+      noValidate
+    >
       <div className="loyalty-form-toolbar">
         <Button variant="secondary" onClick={onBack}>
           <ArrowLeft aria-hidden="true" />
@@ -347,7 +351,7 @@ export default function LoyaltyDraftForm({
               endDate={programme.endDate}
               startError={errors.startDate}
               endError={errors.endDate}
-                            onChange={(range) => {
+              onChange={(range) => {
                 onChange('startDate', range.startDate)
                 onChange('endDate', range.endDate)
               }}
@@ -375,7 +379,10 @@ export default function LoyaltyDraftForm({
           </section>
         </div>
 
-        <aside className="deal-draft-rail loyalty-draft-preview deal-live-preview" aria-label="Draft summary">
+        <aside
+          className="deal-draft-rail loyalty-draft-preview deal-live-preview"
+          aria-label="Draft summary"
+        >
           <div className="deal-live-preview-heading">
             <strong>Customer Preview</strong>
           </div>
