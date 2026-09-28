@@ -1,7 +1,3 @@
--- Reassert the ordered job workflow after accepting a quote. The hosted
--- database drifted back to the legacy implementation, which moved a newly
--- accepted job directly from Open to In progress and skipped the first three
--- visible timeline stages.
 create or replace function public.respond_to_job_quote(
   p_quote_id uuid,
   p_accept boolean

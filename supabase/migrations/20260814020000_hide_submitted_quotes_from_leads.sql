@@ -1,5 +1,3 @@
--- Once a provider has submitted a quote, track it under Quotes instead of
--- continuing to present the request as a Job Lead.
 
 create or replace function public.get_business_job_leads(p_business_id uuid)
 returns table (

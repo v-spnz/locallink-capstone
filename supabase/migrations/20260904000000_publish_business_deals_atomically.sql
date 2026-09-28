@@ -1,5 +1,3 @@
--- US0091: save the deal, its location, and its publication state in one
--- transaction so a failed publication cannot leave a duplicate draft behind.
 
 create or replace function public.save_business_deal(
   p_deal_id uuid,

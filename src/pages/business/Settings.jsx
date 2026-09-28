@@ -25,6 +25,7 @@ import useBusiness from '../../business/useBusiness'
 import BusinessPageLoader from '../../components/ui/BusinessPageLoader'
 import { supabase } from '../../lib/supabase'
 import { fetchManagedBusinessLocations } from '../../features/location/api/locations'
+import { clearRegistrationFlow } from '../../features/onboarding/registrationFlow'
 import ClaimRecords from './ClaimRecords'
 
 function SettingsHeading({ icon: Icon, title }) {
@@ -280,6 +281,7 @@ export default function Settings() {
   async function handleLogout() {
     setIsLoggingOut(true)
     setLogoutError('')
+    clearRegistrationFlow()
 
     const { error } = await supabase.auth.signOut()
 

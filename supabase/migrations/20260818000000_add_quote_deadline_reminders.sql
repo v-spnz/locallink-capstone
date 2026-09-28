@@ -1,6 +1,3 @@
--- Notify providers when an awaiting quote enters the final three working days
--- of the consumer response window. A scheduled run is used because database
--- triggers cannot react to time passing without a row change.
 
 alter table public.business_notifications
   drop constraint if exists business_notifications_notification_type_check;

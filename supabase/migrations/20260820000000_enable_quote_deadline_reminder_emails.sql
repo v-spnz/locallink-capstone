@@ -1,5 +1,3 @@
--- Complete US0075 by delivering the existing quote deadline reminder events
--- through the same durable email outbox as other provider notifications.
 
 create or replace function public.queue_business_notification_emails()
 returns trigger

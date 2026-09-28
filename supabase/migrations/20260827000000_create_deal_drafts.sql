@@ -1,5 +1,3 @@
--- US0090: persist complete and incomplete business deal drafts while keeping
--- every draft private to the business that created it.
 
 create extension if not exists postgis with schema extensions;
 
@@ -82,9 +80,6 @@ create table public.business_deal_locations (
   primary key (deal_id, location_id)
 );
 
--- Preserve usable locations for businesses registered before this feature.
--- Service areas are the best available location data in the earlier schema;
--- deals-only businesses receive a clearly editable fallback location.
 insert into public.business_locations (business_id, name)
 select distinct area.business_id, area.service_area
 from public.business_service_areas as area
@@ -353,8 +348,6 @@ create policy "Business members can delete deal images"
     )
   );
 
--- New businesses capture physical locations during onboarding. Keeping this
--- in the account-creation transaction prevents an unusable deals account.
 drop function if exists public.create_business_with_owner(
   text,
   text,

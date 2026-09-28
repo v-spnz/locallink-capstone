@@ -1,6 +1,3 @@
--- Some existing projects have a required legacy job_type column. Keep it as
--- a compatibility alias of category so inserts work across old and fresh
--- databases without changing marketplace matching behaviour.
 
 do $$
 begin

@@ -98,7 +98,7 @@ grant execute on function public.add_loyalty_progress(uuid, numeric)
 
 
 alter table public.business_loyalty_programmes
-  add column join_code text;
+  add column if not exists join_code text;
 
 create or replace function public.validate_published_loyalty_programme()
 returns trigger
@@ -157,8 +157,20 @@ begin
 end;
 $$;
 
-alter table public.business_loyalty_programmes
-  add constraint business_loyalty_programmes_join_code_unique unique (join_code);
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.business_loyalty_programmes'::regclass
+      and conname = 'business_loyalty_programmes_join_code_unique'
+  ) then
+    alter table public.business_loyalty_programmes
+      add constraint business_loyalty_programmes_join_code_unique
+      unique (join_code);
+  end if;
+end;
+$$;
 
 create or replace function public.join_loyalty_programme(
   p_join_code text
@@ -340,8 +352,6 @@ grant execute on function public.discover_loyalty_programmes()
 
 
 
-
-
 alter table public.business_loyalty_programmes
   drop constraint if exists business_loyalty_programmes_programme_type_check;
 
@@ -498,4 +508,3 @@ $$;
 revoke all on function public.discover_loyalty_programmes() from public;
 grant execute on function public.discover_loyalty_programmes()
   to authenticated;
-  

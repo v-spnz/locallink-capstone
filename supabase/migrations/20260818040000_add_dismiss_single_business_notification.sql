@@ -1,5 +1,3 @@
--- Allow a business member to dismiss one notification without affecting the
--- rest of the business notification history.
 
 create or replace function public.dismiss_business_notification(
   p_business_id uuid,
