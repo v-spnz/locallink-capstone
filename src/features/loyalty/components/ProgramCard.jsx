@@ -14,7 +14,6 @@ import { QRCodeSVG } from 'qrcode.react'
 import Button from '../../../components/ui/Button'
 import Modal from '../../../components/ui/Modal'
 import {
-  getCustomerReward,
   getProgrammeTypeLabel,
   LOYALTY_REDEMPTION_METHOD,
 } from '../businessLoyaltyTemplates'
@@ -24,8 +23,7 @@ import {
 } from '../loyaltyIdentifier'
 import { getLoyaltyProgressPresentation } from '../loyaltyProgress'
 import { createMyLoyaltyScanCode } from '../api/loyaltyApi'
-import BusinessAvatar from './BusinessAvatar'
-import StampRing from './StampRing'
+import LoyaltyTicket from './LoyaltyTicket'
 
 // program.isJoined defaults to true: every record from "Your Loyalty" and
 // "Completed" is joined by definition (get_my_loyalty_records only returns
@@ -40,8 +38,11 @@ export default function ProgramCard({ program, index, onJoin }) {
   const [joinError, setJoinError] = useState('')
   const [secondsRemaining, setSecondsRemaining] = useState(0)
   const progress = getLoyaltyProgressPresentation(program)
-  const isStampCard = program.programmeType === 'stamp_card'
   const businessName = program.business ?? program.businessName
+  const isEnded =
+    isJoined &&
+    Boolean(program.programmeStatus) &&
+    program.programmeStatus !== 'active'
 
   useEffect(() => {
     if (!scanSession?.expiresAt) return undefined
@@ -100,7 +101,7 @@ export default function ProgramCard({ program, index, onJoin }) {
   return (
     <>
       <article
-        className="ly-card card"
+        className="ly-card ly-card--ticket"
         style={{ animationDelay: `${index * 40}ms`, cursor: 'pointer' }}
         onClick={() => setView('details')}
         role="button"
@@ -112,37 +113,13 @@ export default function ProgramCard({ program, index, onJoin }) {
           }
         }}
       >
-        <div className="loyalty-program-header">
-          {isStampCard ? (
-            <StampRing earned={progress.progress} required={progress.target} />
-          ) : (
-            <BusinessAvatar name={businessName} />
-          )}
-          <div className="loyalty-program-business">
-            <strong>{businessName}</strong>
-            <span>{program.programmeName}</span>
-          </div>
-          {program.rewardEligible && (
-            <span className="ly-badge-pulse">Reward ready</span>
-          )}
-        </div>
-
-        {!isStampCard && (
-          <div className="loyalty-points-progress">
-            <div className="progress-bar-track">
-              <div
-                className="progress-bar-fill ly-bar-fill"
-                style={{ width: `${progress.percentage}%` }}
-              />
-            </div>
-            <span>{progress.progressLabel}</span>
-          </div>
-        )}
-
-        <div className="loyalty-reward">
-          <span>Reward</span>
-          <strong>{getCustomerReward(program)}</strong>
-        </div>
+        <LoyaltyTicket
+          program={program}
+          progress={progress}
+          businessName={businessName}
+          isJoined={isJoined}
+          isEnded={isEnded}
+        />
       </article>
 
       {view === 'details' && (
@@ -162,46 +139,14 @@ export default function ProgramCard({ program, index, onJoin }) {
               <X aria-hidden="true" />
             </button>
 
-            <div className="loyalty-details-header">
-              {isStampCard ? (
-                <StampRing
-                  earned={progress.progress}
-                  required={progress.target}
-                />
-              ) : (
-                <BusinessAvatar name={businessName} />
-              )}
-              <div className="loyalty-program-business">
-                <strong id={`loyalty-details-title-${program.id}`}>
-                  {businessName}
-                </strong>
-                <span>{program.programmeName}</span>
-              </div>
-            </div>
-
-            {!isStampCard && (
-              <div className="loyalty-points-progress">
-                <div className="progress-bar-track">
-                  <div
-                    className="progress-bar-fill ly-bar-fill"
-                    style={{ width: `${progress.percentage}%` }}
-                  />
-                </div>
-                <span>{progress.progressLabel}</span>
-              </div>
-            )}
-
-            {program.rewardEligible && (
-              <span className="ly-badge-pulse loyalty-details-badge">
-                <CheckCircle2 aria-hidden="true" />
-                Reward ready
-              </span>
-            )}
-
-            <div className="loyalty-reward">
-              <span>Reward</span>
-              <strong>{getCustomerReward(program)}</strong>
-            </div>
+            <LoyaltyTicket
+              program={program}
+              progress={progress}
+              businessName={businessName}
+              isJoined={isJoined}
+              isEnded={isEnded}
+              titleId={`loyalty-details-title-${program.id}`}
+            />
 
             <dl className="loyalty-details-list">
               <div>

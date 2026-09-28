@@ -417,7 +417,7 @@
 
 .loyalty-details-dialog {
   position: relative;
-  padding: 24px;
+  padding: 58px 20px 20px;
 }
 
 .loyalty-details-header {
@@ -554,4 +554,651 @@
   color: var(--blue);
   font-weight: 700;
   border-bottom-color: var(--blue);
+}
+
+.ly-card--ticket {
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: none;
+}
+
+.ly-card:hover .ly-ticket {
+  --ly-card-line: #bac8ff;
+}
+
+.page-header.ly-page-header {
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  border: 1px solid #e4e9fb;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #eef2ff 0%, #f5f7ff 55%, #ffffff 100%);
+}
+
+.ly-ticket {
+  --ly-ink: #3a56d6;
+  --ly-ink-dark: #2f4ac4;
+  --ly-ink-tint: #eef2ff;
+  --ly-ink-line: #dbe4ff;
+  --ly-card-line: #e4e9fb;
+  --ly-dash: #d7ddf0;
+  --ly-ring: #c5d0f7;
+  --ly-stub: #f7f8ff;
+  --nb: var(--bg, #f6f8fb);
+  position: relative;
+  border: 1px solid var(--ly-card-line);
+  border-radius: 16px;
+  background: #fff;
+  transition: --ly-card-line 0.18s ease;
+}
+
+.ly-ticket.is-ready {
+  --ly-ink: #12a06a;
+  --ly-ink-dark: #087f5b;
+  --ly-ink-tint: #e3f6ee;
+  --ly-ink-line: #c4e8d6;
+  --ly-card-line: #c4e8d6;
+  --ly-dash: #c4e8d6;
+  --ly-ring: #bfe6d2;
+  --ly-stub: #f0faf5;
+}
+
+.ly-ticket.is-ended {
+  --ly-ink: #a9b0bd;
+  --ly-ink-dark: #6b7280;
+  --ly-ink-tint: #f1f2f5;
+  --ly-ink-line: #e1e4ea;
+  --ly-card-line: #e4e6ec;
+  --ly-dash: #dfe2e9;
+  --ly-ring: #dfe2e9;
+  --ly-stub: #f5f6f8;
+}
+
+.loyalty-details-dialog .ly-ticket {
+  --nb: #fff;
+}
+
+.ly-ticket-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px 2px;
+}
+
+.ly-ticket .loyalty-program-business strong {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ly-ticket .loyalty-program-business span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ly-ticket .loyalty-business-avatar {
+  box-sizing: border-box;
+  border: 1px solid var(--ly-ink-line);
+  background: var(--ly-ink-tint);
+  color: var(--ly-ink-dark);
+  box-shadow: none;
+}
+
+.ly-ticket.is-ended .loyalty-program-business strong {
+  color: #4b5262;
+}
+
+.ly-count {
+  color: var(--ly-ink-dark);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.ly-count small {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.ly-tag {
+  padding: 3px 9px;
+  border: 1.5px solid var(--ly-ink);
+  border-radius: 6px;
+  background: var(--ly-stub);
+  color: var(--ly-ink-dark);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  transform: rotate(-5deg);
+}
+
+.ly-ticket.is-ended .ly-tag {
+  border-color: #9aa1ae;
+  background: transparent;
+  color: #6b7280;
+}
+
+.ly-stamps {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  justify-items: center;
+  gap: 14px 4px;
+  padding: 18px 18px 20px;
+}
+
+.ly-stamp {
+  width: 34px;
+  height: 34px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--ly-ink);
+  border-radius: 50%;
+  background: var(--ly-ink-tint);
+  color: var(--ly-ink-dark);
+  font-size: 13px;
+  font-weight: 700;
+  outline: 1px solid var(--ly-ring);
+  outline-offset: 2px;
+}
+
+.ly-stamp.is-earned {
+  animation: ly-stamp-pop 0.35s ease backwards;
+  animation-delay: calc(var(--i, 0) * 30ms);
+}
+
+.ly-stamp.is-earned:nth-child(odd) {
+  transform: rotate(-4deg);
+}
+
+.ly-stamp.is-earned:nth-child(even) {
+  transform: rotate(5deg);
+}
+
+.ly-stamp.is-earned:nth-child(3n) {
+  transform: rotate(-8deg);
+}
+
+.ly-stamp.is-empty,
+.ly-stamp.is-next {
+  border-style: dashed;
+  outline: none;
+}
+
+.ly-stamp.is-empty {
+  border-color: var(--ly-dash);
+  background: transparent;
+  color: #b3bbd2;
+  font-weight: 400;
+}
+
+.ly-ticket.is-ended .ly-stamp.is-empty {
+  color: #c2c7d1;
+}
+
+.ly-stamp.is-next {
+  animation: ly-pulse 1.8s ease-in-out infinite;
+}
+
+.ly-ticket-progress {
+  padding: 18px 18px 20px;
+}
+
+.ly-ticket-progress > span {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.ly-ticket.is-ready .progress-bar-fill {
+  background: var(--ly-ink);
+}
+
+.ly-ticket.is-ended .progress-bar-fill {
+  background: #b8bfcc;
+}
+
+.ly-perf {
+  position: relative;
+  border-top: 1.5px dashed var(--ly-dash);
+}
+
+.ly-perf::before,
+.ly-perf::after {
+  content: '';
+  position: absolute;
+  top: -9px;
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: 1px solid var(--ly-card-line);
+  border-radius: 50%;
+  background: var(--nb);
+}
+
+.ly-perf::before {
+  left: -10px;
+  clip-path: inset(0 0 0 50%);
+}
+
+.ly-perf::after {
+  right: -10px;
+  clip-path: inset(0 50% 0 0);
+}
+
+.ly-stub {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px 14px;
+  border-radius: 0 0 15px 15px;
+  background: var(--ly-stub);
+}
+
+.ly-gift {
+  width: 30px;
+  height: 30px;
+  box-sizing: border-box;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid var(--ly-ink-line);
+  border-radius: 9px;
+  background: var(--ly-ink-tint);
+  color: var(--ly-ink-dark);
+}
+
+.ly-gift svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ly-stub-reward {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+}
+
+.ly-stub-reward span {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.ly-stub-reward strong {
+  font-size: 13px;
+}
+
+.ly-ticket.is-ended .ly-stub-reward strong {
+  color: #4b5262;
+}
+
+.ly-chip {
+  padding: 3px 10px;
+  border: 1px solid var(--ly-ink-line);
+  border-radius: 999px;
+  background: var(--ly-ink-tint);
+  color: var(--ly-ink-dark);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.loyalty-ended-note {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #e6e8ee;
+  border-radius: 10px;
+  background: #f5f6f8;
+  color: #4b5262;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@keyframes ly-stamp-pop {
+  from {
+    opacity: 0;
+    scale: 1.5;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ly-stamp {
+    animation: none !important;
+  }
+}
+
+.ly-empty-state {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 36px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow);
+  color: var(--text-muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.ly-empty-state-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #eef2ff;
+  color: var(--blue);
+}
+
+.ly-empty-state-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.ly-empty-state p {
+  margin: 0;
+  max-width: 320px;
+}
+
+.loyalty-details-dialog .loyalty-qr-close {
+  top: 12px;
+  right: 12px;
+}
+
+.loyalty-details-dialog .ly-redeem-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.loyalty-details-dialog .ly-redeem-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.ly-ticket {
+  --ly-stub: #eff2ff;
+}
+
+.ly-chip--solid {
+  border-color: var(--ly-ink);
+  background: var(--ly-ink);
+  color: #fff;
+}
+
+.ly-stamp.is-empty {
+  border-color: #b9c4ea;
+  color: #8f9bc7;
+}
+
+.ly-ticket.is-ended .ly-stamp.is-empty {
+  border-color: var(--ly-dash);
+  color: #c2c7d1;
+}
+
+/* More blue: stub, stamps, avatar, header, empty states. Delete any block you don't like. */
+
+/* Reward stub: solid colour with the reward larger */
+.ly-ticket .ly-stub {
+  background: var(--ly-ink-dark);
+}
+
+.ly-ticket .ly-gift {
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.ly-ticket .ly-stub-reward span {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.ly-ticket .ly-stub-reward strong {
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.ly-ticket .ly-count {
+  font-size: 22px;
+}
+
+.ly-ticket .ly-chip,
+.ly-ticket .ly-chip--solid {
+  border-color: #fff;
+  background: #fff;
+  color: var(--ly-ink-dark);
+}
+
+/* Ended cards keep the light grey stub */
+.ly-ticket.is-ended .ly-stub {
+  background: var(--ly-stub);
+}
+
+.ly-ticket.is-ended .ly-gift {
+  border-color: var(--ly-ink-line);
+  background: var(--ly-ink-tint);
+  color: var(--ly-ink-dark);
+}
+
+.ly-ticket.is-ended .ly-stub-reward span {
+  color: var(--text-muted);
+}
+
+/* Earned stamps: solid */
+.ly-stamp.is-earned {
+  background: var(--ly-ink);
+  color: #fff;
+}
+
+.ly-ticket.is-ended .ly-stamp.is-earned {
+  background: var(--ly-ink-tint);
+  color: var(--ly-ink-dark);
+}
+
+/* Business avatar: solid */
+.ly-ticket .loyalty-business-avatar {
+  border-color: var(--ly-ink-dark);
+  background: var(--ly-ink-dark);
+  color: #fff;
+}
+
+.ly-ticket.is-ended .loyalty-business-avatar {
+  border-color: var(--ly-ink-line);
+  background: var(--ly-ink-tint);
+  color: var(--ly-ink-dark);
+}
+
+
+/* Empty-state icons */
+.ly-empty-state-icon {
+  background: var(--blue);
+  color: #fff;
+}
+
+/* 1. Transitions */
+.page-header.ly-page-header {
+  animation: ly-rise 0.4s ease backwards;
+}
+
+.ly-search,
+.ly-join-toggle,
+.ly-join-form,
+.ly-empty-state {
+  animation: ly-rise 0.35s ease backwards;
+}
+
+.ly-tab {
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.ly-tab svg {
+  transition: transform 0.2s ease;
+}
+
+.ly-tab:hover svg {
+  transform: translateY(-1px) scale(1.08);
+}
+
+.ly-ticket .ly-count {
+  animation: ly-rise 0.5s ease 0.15s backwards;
+}
+
+.ly-ticket .progress-bar-fill {
+  animation: ly-fill-grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s backwards;
+}
+
+.ly-chip {
+  transition: transform 0.18s ease;
+}
+
+.ly-card:hover .ly-chip {
+  transform: scale(1.06);
+}
+
+.ly-card--ticket:active {
+  transform: translateY(-1px) scale(0.985);
+}
+
+.loyalty-details-dialog,
+.loyalty-qr-dialog {
+  animation: ly-dialog-in 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.loyalty-qr-code {
+  animation: ly-qr-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s backwards;
+}
+
+@keyframes ly-fill-grow {
+  from {
+    width: 0;
+  }
+}
+
+@keyframes ly-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ly-qr-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 2. Hover only, no idle motion */
+.ly-stamp.is-next {
+  animation: none;
+}
+
+.ly-card:hover .ly-gift {
+  animation: ly-gift-wiggle 0.5s ease;
+}
+
+.ly-ticket.is-ended .ly-gift,
+.ly-card:hover .ly-ticket.is-ended .ly-gift {
+  animation: none;
+}
+
+@keyframes ly-gift-wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-12deg);
+  }
+  75% {
+    transform: rotate(12deg);
+  }
+}
+
+/* Join form: buttons match the input height, error gets breathing room */
+.ly-join-controls input {
+  height: 44px;
+  box-sizing: border-box;
+}
+
+.ly-join-controls > button:not(.ly-join-close) {
+  height: 44px;
+  padding: 0 16px;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.ly-join-controls > button:not(.ly-join-close) svg {
+  width: 17px;
+  height: 17px;
+}
+
+.ly-join-form .auth-error {
+  margin-top: 12px;
+}
+
+/* Tab swap: content slides in from the side you're moving toward */
+.ly-pane {
+  animation-duration: 0.32s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: backwards;
+}
+
+.ly-pane--right {
+  animation-name: ly-slide-from-right;
+}
+
+.ly-pane--left {
+  animation-name: ly-slide-from-left;
+}
+
+@keyframes ly-slide-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ly-slide-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }

@@ -1,7 +1,7 @@
 import {
   Award,
-  BadgeCheck,
   Gift,
+  History,
   ScanLine,
   Search,
   UserPlus,
@@ -17,7 +17,8 @@ import useLoyaltyPrograms from '../../features/loyalty/hooks/useLoyaltyPrograms'
 import '../../features/loyalty/Loyalty.css'
 
 export default function Loyalty() {
-const [activeTab, setActiveTab] = useState('cards')
+  const [activeTab, setActiveTab] = useState('cards')
+  const [slide, setSlide] = useState('none')
   const discovery = useLoyaltyDiscovery()
   const loyalty = useLoyaltyPrograms()
   const { reload: reloadLoyaltyPrograms } = loyalty
@@ -29,6 +30,17 @@ const [activeTab, setActiveTab] = useState('cards')
     discovery.reload()
     loyalty.reload()
   })
+
+  function switchTab(nextTab) {
+    if (nextTab === activeTab) return
+    const order = ['discover', 'cards', 'past']
+    setSlide(
+      order.indexOf(nextTab) > order.indexOf(activeTab) ? 'right' : 'left',
+    )
+    setIsCodeFormOpen(false)
+    setIsScannerOpen(false)
+    setActiveTab(nextTab)
+  }
 
   // A business could add a stamp at any moment while the customer is just
   // browsing this tab, with no modal open at all — poll for fresh progress
@@ -79,7 +91,7 @@ const [activeTab, setActiveTab] = useState('cards')
 
   return (
     <>
-      <div className="page-header">
+      <div className="page-header ly-page-header">
         <h2>Loyalty Programmes</h2>
         <p>Track your rewards and show your loyalty QR when you visit.</p>
       </div>
@@ -90,7 +102,7 @@ const [activeTab, setActiveTab] = useState('cards')
         role="tab"
         aria-selected={activeTab === 'discover'}
         className={`ly-tab${activeTab === 'discover' ? ' ly-tab--active' : ''}`}
-        onClick={() => setActiveTab('discover')}
+        onClick={() => switchTab('discover')}
       >
         <Search aria-hidden="true" />
         Discover
@@ -100,7 +112,7 @@ const [activeTab, setActiveTab] = useState('cards')
         role="tab"
         aria-selected={activeTab === 'cards'}
         className={`ly-tab${activeTab === 'cards' ? ' ly-tab--active' : ''}`}
-        onClick={() => setActiveTab('cards')}
+        onClick={() => switchTab('cards')}
       >
         <Award aria-hidden="true" />
         Your Loyalty Cards
@@ -110,13 +122,14 @@ const [activeTab, setActiveTab] = useState('cards')
         role="tab"
         aria-selected={activeTab === 'past'}
         className={`ly-tab${activeTab === 'past' ? ' ly-tab--active' : ''}`}
-        onClick={() => setActiveTab('past')}
+        onClick={() => switchTab('past')}
       >
-        <BadgeCheck aria-hidden="true" />
+        <History aria-hidden="true" />
         Previous Loyalty Programmes
       </button>
     </div>
 
+      <div key={activeTab} className={`ly-pane ly-pane--${slide}`}>
       {activeTab === 'discover' && (
         <>
           {!isCodeFormOpen ? (
@@ -168,7 +181,10 @@ const [activeTab, setActiveTab] = useState('cards')
                   type="button"
                   className="ly-join-close"
                   aria-label="Cancel joining a programme"
-                  onClick={() => setIsCodeFormOpen(false)}
+                  onClick={() => {
+                    setIsCodeFormOpen(false)
+                    setIsScannerOpen(false)
+                  }}
                 >
                   <X aria-hidden="true" />
                 </button>
@@ -213,11 +229,11 @@ const [activeTab, setActiveTab] = useState('cards')
               ))}
             </div>
           ) : (
-            <div className="loyalty-empty-state">
-              <div aria-hidden="true">
+            <div className="ly-empty-state">
+              <span className="ly-empty-state-icon" aria-hidden="true">
                 <Gift />
-              </div>
-              No new loyalty programmes to start in your suburb right now.
+              </span>
+              <p>No new loyalty programmes to start in your suburb right now.</p>
             </div>
           )}
         </>
@@ -248,9 +264,14 @@ const [activeTab, setActiveTab] = useState('cards')
               ))}
             </div>
           ) : (
-            <div className="loyalty-empty-state">
-              <div aria-hidden="true">☕</div>
-              No active programmes yet — join one from Discover!
+            <div className="ly-empty-state">
+              <span className="ly-empty-state-icon" aria-hidden="true">
+                <Award />
+              </span>
+              <p>
+                No active programmes yet. Join one from the Discover tab to
+                start earning rewards.
+              </p>
             </div>
           )}
         </>
@@ -267,16 +288,19 @@ const [activeTab, setActiveTab] = useState('cards')
               ))}
             </div>
           ) : (
-            <div className="loyalty-empty-state">
-              <div aria-hidden="true">
-                <BadgeCheck />
-              </div>
-              No completed programmes yet — cards move here once a programme
-              ends.
+            <div className="ly-empty-state">
+              <span className="ly-empty-state-icon" aria-hidden="true">
+                <History />
+              </span>
+              <p>
+                No previous programmes yet. Programmes move here once they
+                expire.
+              </p>
             </div>
           )}
         </>
       )}
+      </div>
     </>
   )
 }
