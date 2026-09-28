@@ -1,5 +1,3 @@
--- US0104: require a clear customer-facing earning condition for publication.
-
 alter table public.business_loyalty_programmes
   add constraint business_loyalty_programmes_earning_condition_check check (
     status = 'draft'

@@ -1,4 +1,3 @@
--- US0107: validate and persist a loyalty programme publication atomically.
 
 alter table public.business_loyalty_programmes
   add column start_date date,

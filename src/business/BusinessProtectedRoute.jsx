@@ -28,13 +28,7 @@ export default function BusinessProtectedRoute({
   }
 
   if (!user) {
-    return (
-      <Navigate
-        to="/register"
-        replace
-        state={{ from: location, startAt: 'account', intent: 'business' }}
-      />
-    )
+    return <Navigate to="/login" replace state={{ from: location }} />
   }
 
   if (error) {

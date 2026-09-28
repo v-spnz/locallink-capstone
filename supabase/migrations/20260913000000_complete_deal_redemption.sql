@@ -1,4 +1,3 @@
--- US0097: validate short-lived deal claim codes and redeem each claim once.
 
 alter table public.business_deal_claims
   add column redemption_code text;

@@ -1,6 +1,3 @@
--- Expose aggregate, business-scoped analytics for the future dashboard. Date
--- inputs are inclusive Pacific/Auckland calendar dates and are converted to a
--- half-open timestamptz range internally.
 
 create function public.get_business_dashboard_metrics(
   p_business_id uuid,

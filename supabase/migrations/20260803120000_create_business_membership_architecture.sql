@@ -1,12 +1,6 @@
--- Business access is relationship-based. A profile remains a neutral person
--- record and can use consumer features while belonging to one or more
--- businesses. Service providers are businesses with the Service Marketplace
--- capability enabled.
 
 alter table public.profiles drop column if exists account_type;
 
--- The profile trigger only handles new signups. Backfill neutral profiles for
--- users who existed before these migrations were placed under CLI management.
 insert into public.profiles (id, first_name, last_name)
 select
   user_record.id,

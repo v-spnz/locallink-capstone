@@ -1,5 +1,3 @@
--- US0094: keep deal availability aligned with Auckland calendar dates and
--- enforce the same active window for discovery and claims.
 
 alter table public.business_deals
   drop constraint if exists business_deals_status_check;

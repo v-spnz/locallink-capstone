@@ -1,5 +1,3 @@
--- Give every deal claim a public, human-readable reference for support and
--- dispute lookup. The separate redemption code remains the authorising secret.
 
 alter table public.business_deal_claims
   add column claim_reference text;

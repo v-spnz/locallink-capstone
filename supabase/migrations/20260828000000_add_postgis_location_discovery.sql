@@ -1,5 +1,3 @@
--- Replace browser-side mock distances with persisted PostGIS points and
--- authenticated server-side radius searches.
 
 create extension if not exists postgis with schema extensions;
 
@@ -27,8 +25,6 @@ create index if not exists profiles_location_gix
 create index if not exists business_locations_location_gix
   on public.business_locations using gist (location);
 
--- Migration 20260827000000 is already deployed with a text[] location
--- argument. Replace that overload with structured Geoapify address records.
 drop function if exists public.create_business_with_owner(
   text, text, boolean, boolean, boolean, text, text, text[], text[], text[]
 );

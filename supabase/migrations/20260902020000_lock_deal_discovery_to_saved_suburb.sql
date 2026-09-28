@@ -1,6 +1,3 @@
--- Use the authenticated consumer's saved signup suburb as the single source
--- of truth for Deals & Discovery. Consumers cannot override the location or
--- radius through RPC parameters.
 
 create or replace function public.businesses_in_my_suburb(
   p_category text default null
