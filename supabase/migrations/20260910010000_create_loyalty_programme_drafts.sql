@@ -1,4 +1,3 @@
--- US0103: allow loyalty-enabled businesses to prepare private programme drafts.
 
 create table public.business_loyalty_programmes (
   id uuid primary key default gen_random_uuid(),

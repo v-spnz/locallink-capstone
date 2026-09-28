@@ -1,6 +1,3 @@
--- Account-owned job requests and loyalty reward redemptions.
--- Display data remains in src/data; this catalogue only validates that a mock
--- reward is actually eligible before recording a redemption.
 
 create table public.job_requests (
   id uuid primary key default gen_random_uuid(),

@@ -1,4 +1,3 @@
--- US0068: provider quote outcome tracking, response windows, and withdrawal.
 
 create or replace function public.five_working_days_after(p_start timestamptz)
 returns timestamptz

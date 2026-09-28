@@ -1,4 +1,3 @@
--- US0065: provider opportunity review details and provider-specific declines.
 
 alter table public.job_requests
   add column if not exists measurements text;

@@ -1,6 +1,3 @@
--- US0072: track provider job progress in order and expose every update to
--- both the provider and the customer. Completing the work now starts a
--- customer-confirmation step rather than closing the job immediately.
 
 alter table public.job_requests
   drop constraint if exists job_requests_status_check;
@@ -84,8 +81,6 @@ create trigger job_requests_record_status_change
   after update of status on public.job_requests
   for each row execute function public.record_job_status_change();
 
--- Preserve useful timestamps for jobs that were already active before this
--- workflow existed. We do not invent timestamps for stages they never used.
 insert into public.job_status_history (job_request_id, status, updated_at)
 select job.id, 'accepted', quote.updated_at
 from public.job_requests as job
@@ -100,8 +95,6 @@ from public.job_requests as job
 where job.status in ('in_progress', 'completed')
 on conflict (job_request_id, status) do nothing;
 
--- A newly accepted quote begins at Accepted; the provider advances the job
--- from there. Keep the current five-working-day response safeguards.
 create or replace function public.respond_to_job_quote(
   p_quote_id uuid,
   p_accept boolean
@@ -390,8 +383,6 @@ begin
 end;
 $$;
 
--- Retire the old one-step completion endpoint so it cannot bypass the ordered
--- transition and customer-confirmation workflow.
 revoke all on function public.complete_business_job(uuid, uuid) from public;
 revoke execute on function public.complete_business_job(uuid, uuid) from authenticated;
 revoke all on function public.get_business_active_jobs(uuid) from public;

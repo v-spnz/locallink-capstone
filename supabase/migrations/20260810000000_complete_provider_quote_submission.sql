@@ -1,4 +1,3 @@
--- US0066: complete provider quote submission details and enforce request limits.
 
 create or replace function public.three_working_days_after(p_start timestamptz)
 returns timestamptz
@@ -69,8 +68,6 @@ alter table public.job_quotes
     status in ('awaiting_response', 'accepted', 'rejected', 'withdrawn')
   );
 
--- Defaults above backfill legacy rows. New quotes must supply every required
--- detail through submit_business_quote.
 alter table public.job_quotes
   alter column price_type drop default,
   alter column availability_date drop default,
@@ -132,8 +129,6 @@ begin
     raise exception 'Quote message cannot exceed 1000 characters';
   end if;
 
-  -- Serialise submissions for this request so concurrent calls cannot create
-  -- a fourth quote.
   perform 1
   from public.job_requests
   where id = p_job_request_id

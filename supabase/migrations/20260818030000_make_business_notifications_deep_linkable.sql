@@ -1,5 +1,3 @@
--- Return the related record identifiers already stored on notifications so the
--- application can deep-link business members to the exact marketplace item.
 
 drop function if exists public.get_business_notifications(uuid, integer);
 create function public.get_business_notifications(

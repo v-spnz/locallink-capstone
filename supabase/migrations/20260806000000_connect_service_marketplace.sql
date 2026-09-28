@@ -1,6 +1,3 @@
--- Connect consumer job requests to service businesses without exposing the
--- customer's account identifier. Businesses receive matched leads through
--- controlled RPCs; customers receive quotes and job status updates.
 
 alter table public.job_requests
   drop constraint if exists job_requests_status_check;

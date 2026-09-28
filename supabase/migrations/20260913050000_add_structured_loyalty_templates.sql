@@ -1,4 +1,3 @@
--- Replace free-form stamp/points programmes with three structured templates.
 
 drop function if exists public.save_business_loyalty_programme(
   uuid,

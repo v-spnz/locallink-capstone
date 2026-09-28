@@ -1,7 +1,3 @@
--- Repair jobs accepted while the hosted quote-response function contained the
--- legacy Open -> In progress transition. A legitimately advanced job has at
--- least one of Accepted, Scheduled, or On the way in its history; the skipped
--- jobs have only the automatically-recorded In progress event.
 with affected_jobs as materialized (
   select job.id
   from public.job_requests as job

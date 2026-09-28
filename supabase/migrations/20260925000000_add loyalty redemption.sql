@@ -1,7 +1,28 @@
 alter table public.customer_loyalty_records
-  add column redemption_count integer not null default 0 check (
-    redemption_count >= 0
-  );
+  add column if not exists redemption_count integer;
+
+update public.customer_loyalty_records
+set redemption_count = 0
+where redemption_count is null;
+
+alter table public.customer_loyalty_records
+  alter column redemption_count set default 0,
+  alter column redemption_count set not null;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.customer_loyalty_records'::regclass
+      and conname = 'customer_loyalty_records_redemption_count_check'
+  ) then
+    alter table public.customer_loyalty_records
+      add constraint customer_loyalty_records_redemption_count_check
+      check (redemption_count >= 0);
+  end if;
+end;
+$$;
 
 create or replace function public.redeem_loyalty_reward(
   p_loyalty_record_id uuid

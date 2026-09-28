@@ -1,5 +1,3 @@
--- Allow a business member to permanently dismiss their business's notification
--- history without granting direct delete access to the notification table.
 
 create or replace function public.dismiss_business_notifications(
   p_business_id uuid

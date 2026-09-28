@@ -1,5 +1,3 @@
--- Keep this as a separate migration because the original customer notification
--- migration has already been applied to hosted databases.
 
 alter table public.customer_notifications
   drop constraint if exists customer_notifications_notification_type_check;

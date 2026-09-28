@@ -1,5 +1,3 @@
--- Keep marketplace RPC result types stable even if an existing project uses
--- varchar or another assignment-compatible type for display columns.
 
 create or replace function public.get_business_job_leads(p_business_id uuid)
 returns table (

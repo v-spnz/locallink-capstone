@@ -1,6 +1,3 @@
--- US0096: let a business end an Active deal without deleting its claim or
--- redemption history. Existing claims remain redeemable and their customers
--- are told exactly what changed.
 
 alter table public.business_deals
   add column ended_at timestamptz;
