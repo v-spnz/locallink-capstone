@@ -1,4 +1,3 @@
--- Keep customer identity private in business-facing deal redemption responses.
 
 create or replace function public.validate_business_deal_redemption_code(
   p_redemption_code text

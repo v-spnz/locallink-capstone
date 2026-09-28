@@ -1,5 +1,3 @@
--- US0064: expose only available, matched work opportunities and include the
--- details providers need to decide whether to quote.
 
 alter table public.job_requests
   add column if not exists requested_timing text not null default 'Flexible',
@@ -17,8 +15,6 @@ create index if not exists job_requests_available_leads_idx
   on public.job_requests (quote_deadline, created_at desc)
   where status = 'open';
 
--- The return shape is changing, so PostgreSQL requires the old function to be
--- dropped before it is recreated.
 drop function if exists public.get_business_job_leads(uuid);
 
 create function public.get_business_job_leads(p_business_id uuid)
@@ -128,8 +124,6 @@ begin
     raise exception 'Quote message must be between 10 and 1000 characters';
   end if;
 
-  -- Serialise quote submissions for a request so concurrent inserts cannot
-  -- exceed its quote limit.
   perform 1
   from public.job_requests
   where id = p_job_request_id

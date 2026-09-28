@@ -108,11 +108,13 @@ test('suburb names take priority over broader local board districts', () => {
 })
 
 test('registration progressively introduces value before identity creation', async () => {
-  const [register, registerStyles, protectedRoute] = await Promise.all([
-    read('../src/pages/auth/RegisterPage.jsx'),
-    read('../src/pages/auth/RegisterPage.css'),
-    read('../src/auth/ProtectedRoute.jsx'),
-  ])
+  const [register, registerStyles, protectedRoute, businessProtectedRoute] =
+    await Promise.all([
+      read('../src/pages/auth/RegisterPage.jsx'),
+      read('../src/pages/auth/RegisterPage.css'),
+      read('../src/auth/ProtectedRoute.jsx'),
+      read('../src/business/BusinessProtectedRoute.jsx'),
+    ])
 
   for (const stage of [
     'WelcomeStep',
@@ -143,8 +145,10 @@ test('registration progressively introduces value before identity creation', asy
     /HowItWorksStep onContinue=\{\(\) => setStep\('account'\)\}/,
   )
   assert.match(register, /flow\.destination \|\| '\/home'/)
-  assert.match(protectedRoute, /to="\/register"/)
-  assert.match(protectedRoute, /startAt: 'account'/)
+  assert.match(protectedRoute, /to="\/login"/)
+  assert.match(protectedRoute, /state=\{\{ from: location \}\}/)
+  assert.match(businessProtectedRoute, /to="\/login"/)
+  assert.match(businessProtectedRoute, /state=\{\{ from: location \}\}/)
 })
 
 test('business onboarding separates basics, tools, conditional setup, and review', async () => {

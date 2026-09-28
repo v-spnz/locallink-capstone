@@ -1,4 +1,3 @@
--- Persist the additional details captured by the consumer post-job wizard.
 
 alter table public.job_requests
   add column if not exists image_urls text[] not null default '{}',

@@ -9,6 +9,7 @@ test('business settings provides a complete logout flow', async () => {
   )
 
   assert.match(settings, /supabase\.auth\.signOut\(\)/)
+  assert.match(settings, /clearRegistrationFlow\(\)/)
   assert.match(settings, /navigate\('\/login', \{ replace: true \}\)/)
   assert.match(settings, /Unable to log out\. Please try again\./)
   assert.match(settings, /isLoggingOut \? 'Logging out…' : 'Log Out'/)

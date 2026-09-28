@@ -1,7 +1,3 @@
--- Complete the database contract for US0106 and US0112.
--- Loyalty progress and redemptions are accepted only while a programme is
--- active, every successful change appends to the activity history, and
--- business members can read a scoped recent-activity feed through an RPC.
 
 create or replace function public.add_loyalty_progress(
   p_loyalty_record_id uuid,

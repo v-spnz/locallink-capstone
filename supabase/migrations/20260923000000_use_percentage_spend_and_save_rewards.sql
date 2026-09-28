@@ -1,4 +1,3 @@
--- Treat spend-and-save reward values as percentages selected in 5% steps.
 
 alter table public.business_loyalty_programmes
   drop constraint if exists business_loyalty_programmes_reward_value_check;

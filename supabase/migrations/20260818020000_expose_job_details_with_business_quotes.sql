@@ -1,5 +1,3 @@
--- Preserve the original lead context alongside a provider's submitted quote so
--- the provider can compare the request and their response in one place.
 
 drop function if exists public.get_business_quotes(uuid);
 create function public.get_business_quotes(p_business_id uuid)

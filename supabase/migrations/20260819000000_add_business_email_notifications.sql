@@ -1,6 +1,3 @@
--- US0075: deliver provider notifications by email without coupling external
--- email requests to the transaction that creates a job or updates a quote.
--- Deadline reminder emails are intentionally deferred to a later change.
 
 alter table public.business_notifications
   drop constraint if exists business_notifications_notification_type_check;

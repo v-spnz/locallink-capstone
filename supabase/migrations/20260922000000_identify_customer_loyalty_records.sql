@@ -1,5 +1,3 @@
--- US0109: let loyalty-enabled businesses identify a customer's programme
--- record from a customer-presented identifier without exposing account data.
 
 create table public.customer_loyalty_records (
   id uuid primary key default gen_random_uuid(),
