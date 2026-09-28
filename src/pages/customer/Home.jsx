@@ -1,8 +1,7 @@
 import { Clock3 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAuth from '../../auth/useAuth'
-import { supabase } from '../../lib/supabase'
 import { fetchCustomerLocation } from '../../features/location/api/locations'
 import {
   fetchCustomerDealClaims,
@@ -10,109 +9,49 @@ import {
 } from '../../features/deals/api/customerDeals'
 import { isClaimActive } from '../../features/deals/claimStatus'
 import { formatCountdown } from '../../features/deals/countdown'
+import useLoyaltyDiscovery from '../../features/loyalty/hooks/useLoyaltyDiscovery'
+import useLoyaltyPrograms from '../../features/loyalty/hooks/useLoyaltyPrograms'
+import { getLoyaltyProgressPresentation } from '../../features/loyalty/loyaltyProgress'
 import '../../features/location/discovery.css'
+import useAllHistory from './hooks/useAllHistory'
+import useHomeJobs from './hooks/useHomeJobs'
+import useSuburbDeals from './hooks/useSuburbDeals'
+import { buildHomeSearchResults } from './homeSearch'
 
-const DEAL_DISPLAY_COUNT = 3
-
-const loyaltyCard = {
-  businessName: 'Britomart Espresso Bar',
-  stampsTotal: 5,
-  stampsFilled: 4,
-}
-
-const previewJobs = [
-  { id: 1, name: 'Kitchen tap repair', quotes: 3, posted: 'Posted 2 days ago' },
-  { id: 2, name: 'Car wash needed', quotes: 0, posted: 'Posted 5 days ago' },
-]
-
-const recentActivity = [
-  {
-    id: 1,
-    text: 'You redeemed a deal at',
-    business: 'Parnell Village Bakery',
-    time: '2 hours ago',
-  },
-  {
-    id: 2,
-    text: 'You picked up a stamp at',
-    business: 'Britomart Espresso Bar',
-    time: 'Yesterday',
-  },
-  {
-    id: 3,
-    text: 'You posted a job —',
-    business: 'Kitchen tap repair',
-    time: '2 days ago',
-  },
-]
+const MAX_STAMP_CIRCLES = 12
 
 export default function Home() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [search, setSearch] = useState('')
-  const [accountJobs, setAccountJobs] = useState([])
   const [customerLocation, setCustomerLocation] = useState(null)
-  const [suburbResults, setSuburbResults] = useState([])
+  const [savedDeals, setSavedDeals] = useState(null)
+
+  const homeJobs = useHomeJobs()
+  const loyalty = useLoyaltyPrograms()
+  const loyaltyDiscovery = useLoyaltyDiscovery()
+  const suburbDeals = useSuburbDeals()
+  const history = useAllHistory()
 
   useEffect(() => {
     let active = true
-    if (!user)
-      return () => {
-        active = false
-      }
 
-    async function loadJobs() {
-      const [jobsResult, quotesResult] = await Promise.all([
-        supabase
-          .from('job_requests')
-          .select('id, title, status, created_at')
-          .eq('customer_id', user.id)
-          .in('status', ['open', 'in_progress'])
-          .order('created_at', { ascending: false })
-          .limit(3),
-        supabase.rpc('get_customer_job_quotes'),
-      ])
-
-      if (active) {
-        const quoteCounts = (quotesResult.data ?? []).reduce(
-          (counts, quote) => ({
-            ...counts,
-            [quote.job_request_id]: (counts[quote.job_request_id] ?? 0) + 1,
-          }),
-          {},
-        )
-
-        setAccountJobs(
-          (jobsResult.data ?? []).map((job) => ({
-            id: job.id,
-            name: job.title,
-            status: job.status,
-            quotes: quoteCounts[job.id] ?? 0,
-            posted: new Date(job.created_at).toLocaleDateString('en-NZ'),
-          })),
-        )
-      }
-    }
-
-    loadJobs()
-    return () => {
-      active = false
-    }
-  }, [user])
-
-  useEffect(() => {
-    let active = true
-    async function loadSavedDeals() {
-      try {
-        const savedLocation = await fetchCustomerLocation()
+    fetchCustomerLocation()
+      .then((savedLocation) => {
         if (active) setCustomerLocation(savedLocation)
-        const results = await fetchMySavedDeals()
-        if (active) setSuburbResults(results)
-      } catch (error) {
+      })
+      .catch((error) => {
+        console.error('Unable to load your location.', error)
+      })
+
+    fetchMySavedDeals()
+      .then((deals) => {
+        if (active) setSavedDeals(deals)
+      })
+      .catch((error) => {
         console.error('Unable to load saved deals.', error)
-      }
-    }
-    loadSavedDeals()
+        if (active) setSavedDeals([])
+      })
 
     return () => {
       active = false
@@ -169,23 +108,50 @@ export default function Home() {
     }
   }, [activeClaims.length, user?.id])
 
-  const displayedJobs = user ? accountJobs : previewJobs
+  const latestSavedDeal = savedDeals?.[0] ?? null
 
-  const suburbBusinesses = suburbResults
-    .filter((business) => {
-      const query = search.trim().toLowerCase()
-      return (
-        query === '' ||
-        business.business_name.toLowerCase().includes(query) ||
-        business.category.toLowerCase().includes(query)
-      )
+  function openLatestSavedDeal() {
+    navigate(`/deals?tab=wallet&deal=${latestSavedDeal.deal_id}`, {
+      state: { openDeal: latestSavedDeal },
     })
-    .slice(0, DEAL_DISPLAY_COUNT)
+  }
 
-  const featuredBusiness = suburbBusinesses[0]
-  const otherBusinesses = suburbBusinesses.slice(1)
+  const recentActivity = history.items.slice(0, 3).map(toActivity)
 
-  const stampsRemaining = loyaltyCard.stampsTotal - loyaltyCard.stampsFilled
+  const closestLoyalty = useMemo(
+    () => getClosestToCompletion(loyalty.programs),
+    [loyalty.programs],
+  )
+  const loyaltyProgress = closestLoyalty
+    ? getLoyaltyProgressPresentation(closestLoyalty)
+    : null
+  const showStamps =
+    loyaltyProgress !== null &&
+    closestLoyalty.programmeType === 'stamp_card' &&
+    loyaltyProgress.target > 0 &&
+    loyaltyProgress.target <= MAX_STAMP_CIRCLES
+
+  const activeJobCount = homeJobs.activeJobs.length
+  const latestJob = homeJobs.latestJob
+  const latestJobQuotes = homeJobs.latestJobQuoteCount
+
+  const searchGroups = useMemo(
+    () =>
+      buildHomeSearchResults(search, {
+        deals: suburbDeals,
+        loyaltyRecords: loyalty.programs,
+        loyaltyDiscovery: loyaltyDiscovery.businesses,
+        jobs: homeJobs.jobs,
+      }),
+    [
+      search,
+      suburbDeals,
+      loyalty.programs,
+      loyaltyDiscovery.businesses,
+      homeJobs.jobs,
+    ],
+  )
+  const isSearching = search.trim() !== ''
 
   return (
     <>
@@ -238,207 +204,296 @@ export default function Home() {
         <div className="home-search">
           <input
             type="text"
-            placeholder="Search businesses, deals, or services"
+            placeholder="Search deals, loyalty, or jobs"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') setSearch('')
+            }}
           />
+          {isSearching && (
+            <div className="home-search-results">
+              {searchGroups.length === 0 ? (
+                <p className="home-search-empty">
+                  {`No results for "${search.trim()}".`}
+                </p>
+              ) : (
+                searchGroups.map((group) => (
+                  <div className="home-search-group" key={group.key}>
+                    <p className="home-search-group-label">{group.label}</p>
+                    {group.items.map((item) => (
+                      <button
+                        type="button"
+                        className="home-search-result"
+                        key={item.id}
+                        onClick={() =>
+                          navigate(item.to, { state: item.state })
+                        }
+                      >
+                        <span className="home-search-result-title">
+                          {item.title}
+                        </span>
+                        <span className="home-search-result-sub">
+                          {item.subtitle}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="home-two-col">
         <div>
-          {/* Deals Near You - everything here goes to Deals & Discovery */}
           <div className="home-section-head">
             <h3>Your saved deals</h3>
             <button
               className="section-link-btn"
-              onClick={() => navigate('/deals')}
+              onClick={() => navigate('/deals?tab=wallet')}
             >
               View all →
             </button>
           </div>
-          <p className="home-section-note">
-            Deals you've saved, most recent first.
-          </p>
+          <p className="home-section-note">Your most recently saved deal.</p>
 
-          {suburbBusinesses.length === 0 ? (
+          {savedDeals === null ? (
+            <div className="empty-state">Loading your saved deals…</div>
+          ) : !latestSavedDeal ? (
             <div className="empty-state">
-              {search
-                ? `No saved deals match "${search}".`
-                : "You haven't saved any deals yet — browse Deals & Discovery to find some."}
+              You haven't saved any deals yet. Browse Deals & Discovery to find
+              some.
             </div>
           ) : (
-            <>
-              <div
-                className="featured-deal"
-                onClick={() =>
-                  navigate(`/deals?deal=${featuredBusiness.deal_id}`, {
-                    state: { openDeal: featuredBusiness },
-                  })
-                }
-              >
-                <div className="featured-deal-photo">
-                  {featuredBusiness.deal_image_url ? (
-                    <img
-                      src={featuredBusiness.deal_image_url}
-                      alt=""
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                      }}
-                    />
-                  ) : (
+            <div
+              className="featured-deal"
+              role="button"
+              tabIndex={0}
+              onClick={openLatestSavedDeal}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') openLatestSavedDeal()
+              }}
+            >
+              <div className="featured-deal-photo">
+                {latestSavedDeal.deal_image_url ? (
+                  <img
+                    src={latestSavedDeal.deal_image_url}
+                    alt=""
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                    }}
+                  />
+                ) : (
+                  <>
+                    Business photo
+                    <br />
+                    (TBD)
+                  </>
+                )}
+              </div>
+              <div className="featured-deal-body">
+                <span className="deal-tag">{latestSavedDeal.category}</span>
+                <h4 className="featured-deal-name">
+                  {latestSavedDeal.business_name}
+                </h4>
+                <p className="featured-deal-desc">
+                  {latestSavedDeal.deal_description ||
+                    latestSavedDeal.description}
+                </p>
+                <div className="featured-deal-foot">
+                  {latestSavedDeal.distance_km != null ? (
                     <>
-                      Business photo
-                      <br />
-                      (TBD)
+                      <strong>
+                        {Number(latestSavedDeal.distance_km).toFixed(1)} km
+                      </strong>{' '}
+                      away
                     </>
+                  ) : (
+                    'Saved deal'
                   )}
                 </div>
-                <div className="featured-deal-body">
-                  <span className="deal-tag">{featuredBusiness.category}</span>
-                  <h4 className="featured-deal-name">
-                    {featuredBusiness.business_name}
-                  </h4>
-                  <p className="featured-deal-desc">
-                    {featuredBusiness.deal_description ||
-                      featuredBusiness.description}
-                  </p>
-                  <div className="featured-deal-foot">
-                    {featuredBusiness.distance_km != null ? (
-                      <>
-                        <strong>
-                          {Number(featuredBusiness.distance_km).toFixed(1)} km
-                        </strong>{' '}
-                        away
-                      </>
-                    ) : (
-                      'Saved deal'
-                    )}
-                  </div>
-                </div>
               </div>
-
-              {otherBusinesses.length > 0 && (
-                <div className="deal-list">
-                  {otherBusinesses.map((business) => (
-                    <div
-                      className="deal-row"
-                      key={business.business_id}
-                      onClick={() =>
-                        navigate(`/deals?deal=${business.deal_id}`, {
-                          state: { openDeal: business },
-                        })
-                      }
-                    >
-                      <div className="deal-row-body">
-                        <div className="deal-row-name">
-                          {business.business_name}
-                        </div>
-                        <div className="deal-row-sub">
-                          {business.category} · {business.description}
-                        </div>
-                      </div>
-                      <div className="deal-row-dist">
-                        {business.distance_km != null
-                          ? `${Number(business.distance_km).toFixed(1)} km`
-                          : 'Saved'}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
+            </div>
           )}
 
-          {/* Recent Activity - everything here goes to Profile */}
           <div className="home-section-head block-gap">
             <h3>Recent activity</h3>
             <button
               className="section-link-btn"
-              onClick={() => navigate('/profile')}
+              onClick={() => navigate('/profile/history')}
             >
               View all →
             </button>
           </div>
-          <p className="home-section-note">
-            Deals you've used, stamps you've collected, jobs you've posted.
-          </p>
-          {recentActivity.map((item) => (
-            <div
-              className="home-activity-row"
-              key={item.id}
-              onClick={() => navigate('/profile')}
-            >
-              <span className="what">
-                {item.text} <b>{item.business}</b>
-              </span>
-              <span className="when">{item.time}</span>
+          <p className="home-section-note">Your latest history.</p>
+
+          {history.isLoading ? (
+            <div className="empty-state">Loading your activity…</div>
+          ) : history.error ? (
+            <div className="empty-state">{history.error}</div>
+          ) : recentActivity.length === 0 ? (
+            <div className="empty-state">
+              Nothing here yet. Redeem a deal or complete a job and it will show
+              up here.
             </div>
-          ))}
+          ) : (
+            recentActivity.map((item) => (
+              <div className="home-activity-row" key={item.id}>
+                <span className="what">
+                  {item.text} <b>{item.subject}</b>
+                </span>
+                <span className="when">{formatTimeAgo(item.date)}</span>
+              </div>
+            ))
+          )}
         </div>
 
         <aside>
-          {/* Loyalty - mock display, every button goes to the Loyalty page */}
           <div className="home-side-card">
             <p className="home-side-label">
-              Loyalty · {loyaltyCard.businessName}
+              Loyalty{closestLoyalty ? ` · ${closestLoyalty.business}` : ''}
             </p>
-            <h3 className="home-side-title">Coffee Card</h3>
-            <div className="stamp-row">
-              {Array.from({ length: loyaltyCard.stampsTotal }).map(
-                (_, index) => (
-                  <span
-                    key={index}
-                    className={`stamp${index < loyaltyCard.stampsFilled ? ' filled' : ''}`}
-                  />
-                ),
-              )}
-            </div>
-            <p className="stamp-note">
-              {stampsRemaining === 1
-                ? 'One more coffee and the next one is on us!'
-                : `${stampsRemaining} more coffees and the next one is on us!`}
-            </p>
+            {closestLoyalty ? (
+              <>
+                <h3 className="home-side-title">
+                  {closestLoyalty.programmeName}
+                </h3>
+                {showStamps && (
+                  <div className="stamp-row">
+                    {Array.from({ length: loyaltyProgress.target }).map(
+                      (_, index) => (
+                        <span
+                          key={index}
+                          className={`stamp${index < Math.floor(loyaltyProgress.progress) ? ' filled' : ''}`}
+                        />
+                      ),
+                    )}
+                  </div>
+                )}
+                <p className="stamp-note">
+                  {closestLoyalty.rewardEligible
+                    ? 'Reward ready to redeem'
+                    : `${loyaltyProgress.progressLabel}, ${loyaltyProgress.remainingLabel}`}
+                </p>
+                {closestLoyalty.rewardDescription && (
+                  <p className="stamp-note">
+                    Reward: {closestLoyalty.rewardDescription}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="stamp-note">
+                {loyalty.isLoading
+                  ? 'Loading your loyalty cards…'
+                  : "You haven't joined a loyalty programme yet."}
+              </p>
+            )}
             <button
               className="btn-outline"
               onClick={() => navigate('/loyalty')}
             >
-              View all loyalty cards
+              View Your Loyalties
             </button>
           </div>
 
-          {/* Service Marketplace - account jobs and quotes from Supabase */}
           <div className="home-side-card block-gap">
-            <p className="home-side-label">Service Marketplace</p>
+            <p className="home-side-label">Your Active Jobs</p>
             <h3 className="home-side-title">
-              {displayedJobs.length} job{displayedJobs.length !== 1 ? 's' : ''}{' '}
-              active
+              {homeJobs.isLoading
+                ? 'Loading…'
+                : `${activeJobCount} job${activeJobCount !== 1 ? 's' : ''} active`}
             </h3>
-            {displayedJobs.map((job) => (
+            {latestJob && (
               <button
                 className="job-row"
-                key={job.id}
-                onClick={() => navigate('/jobs')}
+                onClick={() => navigate(`/jobs?job=${latestJob.id}`)}
               >
                 <div className="job-top">
-                  <span className="job-name">{job.name}</span>
+                  <span className="job-name">{latestJob.title}</span>
                   <span className="job-quotes">
-                    {job.quotes > 0 ? `${job.quotes} quotes` : 'No quotes yet'}
+                    {latestJobQuotes > 0
+                      ? `${latestJobQuotes} quote${latestJobQuotes === 1 ? '' : 's'}`
+                      : 'No quotes yet'}
                   </span>
                 </div>
-                <div className="job-meta">{job.posted}</div>
+                <div className="job-meta">
+                  {new Date(latestJob.created_at).toLocaleDateString('en-NZ')}
+                </div>
               </button>
-            ))}
+            )}
             <button className="btn-outline" onClick={() => navigate('/jobs')}>
-              View Job List →
+              View all jobs
             </button>
           </div>
         </aside>
       </div>
     </>
   )
+}
+
+
+function toActivity(item) {
+  const base = { id: item.id, date: item.date }
+
+  if (item.type === 'job') {
+    return { ...base, text: 'You completed a job:', subject: item.title }
+  }
+
+  if (item.type === 'deal') {
+    const text =
+      item.statusLabel === 'Redeemed'
+        ? 'You redeemed a deal at'
+        : item.statusLabel === 'Ended early'
+          ? 'A deal ended early at'
+          : 'Your deal expired at'
+    return { ...base, text, subject: item.subtitle }
+  }
+
+  return {
+    ...base,
+    text: 'Your loyalty programme ended at',
+    subject: item.subtitle,
+  }
+}
+
+function getClosestToCompletion(programs) {
+  const active = programs.filter(
+    (program) => program.programmeStatus === 'active',
+  )
+  const inProgress = active.filter((program) => !program.rewardEligible)
+  const pool = inProgress.length > 0 ? inProgress : active
+
+  return pool.reduce((best, program) => {
+    if (!best) return program
+    const bestPercentage = getLoyaltyProgressPresentation(best).percentage
+    const percentage = getLoyaltyProgressPresentation(program).percentage
+    return percentage > bestPercentage ? program : best
+  }, null)
+}
+
+function formatTimeAgo(value) {
+  if (!value) return ''
+  const seconds = Math.round((new Date(value).getTime() - Date.now()) / 1000)
+  const units = [
+    ['year', 31536000],
+    ['month', 2592000],
+    ['week', 604800],
+    ['day', 86400],
+    ['hour', 3600],
+    ['minute', 60],
+  ]
+  const formatter = new Intl.RelativeTimeFormat('en-NZ', { numeric: 'auto' })
+
+  for (const [unit, size] of units) {
+    if (Math.abs(seconds) >= size) {
+      return formatter.format(Math.round(seconds / size), unit)
+    }
+  }
+  return 'Just now'
 }
 
 function getGreeting() {

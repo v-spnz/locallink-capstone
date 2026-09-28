@@ -8,6 +8,7 @@ import {
   X,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import Button from '../../components/ui/Button'
 import QrCodeScanner from '../../components/ui/QrCodeScanner'
 import ProgramCard from '../../features/loyalty/components/ProgramCard'
@@ -17,7 +18,13 @@ import useLoyaltyPrograms from '../../features/loyalty/hooks/useLoyaltyPrograms'
 import '../../features/loyalty/Loyalty.css'
 
 export default function Loyalty() {
-  const [activeTab, setActiveTab] = useState('cards')
+  const [searchParams] = useSearchParams()
+  const requestedTab = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState(
+    ['discover', 'cards', 'past'].includes(requestedTab)
+      ? requestedTab
+      : 'cards',
+  )
   const [slide, setSlide] = useState('none')
   const discovery = useLoyaltyDiscovery()
   const loyalty = useLoyaltyPrograms()

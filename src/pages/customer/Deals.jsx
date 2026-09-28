@@ -41,7 +41,11 @@ export default function Deals() {
   const routerLocation = useLocation()
   const [activeFilter, setActiveFilter] = useState('All')
   const [discoverySearch, setDiscoverySearch] = useState('')
-  const [activeTab, setActiveTab] = useState('discover')
+  const [activeTab, setActiveTab] = useState(() =>
+    new URLSearchParams(routerLocation.search).get('tab') === 'wallet'
+      ? 'wallet'
+      : 'discover',
+  )
   const [slide, setSlide] = useState('none')
   const [location, setLocation] = useState(null)
   const [businesses, setBusinesses] = useState([])
