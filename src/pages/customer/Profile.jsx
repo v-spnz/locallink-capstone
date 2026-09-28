@@ -24,6 +24,7 @@ import {
   fetchCustomerLocation,
   saveCustomerLocation,
 } from '../../features/location/api/locations'
+import { clearRegistrationFlow } from '../../features/onboarding/registrationFlow'
 import useAllHistory from './hooks/useAllHistory'
 import './AccountSettings.css'
 
@@ -265,6 +266,7 @@ export default function Profile() {
   async function handleLogout() {
     setIsLoggingOut(true)
     setLogoutError('')
+    clearRegistrationFlow()
 
     const { error } = await supabase.auth.signOut()
 

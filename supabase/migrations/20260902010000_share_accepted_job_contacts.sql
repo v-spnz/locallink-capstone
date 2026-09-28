@@ -1,6 +1,3 @@
--- Share the minimum available contact information only after a quote has been
--- accepted. This keeps private account data out of lead and quote payloads and
--- gives both the customer and the accepted business the same scoped view.
 
 create or replace function public.get_accepted_job_contacts(
   p_business_id uuid default null

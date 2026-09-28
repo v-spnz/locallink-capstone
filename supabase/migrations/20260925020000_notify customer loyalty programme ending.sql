@@ -12,7 +12,8 @@ alter table public.customer_notifications
       'quote_deadline_reminder',
       'deal_ended',
       'loyalty_reward_close',
-      'loyalty_programme_ending_soon'
+      'loyalty_programme_ending_soon',
+      'saved_deal_ending_soon'
     )
   );
 

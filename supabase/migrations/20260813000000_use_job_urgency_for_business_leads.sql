@@ -1,12 +1,6 @@
--- Use the consumer's urgency field throughout the service marketplace.
--- requested_timing duplicated urgency, while measurements was added only for
--- the provider opportunity review flow and is no longer collected.
 
 drop function if exists public.get_business_job_leads(uuid);
 
--- Preserve timing values from databases that already received the duplicate
--- column before removing it. The conditional also supports environments where
--- requested_timing was never created.
 do $$
 begin
   if exists (

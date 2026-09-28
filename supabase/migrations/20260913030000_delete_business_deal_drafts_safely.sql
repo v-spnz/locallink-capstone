@@ -1,6 +1,3 @@
--- Delete business deal drafts through the RPC already used by the business UI.
--- The function keeps deletion manager-only and prevents published lifecycle
--- records from being removed through a crafted client request.
 
 create or replace function public.delete_business_deal(
   p_business_id uuid,

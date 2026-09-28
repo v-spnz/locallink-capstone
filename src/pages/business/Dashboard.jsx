@@ -32,6 +32,7 @@ import {
   hasMarketplaceActivity,
 } from '../../features/dashboard/dashboardPresentation'
 import useBusinessDashboardAnalytics from '../../features/dashboard/hooks/useBusinessDashboardAnalytics'
+import './Dashboard.css'
 
 function PerformanceMetric({ label, value, detail, unavailable = false }) {
   return (

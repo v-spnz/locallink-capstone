@@ -1,5 +1,3 @@
--- Give the provider lead list access to the consumer's budget for ordering.
--- The UI intentionally does not display this field yet.
 
 drop function if exists public.get_business_job_leads(uuid);
 create function public.get_business_job_leads(p_business_id uuid)

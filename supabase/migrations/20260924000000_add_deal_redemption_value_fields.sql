@@ -1,5 +1,3 @@
--- Record optional sales value and customer savings when a deal is redeemed.
--- Historical redemptions remain valid and unknown values remain null.
 
 alter table public.business_deal_redemptions
   add column transaction_amount_cents integer,

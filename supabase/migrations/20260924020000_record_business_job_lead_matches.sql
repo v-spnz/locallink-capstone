@@ -1,5 +1,3 @@
--- Preserve the moment a new job request matches a service business. Business
--- notifications remain dismissible UI records and are not the analytics source.
 
 create table public.business_job_lead_matches (
   business_id uuid not null references public.businesses(id) on delete cascade,
@@ -19,8 +17,6 @@ revoke all on table public.business_job_lead_matches from anon, authenticated;
 comment on table public.business_job_lead_matches is
   'Durable analytics event recorded when the existing new-lead matching rules match a business.';
 
--- Backfill only evidence that still exists. Notifications dismissed before
--- this migration cannot be reconstructed without guessing.
 insert into public.business_job_lead_matches (
   business_id,
   job_request_id,
