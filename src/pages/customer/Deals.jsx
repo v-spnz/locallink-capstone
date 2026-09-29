@@ -48,7 +48,12 @@ export default function Deals() {
   const routerLocation = useLocation()
   const [activeFilter, setActiveFilter] = useState('All')
   const [discoverySearch, setDiscoverySearch] = useState('')
-  const [activeTab, setActiveTab] = useState('discover')
+  const [activeTab, setActiveTab] = useState(() =>
+    new URLSearchParams(routerLocation.search).get('tab') === 'wallet'
+      ? 'wallet'
+      : 'discover',
+  )
+  const [slide, setSlide] = useState('none')
   const [location, setLocation] = useState(null)
   const [businesses, setBusinesses] = useState([])
   const [isLoadingLocation, setIsLoadingLocation] = useState(true)
@@ -362,6 +367,13 @@ export default function Deals() {
     }
   }
 
+
+  function switchTab(nextTab) {
+    if (nextTab === activeTab) return
+    setSlide(nextTab === 'wallet' ? 'right' : 'left')
+    setActiveTab(nextTab)
+  }
+
   const searchedBusinesses = useMemo(() => {
     if (!discoverySearch.trim()) return businesses
     const query = discoverySearch.trim().toLowerCase()
@@ -397,7 +409,6 @@ export default function Deals() {
       ),
     [searchedBusinesses],
   )
-
   return (
     <>
       <div className="page-header discovery-page-header">
@@ -420,14 +431,14 @@ export default function Deals() {
         <button
           type="button"
           className={`dd-tab${activeTab === 'discover' ? ' dd-tab--active' : ''}`}
-          onClick={() => setActiveTab('discover')}
+          onClick={() => switchTab('discover')}
         >
           Discover
         </button>
         <button
           type="button"
           className={`dd-tab${activeTab === 'wallet' ? ' dd-tab--active' : ''}`}
-          onClick={() => setActiveTab('wallet')}
+          onClick={() => switchTab('wallet')}
         >
           Wallet
         </button>
@@ -439,6 +450,7 @@ export default function Deals() {
         </div>
       )}
 
+      <div key={activeTab} className={`dd-pane dd-pane--${slide}`}>
       {activeTab === 'discover' && (
         <>
           <input
@@ -754,6 +766,7 @@ export default function Deals() {
           </div>
         </section>
       )}
+      </div>
 
       {isDealLoading && !selectedDeal && (
         <Modal onClose={closeDeal} maxWidthClassName="max-w-sm">

@@ -1,14 +1,14 @@
 import {
   Award,
-  BadgeCheck,
   Gift,
+  History,
   ScanLine,
   Search,
   UserPlus,
   X,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import Button from '../../components/ui/Button'
 import QrCodeScanner from '../../components/ui/QrCodeScanner'
 import ProgramCard from '../../features/loyalty/components/ProgramCard'
@@ -16,11 +16,17 @@ import useJoinLoyaltyProgramme from '../../features/loyalty/hooks/useJoinLoyalty
 import useLoyaltyDiscovery from '../../features/loyalty/hooks/useLoyaltyDiscovery'
 import useLoyaltyPrograms from '../../features/loyalty/hooks/useLoyaltyPrograms'
 import '../../features/loyalty/Loyalty.css'
-import '../../features/service-marketplace/ServiceMarketplace.css'
 
 export default function Loyalty() {
   const routerLocation = useLocation()
-  const [activeTab, setActiveTab] = useState('discover')
+  const [searchParams] = useSearchParams()
+  const requestedTab = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState(
+    ['discover', 'cards', 'past'].includes(requestedTab)
+      ? requestedTab
+      : 'cards',
+  )
+  const [slide, setSlide] = useState('none')
   const discovery = useLoyaltyDiscovery()
   const loyalty = useLoyaltyPrograms()
   const { reload: reloadLoyaltyPrograms } = loyalty
@@ -38,6 +44,21 @@ export default function Loyalty() {
   )
   const effectiveActiveTab = autoOpenRecordId ? 'cards' : activeTab
 
+  function switchTab(nextTab) {
+    if (nextTab === activeTab) return
+    const order = ['discover', 'cards', 'past']
+    setSlide(
+      order.indexOf(nextTab) > order.indexOf(activeTab) ? 'right' : 'left',
+    )
+    setIsCodeFormOpen(false)
+    setIsScannerOpen(false)
+    setActiveTab(nextTab)
+  }
+
+  // A business could add a stamp at any moment while the customer is just
+  // browsing this tab, with no modal open at all — poll for fresh progress
+  // while "Your Loyalty Cards" is the active tab, rather than only when a
+  // specific card's QR view happens to be open.
   useEffect(() => {
     if (effectiveActiveTab !== 'cards') return undefined
     const interval = window.setInterval(() => {
@@ -64,7 +85,7 @@ export default function Loyalty() {
     (program) => program.programmeStatus === 'active',
   )
   const completedPrograms = loyalty.programs.filter(
-    (program) => program.programmeStatus !== 'active',
+    (program) => program.programmeStatus === 'expired',
   )
 
   const sortedActivePrograms = [...activePrograms].sort(
@@ -73,44 +94,45 @@ export default function Loyalty() {
 
   return (
     <>
-      <div className="page-header">
+      <div className="page-header ly-page-header">
         <h2>Loyalty Programmes</h2>
         <p>Track your rewards and show your loyalty QR when you visit.</p>
       </div>
 
-      <div className="sm-tabs" role="tablist" aria-label="Loyalty">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={effectiveActiveTab === 'discover'}
-          className={effectiveActiveTab === 'discover' ? 'active' : ''}
-          onClick={() => setActiveTab('discover')}
-        >
-          <Search aria-hidden="true" />
-          Discover
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={effectiveActiveTab === 'cards'}
-          className={effectiveActiveTab === 'cards' ? 'active' : ''}
-          onClick={() => setActiveTab('cards')}
-        >
-          <Award aria-hidden="true" />
-          Your Loyalty Cards
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={effectiveActiveTab === 'past'}
-          className={effectiveActiveTab === 'past' ? 'active' : ''}
-          onClick={() => setActiveTab('past')}
-        >
-          <BadgeCheck aria-hidden="true" />
-          Completed
-        </button>
-      </div>
+    <div className="ly-tabs" role="tablist" aria-label="Loyalty">
+      <button
+        type="button"
+        role="tab"
+        aria-selected={effectiveActiveTab === 'discover'}
+        className={`ly-tab${effectiveActiveTab === 'discover' ? ' ly-tab--active' : ''}`}
+        onClick={() => switchTab('discover')}
+      >
+        <Search aria-hidden="true" />
+        Discover
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={effectiveActiveTab === 'cards'}
+        className={`ly-tab${effectiveActiveTab === 'cards' ? ' ly-tab--active' : ''}`}
+        onClick={() => switchTab('cards')}
+      >
+        <Award aria-hidden="true" />
+        Your Loyalty Cards
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={effectiveActiveTab === 'past'}
+        className={`ly-tab${effectiveActiveTab === 'past' ? ' ly-tab--active' : ''}`}
+        onClick={() => switchTab('past')}
+      >
+        <History aria-hidden="true" />
+        Previous Loyalty Programmes
+      </button>
+    </div>
 
+      <div key={effectiveActiveTab} className={`ly-pane ly-pane--${slide}`}>
       {effectiveActiveTab === 'discover' && (
         <>
           {!isCodeFormOpen ? (
@@ -162,7 +184,10 @@ export default function Loyalty() {
                   type="button"
                   className="ly-join-close"
                   aria-label="Cancel joining a programme"
-                  onClick={() => setIsCodeFormOpen(false)}
+                  onClick={() => {
+                    setIsCodeFormOpen(false)
+                    setIsScannerOpen(false)
+                  }}
                 >
                   <X aria-hidden="true" />
                 </button>
@@ -207,11 +232,11 @@ export default function Loyalty() {
               ))}
             </div>
           ) : (
-            <div className="loyalty-empty-state">
-              <div aria-hidden="true">
+            <div className="ly-empty-state">
+              <span className="ly-empty-state-icon" aria-hidden="true">
                 <Gift />
-              </div>
-              No new loyalty programmes to start in your suburb right now.
+              </span>
+              <p>No new loyalty programmes to start in your suburb right now.</p>
             </div>
           )}
         </>
@@ -247,9 +272,14 @@ export default function Loyalty() {
               ))}
             </div>
           ) : (
-            <div className="loyalty-empty-state">
-              <div aria-hidden="true">☕</div>
-              No active programmes yet — join one from Discover!
+            <div className="ly-empty-state">
+              <span className="ly-empty-state-icon" aria-hidden="true">
+                <Award />
+              </span>
+              <p>
+                No active programmes yet. Join one from the Discover tab to
+                start earning rewards.
+              </p>
             </div>
           )}
         </>
@@ -266,16 +296,19 @@ export default function Loyalty() {
               ))}
             </div>
           ) : (
-            <div className="loyalty-empty-state">
-              <div aria-hidden="true">
-                <BadgeCheck />
-              </div>
-              No completed programmes yet — cards move here once a programme
-              ends.
+            <div className="ly-empty-state">
+              <span className="ly-empty-state-icon" aria-hidden="true">
+                <History />
+              </span>
+              <p>
+                No previous programmes yet. Programmes move here once they
+                expire.
+              </p>
             </div>
           )}
         </>
       )}
+      </div>
     </>
   )
 }

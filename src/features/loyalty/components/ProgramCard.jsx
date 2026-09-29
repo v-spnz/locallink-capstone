@@ -14,9 +14,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import Button from '../../../components/ui/Button'
 import Modal from '../../../components/ui/Modal'
 import {
-  getCustomerReward,
   getProgrammeTypeLabel,
-  isCountBasedLoyaltyType,
   LOYALTY_REDEMPTION_METHOD,
 } from '../businessLoyaltyTemplates'
 import {
@@ -25,8 +23,7 @@ import {
 } from '../loyaltyIdentifier'
 import { getLoyaltyProgressPresentation } from '../loyaltyProgress'
 import { createMyLoyaltyScanCode } from '../api/loyaltyApi'
-import BusinessAvatar from './BusinessAvatar'
-import StampRing from './StampRing'
+import LoyaltyTicket from './LoyaltyTicket'
 
 export default function ProgramCard({ program, index, onJoin, autoOpen }) {
   const isJoined = program.isJoined ?? true
@@ -37,8 +34,11 @@ export default function ProgramCard({ program, index, onJoin, autoOpen }) {
   const [isJoining, setIsJoining] = useState(false)
   const [joinError, setJoinError] = useState('')
   const progress = getLoyaltyProgressPresentation(program)
-  const isCountBasedProgramme = isCountBasedLoyaltyType(program.programmeType)
   const businessName = program.business ?? program.businessName
+  const isEnded =
+    isJoined &&
+    Boolean(program.programmeStatus) &&
+    program.programmeStatus !== 'active'
 
   async function handleShowQr() {
     setQrError('')
@@ -75,7 +75,7 @@ export default function ProgramCard({ program, index, onJoin, autoOpen }) {
   return (
     <>
       <article
-        className="ly-card card"
+        className="ly-card ly-card--ticket"
         style={{ animationDelay: `${index * 40}ms`, cursor: 'pointer' }}
         onClick={() => setView('details')}
         role="button"
@@ -87,37 +87,13 @@ export default function ProgramCard({ program, index, onJoin, autoOpen }) {
           }
         }}
       >
-        <div className="loyalty-program-header">
-          {isCountBasedProgramme ? (
-            <StampRing earned={progress.progress} required={progress.target} />
-          ) : (
-            <BusinessAvatar name={businessName} />
-          )}
-          <div className="loyalty-program-business">
-            <strong>{businessName}</strong>
-            <span>{program.programmeName}</span>
-          </div>
-          {program.rewardEligible && (
-            <span className="ly-badge-pulse">Reward ready</span>
-          )}
-        </div>
-
-        {!isCountBasedProgramme && (
-          <div className="loyalty-points-progress">
-            <div className="progress-bar-track">
-              <div
-                className="progress-bar-fill ly-bar-fill"
-                style={{ width: `${progress.percentage}%` }}
-              />
-            </div>
-            <span>{progress.progressLabel}</span>
-          </div>
-        )}
-
-        <div className="loyalty-reward">
-          <span>Reward</span>
-          <strong>{getCustomerReward(program)}</strong>
-        </div>
+        <LoyaltyTicket
+          program={program}
+          progress={progress}
+          businessName={businessName}
+          isJoined={isJoined}
+          isEnded={isEnded}
+        />
       </article>
 
       {view === 'details' && (
@@ -137,46 +113,14 @@ export default function ProgramCard({ program, index, onJoin, autoOpen }) {
               <X aria-hidden="true" />
             </button>
 
-            <div className="loyalty-details-header">
-              {isCountBasedProgramme ? (
-                <StampRing
-                  earned={progress.progress}
-                  required={progress.target}
-                />
-              ) : (
-                <BusinessAvatar name={businessName} />
-              )}
-              <div className="loyalty-program-business">
-                <strong id={`loyalty-details-title-${program.id}`}>
-                  {businessName}
-                </strong>
-                <span>{program.programmeName}</span>
-              </div>
-            </div>
-
-            {!isCountBasedProgramme && (
-              <div className="loyalty-points-progress">
-                <div className="progress-bar-track">
-                  <div
-                    className="progress-bar-fill ly-bar-fill"
-                    style={{ width: `${progress.percentage}%` }}
-                  />
-                </div>
-                <span>{progress.progressLabel}</span>
-              </div>
-            )}
-
-            {program.rewardEligible && (
-              <span className="ly-badge-pulse loyalty-details-badge">
-                <CheckCircle2 aria-hidden="true" />
-                Reward ready
-              </span>
-            )}
-
-            <div className="loyalty-reward">
-              <span>Reward</span>
-              <strong>{getCustomerReward(program)}</strong>
-            </div>
+            <LoyaltyTicket
+              program={program}
+              progress={progress}
+              businessName={businessName}
+              isJoined={isJoined}
+              isEnded={isEnded}
+              titleId={`loyalty-details-title-${program.id}`}
+            />
 
             <dl className="loyalty-details-list">
               <div>
@@ -208,7 +152,23 @@ export default function ProgramCard({ program, index, onJoin, autoOpen }) {
               )}
             </dl>
 
-            {isJoined ? (
+            {!isJoined ? (
+              <>
+                <Button
+                  className="ly-redeem-btn"
+                  onClick={handleJoin}
+                  disabled={isJoining}
+                >
+                  <UserPlus aria-hidden="true" />
+                  {isJoining ? 'Joining…' : 'Join'}
+                </Button>
+                {joinError && (
+                  <p className="loyalty-qr-error" role="alert">
+                    {joinError}
+                  </p>
+                )}
+              </>
+            ) : program.programmeStatus === 'active' ? (
               <>
                 <Button
                   className="ly-redeem-btn"
@@ -225,21 +185,9 @@ export default function ProgramCard({ program, index, onJoin, autoOpen }) {
                 )}
               </>
             ) : (
-              <>
-                <Button
-                  className="ly-redeem-btn"
-                  onClick={handleJoin}
-                  disabled={isJoining}
-                >
-                  <UserPlus aria-hidden="true" />
-                  {isJoining ? 'Joining…' : 'Join'}
-                </Button>
-                {joinError && (
-                  <p className="loyalty-qr-error" role="alert">
-                    {joinError}
-                  </p>
-                )}
-              </>
+              <p className="loyalty-ended-note">
+                This programme has ended and can no longer be used.
+              </p>
             )}
           </section>
         </Modal>

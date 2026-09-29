@@ -142,9 +142,9 @@ export default function DiscoveryMap({ location, businesses }) {
         >
           <Popup>Your registered suburb</Popup>
         </CircleMarker>
-        {businesses.map((business) => (
+        {businesses.map((business, index) => (
           <CircleMarker
-            key={`${business.business_id}-${business.location_id}`}
+            key={`${business.business_id}-${business.location_id}-${index}`}
             center={[business.latitude, business.longitude]}
             radius={7}
             pathOptions={{

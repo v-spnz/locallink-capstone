@@ -1,0 +1,657 @@
+/* Home — page header */
+.home-page-header {
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  border: 1px solid #e4e9fb;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #eef2ff 0%, #f5f7ff 55%, #ffffff 100%);
+  animation: home-rise 0.35s ease backwards;
+}
+
+.home-header-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.home-greeting {
+  margin: 0 0 3px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.home-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.home-location-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3451d1;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.home-location-chip svg {
+  flex-shrink: 0;
+}
+
+/* Home — search */
+.home-search {
+  position: relative;
+  flex: 0 1 340px;
+  min-width: 220px;
+}
+
+.home-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.home-search input {
+  width: 100%;
+  padding: 10px 12px 10px 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.home-search input:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-light);
+}
+
+.home-search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  z-index: 20;
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow-md);
+  animation: home-fade 0.15s ease;
+}
+
+.home-search-empty {
+  margin: 0;
+  padding: 14px 10px;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.home-search-group + .home-search-group {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+
+.home-search-group-label {
+  margin: 4px 8px 2px;
+  color: var(--text-muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.home-search-result {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--radius);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.home-search-result:hover {
+  background: var(--bg);
+}
+
+.home-search-result-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.home-search-result-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+/* Home — two-column layout */
+.home-two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .home-two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Home — section headings */
+.home-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 4px;
+}
+
+.home-section-head h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.home-section-note {
+  margin-bottom: 11px;
+  color: var(--text-muted);
+  font-size: 11.5px;
+}
+
+.block-gap {
+  margin-top: 26px;
+}
+
+/* Home — empty states, own styling, isolated from shared-ui.css .empty-state */
+.home-empty-state {
+  padding: 28px 18px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  color: var(--text-muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+  text-align: center;
+  animation: home-rise 0.3s ease backwards;
+}
+
+/* Home — featured deal */
+.featured-deal {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  animation: home-rise 0.35s ease backwards;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.featured-deal:hover {
+  border-color: #bac8ff;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.featured-deal:active {
+  transform: translateY(0) scale(0.99);
+}
+
+@media (max-width: 600px) {
+  .featured-deal {
+    grid-template-columns: 1fr;
+  }
+}
+
+.featured-deal-photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  background: linear-gradient(135deg, #6d7dc9, #3f4f9e);
+  font-size: 40px;
+}
+
+.featured-deal-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.featured-deal-body {
+  padding: 16px 18px;
+}
+
+.deal-tag {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 3px 9px;
+  border-radius: var(--radius);
+  background: var(--blue-light);
+  color: var(--blue-dark);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.featured-deal-name {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.featured-deal-desc {
+  margin: 0 0 12px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.featured-deal-foot {
+  padding-top: 11px;
+  border-top: 1px solid var(--border);
+}
+
+.featured-deal-distance {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--emerald-light);
+  color: #087f5b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.featured-deal-distance.is-neutral {
+  background: var(--blue-light);
+  color: var(--blue-dark);
+}
+
+/* Home — recent activity */
+.home-activity-list {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.home-activity-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--text-muted);
+  animation: home-rise 0.3s ease backwards;
+}
+
+.home-activity-row:nth-child(2) {
+  animation-delay: 40ms;
+}
+
+.home-activity-row:nth-child(3) {
+  animation-delay: 80ms;
+}
+
+.home-activity-row:last-child {
+  border-bottom: none;
+}
+
+.home-activity-icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--blue);
+  color: var(--white);
+}
+
+.home-activity-icon.is-deal {
+  background: var(--emerald);
+}
+
+.home-activity-icon.is-loyalty {
+  background: var(--purple);
+}
+
+.home-activity-row .what {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-activity-row .what b {
+  color: var(--text);
+}
+
+.home-activity-row .when {
+  flex-shrink: 0;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* Home — sidebar cards */
+.home-side-card {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow);
+  animation: home-rise 0.35s ease backwards;
+}
+
+.home-two-col aside > .home-side-card:nth-child(2) {
+  animation-delay: 60ms;
+}
+
+/* Loyalty preview card — ink colour swaps blue to emerald once a reward is ready */
+.home-loyalty-card {
+  --home-ink: var(--blue);
+  --home-ink-light: var(--blue-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.home-loyalty-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--home-ink);
+}
+
+.home-loyalty-card.is-ready {
+  --home-ink: var(--emerald);
+  --home-ink-light: var(--emerald-light);
+}
+
+.home-loyalty-card .home-side-icon {
+  background: var(--home-ink-light);
+  color: var(--home-ink);
+}
+
+.home-loyalty-reward-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--home-ink-light);
+  color: var(--home-ink);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Active jobs preview card — gold accent ties to the marketplace's own quote colour */
+.home-jobs-card .home-side-icon {
+  background: var(--quote-gold-light);
+  color: var(--quote-gold);
+}
+
+.home-side-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.home-side-icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: #eef2ff;
+  color: #3451d1;
+}
+
+.home-side-label {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.home-side-title {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* Home — loyalty preview */
+.stamp-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.stamp {
+  width: 20px;
+  height: 20px;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: 50%;
+}
+
+.stamp.filled {
+  border-color: var(--home-ink, var(--blue));
+  background: var(--home-ink, var(--blue));
+}
+
+.home-progress-track {
+  height: 8px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.home-progress-fill {
+  height: 100%;
+  background: var(--home-ink, var(--blue));
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stamp-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.home-reward-line {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+/* Home — active jobs preview */
+.job-row {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--blue);
+  border-radius: var(--radius);
+  background: var(--bg);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.job-row:hover {
+  border-color: var(--blue);
+  background: var(--blue-light);
+}
+
+.job-row:active {
+  transform: scale(0.99);
+}
+
+.job-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.job-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.job-quotes {
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.job-quotes.has-quotes {
+  border-color: var(--quote-gold);
+  background: var(--quote-gold-light);
+  color: var(--quote-gold);
+}
+
+.job-meta {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+/* Home — buttons */
+.btn-outline {
+  width: 100%;
+  margin-top: 16px;
+  padding: 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.btn-outline:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  box-shadow: 0 4px 10px -6px rgba(59, 91, 219, 0.4);
+}
+
+.btn-outline:active {
+  transform: scale(0.98);
+}
+
+.section-link-btn {
+  margin-left: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  display: inline-block;
+}
+
+.section-link-btn:hover {
+  text-decoration: underline;
+  transform: translateX(1px);
+}
+
+@keyframes home-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes home-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-page-header,
+  .home-empty-state,
+  .featured-deal,
+  .home-activity-row,
+  .home-side-card {
+    animation: none !important;
+  }
+
+  .featured-deal,
+  .job-row,
+  .btn-outline,
+  .section-link-btn,
+  .home-progress-fill {
+    transition: none !important;
+  }
+}

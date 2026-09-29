@@ -267,7 +267,7 @@ export default function DealDetailModal({
       </div>
 
       {showConfirm && (
-        <div className="border-t border-[var(--border)] bg-[#fff8e6] px-6 py-5">
+        <div className="dd-reveal border-t border-[var(--border)] bg-[#fff8e6] px-6 py-5">
           <div className="flex items-start gap-2">
             <AlertTriangle
               size={18}
@@ -306,7 +306,7 @@ export default function DealDetailModal({
       )}
 
       {showQrCode && isRedeemed && (
-        <div className="flex flex-col items-center gap-2 border-t border-[var(--border)] bg-[#effaf3] px-6 py-6">
+        <div className="dd-reveal flex flex-col items-center gap-2 border-t border-[var(--border)] bg-[#effaf3] px-6 py-6">
           <BadgeCheck size={40} className="text-[#087f5b]" aria-hidden="true" />
           <p className="text-sm font-bold text-[#087f5b]">
             Deal has been Redeemed
@@ -323,7 +323,7 @@ export default function DealDetailModal({
       )}
 
       {showQrCode && !isRedeemed && windowExpired && (
-        <div className="flex flex-col items-center gap-2 border-t border-[var(--border)] bg-[#fff5f5] px-6 py-6">
+        <div className="dd-reveal flex flex-col items-center gap-2 border-t border-[var(--border)] bg-[#fff5f5] px-6 py-6">
           <Clock
             size={40}
             className="text-[var(--danger)]"
