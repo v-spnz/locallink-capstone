@@ -15,7 +15,6 @@ import Button from '../../../components/ui/Button'
 import Modal from '../../../components/ui/Modal'
 import {
   getProgrammeTypeLabel,
-  isCountBasedLoyaltyType,
   LOYALTY_REDEMPTION_METHOD,
 } from '../businessLoyaltyTemplates'
 import {
