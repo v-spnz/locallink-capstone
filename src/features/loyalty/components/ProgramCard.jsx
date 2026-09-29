@@ -9,7 +9,7 @@ import {
   UserPlus,
   X,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import Button from '../../../components/ui/Button'
 import Modal from '../../../components/ui/Modal'
@@ -27,40 +27,17 @@ import { createMyLoyaltyScanCode } from '../api/loyaltyApi'
 import BusinessAvatar from './BusinessAvatar'
 import StampRing from './StampRing'
 
-// program.isJoined defaults to true: every record from "Your Loyalty" and
-// "Completed" is joined by definition (get_my_loyalty_records only returns
-// joined records at all). Only Discover rows carry isJoined explicitly.
-export default function ProgramCard({ program, index, onJoin }) {
+export default function ProgramCard({ program, index, onJoin, autoOpen }) {
   const isJoined = program.isJoined ?? true
-  const [view, setView] = useState(null) // null | 'details' | 'qr'
+  const [view, setView] = useState(() => (autoOpen ? 'details' : null))
   const [scanSession, setScanSession] = useState(null)
   const [isCreatingCode, setIsCreatingCode] = useState(false)
   const [qrError, setQrError] = useState('')
   const [isJoining, setIsJoining] = useState(false)
   const [joinError, setJoinError] = useState('')
-  const [secondsRemaining, setSecondsRemaining] = useState(0)
   const progress = getLoyaltyProgressPresentation(program)
   const isStampCard = program.programmeType === 'stamp_card'
   const businessName = program.business ?? program.businessName
-
-  useEffect(() => {
-    if (!scanSession?.expiresAt) return undefined
-
-    function updateCountdown() {
-      setSecondsRemaining(
-        Math.max(
-          0,
-          Math.ceil(
-            (new Date(scanSession.expiresAt).getTime() - Date.now()) / 1000,
-          ),
-        ),
-      )
-    }
-
-    updateCountdown()
-    const timer = window.setInterval(updateCountdown, 1000)
-    return () => window.clearInterval(timer)
-  }, [scanSession])
 
   async function handleShowQr() {
     setQrError('')
@@ -93,9 +70,6 @@ export default function ProgramCard({ program, index, onJoin }) {
     setQrError('')
     setJoinError('')
   }
-
-  const countdownMinutes = Math.floor(secondsRemaining / 60)
-  const countdownSeconds = String(secondsRemaining % 60).padStart(2, '0')
 
   return (
     <>
@@ -322,11 +296,6 @@ export default function ProgramCard({ program, index, onJoin }) {
             </div>
             <span className="loyalty-qr-manual-label">Or enter this code</span>
             <code>{formatLoyaltyLookupCode(scanSession.scanCode)}</code>
-            <small>
-              {secondsRemaining > 0
-                ? `Code expires in ${countdownMinutes}:${countdownSeconds}`
-                : 'This code has expired. Close it and create a new one.'}
-            </small>
             <small>{getProgrammeTypeLabel(program.programmeType)}</small>
           </section>
         </Modal>
