@@ -59,6 +59,10 @@ select is(
 );
 
 reset role;
+update public.business_capabilities
+set loyalty_enabled = false
+where business_id = '21000000-0000-0000-0000-000000000001';
+
 select set_config(
   'request.jwt.claim.sub',
   '40000000-0000-0000-0000-000000000001',

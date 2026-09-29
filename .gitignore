@@ -27,8 +27,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# Local AI tooling
-.agents/
-.codex/
-skills-lock.json

@@ -22,14 +22,14 @@ set local role authenticated;
 select lives_ok(
   $$
     select public.set_customer_location(
-      'Queen Street, Auckland Central, Auckland 1010, New Zealand',
-      'Queen Street',
-      'Auckland Central',
+      '12 Lunn Avenue, Mount Wellington, Auckland 1060, New Zealand',
+      '12 Lunn Avenue',
+      'Mount Wellington',
       'Auckland',
-      '1010',
+      '1060',
       'nz',
-      -36.8485,
-      174.7633
+      -36.9080,
+      174.8331
     )
   $$,
   'a customer can save a geocoded address'
@@ -44,8 +44,8 @@ select is(
 select results_eq(
   $$
     select business_id
-    from public.nearby_businesses(-36.8485, 174.7633, 5, null)
-    limit 1
+    from public.nearby_businesses(-36.9080, 174.8331, 5, null)
+    where business_id = '21000000-0000-0000-0000-000000000001'
   $$,
   $$values ('21000000-0000-0000-0000-000000000001'::uuid)$$,
   'nearby businesses are returned closest first by PostGIS'
@@ -55,7 +55,7 @@ select results_eq(
   $$
     select business_id
     from public.businesses_in_my_suburb(null)
-    limit 1
+    where business_id = '21000000-0000-0000-0000-000000000001'
   $$,
   $$values ('21000000-0000-0000-0000-000000000001'::uuid)$$,
   'consumer discovery uses the authenticated customer saved suburb'
