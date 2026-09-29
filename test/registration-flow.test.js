@@ -108,10 +108,17 @@ test('suburb names take priority over broader local board districts', () => {
 })
 
 test('registration progressively introduces value before identity creation', async () => {
-  const [register, registerStyles, protectedRoute, businessProtectedRoute] =
+  const [
+    register,
+    registerStyles,
+    login,
+    protectedRoute,
+    businessProtectedRoute,
+  ] =
     await Promise.all([
       read('../src/pages/auth/RegisterPage.jsx'),
       read('../src/pages/auth/RegisterPage.css'),
+      read('../src/pages/auth/LoginPage.jsx'),
       read('../src/auth/ProtectedRoute.jsx'),
       read('../src/business/BusinessProtectedRoute.jsx'),
     ])
@@ -144,6 +151,8 @@ test('registration progressively introduces value before identity creation', asy
     register,
     /HowItWorksStep onContinue=\{\(\) => setStep\('account'\)\}/,
   )
+  assert.match(login, /<Link to="\/register" viewTransition>/)
+  assert.doesNotMatch(login, /startAt:\s*'account'/)
   assert.match(register, /flow\.destination \|\| '\/home'/)
   assert.match(protectedRoute, /to="\/login"/)
   assert.match(protectedRoute, /state=\{\{ from: location \}\}/)
