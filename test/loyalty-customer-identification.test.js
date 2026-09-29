@@ -15,7 +15,7 @@ import {
 } from '../src/features/loyalty/loyaltyProgress.js'
 
 const ACTIVE_RECORD = {
-  programmeType: 'stamp_card',
+  programmeType: 'visit_card',
   programmeStatus: 'active',
   currentProgress: 6,
   rewardThreshold: 8,
@@ -48,6 +48,19 @@ test('US0109 AC3: current progress and eligibility have clear business-facing la
     remainingLabel: '2 visits to go',
   })
   assert.equal(getLoyaltyEligibilityLabel(ACTIVE_RECORD), 'In progress')
+  assert.deepEqual(
+    getLoyaltyProgressPresentation({
+      ...ACTIVE_RECORD,
+      programmeType: 'purchase_card',
+    }),
+    {
+      progress: 6,
+      target: 8,
+      percentage: 75,
+      progressLabel: '6 of 8 purchases',
+      remainingLabel: '2 purchases to go',
+    },
+  )
   assert.equal(
     getLoyaltyEligibilityLabel({
       ...ACTIVE_RECORD,

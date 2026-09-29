@@ -1,7 +1,12 @@
 import { LOYALTY_DISCOUNT_PERCENTAGES } from './businessLoyaltyTemplates.js'
 
 const MAX_REWARD_THRESHOLD = 1_000_000
-const TEMPLATE_TYPES = ['stamp_card', 'spend_and_save', 'spend_and_reward']
+const COUNT_BASED_TYPES = ['purchase_card', 'visit_card']
+const TEMPLATE_TYPES = [
+  ...COUNT_BASED_TYPES,
+  'spend_and_save',
+  'spend_and_reward',
+]
 
 export function getAucklandToday(now = new Date()) {
   const parts = new Intl.DateTimeFormat('en-NZ', {
@@ -92,13 +97,14 @@ export function validateLoyaltyProgramme(
     (!Number.isFinite(rewardThreshold) ||
       rewardThreshold < 1 ||
       rewardThreshold > MAX_REWARD_THRESHOLD ||
-      (type === 'stamp_card' && !Number.isInteger(rewardThreshold)) ||
-      (type !== 'stamp_card' && !Number.isInteger(rewardThreshold * 100)))
+      (COUNT_BASED_TYPES.includes(type) &&
+        !Number.isInteger(rewardThreshold)) ||
+      (!COUNT_BASED_TYPES.includes(type) &&
+        !Number.isInteger(rewardThreshold * 100)))
   ) {
-    errors.rewardThreshold =
-      type === 'stamp_card'
-        ? 'Use a whole number between 1 and 1,000,000.'
-        : 'Use an amount between $1 and $1,000,000, with up to two decimal places.'
+    errors.rewardThreshold = COUNT_BASED_TYPES.includes(type)
+      ? 'Use a whole number between 1 and 1,000,000.'
+      : 'Use an amount between $1 and $1,000,000, with up to two decimal places.'
   }
 
   if (type === 'spend_and_save') {

@@ -16,6 +16,7 @@ import Modal from '../../../components/ui/Modal'
 import {
   getCustomerReward,
   getProgrammeTypeLabel,
+  isCountBasedLoyaltyType,
   LOYALTY_REDEMPTION_METHOD,
 } from '../businessLoyaltyTemplates'
 import {
@@ -36,7 +37,7 @@ export default function ProgramCard({ program, index, onJoin, autoOpen }) {
   const [isJoining, setIsJoining] = useState(false)
   const [joinError, setJoinError] = useState('')
   const progress = getLoyaltyProgressPresentation(program)
-  const isStampCard = program.programmeType === 'stamp_card'
+  const isCountBasedProgramme = isCountBasedLoyaltyType(program.programmeType)
   const businessName = program.business ?? program.businessName
 
   async function handleShowQr() {
@@ -87,7 +88,7 @@ export default function ProgramCard({ program, index, onJoin, autoOpen }) {
         }}
       >
         <div className="loyalty-program-header">
-          {isStampCard ? (
+          {isCountBasedProgramme ? (
             <StampRing earned={progress.progress} required={progress.target} />
           ) : (
             <BusinessAvatar name={businessName} />
@@ -101,7 +102,7 @@ export default function ProgramCard({ program, index, onJoin, autoOpen }) {
           )}
         </div>
 
-        {!isStampCard && (
+        {!isCountBasedProgramme && (
           <div className="loyalty-points-progress">
             <div className="progress-bar-track">
               <div
@@ -137,7 +138,7 @@ export default function ProgramCard({ program, index, onJoin, autoOpen }) {
             </button>
 
             <div className="loyalty-details-header">
-              {isStampCard ? (
+              {isCountBasedProgramme ? (
                 <StampRing
                   earned={progress.progress}
                   required={progress.target}
@@ -153,7 +154,7 @@ export default function ProgramCard({ program, index, onJoin, autoOpen }) {
               </div>
             </div>
 
-            {!isStampCard && (
+            {!isCountBasedProgramme && (
               <div className="loyalty-points-progress">
                 <div className="progress-bar-track">
                   <div

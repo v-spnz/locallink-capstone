@@ -2367,6 +2367,52 @@ body.business-surface .service-empty-state-copy p {
   text-transform: capitalize;
 }
 
+.business-settings-location-setup {
+  max-width: 650px;
+  margin-top: 26px;
+  padding: 20px;
+  border: 1px solid #dfe5f5;
+  border-radius: 12px;
+  display: grid;
+  gap: 18px;
+  background: rgb(248 249 252 / 78%);
+}
+
+.business-settings-location-setup h3,
+.business-settings-location-setup p {
+  margin: 0;
+}
+
+.business-settings-location-setup h3 {
+  color: var(--business-ink);
+  font-size: 17px;
+  line-height: 1.35;
+}
+
+.business-settings-location-setup p {
+  margin-top: 5px;
+  color: var(--business-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.business-settings-location-status {
+  max-width: 650px;
+  margin: 16px 0 0;
+  color: var(--business-muted);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.business-settings-location-status.is-success {
+  color: #18764a;
+}
+
+.business-settings-location-status.is-error {
+  color: var(--business-danger);
+}
+
 .business-settings-callout {
   max-width: 650px;
   padding: 16px;

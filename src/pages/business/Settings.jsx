@@ -22,9 +22,13 @@ import {
   useNavigate,
 } from 'react-router-dom'
 import useBusiness from '../../business/useBusiness'
+import AddressAutocomplete from '../../features/location/components/AddressAutocomplete'
+import {
+  addManagedBusinessLocation,
+  fetchManagedBusinessLocations,
+} from '../../features/location/api/locations'
 import BusinessPageLoader from '../../components/ui/BusinessPageLoader'
 import { supabase } from '../../lib/supabase'
-import { fetchManagedBusinessLocations } from '../../features/location/api/locations'
 import { clearRegistrationFlow } from '../../features/onboarding/registrationFlow'
 import ClaimRecords from './ClaimRecords'
 
@@ -85,7 +89,20 @@ function AccountOverview({
   )
 }
 
-function BusinessProfile({ business, membership, enabledCapabilities }) {
+function BusinessProfile({
+  business,
+  membership,
+  enabledCapabilities,
+  primaryLocation,
+  locationStatus,
+  isSavingLocation,
+  onLocationSelect,
+}) {
+  const hasCompleteLocation = Boolean(
+    primaryLocation?.formatted_address && primaryLocation?.suburb,
+  )
+  const canManageLocation = ['owner', 'admin'].includes(membership.role)
+
   return (
     <section className="business-settings-section">
       <SettingsHeading icon={Building2} title="Business profile" />
@@ -104,10 +121,53 @@ function BusinessProfile({ business, membership, enabledCapabilities }) {
           <dd>{business.description || 'No description added'}</dd>
         </div>
         <div>
+          <dt>Store address</dt>
+          <dd>{primaryLocation?.formatted_address || 'No address added'}</dd>
+        </div>
+        <div>
+          <dt>Suburb</dt>
+          <dd>{primaryLocation?.suburb || 'No suburb added'}</dd>
+        </div>
+        <div>
           <dt>Enabled capabilities</dt>
           <dd>{enabledCapabilities.join(', ') || 'None enabled'}</dd>
         </div>
       </dl>
+
+      {!hasCompleteLocation && canManageLocation && (
+        <div className="business-settings-location-setup">
+          <div>
+            <h3>Add your store location</h3>
+            <p>
+              Select your complete street address. LocalLink will automatically
+              save the suburb for customer discovery.
+            </p>
+          </div>
+          <AddressAutocomplete
+            id="business-settings-address"
+            label="Store address"
+            placeholder="Search for your shop, office, or service address"
+            disabled={isSavingLocation}
+            showCurrentLocation={false}
+            onSelect={onLocationSelect}
+          />
+        </div>
+      )}
+
+      {!hasCompleteLocation && !canManageLocation && (
+        <p className="business-settings-location-status">
+          Ask a business owner or administrator to add the store address.
+        </p>
+      )}
+
+      {locationStatus && (
+        <p
+          className={`business-settings-location-status is-${locationStatus.variant}`}
+          role={locationStatus.variant === 'error' ? 'alert' : 'status'}
+        >
+          {locationStatus.message}
+        </p>
+      )}
     </section>
   )
 }
@@ -204,6 +264,8 @@ export default function Settings() {
   const [logoutError, setLogoutError] = useState('')
   const [businessLocations, setBusinessLocations] = useState([])
   const [areLocationsLoading, setAreLocationsLoading] = useState(true)
+  const [isSavingLocation, setIsSavingLocation] = useState(false)
+  const [locationStatus, setLocationStatus] = useState(null)
   const {
     business,
     membership,
@@ -218,6 +280,16 @@ export default function Settings() {
     capabilities.loyalty_enabled && 'Loyalty',
     capabilities.service_marketplace_enabled && 'Service Marketplace',
   ].filter(Boolean)
+  const primaryLocation =
+    businessLocations.find(
+      (location) =>
+        location.is_primary && location.formatted_address && location.suburb,
+    ) ??
+    businessLocations.find(
+      (location) => location.formatted_address && location.suburb,
+    ) ??
+    businessLocations.find((location) => location.is_primary) ??
+    businessLocations[0]
 
   const settingsPages = [
     {
@@ -277,6 +349,38 @@ export default function Settings() {
       active = false
     }
   }, [business.id])
+
+  async function handleLocationSelect(address) {
+    if (!address.suburb?.trim()) {
+      setLocationStatus({
+        variant: 'error',
+        message:
+          'We could not identify the suburb for this address. Choose another search result.',
+      })
+      return
+    }
+
+    setIsSavingLocation(true)
+    setLocationStatus({ variant: 'loading', message: 'Saving location…' })
+
+    try {
+      await addManagedBusinessLocation(business.id, address)
+      const locations = await fetchManagedBusinessLocations(business.id)
+      setBusinessLocations(locations)
+      setLocationStatus({
+        variant: 'success',
+        message: `Store address saved. Suburb: ${address.suburb}.`,
+      })
+    } catch (error) {
+      console.error('Unable to save business location.', error)
+      setLocationStatus({
+        variant: 'error',
+        message: 'Unable to save this address. Please try again.',
+      })
+    } finally {
+      setIsSavingLocation(false)
+    }
+  }
 
   async function handleLogout() {
     setIsLoggingOut(true)
@@ -358,6 +462,10 @@ export default function Settings() {
                   business={business}
                   membership={membership}
                   enabledCapabilities={enabledCapabilities}
+                  primaryLocation={primaryLocation}
+                  locationStatus={locationStatus}
+                  isSavingLocation={isSavingLocation}
+                  onLocationSelect={handleLocationSelect}
                 />
               }
             />

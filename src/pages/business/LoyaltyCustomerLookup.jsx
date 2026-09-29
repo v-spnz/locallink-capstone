@@ -12,7 +12,10 @@ import { useCallback, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Button from '../../components/ui/Button'
 import QrCodeScanner from '../../components/ui/QrCodeScanner'
-import { getProgrammeTypeLabel } from '../../features/loyalty/businessLoyaltyTemplates'
+import {
+  getProgrammeTypeLabel,
+  isCountBasedLoyaltyType,
+} from '../../features/loyalty/businessLoyaltyTemplates'
 import useLoyaltyCustomerLookup from '../../features/loyalty/hooks/useLoyaltyCustomerLookup'
 import {
   getLoyaltyEligibilityLabel,
@@ -47,7 +50,9 @@ function LoyaltyRecord({
   const progress = getLoyaltyProgressPresentation(record)
   const eligibilityLabel = getLoyaltyEligibilityLabel(record)
   const isProgrammeActive = record.programmeStatus === 'active'
-  const isSpendProgramme = record.programmeType !== 'stamp_card'
+  const isCountBasedProgramme = isCountBasedLoyaltyType(record.programmeType)
+  const progressUnit =
+    record.programmeType === 'purchase_card' ? 'purchase' : 'visit'
   const [spendAmount, setSpendAmount] = useState('1')
 
   return (
@@ -163,7 +168,7 @@ function LoyaltyRecord({
           </>
         )}
 
-        {isSpendProgramme ? (
+        {!isCountBasedProgramme ? (
           <div className="loyalty-customer-points-row">
             <label htmlFor="loyalty-spend-amount">Purchase amount</label>
             <input
@@ -191,7 +196,7 @@ function LoyaltyRecord({
             disabled={!isProgrammeActive || isAddingStamp}
           >
             <PlusCircle aria-hidden="true" />
-            {isAddingStamp ? 'Adding…' : 'Add stamp'}
+            {isAddingStamp ? 'Adding…' : `Add ${progressUnit}`}
           </Button>
         )}
         {stampError && (
@@ -201,7 +206,9 @@ function LoyaltyRecord({
         )}
         {stampSuccess && !stampError && (
           <p className="loyalty-stamp-success" role="status">
-            {isSpendProgramme ? 'Purchase added.' : 'Stamp added.'}
+            {!isCountBasedProgramme
+              ? 'Purchase added.'
+              : `${progressUnit === 'purchase' ? 'Purchase' : 'Visit'} added.`}
           </p>
         )}
       </section>
