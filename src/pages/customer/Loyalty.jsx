@@ -8,6 +8,7 @@ import {
   X,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import Button from '../../components/ui/Button'
 import QrCodeScanner from '../../components/ui/QrCodeScanner'
 import ProgramCard from '../../features/loyalty/components/ProgramCard'
@@ -18,6 +19,7 @@ import '../../features/loyalty/Loyalty.css'
 import '../../features/service-marketplace/ServiceMarketplace.css'
 
 export default function Loyalty() {
+  const routerLocation = useLocation()
   const [activeTab, setActiveTab] = useState('discover')
   const discovery = useLoyaltyDiscovery()
   const loyalty = useLoyaltyPrograms()
@@ -31,17 +33,18 @@ export default function Loyalty() {
     loyalty.reload()
   })
 
-  // A business could add a stamp at any moment while the customer is just
-  // browsing this tab, with no modal open at all — poll for fresh progress
-  // while "Your Loyalty Cards" is the active tab, rather than only when a
-  // specific card's QR view happens to be open.
+  const autoOpenRecordId = new URLSearchParams(routerLocation.search).get(
+    'record',
+  )
+  const effectiveActiveTab = autoOpenRecordId ? 'cards' : activeTab
+
   useEffect(() => {
-    if (activeTab !== 'cards') return undefined
+    if (effectiveActiveTab !== 'cards') return undefined
     const interval = window.setInterval(() => {
       reloadLoyaltyPrograms({ silent: true })
     }, 5000)
     return () => window.clearInterval(interval)
-  }, [activeTab, reloadLoyaltyPrograms])
+  }, [effectiveActiveTab, reloadLoyaltyPrograms])
 
   async function handleDiscoverJoin(joinCode) {
     const joined = await join.handleScannedCode(joinCode)
@@ -50,30 +53,20 @@ export default function Loyalty() {
       loyalty.reload()
       return true
     }
-    // join.error now holds the real reason (e.g. the Postgres message
-    // from join_loyalty_programme) rather than a generic fallback.
     return join.error || 'Unable to join right now. Please try again.'
   }
 
-  // Discover only shows programmes you haven't started yet — once joined,
-  // a programme moves entirely into "Your Loyalty Cards" instead of also
-  // lingering here.
   const notStartedBusinesses = discovery.businesses.filter(
     (business) => !business.isJoined,
   )
 
-  // "Your Loyalty Cards" = joined + the programme is still active, at any
-  // progress level (including 0 — joining alone counts as "started").
   const activePrograms = loyalty.programs.filter(
     (program) => program.programmeStatus === 'active',
   )
   const completedPrograms = loyalty.programs.filter(
     (program) => program.programmeStatus !== 'active',
   )
-  // Reward-eligible cards stay in this same list (surfaced first), rather
-  // than a separate sub-tab — moving a card to a different list the
-  // instant it becomes reward-eligible would unmount it mid-interaction,
-  // closing any modal the customer had open on it.
+
   const sortedActivePrograms = [...activePrograms].sort(
     (a, b) => (b.rewardEligible ? 1 : 0) - (a.rewardEligible ? 1 : 0),
   )
@@ -89,8 +82,8 @@ export default function Loyalty() {
         <button
           type="button"
           role="tab"
-          aria-selected={activeTab === 'discover'}
-          className={activeTab === 'discover' ? 'active' : ''}
+          aria-selected={effectiveActiveTab === 'discover'}
+          className={effectiveActiveTab === 'discover' ? 'active' : ''}
           onClick={() => setActiveTab('discover')}
         >
           <Search aria-hidden="true" />
@@ -99,8 +92,8 @@ export default function Loyalty() {
         <button
           type="button"
           role="tab"
-          aria-selected={activeTab === 'cards'}
-          className={activeTab === 'cards' ? 'active' : ''}
+          aria-selected={effectiveActiveTab === 'cards'}
+          className={effectiveActiveTab === 'cards' ? 'active' : ''}
           onClick={() => setActiveTab('cards')}
         >
           <Award aria-hidden="true" />
@@ -109,8 +102,8 @@ export default function Loyalty() {
         <button
           type="button"
           role="tab"
-          aria-selected={activeTab === 'past'}
-          className={activeTab === 'past' ? 'active' : ''}
+          aria-selected={effectiveActiveTab === 'past'}
+          className={effectiveActiveTab === 'past' ? 'active' : ''}
           onClick={() => setActiveTab('past')}
         >
           <BadgeCheck aria-hidden="true" />
@@ -118,7 +111,7 @@ export default function Loyalty() {
         </button>
       </div>
 
-      {activeTab === 'discover' && (
+      {effectiveActiveTab === 'discover' && (
         <>
           {!isCodeFormOpen ? (
             <button
@@ -224,7 +217,7 @@ export default function Loyalty() {
         </>
       )}
 
-      {activeTab === 'cards' && (
+      {effectiveActiveTab === 'cards' && (
         <>
           <input
             type="text"
@@ -245,7 +238,12 @@ export default function Loyalty() {
           ) : sortedActivePrograms.length > 0 ? (
             <div className="loyalty-program-grid">
               {sortedActivePrograms.map((program, index) => (
-                <ProgramCard key={program.id} program={program} index={index} />
+                <ProgramCard
+                  key={program.id}
+                  program={program}
+                  index={index}
+                  autoOpen={program.id === autoOpenRecordId}
+                />
               ))}
             </div>
           ) : (
@@ -257,7 +255,7 @@ export default function Loyalty() {
         </>
       )}
 
-      {activeTab === 'past' && (
+      {effectiveActiveTab === 'past' && (
         <>
           {loyalty.isLoading ? (
             <div className="loyalty-empty-state">Loading your programmes…</div>
