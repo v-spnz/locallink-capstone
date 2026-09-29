@@ -267,6 +267,17 @@ select is(
   'scheduled programmes become active on their start date'
 );
 
+-- Keep this discovery assertion independent from optional demo seeds that
+-- relocate the seeded consumer to another suburb.
+update public.profiles
+set
+  suburb = 'Ponsonby',
+  location = extensions.st_setsrid(
+    extensions.st_makepoint(174.7465, -36.8551),
+    4326
+  )::extensions.geography
+where id = '10000000-0000-0000-0000-000000000001';
+
 select set_config(
   'request.jwt.claim.sub',
   '10000000-0000-0000-0000-000000000001',
