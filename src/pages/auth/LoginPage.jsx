@@ -285,11 +285,7 @@ export default function LoginPage() {
 
             <div className="login-register-row">
               <span>New to LocalLink?</span>
-              <Link
-                to="/register"
-                state={{ from: location.state?.from, startAt: 'account' }}
-                viewTransition
-              >
+              <Link to="/register" viewTransition>
                 Create an account
               </Link>
             </div>

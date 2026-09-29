@@ -125,7 +125,7 @@ select results_eq(
   $$values (
     'Casey Consumer'::text,
     'consumer@test.locallink.nz'::text,
-    'Ponsonby Plumbing Test'::text
+    'Maungarei Plumbing'::text
   )$$,
   'the accepted provider receives the customer contact data'
 );

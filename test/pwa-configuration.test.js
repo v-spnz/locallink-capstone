@@ -24,6 +24,7 @@ test('PWA configuration keeps LocalLink installable without caching API data', a
 
   assert.match(html, /name="theme-color" content="#3b5bdb"/)
   assert.match(html, /name="apple-mobile-web-app-capable" content="yes"/)
+  assert.match(html, /name="mobile-web-app-capable" content="yes"/)
   assert.match(html, /rel="apple-touch-icon"/)
   assert.equal(redirects.trim(), '/* /index.html 200')
 
