@@ -2,9 +2,18 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useBusiness from '../../../business/useBusiness'
 import {
+  cancelBusinessLoyaltySchedule,
+  deleteBusinessLoyaltyDraft,
+  endBusinessLoyaltyProgramme,
   fetchBusinessLoyaltyProgrammes,
+  fetchBusinessLoyaltyEndSummary,
   saveBusinessLoyaltyProgramme,
 } from '../api/businessLoyalty'
+import {
+  getProgrammeAvailability,
+  LOYALTY_STATUS_FILTERS,
+  matchesLoyaltyStatusFilter,
+} from '../businessLoyaltyTemplates'
 import { validateLoyaltyProgramme } from '../businessLoyaltyValidation'
 
 export const EMPTY_LOYALTY_PROGRAMME = {
@@ -18,6 +27,8 @@ export const EMPTY_LOYALTY_PROGRAMME = {
   terms: '',
   startDate: '',
   endDate: '',
+  imageUrl: '',
+  imageFile: null,
   status: 'draft',
   publishedAt: null,
   createdAt: null,
@@ -41,6 +52,7 @@ export default function useBusinessLoyaltyProgrammes() {
   const [reviewAttempted, setReviewAttempted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [busyProgrammeId, setBusyProgrammeId] = useState(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isLeaveConfirmationOpen, setIsLeaveConfirmationOpen] = useState(false)
   const saveInProgressRef = useRef(false)
@@ -140,6 +152,44 @@ export default function useBusinessLoyaltyProgrammes() {
     setHasUnsavedChanges(true)
   }
 
+  function setImage(file) {
+    if (!file) return
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      setErrors((current) => ({
+        ...current,
+        image: 'Choose a JPG, PNG, or WebP image.',
+      }))
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors((current) => ({
+        ...current,
+        image: 'Choose an image smaller than 5 MB.',
+      }))
+      return
+    }
+
+    setForm((current) => ({
+      ...current,
+      imageFile: file,
+      imageUrl: '',
+    }))
+    setErrors((current) => ({ ...current, image: '' }))
+    setHasUnsavedChanges(true)
+  }
+
+  function removeImage() {
+    setForm((current) => ({
+      ...current,
+      imageFile: null,
+      imageUrl: '',
+    }))
+    setErrors((current) => ({ ...current, image: '' }))
+    setHasUnsavedChanges(true)
+  }
+
   function handleStartNewProgramme() {
     setForm(newProgramme())
     setErrors({})
@@ -161,6 +211,58 @@ export default function useBusinessLoyaltyProgrammes() {
     setReviewAttempted(false)
     setHasUnsavedChanges(false)
     setStep('form')
+  }
+
+  async function runLifecycleAction(programmeId, action, successMessage) {
+    if (busyProgrammeId) return false
+    setBusyProgrammeId(programmeId)
+    setRequestError('')
+    setFeedback(null)
+    try {
+      const result = await action()
+      await loadProgrammes()
+      setFeedback({ variant: 'success', message: successMessage(result) })
+      return result
+    } catch (error) {
+      console.error('Unable to update loyalty programme.', error)
+      const message = 'Unable to update this programme. Please try again.'
+      setRequestError(message)
+      setFeedback({ variant: 'error', message })
+      return false
+    } finally {
+      setBusyProgrammeId(null)
+    }
+  }
+
+  function handleDeleteDraft(programmeId) {
+    return runLifecycleAction(
+      programmeId,
+      () => deleteBusinessLoyaltyDraft(programmeId, business.id),
+      () => 'Draft deleted.',
+    )
+  }
+
+  function handleCancelSchedule(programmeId) {
+    return runLifecycleAction(
+      programmeId,
+      () => cancelBusinessLoyaltySchedule(programmeId, business.id),
+      () => 'Scheduled publication cancelled. The programme is now a draft.',
+    )
+  }
+
+  function handleGetEndSummary(programmeId) {
+    return fetchBusinessLoyaltyEndSummary(programmeId, business.id)
+  }
+
+  function handleEndProgramme(programmeId) {
+    return runLifecycleAction(
+      programmeId,
+      () => endBusinessLoyaltyProgramme(programmeId, business.id),
+      (result) =>
+        result.customerCount > 0
+          ? `Programme ended. ${result.notificationsCreated} ${result.notificationsCreated === 1 ? 'customer was' : 'customers were'} notified.`
+          : 'Programme ended. There were no existing customers to notify.',
+    )
   }
 
   function leaveToList() {
@@ -252,7 +354,9 @@ export default function useBusinessLoyaltyProgrammes() {
       setForm(saved)
       setHasUnsavedChanges(false)
       setReviewAttempted(false)
-      setActiveStatus(status === 'draft' ? 'draft' : 'published')
+      setActiveStatus(
+        status === 'draft' ? 'draft' : getProgrammeAvailability(saved).value,
+      )
       setFeedback({
         variant: 'success',
         message:
@@ -305,23 +409,29 @@ export default function useBusinessLoyaltyProgrammes() {
     setStep('form')
   }
 
-  const programmeCounts = {
-    draft: programmes.filter((programme) => programme.status === 'draft')
-      .length,
-    published: programmes.filter((programme) => programme.status !== 'draft')
-      .length,
-  }
-
-  const visibleProgrammes = programmes.filter((programme) =>
-    activeStatus === 'draft'
-      ? programme.status === 'draft'
-      : programme.status !== 'draft',
+  const programmeRecords = programmes.map((programme) => ({
+    programme,
+    availability: getProgrammeAvailability(programme),
+  }))
+  const programmeCounts = Object.fromEntries(
+    LOYALTY_STATUS_FILTERS.map(({ value }) => [
+      value,
+      programmeRecords.filter(({ availability }) =>
+        matchesLoyaltyStatusFilter(availability.value, value),
+      ).length,
+    ]),
   )
+  const visibleProgrammes = programmeRecords
+    .filter(({ availability }) =>
+      matchesLoyaltyStatusFilter(availability.value, activeStatus),
+    )
+    .map(({ programme }) => programme)
 
   return {
     programmes,
     visibleProgrammes,
     programmeCounts,
+    businessName: business.business_name || 'Your business',
     form,
     errors,
     feedback,
@@ -331,13 +441,20 @@ export default function useBusinessLoyaltyProgrammes() {
     reviewAttempted,
     isLoading,
     isSaving,
+    busyProgrammeId,
     isLeaveConfirmationOpen,
     loadProgrammes,
     setField,
+    setImage,
+    removeImage,
     setActiveStatus,
     handleReview,
     handleStartNewProgramme,
     handleEditProgramme,
+    handleDeleteDraft,
+    handleCancelSchedule,
+    handleGetEndSummary,
+    handleEndProgramme,
     handleBackToList,
     cancelLeave,
     discardAndLeave,

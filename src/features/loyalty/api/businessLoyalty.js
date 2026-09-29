@@ -14,6 +14,9 @@ const PROGRAMME_FIELDS = `
   end_date,
   status,
   join_code,
+  image_url,
+  ended_at,
+  early_end_completion_deadline,
   published_at,
   created_at,
   updated_at
@@ -40,10 +43,76 @@ export function mapBusinessLoyaltyProgramme(record) {
     endDate: record.end_date || '',
     status: record.status || 'draft',
     joinCode: record.join_code || '',
+    imageUrl: record.image_url || '',
+    endedAt: record.ended_at,
+    earlyEndCompletionDeadline: record.early_end_completion_deadline || '',
+    imageFile: null,
     publishedAt: record.published_at,
     createdAt: record.created_at,
     updatedAt: record.updated_at,
   }
+}
+
+export async function deleteBusinessLoyaltyDraft(programmeId, businessId) {
+  const { data, error } = await supabase.rpc(
+    'delete_business_loyalty_programme_draft',
+    { p_programme_id: programmeId, p_business_id: businessId },
+  )
+  if (error) throw error
+  return data
+}
+
+export async function cancelBusinessLoyaltySchedule(programmeId, businessId) {
+  const { data, error } = await supabase.rpc(
+    'cancel_business_loyalty_programme_schedule',
+    { p_programme_id: programmeId, p_business_id: businessId },
+  )
+  if (error) throw error
+  return data
+}
+
+export async function fetchBusinessLoyaltyEndSummary(programmeId, businessId) {
+  const { data, error } = await supabase
+    .rpc('get_business_loyalty_programme_end_summary', {
+      p_programme_id: programmeId,
+      p_business_id: businessId,
+    })
+    .single()
+  if (error) throw error
+  return {
+    customerCount: Number(data.customer_count || 0),
+    completionDeadline: data.completion_deadline,
+  }
+}
+
+export async function endBusinessLoyaltyProgramme(programmeId, businessId) {
+  const { data, error } = await supabase
+    .rpc('end_business_loyalty_programme_early', {
+      p_programme_id: programmeId,
+      p_business_id: businessId,
+    })
+    .single()
+  if (error) throw error
+  return {
+    programmeId: data.programme_id,
+    customerCount: Number(data.customer_count || 0),
+    notificationsCreated: Number(data.notifications_created || 0),
+    completionDeadline: data.completion_deadline,
+  }
+}
+
+async function uploadProgrammeImage(file, businessId) {
+  const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const path = `${businessId}/${crypto.randomUUID()}.${extension}`
+  const { error } = await supabase.storage
+    .from('loyalty-programme-images')
+    .upload(path, file)
+  if (error) throw error
+
+  const { data } = supabase.storage
+    .from('loyalty-programme-images')
+    .getPublicUrl(path)
+  return data.publicUrl
 }
 
 export async function fetchBusinessLoyaltyProgrammes(businessId) {
@@ -62,6 +131,10 @@ export async function saveBusinessLoyaltyProgramme({
   programme,
   status = 'draft',
 }) {
+  const imageUrl = programme.imageFile
+    ? await uploadProgrammeImage(programme.imageFile, businessId)
+    : programme.imageUrl || null
+
   const payload = {
     id: programme.id,
     business_id: businessId,
@@ -75,6 +148,7 @@ export async function saveBusinessLoyaltyProgramme({
     terms: nullableText(programme.terms),
     start_date: programme.startDate || null,
     end_date: programme.endDate || null,
+    image_url: imageUrl,
   }
 
   const { data: savedProgrammeId, error: saveError } = await supabase.rpc(
@@ -91,6 +165,7 @@ export async function saveBusinessLoyaltyProgramme({
       p_start_date: payload.start_date,
       p_end_date: payload.end_date,
       p_status: status,
+      p_image_url: payload.image_url,
     },
   )
 

@@ -9,6 +9,7 @@ import LoyaltyProgrammeReview from '../../features/loyalty/components/LoyaltyPro
 import useBusinessLoyaltyActivity from '../../features/loyalty/hooks/useBusinessLoyaltyActivity'
 import useBusinessLoyaltyProgrammes from '../../features/loyalty/hooks/useBusinessLoyaltyProgrammes'
 import LoyaltyCustomerLookup from './LoyaltyCustomerLookup'
+import '../../features/loyalty/Loyalty.css'
 import '../../features/loyalty/BusinessLoyalty.css'
 import '../../features/deals/CreateDeal.css'
 
@@ -56,6 +57,11 @@ export default function CreateLoyalty() {
             onStatusChange={loyalty.setActiveStatus}
             onCreate={loyalty.handleStartNewProgramme}
             onEdit={loyalty.handleEditProgramme}
+            onDeleteDraft={loyalty.handleDeleteDraft}
+            onCancelSchedule={loyalty.handleCancelSchedule}
+            onGetEndSummary={loyalty.handleGetEndSummary}
+            onEndProgramme={loyalty.handleEndProgramme}
+            busyProgrammeId={loyalty.busyProgrammeId}
           />
           <LoyaltyActivityFeed
             activity={activity.activity}
@@ -74,9 +80,12 @@ export default function CreateLoyalty() {
           requestError={loyalty.requestError}
           reviewAttempted={loyalty.reviewAttempted}
           onChange={loyalty.setField}
+          onImageChange={loyalty.setImage}
+          onImageRemove={loyalty.removeImage}
           onBack={loyalty.handleBackToList}
           onReview={loyalty.handleReview}
           onSaveDraft={loyalty.handleSaveDraft}
+          businessName={loyalty.businessName}
         />
       )}
 

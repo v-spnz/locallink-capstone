@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
+import {
+  getProgrammeAvailability,
+  LOYALTY_STATUS_FILTERS,
+  matchesLoyaltyStatusFilter,
+} from '../src/features/loyalty/businessLoyaltyTemplates.js'
 import { validateLoyaltyProgramme } from '../src/features/loyalty/businessLoyaltyValidation.js'
 
 const COMPLETE_PROGRAMME = {
@@ -88,6 +93,44 @@ test('structured templates require only their own reward fields', () => {
   )
 })
 
+test('loyalty lifecycle filters match the Deals management menu', () => {
+  assert.deepEqual(
+    LOYALTY_STATUS_FILTERS.map(({ value, label }) => ({ value, label })),
+    [
+      { value: 'draft', label: 'Draft' },
+      { value: 'active', label: 'Active' },
+      { value: 'scheduled', label: 'Scheduled' },
+      { value: 'history', label: 'History' },
+      { value: 'all', label: 'All' },
+    ],
+  )
+
+  const today = new Date('2026-09-30T12:00:00+13:00')
+  const availabilityValues = [
+    { status: 'draft', startDate: '', endDate: '' },
+    { status: 'active', startDate: '2026-09-01', endDate: '2026-10-31' },
+    { status: 'scheduled', startDate: '2026-10-01', endDate: '' },
+    { status: 'expired', startDate: '2026-08-01', endDate: '2026-09-29' },
+  ].map((programme) => getProgrammeAvailability(programme, today).value)
+
+  const counts = Object.fromEntries(
+    LOYALTY_STATUS_FILTERS.map(({ value }) => [
+      value,
+      availabilityValues.filter((availability) =>
+        matchesLoyaltyStatusFilter(availability, value),
+      ).length,
+    ]),
+  )
+
+  assert.deepEqual(counts, {
+    draft: 1,
+    active: 1,
+    scheduled: 1,
+    history: 1,
+    all: 4,
+  })
+})
+
 test('consumer loyalty discovery does not require business membership', async () => {
   const migration = await readFile(
     new URL(
@@ -160,20 +203,46 @@ test('US0107 AC3-5: review, correction, persisted publication, and status tabs a
 
   assert.match(form, /Review and publish/)
   assert.match(form, /Redemption method/)
+  assert.match(form, /Programme image/)
+  assert.match(form, /LoyaltyTicket/)
+  assert.match(form, /getLoyaltyProgressPresentation/)
+  assert.match(form, /loyalty-preview-details/)
+  assert.doesNotMatch(form, /Once published:/)
+  assert.doesNotMatch(
+    form,
+    /Customers cannot see or use this programme while it is a draft/,
+  )
+  assert.match(page, /businessName={loyalty\.businessName}/)
   assert.match(page, /LoyaltyProgrammeReview/)
   assert.match(review, /How customers earn/)
   assert.match(review, /Programme period/)
   assert.match(review, /Redemption method/)
   assert.match(review, /Back to edit/)
   assert.match(review, /Confirm and publish/)
-  assert.match(list, /role="tablist"/)
-  assert.match(list, /Published/)
+  assert.match(list, /Filter loyalty programmes/)
+  assert.match(list, /deal-filters-overflow-trigger/)
+  assert.match(list, /PRIMARY_FILTER_VALUES/)
+  assert.match(list, /OVERFLOW_FILTER_VALUES/)
   assert.match(list, /deal-management-card loyalty-programme-row/)
   assert.match(list, /className="deal-list-row"/)
+  assert.match(list, /programme\.imageUrl/)
+  assert.match(list, /loyalty-programme-background/)
+  assert.match(list, /has-background-image/)
+  assert.doesNotMatch(list, /QRCodeSVG/)
+  const cardMarkup = list.slice(
+    list.indexOf('<article'),
+    list.indexOf('</article>'),
+  )
+  assert.doesNotMatch(
+    cardMarkup,
+    /<(?:Award|CalendarDays|ChevronRight|Copy|Gift|LockKeyhole|QRCodeSVG|Users)\b/,
+  )
   assert.match(hook, /setStep\('review'\)/)
   assert.match(hook, /persist\('published'\)/)
-  assert.match(hook, /setActiveStatus\(status === 'draft'/)
+  assert.match(hook, /matchesLoyaltyStatusFilter/)
   assert.match(api, /save_business_loyalty_programme/)
+  assert.match(api, /loyalty-programme-images/)
+  assert.match(api, /p_image_url/)
   assert.match(migration, /validate_loyalty_programme_before_publish/)
   assert.match(migration, /set status = 'published'/)
   assert.match(migration, /then 'scheduled'/)

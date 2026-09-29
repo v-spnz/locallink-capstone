@@ -90,7 +90,7 @@ test('AC4: a saved loyalty draft can be reopened without losing its information'
     ),
   ])
 
-  assert.match(list, /Continue editing/)
+  assert.match(list, /Continue draft/)
   assert.match(hook, /handleEditProgramme/)
   assert.match(hook, /setForm\(\{ \.\.\.programme \}\)/)
   assert.match(hook, /filter\(\(programme\) => programme\.id !== saved\.id\)/)
@@ -123,7 +123,7 @@ test('AC5: draft loyalty programmes are not visible or usable by consumers', asy
 
   assert.match(
     form,
-    /Customers cannot see or use this programme while it is a draft\./,
+    /Private draft/,
   )
   assert.match(migration, /status = 'draft'/)
   assert.match(

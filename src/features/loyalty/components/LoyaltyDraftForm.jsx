@@ -3,23 +3,24 @@ import {
   CalendarDays,
   CircleDollarSign,
   Gift,
+  ImagePlus,
   LockKeyhole,
   QrCode,
   Save,
   Send,
   Stamp,
+  Trash2,
 } from 'lucide-react'
+import { useEffect, useMemo } from 'react'
 import Button from '../../../components/ui/Button'
 import DateRangeCalendar from '../../../components/ui/DateRangeCalendar'
 import RedemptionMethodField from '../../../components/ui/RedemptionMethodField'
+import { getLoyaltyProgressPresentation } from '../loyaltyProgress'
 import { sanitizeRewardThreshold } from '../businessLoyaltyValidation'
 import DiscountPercentageCombobox from './DiscountPercentageCombobox'
+import LoyaltyTicket from './LoyaltyTicket'
 import {
-  getCustomerReward,
   getEarningRules,
-  getProgrammeAvailability,
-  getProgrammeTypeLabel,
-  getRewardTarget,
   isCountBasedLoyaltyType,
   LOYALTY_REDEMPTION_METHOD,
   LOYALTY_TEMPLATES,
@@ -129,6 +130,66 @@ function TextAreaField({
   )
 }
 
+function ProgrammeImageField({ error, onChange, onRemove, previewUrl }) {
+  const descriptionIds = [
+    'loyalty-programme-image-helper',
+    error ? 'loyalty-programme-image-error' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  return (
+    <div className="form-group loyalty-programme-image-field">
+      <span className="form-label" id="loyalty-programme-image-label">
+        Programme image <span className="loyalty-optional">Optional</span>
+      </span>
+      <label className="deal-image-picker" htmlFor="loyalty-programme-image">
+        <span className="deal-image-thumbnail">
+          {previewUrl ? (
+            <img src={previewUrl} alt="Programme image preview" />
+          ) : (
+            <ImagePlus aria-hidden="true" />
+          )}
+        </span>
+        <span className="deal-image-copy">
+          <strong>{previewUrl ? 'Replace image' : 'Add an image'}</strong>
+          <small id="loyalty-programme-image-helper">
+            JPG, PNG or WebP, up to 5 MB. The gift icon remains if you skip
+            this.
+          </small>
+        </span>
+        <span className="deal-image-action" aria-hidden="true">
+          Choose file
+        </span>
+      </label>
+      <input
+        accept="image/jpeg,image/png,image/webp"
+        aria-labelledby="loyalty-programme-image-label"
+        aria-describedby={descriptionIds}
+        aria-invalid={Boolean(error)}
+        className="deal-file-input"
+        id="loyalty-programme-image"
+        type="file"
+        onChange={(event) => {
+          onChange(event.target.files?.[0] || null)
+          event.target.value = ''
+        }}
+      />
+      {previewUrl && (
+        <button
+          className="loyalty-programme-image-remove"
+          type="button"
+          onClick={onRemove}
+        >
+          <Trash2 aria-hidden="true" />
+          Remove image
+        </button>
+      )}
+      <FieldError id="loyalty-programme-image-error">{error}</FieldError>
+    </div>
+  )
+}
+
 function formatAvailability(programme) {
   if (!programme.startDate) return 'Choose when the programme starts'
   if (!programme.endDate) return `Starts ${programme.startDate}`
@@ -142,10 +203,26 @@ export default function LoyaltyDraftForm({
   requestError,
   reviewAttempted,
   onChange,
+  onImageChange,
+  onImageRemove,
   onBack,
   onReview,
   onSaveDraft,
+  businessName,
 }) {
+  const imagePreviewUrl = useMemo(
+    () =>
+      programme.imageFile
+        ? URL.createObjectURL(programme.imageFile)
+        : programme.imageUrl,
+    [programme.imageFile, programme.imageUrl],
+  )
+
+  useEffect(() => {
+    if (!programme.imageFile || !imagePreviewUrl) return undefined
+    return () => URL.revokeObjectURL(imagePreviewUrl)
+  }, [programme.imageFile, imagePreviewUrl])
+
   const filledFields = [
     programme.name,
     programme.programmeType,
@@ -157,9 +234,19 @@ export default function LoyaltyDraftForm({
         : isCountBasedLoyaltyType(programme.programmeType),
     programme.startDate,
   ].filter(Boolean).length
-  const availabilityOnPublish = programme.startDate
-    ? getProgrammeAvailability({ ...programme, status: 'published' })
-    : null
+  const previewProgram = {
+    ...programme,
+    programmeName: programme.name || 'Untitled programme',
+    rewardDescription: programme.rewardDescription || 'Add reward details',
+    currentProgress: 0,
+    rewardEligible: false,
+    programmeStatus: 'active',
+  }
+  const previewProgress = getLoyaltyProgressPresentation(previewProgram)
+  if (!programme.rewardThreshold) {
+    previewProgress.progressLabel = 'Add a reward target'
+    previewProgress.remainingLabel = 'Set target'
+  }
 
   return (
     <form
@@ -216,6 +303,13 @@ export default function LoyaltyDraftForm({
               error={errors.name}
               onChange={(value) => onChange('name', value)}
               requiredToPublish
+            />
+
+            <ProgrammeImageField
+              error={errors.image}
+              onChange={onImageChange}
+              onRemove={onImageRemove}
+              previewUrl={imagePreviewUrl}
             />
 
             <fieldset className="loyalty-type-fieldset">
@@ -399,37 +493,29 @@ export default function LoyaltyDraftForm({
             </span>
             <strong>{filledFields} of 5 details added</strong>
           </div>
-          <div className="loyalty-preview-programme">
-            <span className="loyalty-preview-icon" aria-hidden="true">
-              <Gift />
-            </span>
-            <small>{getProgrammeTypeLabel(programme.programmeType)}</small>
-            <h3>{programme.name || 'Untitled programme'}</h3>
-            <p>{getRewardTarget(programme)}</p>
+          <div
+            className="loyalty-preview-ticket"
+            aria-label="Customer loyalty card preview"
+          >
+            <LoyaltyTicket
+              program={previewProgram}
+              progress={previewProgress}
+              businessName={businessName || 'Your business'}
+              isJoined
+              isEnded={false}
+              titleId="loyalty-preview-ticket-title"
+            />
           </div>
-          <div className="loyalty-preview-reward">
-            <span>Customer reward</span>
-            <strong>
-              {getCustomerReward(programme) || 'Add the reward details'}
-            </strong>
-          </div>
-          <p className="loyalty-field-helper">
-            {getEarningRules(programme) ||
-              'Complete the template details to preview the rules.'}
-          </p>
-          <p className="loyalty-preview-availability">
-            <CalendarDays aria-hidden="true" />
-            {formatAvailability(programme)}
-          </p>
-          {availabilityOnPublish && (
-            <p className="loyalty-preview-note">
-              Once published: <strong>{availabilityOnPublish.label}</strong>.{' '}
-              {availabilityOnPublish.description}
+          <div className="loyalty-preview-details">
+            <p className="loyalty-field-helper">
+              {getEarningRules(programme) ||
+                'Complete the template details to preview the rules.'}
             </p>
-          )}
-          <p className="loyalty-preview-note">
-            Customers cannot see or use this programme while it is a draft.
-          </p>
+            <p className="loyalty-preview-availability">
+              <CalendarDays aria-hidden="true" />
+              {formatAvailability(programme)}
+            </p>
+          </div>
         </aside>
       </div>
 

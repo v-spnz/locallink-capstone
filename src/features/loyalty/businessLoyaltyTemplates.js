@@ -109,11 +109,35 @@ const PROGRAMME_AVAILABILITY = {
     label: 'Expired',
     description: 'Ended. It no longer accepts new loyalty activity.',
   },
+  endedEarly: {
+    value: 'ended-early',
+    label: 'Ended early',
+    description:
+      'Closed to new customers. Existing customers may finish before their completion deadline.',
+  },
+}
+
+export const LOYALTY_STATUS_FILTERS = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'active', label: 'Active' },
+  { value: 'scheduled', label: 'Scheduled' },
+  { value: 'history', label: 'History' },
+  { value: 'all', label: 'All' },
+]
+
+export function matchesLoyaltyStatusFilter(availabilityValue, filter) {
+  if (filter === 'all') return true
+  if (filter === 'history')
+    return ['expired', 'ended-early'].includes(availabilityValue)
+  return availabilityValue === filter
 }
 
 export function getProgrammeAvailability(programme, now = new Date()) {
   if (!programme.status || programme.status === 'draft') {
     return PROGRAMME_AVAILABILITY.draft
+  }
+  if (programme.status === 'ended_early') {
+    return PROGRAMME_AVAILABILITY.endedEarly
   }
   const today = getAucklandToday(now)
   if (programme.startDate && programme.startDate > today) {
@@ -123,6 +147,15 @@ export function getProgrammeAvailability(programme, now = new Date()) {
     return PROGRAMME_AVAILABILITY.expired
   }
   return PROGRAMME_AVAILABILITY.active
+}
+
+export function isEarlyEndGracePeriodActive(programme, now = new Date()) {
+  if (
+    programme.programmeStatus !== 'ended_early' ||
+    !programme.earlyEndCompletionDeadline
+  )
+    return false
+  return programme.earlyEndCompletionDeadline >= getAucklandToday(now)
 }
 
 export function isProgrammeAcceptingActivity(programme, now = new Date()) {

@@ -51,6 +51,7 @@ const NOTIFICATION_ICONS = {
   deal_ended: BadgePercent,
   loyalty_reward_close: Gift,
   loyalty_programme_ending_soon: Clock,
+  loyalty_programme_ended_early: Clock,
   saved_deal_ending_soon: Clock,
 }
 
