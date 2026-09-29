@@ -46,20 +46,37 @@ test('business profile shows the store address and automatically saved suburb', 
   assert.match(settings, /primaryLocation=\{primaryLocation\}/)
 })
 
-test('business managers can add a missing store address from settings', async () => {
-  const settings = await readFile(
-    new URL('../src/pages/business/Settings.jsx', import.meta.url),
-    'utf8',
-  )
+test('business managers can add a missing store address inline from settings', async () => {
+  const [settings, styles] = await Promise.all([
+    readFile(
+      new URL('../src/pages/business/Settings.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/pages/business/BusinessPortal.css', import.meta.url),
+      'utf8',
+    ),
+  ])
 
   assert.match(settings, /import AddressAutocomplete/)
   assert.match(settings, /addManagedBusinessLocation/)
-  assert.match(settings, /!hasCompleteLocation && canManageLocation/)
+  assert.match(settings, /business-settings-inline-address/)
+  assert.match(settings, /className="business-settings-address-edit"/)
+  assert.match(settings, /<Pencil aria-hidden="true" \/>/)
+  assert.match(settings, /aria-label=/)
+  assert.match(settings, /isEditingLocation/)
   assert.match(settings, /id="business-settings-address"/)
-  assert.match(settings, /onSelect=\{onLocationSelect\}/)
+  assert.match(settings, /autoFocus/)
+  assert.match(settings, /onSelect=\{handleInlineLocationSelect\}/)
+  assert.doesNotMatch(settings, /business-settings-location-setup/)
+  assert.doesNotMatch(settings, /Add your store location/)
   assert.match(settings, /if \(!address\.suburb\?\.trim\(\)\)/)
   assert.match(settings, /Suburb: \$\{address\.suburb\}/)
   assert.match(settings, /fetchManagedBusinessLocations\(business\.id\)/)
+  assert.match(
+    styles,
+    /\.business-settings-address-editor[\s\S]*\.address-autocomplete-input-wrap[\s\S]*\.form-input \{[\s\S]*padding-left: 44px;/,
+  )
 })
 
 test('business settings uses separate pages without a sidebar account name', async () => {

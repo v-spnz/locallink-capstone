@@ -7,10 +7,12 @@ import {
   LayoutDashboard,
   LogOut,
   MapPin,
+  Pencil,
   ReceiptText,
   ShieldCheck,
   Tags,
   UserCog,
+  X,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
@@ -98,10 +100,16 @@ function BusinessProfile({
   isSavingLocation,
   onLocationSelect,
 }) {
+  const [isEditingLocation, setIsEditingLocation] = useState(false)
   const hasCompleteLocation = Boolean(
     primaryLocation?.formatted_address && primaryLocation?.suburb,
   )
   const canManageLocation = ['owner', 'admin'].includes(membership.role)
+
+  async function handleInlineLocationSelect(address) {
+    const didSave = await onLocationSelect(address)
+    if (didSave) setIsEditingLocation(false)
+  }
 
   return (
     <section className="business-settings-section">
@@ -120,9 +128,51 @@ function BusinessProfile({
           <dt>Description</dt>
           <dd>{business.description || 'No description added'}</dd>
         </div>
-        <div>
+        <div className="business-settings-address-row">
           <dt>Store address</dt>
-          <dd>{primaryLocation?.formatted_address || 'No address added'}</dd>
+          <dd className="business-settings-inline-address">
+            {isEditingLocation ? (
+              <div className="business-settings-address-editor">
+                <AddressAutocomplete
+                  id="business-settings-address"
+                  label="Store address"
+                  placeholder="Search for your shop, office, or service address"
+                  disabled={isSavingLocation}
+                  showCurrentLocation={false}
+                  autoFocus
+                  onSelect={handleInlineLocationSelect}
+                />
+              </div>
+            ) : (
+              <span>
+                {primaryLocation?.formatted_address || 'No address added'}
+              </span>
+            )}
+            {!hasCompleteLocation && canManageLocation && (
+              <button
+                type="button"
+                className="business-settings-address-edit"
+                aria-label={
+                  isEditingLocation
+                    ? 'Cancel adding store address'
+                    : 'Add store address'
+                }
+                title={
+                  isEditingLocation
+                    ? 'Cancel adding store address'
+                    : 'Add store address'
+                }
+                onClick={() => setIsEditingLocation((current) => !current)}
+                disabled={isSavingLocation}
+              >
+                {isEditingLocation ? (
+                  <X aria-hidden="true" />
+                ) : (
+                  <Pencil aria-hidden="true" />
+                )}
+              </button>
+            )}
+          </dd>
         </div>
         <div>
           <dt>Suburb</dt>
@@ -133,26 +183,6 @@ function BusinessProfile({
           <dd>{enabledCapabilities.join(', ') || 'None enabled'}</dd>
         </div>
       </dl>
-
-      {!hasCompleteLocation && canManageLocation && (
-        <div className="business-settings-location-setup">
-          <div>
-            <h3>Add your store location</h3>
-            <p>
-              Select your complete street address. LocalLink will automatically
-              save the suburb for customer discovery.
-            </p>
-          </div>
-          <AddressAutocomplete
-            id="business-settings-address"
-            label="Store address"
-            placeholder="Search for your shop, office, or service address"
-            disabled={isSavingLocation}
-            showCurrentLocation={false}
-            onSelect={onLocationSelect}
-          />
-        </div>
-      )}
 
       {!hasCompleteLocation && !canManageLocation && (
         <p className="business-settings-location-status">
@@ -357,7 +387,7 @@ export default function Settings() {
         message:
           'We could not identify the suburb for this address. Choose another search result.',
       })
-      return
+      return false
     }
 
     setIsSavingLocation(true)
@@ -371,12 +401,14 @@ export default function Settings() {
         variant: 'success',
         message: `Store address saved. Suburb: ${address.suburb}.`,
       })
+      return true
     } catch (error) {
       console.error('Unable to save business location.', error)
       setLocationStatus({
         variant: 'error',
         message: 'Unable to save this address. Please try again.',
       })
+      return false
     } finally {
       setIsSavingLocation(false)
     }

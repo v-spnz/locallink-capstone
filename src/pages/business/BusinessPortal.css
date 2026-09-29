@@ -2367,33 +2367,83 @@ body.business-surface .service-empty-state-copy p {
   text-transform: capitalize;
 }
 
-.business-settings-location-setup {
-  max-width: 650px;
-  margin-top: 26px;
-  padding: 20px;
-  border: 1px solid #dfe5f5;
-  border-radius: 12px;
+.business-settings-inline-address {
   display: grid;
-  gap: 18px;
-  background: rgb(248 249 252 / 78%);
+  grid-template-columns: minmax(0, 1fr) 34px;
+  align-items: start;
+  gap: 12px;
+  text-transform: none;
 }
 
-.business-settings-location-setup h3,
-.business-settings-location-setup p {
+.business-settings-inline-address > span {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+}
+
+.business-settings-address-editor {
+  min-width: 0;
+}
+
+.business-settings-address-editor .address-autocomplete {
   margin: 0;
 }
 
-.business-settings-location-setup h3 {
-  color: var(--business-ink);
-  font-size: 17px;
-  line-height: 1.35;
+body.business-surface
+  .business-settings-address-editor
+  .address-autocomplete-input-wrap
+  .form-input {
+  padding-right: 40px;
+  padding-left: 44px;
 }
 
-.business-settings-location-setup p {
-  margin-top: 5px;
+.business-settings-address-editor .form-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.business-settings-address-edit {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--business-border-strong);
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--business-surface);
   color: var(--business-muted);
-  font-size: 14px;
-  line-height: 1.55;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.business-settings-address-edit:hover {
+  border-color: #aeb9d9;
+  background: var(--business-accent-soft);
+  color: var(--business-accent);
+}
+
+.business-settings-address-edit:focus-visible {
+  outline: 3px solid rgb(63 91 211 / 24%);
+  outline-offset: 2px;
+}
+
+.business-settings-address-edit:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.business-settings-address-edit svg {
+  width: 16px;
+  height: 16px;
 }
 
 .business-settings-location-status {
