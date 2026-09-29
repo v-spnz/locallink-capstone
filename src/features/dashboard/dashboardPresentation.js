@@ -1,3 +1,6 @@
+import { getDealLifecycle } from '../deals/constants.js'
+import { validateDeal } from '../deals/validation.js'
+
 const countFormatter = new Intl.NumberFormat('en-NZ')
 
 const percentageFormatter = new Intl.NumberFormat('en-NZ', {
@@ -90,4 +93,70 @@ export function hasMarketplaceActivity(metrics) {
       metrics.marketplaceJobsWon > 0 ||
       metrics.marketplaceCompletedJobs > 0),
   )
+}
+
+export const DEAL_STATUS_ORDER = [
+  'draft',
+  'scheduled',
+  'active',
+  'expired',
+  'ended_early',
+]
+
+const ENDING_SOON_DAYS = 7
+
+export function getDealStatusSummary(deals = [], today = new Date()) {
+  const counts = {
+    draft: 0,
+    scheduled: 0,
+    active: 0,
+    expired: 0,
+    ended_early: 0,
+  }
+  const drafts = []
+  const endingSoon = []
+
+  const todayStart = new Date(today)
+  todayStart.setHours(0, 0, 0, 0)
+
+  for (const deal of deals) {
+    const rawState = getDealLifecycle(deal, today).value
+    const state = rawState === 'ended-early' ? 'ended_early' : rawState
+    if (!(state in counts)) continue
+
+    counts[state] += 1
+
+    if (state === 'draft') {
+      drafts.push({
+        id: deal.id,
+        title: deal.title || 'Untitled deal draft',
+        missingCount: Object.keys(validateDeal(deal, { forPublication: true }))
+          .length,
+      })
+    }
+
+    if (state === 'active' && deal.endDate) {
+      const end = new Date(`${deal.endDate}T12:00:00`)
+      if (!Number.isNaN(end.getTime())) {
+        end.setHours(0, 0, 0, 0)
+        const daysRemaining = Math.round((end - todayStart) / 86_400_000)
+        if (daysRemaining >= 0 && daysRemaining <= ENDING_SOON_DAYS) {
+          endingSoon.push({
+            id: deal.id,
+            title: deal.title || 'Untitled deal',
+            daysRemaining,
+          })
+        }
+      }
+    }
+  }
+
+  endingSoon.sort((a, b) => a.daysRemaining - b.daysRemaining)
+
+  return {
+    counts,
+    total: DEAL_STATUS_ORDER.reduce((sum, key) => sum + counts[key], 0),
+    drafts,
+    endingSoon,
+  }
 }

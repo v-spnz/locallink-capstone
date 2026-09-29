@@ -1,5 +1,12 @@
 import { Bookmark, MapPin, Clock3, BadgeCheck } from 'lucide-react'
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { useLocation } from 'react-router-dom'
 import {
   fetchBusinessesInSavedSuburb,
@@ -360,23 +367,48 @@ export default function Deals() {
     }
   }
 
+
   function switchTab(nextTab) {
     if (nextTab === activeTab) return
     setSlide(nextTab === 'wallet' ? 'right' : 'left')
     setActiveTab(nextTab)
   }
 
-  const searchedBusinesses = discoverySearch.trim()
-    ? businesses.filter((business) => {
-        const query = discoverySearch.trim().toLowerCase()
-        return (
-          business.business_name?.toLowerCase().includes(query) ||
-          business.deal_title?.toLowerCase().includes(query) ||
-          business.deal_description?.toLowerCase().includes(query)
-        )
-      })
-    : businesses
+  const searchedBusinesses = useMemo(() => {
+    if (!discoverySearch.trim()) return businesses
+    const query = discoverySearch.trim().toLowerCase()
+    return businesses.filter(
+      (business) =>
+        business.business_name?.toLowerCase().includes(query) ||
+        business.deal_title?.toLowerCase().includes(query) ||
+        business.deal_description?.toLowerCase().includes(query),
+    )
+  }, [businesses, discoverySearch])
 
+  // businesses_in_my_suburb() returns up to 3 rows per business, one per
+  // active deal — correct for the list/grid, which shows a separate card
+  // per deal, but the map should only ever draw one pin per business
+  // location, not one per deal sharing the same coordinates.
+  //
+  // Memoized deliberately: DiscoveryMap's internal MapViewport re-fits
+  // the map any time this array's *reference* changes, even if the
+  // actual businesses are identical. An unmemoized array here recreated
+  // on every unrelated re-render (e.g. the claims-polling state update),
+  // causing Leaflet to repeatedly interrupt its own pan/zoom animation —
+  // the cause of an intermittent "Cannot read properties of undefined
+  // (reading '_leaflet_pos')" crash from leaflet.js.
+  const uniqueBusinessesForMap = useMemo(
+    () =>
+      Array.from(
+        new Map(
+          searchedBusinesses.map((business) => [
+            business.business_id,
+            business,
+          ]),
+        ).values(),
+      ),
+    [searchedBusinesses],
+  )
   return (
     <>
       <div className="page-header discovery-page-header">
@@ -452,7 +484,7 @@ export default function Deals() {
             >
               <DiscoveryMap
                 location={location}
-                businesses={searchedBusinesses}
+                businesses={uniqueBusinessesForMap}
               />
             </Suspense>
           ) : (

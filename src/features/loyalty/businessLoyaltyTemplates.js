@@ -1,9 +1,15 @@
 import { getAucklandToday } from './businessLoyaltyValidation.js'
 export const LOYALTY_TEMPLATES = [
   {
-    value: 'stamp_card',
-    label: 'Stamp card',
-    description: 'Complete purchases or visits and get the next one free.',
+    value: 'purchase_card',
+    label: 'Purchase rewards',
+    description:
+      'Complete a set number of purchases and get the next one free.',
+  },
+  {
+    value: 'visit_card',
+    label: 'Visit rewards',
+    description: 'Complete a set number of visits and get the next one free.',
   },
   {
     value: 'spend_and_save',
@@ -25,6 +31,10 @@ export const LOYALTY_DISCOUNT_PERCENTAGES = Array.from(
 export const LOYALTY_REDEMPTION_METHOD =
   'Redeem with the customer loyalty QR or manual code in store.'
 
+export function isCountBasedLoyaltyType(type) {
+  return ['purchase_card', 'visit_card', 'stamp_card'].includes(type)
+}
+
 export function getProgrammeTypeLabel(type) {
   return (
     LOYALTY_TEMPLATES.find((template) => template.value === type)?.label ||
@@ -38,14 +48,20 @@ function formatNumber(value) {
 
 export function getRewardTarget(programme) {
   if (!programme.rewardThreshold) return 'Set a reward target'
-  return programme.programmeType === 'stamp_card'
-    ? `${formatNumber(programme.rewardThreshold)} purchases or visits`
-    : `$${formatNumber(programme.rewardThreshold)} spend`
+  if (programme.programmeType === 'purchase_card') {
+    return `${formatNumber(programme.rewardThreshold)} purchases`
+  }
+  if (['visit_card', 'stamp_card'].includes(programme.programmeType)) {
+    return `${formatNumber(programme.rewardThreshold)} visits`
+  }
+  return `$${formatNumber(programme.rewardThreshold)} spend`
 }
 
 export function getCustomerReward(programme) {
-  if (programme.programmeType === 'stamp_card')
-    return 'Next purchase or visit free'
+  if (programme.programmeType === 'purchase_card') return 'Next purchase free'
+  if (['visit_card', 'stamp_card'].includes(programme.programmeType)) {
+    return 'Next visit free'
+  }
   if (programme.programmeType === 'spend_and_save')
     return programme.rewardValue
       ? `${formatNumber(programme.rewardValue)}% off`
@@ -55,8 +71,12 @@ export function getCustomerReward(programme) {
 
 export function getEarningRules(programme) {
   if (!programme.rewardThreshold) return ''
-  if (programme.programmeType === 'stamp_card')
-    return `Complete ${formatNumber(programme.rewardThreshold)} purchases or visits to receive the next one free.`
+  if (programme.programmeType === 'purchase_card') {
+    return `Complete ${formatNumber(programme.rewardThreshold)} purchases to receive the next purchase free.`
+  }
+  if (['visit_card', 'stamp_card'].includes(programme.programmeType)) {
+    return `Complete ${formatNumber(programme.rewardThreshold)} visits to receive the next visit free.`
+  }
   if (programme.programmeType === 'spend_and_save' && programme.rewardValue)
     return `Spend $${formatNumber(programme.rewardThreshold)} to receive ${formatNumber(programme.rewardValue)}% off.`
   if (

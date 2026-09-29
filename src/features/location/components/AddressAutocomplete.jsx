@@ -31,6 +31,7 @@ export default function AddressAutocomplete({
   searchType = 'address',
   invalid = false,
   describedBy,
+  autoFocus = false,
   onSelect,
 }) {
   const [query, setQuery] = useState(value)
@@ -214,6 +215,7 @@ export default function AddressAutocomplete({
           aria-controls={resultsId}
           aria-expanded={isOpen && suggestions.length > 0}
           autoComplete="off"
+          autoFocus={autoFocus}
           className="form-input"
           disabled={disabled}
           id={id}

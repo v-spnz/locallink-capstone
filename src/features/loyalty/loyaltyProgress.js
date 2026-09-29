@@ -14,17 +14,22 @@ export function getLoyaltyProgressPresentation(record) {
   const progress = Math.max(0, Number(record.currentProgress) || 0)
   const target = Math.max(0, Number(record.rewardThreshold) || 0)
   const remaining = Math.max(0, target - progress)
-  const isStampCard = record.programmeType === 'stamp_card'
+  const isPurchaseCard = record.programmeType === 'purchase_card'
+  const isVisitCard = ['visit_card', 'stamp_card'].includes(
+    record.programmeType,
+  )
+  const unit = isPurchaseCard ? 'purchase' : 'visit'
+  const isCountBased = isPurchaseCard || isVisitCard
 
   return {
     progress,
     target,
     percentage: target > 0 ? Math.min(100, (progress / target) * 100) : 0,
-    progressLabel: isStampCard
-      ? `${formatNumber(progress)} of ${formatNumber(target)} visits`
+    progressLabel: isCountBased
+      ? `${formatNumber(progress)} of ${formatNumber(target)} ${unit}${target === 1 ? '' : 's'}`
       : `${formatCurrency(progress)} of ${formatCurrency(target)} spent`,
-    remainingLabel: isStampCard
-      ? `${formatNumber(remaining)} ${remaining === 1 ? 'visit' : 'visits'} to go`
+    remainingLabel: isCountBased
+      ? `${formatNumber(remaining)} ${remaining === 1 ? unit : `${unit}s`} to go`
       : `${formatCurrency(remaining)} to go`,
   }
 }

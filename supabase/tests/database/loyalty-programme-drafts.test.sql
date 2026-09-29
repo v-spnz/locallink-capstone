@@ -70,9 +70,9 @@ select lives_ok(
   $$
     update public.business_loyalty_programmes
     set
-      programme_type = 'stamp_card',
+      programme_type = 'visit_card',
       reward_threshold = 8,
-      reward_description = 'Next purchase or visit free'
+      reward_description = 'Next visit free'
     where id = '47000000-0000-0000-0000-000000000103'
   $$,
   'the business can reopen and continue its saved draft later'
@@ -90,7 +90,7 @@ select is(
     from public.business_loyalty_programmes
     where id = '47000000-0000-0000-0000-000000000103'
   ),
-  'Morning coffee rewards|stamp_card|8.00|Next purchase or visit free',
+  'Morning coffee rewards|visit_card|8.00|Next visit free',
   'reopening a draft preserves the information already entered'
 );
 

@@ -37,7 +37,7 @@ values
     '47000000-0000-0000-0000-000000000109',
     '41000000-0000-0000-0000-000000000001',
     'Morning coffee rewards',
-    'stamp_card',
+    'visit_card',
     8,
     null,
     (now() at time zone 'Pacific/Auckland')::date,

@@ -5,11 +5,15 @@ import {
   fetchBusinessDealPerformance,
   fetchBusinessLoyaltyProgrammePerformance,
 } from '../api/businessDashboard'
+import { fetchBusinessDeals } from '../../deals/api/businessDeals'
 
 export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
   const { business } = useBusiness()
   const [metrics, setMetrics] = useState(null)
   const [dealPerformance, setDealPerformance] = useState([])
+  const [deals, setDeals] = useState([])
+  const [dealsFailed, setDealsFailed] = useState(false)
+  const [dealsLoading, setDealsLoading] = useState(true)
   const [loyaltyProgrammePerformance, setLoyaltyProgrammePerformance] =
     useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -30,6 +34,31 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
       fetchBusinessLoyaltyProgrammePerformance(options),
     ])
   }, [business.id, endDate, startDate])
+
+  useEffect(() => {
+    let active = true
+
+    async function loadDeals() {
+      setDealsLoading(true)
+      setDealsFailed(false)
+      try {
+        const data = await fetchBusinessDeals(business.id)
+        if (active) setDeals(data.deals)
+      } catch (dealError) {
+        if (!active) return
+        console.error('Unable to load deals for the dashboard.', dealError)
+        setDeals([])
+        setDealsFailed(true)
+      } finally {
+        if (active) setDealsLoading(false)
+      }
+    }
+
+    void loadDeals()
+    return () => {
+      active = false
+    }
+  }, [business.id, reloadKey])
 
   useEffect(() => {
     let active = true
@@ -71,6 +100,9 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
   return {
     metrics,
     dealPerformance,
+    deals,
+    dealsFailed,
+    dealsLoading,
     loyaltyProgrammePerformance,
     isLoading,
     error,

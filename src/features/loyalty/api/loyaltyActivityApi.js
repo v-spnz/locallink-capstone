@@ -10,9 +10,13 @@ function getActivityDetail(record) {
   if (record.activity_type === 'reward_redeemed') return 'Reward redeemed'
 
   const amount = formatAmount(record.amount)
-  return record.programme_type === 'stamp_card'
-    ? `${amount} ${Number(record.amount) === 1 ? 'stamp' : 'stamps'} added`
-    : `$${amount} progress added`
+  if (record.programme_type === 'purchase_card') {
+    return `${amount} ${Number(record.amount) === 1 ? 'purchase' : 'purchases'} added`
+  }
+  if (['visit_card', 'stamp_card'].includes(record.programme_type)) {
+    return `${amount} ${Number(record.amount) === 1 ? 'visit' : 'visits'} added`
+  }
+  return `$${amount} progress added`
 }
 
 function mapActivity(record) {

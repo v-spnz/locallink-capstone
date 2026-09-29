@@ -2367,6 +2367,102 @@ body.business-surface .service-empty-state-copy p {
   text-transform: capitalize;
 }
 
+.business-settings-inline-address {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  align-items: start;
+  gap: 12px;
+  text-transform: none;
+}
+
+.business-settings-inline-address > span {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+}
+
+.business-settings-address-editor {
+  min-width: 0;
+}
+
+.business-settings-address-editor .address-autocomplete {
+  margin: 0;
+}
+
+body.business-surface
+  .business-settings-address-editor
+  .address-autocomplete-input-wrap
+  .form-input {
+  padding-right: 40px;
+  padding-left: 44px;
+}
+
+.business-settings-address-editor .form-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.business-settings-address-edit {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--business-border-strong);
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--business-surface);
+  color: var(--business-muted);
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.business-settings-address-edit:hover {
+  border-color: #aeb9d9;
+  background: var(--business-accent-soft);
+  color: var(--business-accent);
+}
+
+.business-settings-address-edit:focus-visible {
+  outline: 3px solid rgb(63 91 211 / 24%);
+  outline-offset: 2px;
+}
+
+.business-settings-address-edit:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.business-settings-address-edit svg {
+  width: 16px;
+  height: 16px;
+}
+
+.business-settings-location-status {
+  max-width: 650px;
+  margin: 16px 0 0;
+  color: var(--business-muted);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.business-settings-location-status.is-success {
+  color: #18764a;
+}
+
+.business-settings-location-status.is-error {
+  color: var(--business-danger);
+}
+
 .business-settings-callout {
   max-width: 650px;
   padding: 16px;
@@ -2971,5 +3067,149 @@ body.business-surface .business-onboarding-submit {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+.business-deal-status-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.business-deal-status-grid > div {
+  padding: 16px;
+  border: 1px solid var(--business-border);
+  border-radius: 12px;
+  display: grid;
+  gap: 4px;
+  background: var(--business-surface);
+}
+
+.business-deal-status-grid dt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  color: var(--business-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.business-deal-status-grid dd {
+  margin: 0;
+  color: var(--business-ink);
+  font-size: 28px;
+  font-weight: 750;
+  line-height: 1.1;
+}
+
+.business-deal-status-grid small {
+  color: var(--business-muted);
+  font-size: 12px;
+}
+
+.business-deal-ending-soon {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: #fff0cc;
+  color: #8a5b00;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.business-deal-status-grid .is-active:not(.is-empty) dd {
+  color: #087f5b;
+}
+
+.business-deal-status-grid .is-draft:not(.is-empty) dd {
+  color: var(--business-accent-strong);
+}
+
+.business-deal-status-grid .is-ended_early:not(.is-empty) dd {
+  color: var(--business-danger);
+}
+
+.business-deal-status-grid .is-empty {
+  background: var(--business-surface-soft);
+}
+
+.business-deal-status-grid .is-empty dd {
+  color: var(--business-muted);
+}
+
+.business-deal-attention {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+.business-deal-attention-group {
+  padding: 16px;
+  border: 1px solid var(--business-border);
+  border-radius: 12px;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  background: var(--business-surface);
+}
+
+.business-deal-attention-group h3 {
+  margin: 0 0 4px;
+  color: var(--business-ink);
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.business-deal-attention-group a {
+  padding: 10px 12px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--business-surface-soft);
+  color: inherit;
+  text-decoration: none;
+}
+
+.business-deal-attention-group a:hover {
+  background: var(--business-accent-soft);
+}
+
+.business-deal-attention-group a span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.business-deal-attention-group a strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.business-deal-attention-group a small {
+  color: var(--business-muted);
+  font-size: 12px;
+}
+
+.business-deal-attention-group a svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+
+a.business-performance-refresh {
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .business-deal-status-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

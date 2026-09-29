@@ -1,6 +1,6 @@
 begin;
 
-select plan(18);
+select plan(22);
 
 select has_function(
   'public',
@@ -25,7 +25,7 @@ select lives_ok(
       '47000000-0000-0000-0000-000000000107',
       '41000000-0000-0000-0000-000000000001',
       'Morning coffee rewards',
-      'stamp_card',
+      'purchase_card',
       null,
       8,
       null,
@@ -64,8 +64,8 @@ select is(
     from public.business_loyalty_programmes
     where id = '47000000-0000-0000-0000-000000000107'
   ),
-  'Complete 8 purchases or visits to receive the next one free.',
-  'US0104: stamp cards store a complete customer-facing earning condition'
+  'Complete 8 purchases to receive the next purchase free.',
+  'US0104: purchase cards store a complete customer-facing earning condition'
 );
 
 select is(
@@ -74,8 +74,47 @@ select is(
     from public.business_loyalty_programmes
     where id = '47000000-0000-0000-0000-000000000107'
   ),
-  'Next purchase or visit free',
-  'US0104: stamp card rewards are derived from the structured template'
+  'Next purchase free',
+  'US0104: purchase card rewards are derived from the structured template'
+);
+
+select lives_ok(
+  $$
+    select public.save_business_loyalty_programme(
+      '47000000-0000-0000-0000-000000000112',
+      '41000000-0000-0000-0000-000000000001',
+      'Weekly visit rewards',
+      'visit_card',
+      null,
+      4,
+      null,
+      null,
+      (now() at time zone 'Pacific/Auckland')::date,
+      null,
+      'published'
+    )
+  $$,
+  'a visit-based programme can be published separately'
+);
+
+select is(
+  (
+    select earning_rules
+    from public.business_loyalty_programmes
+    where id = '47000000-0000-0000-0000-000000000112'
+  ),
+  'Complete 4 visits to receive the next visit free.',
+  'visit cards store visit-specific customer-facing earning rules'
+);
+
+select is(
+  (
+    select reward_description
+    from public.business_loyalty_programmes
+    where id = '47000000-0000-0000-0000-000000000112'
+  ),
+  'Next visit free',
+  'visit card rewards are derived separately from purchase card rewards'
 );
 
 select lives_ok(
@@ -193,7 +232,7 @@ select throws_ok(
       '47000000-0000-0000-0000-000000000108',
       '41000000-0000-0000-0000-000000000001',
       'Incomplete publication',
-      'stamp_card',
+      'visit_card',
       null,
       null,
       null,
@@ -228,6 +267,17 @@ select is(
   'scheduled programmes become active on their start date'
 );
 
+-- Keep this discovery assertion independent from optional demo seeds that
+-- relocate the seeded consumer to another suburb.
+update public.profiles
+set
+  suburb = 'Ponsonby',
+  location = extensions.st_setsrid(
+    extensions.st_makepoint(174.7465, -36.8551),
+    4326
+  )::extensions.geography
+where id = '10000000-0000-0000-0000-000000000001';
+
 select set_config(
   'request.jwt.claim.sub',
   '10000000-0000-0000-0000-000000000001',
@@ -242,11 +292,22 @@ select is(
     where id in (
       '47000000-0000-0000-0000-000000000107',
       '47000000-0000-0000-0000-000000000109',
-      '47000000-0000-0000-0000-000000000110'
+      '47000000-0000-0000-0000-000000000110',
+      '47000000-0000-0000-0000-000000000112'
     )
   ),
-  3::bigint,
+  4::bigint,
   'a consumer can view active loyalty programmes'
+);
+
+select is(
+  (
+    select count(*)
+    from public.discover_loyalty_programmes()
+    where programme_id = '47000000-0000-0000-0000-000000000109'
+  ),
+  1::bigint,
+  'a consumer can discover an active programme without being a business member'
 );
 
 select * from finish();

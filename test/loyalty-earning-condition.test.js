@@ -22,12 +22,20 @@ const TEMPLATE_CASES = [
   {
     programme: {
       ...BASE_PROGRAMME,
-      programmeType: 'stamp_card',
+      programmeType: 'purchase_card',
       rewardThreshold: '5',
     },
-    earningRules:
-      'Complete 5 purchases or visits to receive the next one free.',
-    customerReward: 'Next purchase or visit free',
+    earningRules: 'Complete 5 purchases to receive the next purchase free.',
+    customerReward: 'Next purchase free',
+  },
+  {
+    programme: {
+      ...BASE_PROGRAMME,
+      programmeType: 'visit_card',
+      rewardThreshold: '5',
+    },
+    earningRules: 'Complete 5 visits to receive the next visit free.',
+    customerReward: 'Next visit free',
   },
   {
     programme: {
@@ -51,10 +59,10 @@ const TEMPLATE_CASES = [
   },
 ]
 
-test('US0104 AC1: earning conditions use only the three structured MVP templates', () => {
+test('US0104 AC1: purchase and visit loyalty use separate structured templates', () => {
   assert.deepEqual(
     LOYALTY_TEMPLATES.map(({ value }) => value),
-    ['stamp_card', 'spend_and_save', 'spend_and_reward'],
+    ['purchase_card', 'visit_card', 'spend_and_save', 'spend_and_reward'],
   )
   assert.equal(
     LOYALTY_TEMPLATES.some(({ value }) => value === 'custom'),
@@ -77,7 +85,16 @@ test('US0104 AC3: incomplete or invalid earning conditions cannot be confirmed',
   const invalidProgrammes = [
     { ...BASE_PROGRAMME, programmeType: '', rewardThreshold: '5' },
     { ...BASE_PROGRAMME, programmeType: 'custom', rewardThreshold: '5' },
-    { ...BASE_PROGRAMME, programmeType: 'stamp_card', rewardThreshold: '2.5' },
+    {
+      ...BASE_PROGRAMME,
+      programmeType: 'purchase_card',
+      rewardThreshold: '2.5',
+    },
+    {
+      ...BASE_PROGRAMME,
+      programmeType: 'visit_card',
+      rewardThreshold: '2.5',
+    },
     {
       ...BASE_PROGRAMME,
       programmeType: 'spend_and_save',
@@ -107,29 +124,37 @@ test('US0104 AC3: incomplete or invalid earning conditions cannot be confirmed',
 })
 
 test('US0104 AC4: the earning condition is saved against the selected loyalty programme', async () => {
-  const [api, saveMigration, percentageMigration] = await Promise.all([
-    readFile(
-      new URL(
-        '../src/features/loyalty/api/businessLoyalty.js',
-        import.meta.url,
+  const [api, saveMigration, percentageMigration, splitMigration] =
+    await Promise.all([
+      readFile(
+        new URL(
+          '../src/features/loyalty/api/businessLoyalty.js',
+          import.meta.url,
+        ),
+        'utf8',
       ),
-      'utf8',
-    ),
-    readFile(
-      new URL(
-        '../supabase/migrations/20260913050000_add_structured_loyalty_templates.sql',
-        import.meta.url,
+      readFile(
+        new URL(
+          '../supabase/migrations/20260913050000_add_structured_loyalty_templates.sql',
+          import.meta.url,
+        ),
+        'utf8',
       ),
-      'utf8',
-    ),
-    readFile(
-      new URL(
-        '../supabase/migrations/20260923000000_use_percentage_spend_and_save_rewards.sql',
-        import.meta.url,
+      readFile(
+        new URL(
+          '../supabase/migrations/20260923000000_use_percentage_spend_and_save_rewards.sql',
+          import.meta.url,
+        ),
+        'utf8',
       ),
-      'utf8',
-    ),
-  ])
+      readFile(
+        new URL(
+          '../supabase/migrations/20260929020000_split_purchase_and_visit_loyalty_programmes.sql',
+          import.meta.url,
+        ),
+        'utf8',
+      ),
+    ])
 
   assert.match(api, /p_programme_id: payload\.id/)
   assert.match(api, /p_business_id: payload\.business_id/)
@@ -140,6 +165,16 @@ test('US0104 AC4: the earning condition is saved against the selected loyalty pr
   assert.match(saveMigration, /and business_id = p_business_id/)
   assert.match(percentageMigration, /new\.earning_rules := case/)
   assert.match(percentageMigration, /Spend \$%s to receive %s%% off\./)
+  assert.match(splitMigration, /new\.programme_type = 'purchase_card'/)
+  assert.match(splitMigration, /new\.programme_type = 'visit_card'/)
+  assert.match(
+    splitMigration,
+    /Complete %s purchases to receive the next purchase free\./,
+  )
+  assert.match(
+    splitMigration,
+    /Complete %s visits to receive the next visit free\./,
+  )
 })
 
 test('US0104 AC5: the generated earning condition is reviewed before publication', async () => {

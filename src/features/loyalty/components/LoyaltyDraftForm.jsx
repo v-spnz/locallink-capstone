@@ -20,6 +20,7 @@ import {
   getProgrammeAvailability,
   getProgrammeTypeLabel,
   getRewardTarget,
+  isCountBasedLoyaltyType,
   LOYALTY_REDEMPTION_METHOD,
   LOYALTY_TEMPLATES,
 } from '../businessLoyaltyTemplates'
@@ -153,7 +154,7 @@ export default function LoyaltyDraftForm({
       ? programme.rewardValue
       : programme.programmeType === 'spend_and_reward'
         ? programme.rewardDescription
-        : programme.programmeType === 'stamp_card',
+        : isCountBasedLoyaltyType(programme.programmeType),
     programme.startDate,
   ].filter(Boolean).length
   const availabilityOnPublish = programme.startDate
@@ -224,8 +225,9 @@ export default function LoyaltyDraftForm({
               </legend>
               <div className="loyalty-type-options">
                 {LOYALTY_TEMPLATES.map((option) => {
-                  const Icon =
-                    option.value === 'stamp_card' ? Stamp : CircleDollarSign
+                  const Icon = isCountBasedLoyaltyType(option.value)
+                    ? Stamp
+                    : CircleDollarSign
                   return (
                     <label
                       className={
@@ -273,23 +275,27 @@ export default function LoyaltyDraftForm({
                 id="loyalty-reward-threshold"
                 label="Reward target"
                 helper={
-                  programme.programmeType === 'stamp_card'
-                    ? 'Number of eligible purchases or visits.'
-                    : programme.programmeType
-                      ? 'Amount the customer must spend, in dollars.'
-                      : 'Choose a programme template above.'
+                  programme.programmeType === 'purchase_card'
+                    ? 'Number of eligible purchases.'
+                    : programme.programmeType === 'visit_card'
+                      ? 'Number of eligible visits.'
+                      : programme.programmeType
+                        ? 'Amount the customer must spend, in dollars.'
+                        : 'Choose a programme template above.'
                 }
                 placeholder="e.g. 8"
                 inputMode="decimal"
                 prefix={
-                  programme.programmeType !== 'stamp_card' ? '$' : undefined
+                  !isCountBasedLoyaltyType(programme.programmeType)
+                    ? '$'
+                    : undefined
                 }
                 value={programme.rewardThreshold}
                 error={errors.rewardThreshold}
                 onChange={(value) =>
                   onChange(
                     'rewardThreshold',
-                    programme.programmeType === 'stamp_card'
+                    isCountBasedLoyaltyType(programme.programmeType)
                       ? sanitizeRewardThreshold(value).split('.')[0]
                       : sanitizeRewardThreshold(value),
                   )

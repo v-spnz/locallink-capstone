@@ -5,7 +5,7 @@ import { validateLoyaltyProgramme } from '../src/features/loyalty/businessLoyalt
 
 const COMPLETE_PROGRAMME = {
   name: 'Morning coffee rewards',
-  programmeType: 'stamp_card',
+  programmeType: 'purchase_card',
   rewardDescription: '',
   rewardThreshold: '8',
   rewardValue: '',
@@ -85,6 +85,26 @@ test('structured templates require only their own reward fields', () => {
       },
       { forPublication: true },
     ).rewardDescription,
+  )
+})
+
+test('consumer loyalty discovery does not require business membership', async () => {
+  const migration = await readFile(
+    new URL(
+      '../supabase/migrations/20260929010000_fix_loyalty_discovery_for_consumers.sql',
+      import.meta.url,
+    ),
+    'utf8',
+  )
+
+  assert.match(migration, /from public\.business_capabilities as capability/)
+  assert.match(
+    migration,
+    /capability\.business_id = nearest\.business_id[\s\S]*capability\.loyalty_enabled/,
+  )
+  assert.doesNotMatch(
+    migration,
+    /business_has_capability\(nearest\.business_id, 'loyalty'\)/,
   )
 })
 
