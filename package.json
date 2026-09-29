@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "generate:pwa-icons": "pwa-assets-generator --config pwa-assets.config.js",
     "test": "node --test",
     "test:db": "supabase test db",
     "preview": "vite preview"
@@ -33,6 +34,7 @@
     "@eslint/js": "^9.39.4",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vite-pwa/assets-generator": "^1.0.4",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -40,6 +42,7 @@
     "globals": "^17.5.0",
     "prettier": "^3.9.6",
     "supabase": "^2.111.0",
-    "vite": "^8.0.9"
+    "vite": "^8.0.9",
+    "vite-plugin-pwa": "^1.3.0"
   }
 }
