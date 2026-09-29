@@ -1,4 +1,4 @@
-import { Clock3 } from 'lucide-react'
+import { BadgePercent, BriefcaseBusiness, Clock3, Gift, MapPin, Search } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAuth from '../../auth/useAuth'
@@ -13,12 +13,28 @@ import useLoyaltyDiscovery from '../../features/loyalty/hooks/useLoyaltyDiscover
 import useLoyaltyPrograms from '../../features/loyalty/hooks/useLoyaltyPrograms'
 import { getLoyaltyProgressPresentation } from '../../features/loyalty/loyaltyProgress'
 import '../../features/location/discovery.css'
+import './Home.css'
 import useAllHistory from './hooks/useAllHistory'
 import useHomeJobs from './hooks/useHomeJobs'
 import useSuburbDeals from './hooks/useSuburbDeals'
 import { buildHomeSearchResults } from './homeSearch'
 
 const MAX_STAMP_CIRCLES = 12
+
+const ACTIVITY_ICONS = { job: BriefcaseBusiness, deal: BadgePercent, loyalty: Gift }
+
+const CATEGORY_EMOJI = {
+  'Food & Drink': '🍔',
+  Retail: '🛍️',
+  Services: '✂️',
+  'Health & Wellness': '🏥',
+  Trades: '🔧',
+  Entertainment: '🎟️',
+}
+
+function getCategoryEmoji(category) {
+  return CATEGORY_EMOJI[category] || '📍'
+}
 
 export default function Home() {
   const navigate = useNavigate()
@@ -183,66 +199,64 @@ export default function Home() {
         </section>
       )}
 
-      <div className="home-header-row">
-        <div>
-          <p
-            style={{
-              fontSize: 13,
-              color: 'var(--text-muted)',
-              marginBottom: 3,
-            }}
-          >
-            {getGreeting()}, {user?.user_metadata?.first_name ?? 'Neighbour'}
-          </p>
-          <h2 style={{ fontSize: 22, fontWeight: 700 }}>My LocalLink</h2>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 7 }}>
-            {customerLocation?.suburb ||
-              customerLocation?.city ||
-              'Set your location in Profile'}
-          </p>
-        </div>
-        <div className="home-search">
-          <input
-            type="text"
-            placeholder="Search deals, loyalty, or jobs"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Escape') setSearch('')
-            }}
-          />
-          {isSearching && (
-            <div className="home-search-results">
-              {searchGroups.length === 0 ? (
-                <p className="home-search-empty">
-                  {`No results for "${search.trim()}".`}
-                </p>
-              ) : (
-                searchGroups.map((group) => (
-                  <div className="home-search-group" key={group.key}>
-                    <p className="home-search-group-label">{group.label}</p>
-                    {group.items.map((item) => (
-                      <button
-                        type="button"
-                        className="home-search-result"
-                        key={item.id}
-                        onClick={() =>
-                          navigate(item.to, { state: item.state })
-                        }
-                      >
-                        <span className="home-search-result-title">
-                          {item.title}
-                        </span>
-                        <span className="home-search-result-sub">
-                          {item.subtitle}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                ))
-              )}
-            </div>
-          )}
+      <div className="home-page-header">
+        <div className="home-header-row">
+          <div className="home-header-text">
+            <p className="home-greeting">
+              {getGreeting()}, {user?.user_metadata?.first_name ?? 'Neighbour'}
+            </p>
+            <h2 className="home-title">My LocalLink</h2>
+            <p className="home-location-chip">
+              <MapPin aria-hidden="true" size={13} />
+              {customerLocation?.suburb ||
+                customerLocation?.city ||
+                'Set your location in Profile'}
+            </p>
+          </div>
+          <div className="home-search">
+            <Search className="home-search-icon" size={16} aria-hidden="true" />
+            <input
+              type="text"
+              placeholder="Search deals, loyalty, or jobs"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') setSearch('')
+              }}
+            />
+            {isSearching && (
+              <div className="home-search-results">
+                {searchGroups.length === 0 ? (
+                  <p className="home-search-empty">
+                    {`No results for "${search.trim()}".`}
+                  </p>
+                ) : (
+                  searchGroups.map((group) => (
+                    <div className="home-search-group" key={group.key}>
+                      <p className="home-search-group-label">{group.label}</p>
+                      {group.items.map((item) => (
+                        <button
+                          type="button"
+                          className="home-search-result"
+                          key={item.id}
+                          onClick={() =>
+                            navigate(item.to, { state: item.state })
+                          }
+                        >
+                          <span className="home-search-result-title">
+                            {item.title}
+                          </span>
+                          <span className="home-search-result-sub">
+                            {item.subtitle}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -260,9 +274,9 @@ export default function Home() {
           <p className="home-section-note">Your most recently saved deal.</p>
 
           {savedDeals === null ? (
-            <div className="empty-state">Loading your saved deals…</div>
+            <div className="home-empty-state">Loading your saved deals…</div>
           ) : !latestSavedDeal ? (
-            <div className="empty-state">
+            <div className="home-empty-state">
               You haven't saved any deals yet. Browse Deals & Discovery to find
               some.
             </div>
@@ -278,21 +292,11 @@ export default function Home() {
             >
               <div className="featured-deal-photo">
                 {latestSavedDeal.deal_image_url ? (
-                  <img
-                    src={latestSavedDeal.deal_image_url}
-                    alt=""
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    }}
-                  />
+                  <img src={latestSavedDeal.deal_image_url} alt="" />
                 ) : (
-                  <>
-                    Business photo
-                    <br />
-                    (TBD)
-                  </>
+                  <span aria-hidden="true">
+                    {getCategoryEmoji(latestSavedDeal.category)}
+                  </span>
                 )}
               </div>
               <div className="featured-deal-body">
@@ -306,14 +310,13 @@ export default function Home() {
                 </p>
                 <div className="featured-deal-foot">
                   {latestSavedDeal.distance_km != null ? (
-                    <>
-                      <strong>
-                        {Number(latestSavedDeal.distance_km).toFixed(1)} km
-                      </strong>{' '}
-                      away
-                    </>
+                    <span className="featured-deal-distance">
+                      {Number(latestSavedDeal.distance_km).toFixed(1)} km away
+                    </span>
                   ) : (
-                    'Saved deal'
+                    <span className="featured-deal-distance is-neutral">
+                      Saved deal
+                    </span>
                   )}
                 </div>
               </div>
@@ -332,37 +335,58 @@ export default function Home() {
           <p className="home-section-note">Your latest history.</p>
 
           {history.isLoading ? (
-            <div className="empty-state">Loading your activity…</div>
+            <div className="home-empty-state">Loading your activity…</div>
           ) : history.error ? (
-            <div className="empty-state">{history.error}</div>
+            <div className="home-empty-state">{history.error}</div>
           ) : recentActivity.length === 0 ? (
-            <div className="empty-state">
-              Nothing here yet. Redeem a deal or complete a job and it will show
-              up here.
+            <div className="home-empty-state">
+              Nothing here yet. Redeem a deal or complete a job and it will
+              show up here.
             </div>
           ) : (
-            recentActivity.map((item) => (
-              <div className="home-activity-row" key={item.id}>
-                <span className="what">
-                  {item.text} <b>{item.subject}</b>
-                </span>
-                <span className="when">{formatTimeAgo(item.date)}</span>
-              </div>
-            ))
+            <div className="home-activity-list">
+              {recentActivity.map((item) => {
+                const Icon = ACTIVITY_ICONS[item.type]
+                return (
+                  <div className="home-activity-row" key={item.id}>
+                    <span className={`home-activity-icon is-${item.type}`}>
+                      <Icon aria-hidden="true" size={15} />
+                    </span>
+                    <span className="what">
+                      {item.text} <b>{item.subject}</b>
+                    </span>
+                    <span className="when">{formatTimeAgo(item.date)}</span>
+                  </div>
+                )
+              })}
+            </div>
           )}
         </div>
 
         <aside>
-          <div className="home-side-card">
-            <p className="home-side-label">
-              Loyalty{closestLoyalty ? ` · ${closestLoyalty.business}` : ''}
-            </p>
+          <div
+            className={`home-side-card home-loyalty-card${closestLoyalty?.rewardEligible ? ' is-ready' : ''}`}
+          >
+            <div className="home-side-label-row">
+              <span className="home-side-icon">
+                <Gift aria-hidden="true" size={14} />
+              </span>
+              <p className="home-side-label">
+                Loyalty{closestLoyalty ? ` · ${closestLoyalty.business}` : ''}
+              </p>
+            </div>
             {closestLoyalty ? (
               <>
+                {closestLoyalty.rewardEligible && (
+                  <span className="home-loyalty-reward-tag">
+                    <Gift aria-hidden="true" size={12} />
+                    Reward ready
+                  </span>
+                )}
                 <h3 className="home-side-title">
                   {closestLoyalty.programmeName}
                 </h3>
-                {showStamps && (
+                {showStamps ? (
                   <div className="stamp-row">
                     {Array.from({ length: loyaltyProgress.target }).map(
                       (_, index) => (
@@ -373,6 +397,13 @@ export default function Home() {
                       ),
                     )}
                   </div>
+                ) : (
+                  <div className="home-progress-track">
+                    <div
+                      className="home-progress-fill"
+                      style={{ width: `${loyaltyProgress.percentage}%` }}
+                    />
+                  </div>
                 )}
                 <p className="stamp-note">
                   {closestLoyalty.rewardEligible
@@ -380,7 +411,7 @@ export default function Home() {
                     : `${loyaltyProgress.progressLabel}, ${loyaltyProgress.remainingLabel}`}
                 </p>
                 {closestLoyalty.rewardDescription && (
-                  <p className="stamp-note">
+                  <p className="home-reward-line">
                     Reward: {closestLoyalty.rewardDescription}
                   </p>
                 )}
@@ -400,8 +431,13 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="home-side-card block-gap">
-            <p className="home-side-label">Your Active Jobs</p>
+          <div className="home-side-card home-jobs-card block-gap">
+            <div className="home-side-label-row">
+              <span className="home-side-icon">
+                <BriefcaseBusiness aria-hidden="true" size={14} />
+              </span>
+              <p className="home-side-label">Your Active Jobs</p>
+            </div>
             <h3 className="home-side-title">
               {homeJobs.isLoading
                 ? 'Loading…'
@@ -414,7 +450,9 @@ export default function Home() {
               >
                 <div className="job-top">
                   <span className="job-name">{latestJob.title}</span>
-                  <span className="job-quotes">
+                  <span
+                    className={`job-quotes${latestJobQuotes > 0 ? ' has-quotes' : ''}`}
+                  >
                     {latestJobQuotes > 0
                       ? `${latestJobQuotes} quote${latestJobQuotes === 1 ? '' : 's'}`
                       : 'No quotes yet'}
@@ -435,9 +473,8 @@ export default function Home() {
   )
 }
 
-
 function toActivity(item) {
-  const base = { id: item.id, date: item.date }
+  const base = { id: item.id, date: item.date, type: item.type }
 
   if (item.type === 'job') {
     return { ...base, text: 'You completed a job:', subject: item.title }
