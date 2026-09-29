@@ -1,15 +1,22 @@
 begin;
 
-select plan(22);
+select plan(24);
 
 select has_function(
   'public',
   'save_business_loyalty_programme',
   array[
     'uuid', 'uuid', 'text', 'text', 'text', 'numeric', 'numeric', 'text',
-    'date', 'date', 'text'
+    'date', 'date', 'text', 'text'
   ],
   'the atomic loyalty programme save and publication function exists'
+);
+
+select has_column(
+  'public',
+  'business_loyalty_programmes',
+  'image_url',
+  'loyalty programmes can store an optional business image'
 );
 
 select set_config(
@@ -32,7 +39,8 @@ select lives_ok(
       'One reward per customer.',
       (now() at time zone 'Pacific/Auckland')::date + 1,
       (now() at time zone 'Pacific/Auckland')::date + 30,
-      'published'
+      'published',
+      'https://example.test/coffee-rewards.jpg'
     )
   $$,
   'a complete loyalty programme can be published atomically'
@@ -56,6 +64,16 @@ select is(
   ),
   1::bigint,
   'publication creates exactly one programme'
+);
+
+select is(
+  (
+    select image_url
+    from public.business_loyalty_programmes
+    where id = '47000000-0000-0000-0000-000000000107'
+  ),
+  'https://example.test/coffee-rewards.jpg',
+  'a programme keeps its optional business image when published'
 );
 
 select is(

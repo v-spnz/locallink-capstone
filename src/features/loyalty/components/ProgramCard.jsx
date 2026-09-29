@@ -16,6 +16,7 @@ import Modal from '../../../components/ui/Modal'
 import {
   getProgrammeTypeLabel,
   LOYALTY_REDEMPTION_METHOD,
+  isEarlyEndGracePeriodActive,
 } from '../businessLoyaltyTemplates'
 import {
   formatLoyaltyLookupCode,
@@ -35,10 +36,12 @@ export default function ProgramCard({ program, index, onJoin, autoOpen }) {
   const [joinError, setJoinError] = useState('')
   const progress = getLoyaltyProgressPresentation(program)
   const businessName = program.business ?? program.businessName
+  const isInEarlyEndGracePeriod = isEarlyEndGracePeriodActive(program)
   const isEnded =
     isJoined &&
     Boolean(program.programmeStatus) &&
-    program.programmeStatus !== 'active'
+    program.programmeStatus !== 'active' &&
+    !isInEarlyEndGracePeriod
 
   async function handleShowQr() {
     setQrError('')
@@ -123,6 +126,22 @@ export default function ProgramCard({ program, index, onJoin, autoOpen }) {
             />
 
             <dl className="loyalty-details-list">
+              {isInEarlyEndGracePeriod && (
+                <div className="loyalty-early-end-notice">
+                  <dt>Programme ended early</dt>
+                  <dd>
+                    You can keep earning and redeeming until{' '}
+                    {new Date(
+                      `${program.earlyEndCompletionDeadline}T00:00:00`,
+                    ).toLocaleDateString('en-NZ', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                    .
+                  </dd>
+                </div>
+              )}
               <div>
                 <dt>
                   <ClipboardList aria-hidden="true" size={14} />
@@ -168,7 +187,8 @@ export default function ProgramCard({ program, index, onJoin, autoOpen }) {
                   </p>
                 )}
               </>
-            ) : program.programmeStatus === 'active' ? (
+            ) : program.programmeStatus === 'active' ||
+              isInEarlyEndGracePeriod ? (
               <>
                 <Button
                   className="ly-redeem-btn"

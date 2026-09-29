@@ -529,7 +529,6 @@
   }
 }
 
-
 .ly-tabs {
   display: flex;
   gap: 24px;
@@ -1023,7 +1022,6 @@
   color: var(--ly-ink-dark);
 }
 
-
 /* Empty-state icons */
 .ly-empty-state-icon {
   background: var(--blue);
@@ -1164,6 +1162,17 @@
 
 .ly-join-form .auth-error {
   margin-top: 12px;
+}
+
+.loyalty-early-end-notice {
+  border: 1px solid #f0d28a;
+  border-radius: 10px;
+  background: #fff8e6;
+}
+
+.loyalty-early-end-notice dt,
+.loyalty-early-end-notice dd {
+  color: #7a5c00;
 }
 
 /* Tab swap: content slides in from the side you're moving toward */

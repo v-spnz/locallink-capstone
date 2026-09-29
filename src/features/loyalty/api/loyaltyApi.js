@@ -12,6 +12,7 @@ export async function fetchMyLoyaltyRecords() {
     programmeName: record.programme_name,
     programmeType: record.programme_type,
     programmeStatus: record.programme_status,
+    earlyEndCompletionDeadline: record.early_end_completion_deadline || null,
     currentProgress: Number(record.current_progress),
     rewardThreshold: Number(record.reward_threshold),
     rewardDescription: record.reward_description,
