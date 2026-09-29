@@ -35,7 +35,7 @@ values (
   '95000000-0000-0000-0000-000000000001',
   '41000000-0000-0000-0000-000000000001',
   'Activity history test',
-  'stamp_card',
+  'visit_card',
   8,
   (now() at time zone 'Pacific/Auckland')::date,
   'published'

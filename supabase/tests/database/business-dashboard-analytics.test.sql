@@ -160,7 +160,7 @@ values (
   '94000000-0000-0000-0000-000000000041',
   '94000000-0000-0000-0000-000000000001',
   'Analytics loyalty programme',
-  'stamp_card',
+  'visit_card',
   8,
   (now() at time zone 'Pacific/Auckland')::date - 10,
   'published'

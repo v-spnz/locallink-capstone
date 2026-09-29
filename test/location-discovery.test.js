@@ -213,9 +213,8 @@ test('customer and business signup addresses are persisted and business location
   assert.match(profile, /saveCustomerLocation/)
   assert.match(onboarding, /AddressAutocomplete/)
   assert.match(onboarding, /p_locations/)
-  assert.doesNotMatch(
-    settings,
-    /addManagedBusinessLocation|AddressAutocomplete/,
-  )
+  assert.match(settings, /addManagedBusinessLocation/)
+  assert.match(settings, /AddressAutocomplete/)
+  assert.match(settings, /address\.suburb/)
   assert.match(dealsApi, /from\('business_locations'\)/)
 })

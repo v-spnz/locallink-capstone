@@ -7,10 +7,12 @@ import {
   LayoutDashboard,
   LogOut,
   MapPin,
+  Pencil,
   ReceiptText,
   ShieldCheck,
   Tags,
   UserCog,
+  X,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
@@ -22,9 +24,13 @@ import {
   useNavigate,
 } from 'react-router-dom'
 import useBusiness from '../../business/useBusiness'
+import AddressAutocomplete from '../../features/location/components/AddressAutocomplete'
+import {
+  addManagedBusinessLocation,
+  fetchManagedBusinessLocations,
+} from '../../features/location/api/locations'
 import BusinessPageLoader from '../../components/ui/BusinessPageLoader'
 import { supabase } from '../../lib/supabase'
-import { fetchManagedBusinessLocations } from '../../features/location/api/locations'
 import { clearRegistrationFlow } from '../../features/onboarding/registrationFlow'
 import ClaimRecords from './ClaimRecords'
 
@@ -85,7 +91,26 @@ function AccountOverview({
   )
 }
 
-function BusinessProfile({ business, membership, enabledCapabilities }) {
+function BusinessProfile({
+  business,
+  membership,
+  enabledCapabilities,
+  primaryLocation,
+  locationStatus,
+  isSavingLocation,
+  onLocationSelect,
+}) {
+  const [isEditingLocation, setIsEditingLocation] = useState(false)
+  const hasCompleteLocation = Boolean(
+    primaryLocation?.formatted_address && primaryLocation?.suburb,
+  )
+  const canManageLocation = ['owner', 'admin'].includes(membership.role)
+
+  async function handleInlineLocationSelect(address) {
+    const didSave = await onLocationSelect(address)
+    if (didSave) setIsEditingLocation(false)
+  }
+
   return (
     <section className="business-settings-section">
       <SettingsHeading icon={Building2} title="Business profile" />
@@ -103,11 +128,76 @@ function BusinessProfile({ business, membership, enabledCapabilities }) {
           <dt>Description</dt>
           <dd>{business.description || 'No description added'}</dd>
         </div>
+        <div className="business-settings-address-row">
+          <dt>Store address</dt>
+          <dd className="business-settings-inline-address">
+            {isEditingLocation ? (
+              <div className="business-settings-address-editor">
+                <AddressAutocomplete
+                  id="business-settings-address"
+                  label="Store address"
+                  placeholder="Search for your shop, office, or service address"
+                  disabled={isSavingLocation}
+                  showCurrentLocation={false}
+                  autoFocus
+                  onSelect={handleInlineLocationSelect}
+                />
+              </div>
+            ) : (
+              <span>
+                {primaryLocation?.formatted_address || 'No address added'}
+              </span>
+            )}
+            {!hasCompleteLocation && canManageLocation && (
+              <button
+                type="button"
+                className="business-settings-address-edit"
+                aria-label={
+                  isEditingLocation
+                    ? 'Cancel adding store address'
+                    : 'Add store address'
+                }
+                title={
+                  isEditingLocation
+                    ? 'Cancel adding store address'
+                    : 'Add store address'
+                }
+                onClick={() => setIsEditingLocation((current) => !current)}
+                disabled={isSavingLocation}
+              >
+                {isEditingLocation ? (
+                  <X aria-hidden="true" />
+                ) : (
+                  <Pencil aria-hidden="true" />
+                )}
+              </button>
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt>Suburb</dt>
+          <dd>{primaryLocation?.suburb || 'No suburb added'}</dd>
+        </div>
         <div>
           <dt>Enabled capabilities</dt>
           <dd>{enabledCapabilities.join(', ') || 'None enabled'}</dd>
         </div>
       </dl>
+
+      {!hasCompleteLocation && !canManageLocation && (
+        <p className="business-settings-location-status">
+          Ask a business owner or administrator to add the store address.
+        </p>
+      )}
+
+      {locationStatus && (
+        <p
+          className={`business-settings-location-status is-${locationStatus.variant}`}
+          role={locationStatus.variant === 'error' ? 'alert' : 'status'}
+        >
+          {locationStatus.message}
+        </p>
+      )}
     </section>
   )
 }
@@ -204,6 +294,8 @@ export default function Settings() {
   const [logoutError, setLogoutError] = useState('')
   const [businessLocations, setBusinessLocations] = useState([])
   const [areLocationsLoading, setAreLocationsLoading] = useState(true)
+  const [isSavingLocation, setIsSavingLocation] = useState(false)
+  const [locationStatus, setLocationStatus] = useState(null)
   const {
     business,
     membership,
@@ -218,6 +310,16 @@ export default function Settings() {
     capabilities.loyalty_enabled && 'Loyalty',
     capabilities.service_marketplace_enabled && 'Service Marketplace',
   ].filter(Boolean)
+  const primaryLocation =
+    businessLocations.find(
+      (location) =>
+        location.is_primary && location.formatted_address && location.suburb,
+    ) ??
+    businessLocations.find(
+      (location) => location.formatted_address && location.suburb,
+    ) ??
+    businessLocations.find((location) => location.is_primary) ??
+    businessLocations[0]
 
   const settingsPages = [
     {
@@ -277,6 +379,40 @@ export default function Settings() {
       active = false
     }
   }, [business.id])
+
+  async function handleLocationSelect(address) {
+    if (!address.suburb?.trim()) {
+      setLocationStatus({
+        variant: 'error',
+        message:
+          'We could not identify the suburb for this address. Choose another search result.',
+      })
+      return false
+    }
+
+    setIsSavingLocation(true)
+    setLocationStatus({ variant: 'loading', message: 'Saving location…' })
+
+    try {
+      await addManagedBusinessLocation(business.id, address)
+      const locations = await fetchManagedBusinessLocations(business.id)
+      setBusinessLocations(locations)
+      setLocationStatus({
+        variant: 'success',
+        message: `Store address saved. Suburb: ${address.suburb}.`,
+      })
+      return true
+    } catch (error) {
+      console.error('Unable to save business location.', error)
+      setLocationStatus({
+        variant: 'error',
+        message: 'Unable to save this address. Please try again.',
+      })
+      return false
+    } finally {
+      setIsSavingLocation(false)
+    }
+  }
 
   async function handleLogout() {
     setIsLoggingOut(true)
@@ -358,6 +494,10 @@ export default function Settings() {
                   business={business}
                   membership={membership}
                   enabledCapabilities={enabledCapabilities}
+                  primaryLocation={primaryLocation}
+                  locationStatus={locationStatus}
+                  isSavingLocation={isSavingLocation}
+                  onLocationSelect={handleLocationSelect}
                 />
               }
             />
