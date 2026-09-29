@@ -132,7 +132,10 @@ test('US0109 AC1-3: the protected business workflow finds and presents its match
   assert.match(customerCard, /getLoyaltyIdentifierPayload/)
   assert.match(customerCard, /Show loyalty QR/)
   assert.match(customerCard, /createMyLoyaltyScanCode/)
-  assert.match(customerCard, /Code expires in/)
+  // Loyalty QR codes no longer expire (deals keep their own separate
+  // 15-minute redemption window, untouched) — this guards against the
+  // countdown silently coming back.
+  assert.doesNotMatch(customerCard, /Code expires in/)
   assert.match(customerApi, /get_my_loyalty_records/)
   assert.match(customerApi, /create_my_loyalty_scan_code/)
   assert.match(scanner, /BarcodeDetector/)
