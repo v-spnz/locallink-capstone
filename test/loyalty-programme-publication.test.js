@@ -51,8 +51,8 @@ test('structured templates require only their own reward fields', () => {
       {
         ...COMPLETE_PROGRAMME,
         programmeType: 'spend_and_save',
-        rewardThreshold: '50',
-        rewardValue: '5',
+        rewardThreshold: '12',
+        rewardValue: '20',
       },
       { forPublication: true },
     ),
@@ -90,6 +90,23 @@ test('structured templates require only their own reward fields', () => {
       },
       { forPublication: true },
     ).rewardDescription,
+  )
+})
+
+test('spend-and-save percentages are independent of the dollar target', async () => {
+  const migration = await readFile(
+    new URL(
+      '../supabase/migrations/20260930020000_fix_spend_and_save_publication_validation.sql',
+      import.meta.url,
+    ),
+    'utf8',
+  )
+
+  assert.doesNotMatch(migration, /reward_value > new\.reward_threshold/)
+  assert.match(migration, /new\.reward_value not between 5 and 100/)
+  assert.match(
+    migration,
+    /new\.reward_value <> round\(new\.reward_value \/ 5\) \* 5/,
   )
 })
 

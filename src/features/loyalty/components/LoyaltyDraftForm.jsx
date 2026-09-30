@@ -16,7 +16,10 @@ import Button from '../../../components/ui/Button'
 import DateRangeCalendar from '../../../components/ui/DateRangeCalendar'
 import RedemptionMethodField from '../../../components/ui/RedemptionMethodField'
 import { getLoyaltyProgressPresentation } from '../loyaltyProgress'
-import { sanitizeRewardThreshold } from '../businessLoyaltyValidation'
+import {
+  MAX_COUNT_BASED_REWARD_THRESHOLD,
+  sanitizeRewardThreshold,
+} from '../businessLoyaltyValidation'
 import DiscountPercentageCombobox from './DiscountPercentageCombobox'
 import LoyaltyTicket from './LoyaltyTicket'
 import {
@@ -234,8 +237,14 @@ export default function LoyaltyDraftForm({
         : isCountBasedLoyaltyType(programme.programmeType),
     programme.startDate,
   ].filter(Boolean).length
+  const previewRewardThreshold =
+    isCountBasedLoyaltyType(programme.programmeType) &&
+    Number(programme.rewardThreshold) > MAX_COUNT_BASED_REWARD_THRESHOLD
+      ? String(MAX_COUNT_BASED_REWARD_THRESHOLD)
+      : programme.rewardThreshold
   const previewProgram = {
     ...programme,
+    rewardThreshold: previewRewardThreshold,
     programmeName: programme.name || 'Untitled programme',
     rewardDescription: programme.rewardDescription || 'Add reward details',
     currentProgress: 0,
@@ -370,9 +379,9 @@ export default function LoyaltyDraftForm({
                 label="Reward target"
                 helper={
                   programme.programmeType === 'purchase_card'
-                    ? 'Number of eligible purchases.'
+                    ? `Maximum ${MAX_COUNT_BASED_REWARD_THRESHOLD}`
                     : programme.programmeType === 'visit_card'
-                      ? 'Number of eligible visits.'
+                      ? `Maximum ${MAX_COUNT_BASED_REWARD_THRESHOLD}`
                       : programme.programmeType
                         ? 'Amount the customer must spend, in dollars.'
                         : 'Choose a programme template above.'
@@ -508,7 +517,7 @@ export default function LoyaltyDraftForm({
           </div>
           <div className="loyalty-preview-details">
             <p className="loyalty-field-helper">
-              {getEarningRules(programme) ||
+              {getEarningRules(previewProgram) ||
                 'Complete the template details to preview the rules.'}
             </p>
             <p className="loyalty-preview-availability">

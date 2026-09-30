@@ -1,6 +1,7 @@
 import { LOYALTY_DISCOUNT_PERCENTAGES } from './businessLoyaltyTemplates.js'
 
 const MAX_REWARD_THRESHOLD = 1_000_000
+export const MAX_COUNT_BASED_REWARD_THRESHOLD = 12
 const COUNT_BASED_TYPES = ['purchase_card', 'visit_card']
 const TEMPLATE_TYPES = [
   ...COUNT_BASED_TYPES,
@@ -55,6 +56,7 @@ export function validateLoyaltyProgramme(
   const rewardThreshold = Number(programme.rewardThreshold)
   const rewardValue = Number(programme.rewardValue)
   const type = programme.programmeType
+  const isCountBased = COUNT_BASED_TYPES.includes(type)
 
   if (forPublication) {
     requireText(errors, programme, 'name', 'Programme name', 3, 120)
@@ -92,19 +94,25 @@ export function validateLoyaltyProgramme(
 
   if (forPublication && !programme.rewardThreshold) {
     errors.rewardThreshold = 'Enter the reward target.'
+  } else if (programme.rewardThreshold && isCountBased) {
+    if (
+      !Number.isFinite(rewardThreshold) ||
+      rewardThreshold < 1 ||
+      !Number.isInteger(rewardThreshold)
+    ) {
+      errors.rewardThreshold = 'Enter a whole number from 1 to 12.'
+    } else if (rewardThreshold > MAX_COUNT_BASED_REWARD_THRESHOLD) {
+      errors.rewardThreshold = 'Must be 12 or less.'
+    }
   } else if (
     programme.rewardThreshold &&
     (!Number.isFinite(rewardThreshold) ||
       rewardThreshold < 1 ||
       rewardThreshold > MAX_REWARD_THRESHOLD ||
-      (COUNT_BASED_TYPES.includes(type) &&
-        !Number.isInteger(rewardThreshold)) ||
-      (!COUNT_BASED_TYPES.includes(type) &&
-        !Number.isInteger(rewardThreshold * 100)))
+      !Number.isInteger(rewardThreshold * 100))
   ) {
-    errors.rewardThreshold = COUNT_BASED_TYPES.includes(type)
-      ? 'Use a whole number between 1 and 1,000,000.'
-      : 'Use an amount between $1 and $1,000,000, with up to two decimal places.'
+    errors.rewardThreshold =
+      'Use an amount between $1 and $1,000,000, with up to two decimal places.'
   }
 
   if (type === 'spend_and_save') {

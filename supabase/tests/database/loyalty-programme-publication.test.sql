@@ -143,8 +143,8 @@ select lives_ok(
       'Active lunch rewards',
       'spend_and_save',
       null,
-      50,
-      5,
+      12,
+      20,
       null,
       (now() at time zone 'Pacific/Auckland')::date,
       null,
@@ -170,8 +170,8 @@ select is(
     from public.business_loyalty_programmes
     where id = '47000000-0000-0000-0000-000000000109'
   ),
-  'Spend $50 to receive 5% off.',
-  'US0104: spend-and-save programmes store the target and percentage discount'
+  'Spend $12 to receive 20% off.',
+  'US0104: percentage discounts are independent of the dollar spend target'
 );
 
 select is(
@@ -180,7 +180,7 @@ select is(
     from public.business_loyalty_programmes
     where id = '47000000-0000-0000-0000-000000000109'
   ),
-  '5% off',
+  '20% off',
   'US0104: spend-and-save rewards are derived from structured values'
 );
 

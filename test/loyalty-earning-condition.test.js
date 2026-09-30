@@ -5,6 +5,7 @@ import { validateLoyaltyProgramme } from '../src/features/loyalty/businessLoyalt
 import {
   getCustomerReward,
   getEarningRules,
+  isCountBasedLoyaltyType,
   LOYALTY_TEMPLATES,
 } from '../src/features/loyalty/businessLoyaltyTemplates.js'
 
@@ -79,6 +80,58 @@ test('US0104 AC2: every template produces a complete customer-facing earning con
     assert.equal(getEarningRules(programme), earningRules)
     assert.equal(getCustomerReward(programme), customerReward)
   }
+})
+
+test('count-based loyalty programmes use the stamp-card presentation', async () => {
+  assert.equal(isCountBasedLoyaltyType('purchase_card'), true)
+  assert.equal(isCountBasedLoyaltyType('visit_card'), true)
+  assert.equal(isCountBasedLoyaltyType('stamp_card'), true)
+  assert.equal(isCountBasedLoyaltyType('spend_and_save'), false)
+  assert.equal(isCountBasedLoyaltyType('spend_and_reward'), false)
+
+  const ticket = await readFile(
+    new URL(
+      '../src/features/loyalty/components/LoyaltyTicket.jsx',
+      import.meta.url,
+    ),
+    'utf8',
+  )
+
+  assert.match(ticket, /isCountBasedLoyaltyType\(program\.programmeType\)/)
+  assert.doesNotMatch(ticket, /program\.programmeType === 'stamp_card'/)
+})
+
+test('count-based loyalty programmes allow a maximum of 12 stamps', async () => {
+  for (const programmeType of ['purchase_card', 'visit_card']) {
+    assert.deepEqual(
+      validateLoyaltyProgramme(
+        { ...BASE_PROGRAMME, programmeType, rewardThreshold: '12' },
+        { forPublication: true },
+      ),
+      {},
+    )
+    assert.match(
+      validateLoyaltyProgramme(
+        { ...BASE_PROGRAMME, programmeType, rewardThreshold: '13' },
+        { forPublication: true },
+      ).rewardThreshold,
+      /must be 12 or less/i,
+    )
+  }
+
+  const form = await readFile(
+    new URL(
+      '../src/features/loyalty/components/LoyaltyDraftForm.jsx',
+      import.meta.url,
+    ),
+    'utf8',
+  )
+  assert.match(form, /`Maximum \$\{MAX_COUNT_BASED_REWARD_THRESHOLD\}`/)
+  assert.match(
+    form,
+    /Number\(programme\.rewardThreshold\) > MAX_COUNT_BASED_REWARD_THRESHOLD/,
+  )
+  assert.match(form, /getEarningRules\(previewProgram\)/)
 })
 
 test('US0104 AC3: incomplete or invalid earning conditions cannot be confirmed', () => {
@@ -203,7 +256,7 @@ test('US0104 AC5: the generated earning condition is reviewed before publication
   ])
 
   assert.doesNotMatch(form, /Customer-facing earning rules:/)
-  assert.match(form, /getEarningRules\(programme\)/)
+  assert.match(form, /getEarningRules\(previewProgram\)/)
   assert.match(form, /Review and publish/)
   assert.match(review, /label="How customers earn"/)
   assert.match(review, /value=\{getEarningRules\(programme\)\}/)

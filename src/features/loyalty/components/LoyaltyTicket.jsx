@@ -1,5 +1,8 @@
 import { Gift } from 'lucide-react'
-import { getCustomerReward } from '../businessLoyaltyTemplates'
+import {
+  getCustomerReward,
+  isCountBasedLoyaltyType,
+} from '../businessLoyaltyTemplates'
 import BusinessAvatar from './BusinessAvatar'
 import StampRow, { MAX_STAMP_CIRCLES } from './StampRow'
 
@@ -11,9 +14,11 @@ export default function LoyaltyTicket({
   isEnded,
   titleId,
 }) {
-  const isStampCard = program.programmeType === 'stamp_card'
+  const isCountBasedProgramme = isCountBasedLoyaltyType(program.programmeType)
   const showStamps =
-    isStampCard && progress.target >= 1 && progress.target <= MAX_STAMP_CIRCLES
+    isCountBasedProgramme &&
+    progress.target >= 1 &&
+    progress.target <= MAX_STAMP_CIRCLES
   const isReady = Boolean(program.rewardEligible) && !isEnded
   const earned = Math.floor(progress.progress)
 
