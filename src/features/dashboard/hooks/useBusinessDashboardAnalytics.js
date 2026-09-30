@@ -20,7 +20,17 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
   const [error, setError] = useState('')
   const [reloadKey, setReloadKey] = useState(0)
 
-  const loadAnalytics = useCallback(async () => {
+  const loadMetrics = useCallback(async () => {
+    if (!startDate || !endDate) return null
+
+    return fetchBusinessDashboardMetrics({
+      businessId: business.id,
+      startDate,
+      endDate,
+    })
+  }, [business.id, endDate, startDate])
+
+  const loadPerformanceBreakdowns = useCallback(async () => {
     if (!startDate || !endDate) return null
 
     const options = {
@@ -29,7 +39,6 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
       endDate,
     }
     return Promise.all([
-      fetchBusinessDashboardMetrics(options),
       fetchBusinessDealPerformance(options),
       fetchBusinessLoyaltyProgrammePerformance(options),
     ])
@@ -68,23 +77,15 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
       setError('')
 
       try {
-        const result = await loadAnalytics()
-        if (!active) return
-
-        if (!result) {
-          setMetrics(null)
-          setDealPerformance([])
-          setLoyaltyProgrammePerformance([])
-          return
-        }
-
-        const [nextMetrics, nextDeals, nextLoyaltyProgrammes] = result
-        setMetrics(nextMetrics)
-        setDealPerformance(nextDeals)
-        setLoyaltyProgrammePerformance(nextLoyaltyProgrammes)
+        const nextMetrics = await loadMetrics()
+        if (active) setMetrics(nextMetrics)
       } catch (loadError) {
         if (!active) return
-        console.error('Unable to load business dashboard analytics.', loadError)
+        console.error(
+          'Unable to load business dashboard metrics.',
+          loadError,
+        )
+        setMetrics(null)
         setError('Unable to load dashboard analytics. Please try again.')
       } finally {
         if (active) setIsLoading(false)
@@ -95,7 +96,41 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
     return () => {
       active = false
     }
-  }, [loadAnalytics, reloadKey])
+  }, [loadMetrics, reloadKey])
+
+  useEffect(() => {
+    let active = true
+
+    async function load() {
+      try {
+        const result = await loadPerformanceBreakdowns()
+        if (!active) return
+
+        if (!result) {
+          setDealPerformance([])
+          setLoyaltyProgrammePerformance([])
+          return
+        }
+
+        const [nextDeals, nextLoyaltyProgrammes] = result
+        setDealPerformance(nextDeals)
+        setLoyaltyProgrammePerformance(nextLoyaltyProgrammes)
+      } catch (loadError) {
+        if (!active) return
+        console.error(
+          'Unable to load deal/loyalty performance breakdowns.',
+          loadError,
+        )
+        setDealPerformance([])
+        setLoyaltyProgrammePerformance([])
+      }
+    }
+
+    void load()
+    return () => {
+      active = false
+    }
+  }, [loadPerformanceBreakdowns, reloadKey])
 
   return {
     metrics,
