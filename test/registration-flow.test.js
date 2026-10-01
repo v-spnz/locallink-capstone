@@ -114,14 +114,13 @@ test('registration progressively introduces value before identity creation', asy
     login,
     protectedRoute,
     businessProtectedRoute,
-  ] =
-    await Promise.all([
-      read('../src/pages/auth/RegisterPage.jsx'),
-      read('../src/pages/auth/RegisterPage.css'),
-      read('../src/pages/auth/LoginPage.jsx'),
-      read('../src/auth/ProtectedRoute.jsx'),
-      read('../src/business/BusinessProtectedRoute.jsx'),
-    ])
+  ] = await Promise.all([
+    read('../src/pages/auth/RegisterPage.jsx'),
+    read('../src/pages/auth/RegisterPage.css'),
+    read('../src/pages/auth/LoginPage.jsx'),
+    read('../src/auth/ProtectedRoute.jsx'),
+    read('../src/business/BusinessProtectedRoute.jsx'),
+  ])
 
   for (const stage of [
     'WelcomeStep',
@@ -161,18 +160,30 @@ test('registration progressively introduces value before identity creation', asy
 })
 
 test('business onboarding separates basics, tools, conditional setup, and review', async () => {
-  const [onboarding, onboardingStyles] = await Promise.all([
+  const [onboarding, onboardingStyles, ...stageModules] = await Promise.all([
     read('../src/pages/business/BusinessOnboarding.jsx'),
-    read('../src/pages/business/BusinessOnboarding.css'),
+    read('../src/features/business-onboarding/BusinessOnboarding.css'),
+    read(
+      '../src/features/business-onboarding/components/BusinessBasicsStep.jsx',
+    ),
+    read('../src/features/business-onboarding/components/CapabilitiesStep.jsx'),
+    read(
+      '../src/features/business-onboarding/components/ConditionalSetupStep.jsx',
+    ),
+    read('../src/features/business-onboarding/components/ReviewStep.jsx'),
   ])
 
-  for (const stage of [
+  for (const [index, stage] of [
     'BusinessBasicsStep',
     'CapabilitiesStep',
     'ConditionalSetupStep',
     'ReviewStep',
-  ]) {
-    assert.match(onboarding, new RegExp(stage))
+  ].entries()) {
+    assert.match(onboarding, new RegExp(`<${stage}`))
+    assert.match(
+      stageModules[index],
+      new RegExp(`export default function ${stage}`),
+    )
   }
 
   assert.match(onboarding, /p_locations/)

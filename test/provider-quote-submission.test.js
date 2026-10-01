@@ -146,9 +146,19 @@ test('interactive and typing controls use the expected cursor', async () => {
 })
 
 test('business form field containers do not enlarge their control hit areas', async () => {
-  const [onboarding, marketplace] = await Promise.all([
+  const [basics, setup, marketplace] = await Promise.all([
     readFile(
-      new URL('../src/pages/business/BusinessOnboarding.jsx', import.meta.url),
+      new URL(
+        '../src/features/business-onboarding/components/BusinessBasicsStep.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/business-onboarding/components/ConditionalSetupStep.jsx',
+        import.meta.url,
+      ),
       'utf8',
     ),
     readFile(
@@ -161,11 +171,11 @@ test('business form field containers do not enlarge their control hit areas', as
   ])
 
   assert.doesNotMatch(
-    onboarding,
+    `${basics}\n${setup}`,
     /<label className="business-onboarding-field"/,
   )
-  assert.match(onboarding, /aria-labelledby="business-name-label"/)
-  assert.match(onboarding, /aria-labelledby="business-availability-label"/)
+  assert.match(basics, /aria-labelledby="business-name-label"/)
+  assert.match(setup, /aria-labelledby="business-availability-label"/)
   assert.doesNotMatch(
     marketplace,
     /<label className="service-marketplace-search"/,

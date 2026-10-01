@@ -10,10 +10,10 @@ import Dashboard from './Dashboard'
 import CreateDeal from './CreateDeal'
 import CreateLoyalty from './CreateLoyalty'
 import Settings from './Settings'
-import BusinessOnboarding from './BusinessOnboarding'
 import Services from './Services'
 import './BusinessTypography.css'
 import './BusinessPortal.css'
+import BusinessOnboarding from './BusinessOnboarding'
 import './BusinessMarketplace.css'
 
 function BusinessPage({ children, capability, roles }) {

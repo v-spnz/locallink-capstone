@@ -1,65 +1,27 @@
 import { useEffect, useState } from 'react'
-import {
-  ArrowLeft,
-  ArrowRight,
-  BadgePercent,
-  BriefcaseBusiness,
-  Check,
-  CheckCircle2,
-  Gift,
-  MapPin,
-} from 'lucide-react'
+import { ArrowLeft, ArrowRight, BriefcaseBusiness, Check } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import AuthPageHeader from '../../components/auth/AuthPageHeader'
 import BusinessPageLoader from '../../components/ui/BusinessPageLoader'
 import useBusiness from '../../business/useBusiness'
 import { supabase } from '../../lib/supabase'
-import AddressAutocomplete from '../../features/location/components/AddressAutocomplete'
+import BusinessBasicsStep from '../../features/business-onboarding/components/BusinessBasicsStep'
+import CapabilitiesStep from '../../features/business-onboarding/components/CapabilitiesStep'
+import ConditionalSetupStep from '../../features/business-onboarding/components/ConditionalSetupStep'
+import ReviewStep from '../../features/business-onboarding/components/ReviewStep'
+import {
+  CAPABILITY_OPTIONS,
+  SETUP_STEPS,
+  getInvalidFields,
+  listFromInput,
+  validateStep,
+} from '../../features/business-onboarding/businessOnboarding'
 import { saveCustomerLocation } from '../../features/location/api/locations'
 import {
   clearRegistrationFlow,
   readRegistrationFlow,
 } from '../../features/onboarding/registrationFlow'
-import './BusinessOnboarding.css'
-
-const CAPABILITY_OPTIONS = [
-  {
-    key: 'deals',
-    label: 'Promote deals',
-    description: 'Publish useful local offers for nearby customers.',
-    icon: BadgePercent,
-  },
-  {
-    key: 'loyalty',
-    label: 'Run loyalty programmes',
-    description: 'Create repeat-visit rewards and loyalty cards.',
-    icon: Gift,
-  },
-  {
-    key: 'serviceMarketplace',
-    label: 'Receive service requests',
-    description: 'Find local job leads and send quotes.',
-    icon: BriefcaseBusiness,
-  },
-]
-
-const SETUP_STEPS = [
-  { key: 'basics', label: 'Business basics' },
-  { key: 'capabilities', label: 'Select tools' },
-  { key: 'setup', label: 'Conditional setup' },
-  { key: 'review', label: 'Review and finish' },
-]
-
-function listFromInput(value) {
-  return [
-    ...new Set(
-      value
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean),
-    ),
-  ]
-}
+import '../../features/business-onboarding/BusinessOnboarding.css'
 
 export default function BusinessOnboarding() {
   const navigate = useNavigate()
@@ -108,64 +70,11 @@ export default function BusinessOnboarding() {
     setForm((current) => ({ ...current, [key]: !current[key] }))
   }
 
-  function validateStep(stepToValidate) {
-    if (stepToValidate === 'basics' && form.businessName.trim().length < 2) {
-      return 'Enter your business name.'
-    }
-
-    if (stepToValidate === 'capabilities' && selectedCapabilityCount === 0) {
-      return 'Select at least one way to use LocalLink.'
-    }
-
-    if (stepToValidate === 'setup') {
-      if (form.deals && form.locations.length === 0) {
-        return 'Enter at least one location that can participate in deals.'
-      }
-
-      if (
-        form.serviceMarketplace &&
-        (form.serviceDescription.trim().length < 10 ||
-          !form.availability.trim() ||
-          listFromInput(form.categories).length === 0 ||
-          listFromInput(form.areas).length === 0)
-      ) {
-        return 'Complete all Service Marketplace details.'
-      }
-    }
-
-    return ''
-  }
-
-  function getInvalidFields(stepToValidate) {
-    if (stepToValidate === 'basics') {
-      return form.businessName.trim().length < 2 ? ['businessName'] : []
-    }
-
-    if (stepToValidate !== 'setup') return []
-
-    if (form.deals && form.locations.length === 0) return ['location']
-
-    return [
-      form.serviceMarketplace && form.serviceDescription.trim().length < 10
-        ? 'serviceDescription'
-        : '',
-      form.serviceMarketplace && !form.availability.trim()
-        ? 'availability'
-        : '',
-      form.serviceMarketplace && listFromInput(form.categories).length === 0
-        ? 'categories'
-        : '',
-      form.serviceMarketplace && listFromInput(form.areas).length === 0
-        ? 'areas'
-        : '',
-    ].filter(Boolean)
-  }
-
   function continueSetup(event) {
     event?.preventDefault()
-    const validationError = validateStep(step)
+    const validationError = validateStep(step, form, selectedCapabilityCount)
     setError(validationError)
-    setInvalidFields(validationError ? getInvalidFields(step) : [])
+    setInvalidFields(validationError ? getInvalidFields(step, form) : [])
     if (validationError) return
 
     const nextStep = SETUP_STEPS[currentStepIndex + 1]
@@ -189,12 +98,17 @@ export default function BusinessOnboarding() {
 
     setError('')
 
-    const invalidStep = ['basics', 'capabilities', 'setup'].find(validateStep)
-    const validationError = invalidStep ? validateStep(invalidStep) : ''
+    const invalidStep = ['basics', 'capabilities', 'setup'].find(
+      (stepToValidate) =>
+        validateStep(stepToValidate, form, selectedCapabilityCount),
+    )
+    const validationError = invalidStep
+      ? validateStep(invalidStep, form, selectedCapabilityCount)
+      : ''
 
     if (validationError) {
       setError(validationError)
-      setInvalidFields(getInvalidFields(invalidStep))
+      setInvalidFields(getInvalidFields(invalidStep, form))
       return
     }
 
@@ -402,318 +316,6 @@ export default function BusinessOnboarding() {
           </form>
         </section>
       </main>
-    </div>
-  )
-}
-
-function BusinessBasicsStep({ form, invalidFields, onChange }) {
-  return (
-    <div className="business-onboarding-stage">
-      <header>
-        <h2>Business basics</h2>
-        <p>Tell customers who they will be dealing with.</p>
-      </header>
-
-      <div className="business-onboarding-field">
-        <span id="business-name-label">Business name</span>
-        <input
-          aria-describedby={
-            invalidFields.includes('businessName')
-              ? 'business-onboarding-error'
-              : undefined
-          }
-          aria-invalid={invalidFields.includes('businessName')}
-          aria-labelledby="business-name-label"
-          name="businessName"
-          value={form.businessName}
-          onChange={onChange}
-          placeholder="e.g. Morgan Plumbing"
-          required
-        />
-      </div>
-
-      <div className="business-onboarding-field">
-        <span id="business-description-label">Short description</span>
-        <textarea
-          aria-labelledby="business-description-label"
-          name="description"
-          value={form.description}
-          onChange={onChange}
-          placeholder="What does your business help people with?"
-          rows="5"
-          maxLength="1000"
-        />
-        <small>{form.description.length} of 1,000 characters</small>
-      </div>
-    </div>
-  )
-}
-
-function CapabilitiesStep({ form, selectedCount, onToggle }) {
-  return (
-    <div className="business-onboarding-stage">
-      <header>
-        <h2>Select your LocalLink tools</h2>
-        <p>Choose one or more. You can change these later.</p>
-      </header>
-
-      <div className="business-capability-options">
-        {CAPABILITY_OPTIONS.map((option) => {
-          const Icon = option.icon
-          const selected = form[option.key]
-
-          return (
-            <button
-              key={option.key}
-              type="button"
-              className={selected ? 'selected' : ''}
-              onClick={() => onToggle(option.key)}
-              aria-pressed={selected}
-            >
-              <span className="business-capability-icon">
-                <Icon aria-hidden="true" />
-              </span>
-              <span>
-                <strong>{option.label}</strong>
-                <small>{option.description}</small>
-              </span>
-              <Check className="business-capability-check" />
-            </button>
-          )
-        })}
-      </div>
-      <p className="business-capability-selection-count" role="status">
-        {selectedCount}{' '}
-        {selectedCount === 1 ? 'tool selected' : 'tools selected'}
-      </p>
-    </div>
-  )
-}
-
-function ConditionalSetupStep({
-  form,
-  invalidFields,
-  onChange,
-  onSetLocation,
-  onClearLocation,
-}) {
-  const needsExtraSetup = form.deals || form.serviceMarketplace
-  const businessLocation = form.locations[0] || null
-
-  return (
-    <div className="business-onboarding-stage">
-      <header>
-        <h2>Complete the required setup</h2>
-        <p>Only the tools you selected ask for additional information.</p>
-      </header>
-
-      {!needsExtraSetup && (
-        <div className="business-onboarding-no-setup">
-          <CheckCircle2 aria-hidden="true" />
-          <div>
-            <strong>No extra setup needed</strong>
-            <p>Your selected tools are ready for review.</p>
-          </div>
-        </div>
-      )}
-
-      {form.deals && (
-        <section className="business-conditional-section">
-          <div className="business-conditional-heading">
-            <BadgePercent aria-hidden="true" />
-            <div>
-              <h3>Deal locations</h3>
-              <p>Add the shop, office, or service address for this business.</p>
-            </div>
-          </div>
-          <AddressAutocomplete
-            key={businessLocation?.formattedAddress || 'business-location'}
-            id="business-location"
-            label={
-              businessLocation
-                ? 'Change business location'
-                : 'Business location'
-            }
-            value={businessLocation?.formattedAddress || ''}
-            placeholder="Search for your shop, office, or service address"
-            invalid={invalidFields.includes('location')}
-            describedBy="business-onboarding-error"
-            onSelect={onSetLocation}
-          />
-          {businessLocation && (
-            <div className="business-onboarding-location-list">
-              <div>
-                <MapPin aria-hidden="true" />
-                <span>{businessLocation.formattedAddress}</span>
-                <button type="button" onClick={onClearLocation}>
-                  Remove
-                </button>
-              </div>
-            </div>
-          )}
-        </section>
-      )}
-
-      {form.serviceMarketplace && (
-        <section className="business-conditional-section">
-          <div className="business-conditional-heading">
-            <BriefcaseBusiness aria-hidden="true" />
-            <div>
-              <h3>Service Marketplace</h3>
-              <p>These details match your business with suitable leads.</p>
-            </div>
-          </div>
-
-          <div className="business-onboarding-field">
-            <span id="business-service-description-label">
-              Service description
-            </span>
-            <textarea
-              aria-describedby={
-                invalidFields.includes('serviceDescription')
-                  ? 'business-onboarding-error'
-                  : undefined
-              }
-              aria-invalid={invalidFields.includes('serviceDescription')}
-              aria-labelledby="business-service-description-label"
-              name="serviceDescription"
-              value={form.serviceDescription}
-              onChange={onChange}
-              placeholder="Describe the services you provide"
-              rows="4"
-              required
-            />
-          </div>
-
-          <div className="business-onboarding-field-grid">
-            <div className="business-onboarding-field">
-              <span id="business-service-categories-label">
-                Service categories
-              </span>
-              <input
-                aria-describedby={
-                  invalidFields.includes('categories')
-                    ? 'business-onboarding-error'
-                    : undefined
-                }
-                aria-invalid={invalidFields.includes('categories')}
-                aria-labelledby="business-service-categories-label"
-                name="categories"
-                value={form.categories}
-                onChange={onChange}
-                placeholder="Plumbing, Roofing"
-                required
-              />
-              <small>Separate categories with commas.</small>
-            </div>
-
-            <div className="business-onboarding-field">
-              <span id="business-service-areas-label">Service areas</span>
-              <input
-                aria-describedby={
-                  invalidFields.includes('areas')
-                    ? 'business-onboarding-error'
-                    : undefined
-                }
-                aria-invalid={invalidFields.includes('areas')}
-                aria-labelledby="business-service-areas-label"
-                name="areas"
-                value={form.areas}
-                onChange={onChange}
-                placeholder="Takapuna, Albany"
-                required
-              />
-              <small>Separate areas with commas.</small>
-            </div>
-          </div>
-
-          <div className="business-onboarding-field">
-            <span id="business-availability-label">Availability</span>
-            <input
-              aria-describedby={
-                invalidFields.includes('availability')
-                  ? 'business-onboarding-error'
-                  : undefined
-              }
-              aria-invalid={invalidFields.includes('availability')}
-              aria-labelledby="business-availability-label"
-              name="availability"
-              value={form.availability}
-              onChange={onChange}
-              placeholder="e.g. Monday-Friday, 8am-5pm"
-              required
-            />
-          </div>
-
-          <p className="business-verification-note">
-            Service Marketplace verification starts as pending. Evidence can be
-            supplied when the review process is confirmed.
-          </p>
-        </section>
-      )}
-    </div>
-  )
-}
-
-function ReviewStep({ form, onEdit, selectedCount }) {
-  const capabilities = CAPABILITY_OPTIONS.filter(({ key }) => form[key])
-
-  return (
-    <div className="business-onboarding-stage">
-      <header>
-        <h2>Review your business setup</h2>
-        <p>Check the details below before opening your dashboard.</p>
-      </header>
-
-      <div className="business-onboarding-review">
-        <section>
-          <div>
-            <h3>Business basics</h3>
-            <button type="button" onClick={() => onEdit('basics')}>
-              Edit
-            </button>
-          </div>
-          <strong>{form.businessName}</strong>
-          <p>{form.description || 'No description added.'}</p>
-        </section>
-
-        <section>
-          <div>
-            <h3>Enabled tools</h3>
-            <button type="button" onClick={() => onEdit('capabilities')}>
-              Edit
-            </button>
-          </div>
-          <p>
-            {selectedCount} {selectedCount === 1 ? 'tool' : 'tools'} selected
-          </p>
-          <div className="business-review-tools">
-            {capabilities.map((capability) => (
-              <span key={capability.key}>{capability.label}</span>
-            ))}
-          </div>
-        </section>
-
-        {(form.deals || form.serviceMarketplace) && (
-          <section>
-            <div>
-              <h3>Additional setup</h3>
-              <button type="button" onClick={() => onEdit('setup')}>
-                Edit
-              </button>
-            </div>
-            {form.deals && <p>{form.locations[0]?.formattedAddress}</p>}
-            {form.serviceMarketplace && (
-              <p>
-                {listFromInput(form.categories).length} service{' '}
-                {listFromInput(form.categories).length === 1
-                  ? 'category'
-                  : 'categories'}
-              </p>
-            )}
-          </section>
-        )}
-      </div>
     </div>
   )
 }

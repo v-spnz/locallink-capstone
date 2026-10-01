@@ -204,14 +204,18 @@ test('discovery uses Supabase results and a react-leaflet map instead of mocks',
 })
 
 test('customer and business signup addresses are persisted and business locations feed deals', async () => {
-  const [profile, onboarding, settings, dealsApi] = await Promise.all([
+  const [profile, onboarding, setup, settings, dealsApi] = await Promise.all([
     read('../src/pages/customer/Profile.jsx'),
     read('../src/pages/business/BusinessOnboarding.jsx'),
+    read(
+      '../src/features/business-onboarding/components/ConditionalSetupStep.jsx',
+    ),
     read('../src/pages/business/Settings.jsx'),
     read('../src/features/deals/api/businessDeals.js'),
   ])
   assert.match(profile, /saveCustomerLocation/)
-  assert.match(onboarding, /AddressAutocomplete/)
+  assert.match(onboarding, /<ConditionalSetupStep/)
+  assert.match(setup, /AddressAutocomplete/)
   assert.match(onboarding, /p_locations/)
   assert.match(settings, /addManagedBusinessLocation/)
   assert.match(settings, /AddressAutocomplete/)

@@ -1,8 +1,17 @@
 /* Business portal visual system. All selectors are scoped to the business
    surface so the customer portal keeps its existing presentation. */
 body.business-surface {
+  --font-ui: 'Figtree', sans-serif;
+  --business-copy: #6b7280;
   --business-copy-size: 16px;
   --business-copy-leading: 1.65;
+  --business-primary-gradient: linear-gradient(135deg, #2f4ac4, #4b69e8);
+  --business-hero-gradient: linear-gradient(
+    135deg,
+    #1a2e9e 0%,
+    #2f4ac4 45%,
+    #4b69e8 100%
+  );
   --business-ink: #182235;
   --business-ink-soft: #3c485d;
   --business-muted: #69758a;
@@ -21,6 +30,9 @@ body.business-surface {
   --business-radius-card: 16px;
   --business-shadow-sm: 0 4px 14px rgb(35 50 82 / 6%);
   --business-shadow-md: 0 14px 36px rgb(35 50 82 / 10%);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 400;
   background: var(--business-canvas);
   color: var(--business-ink);
 }
@@ -197,134 +209,6 @@ body.business-surface .loading-spinner {
   border: 1px solid var(--business-border);
   border-radius: var(--business-radius-card);
   background: var(--business-surface);
-}
-
-/* Navigation */
-body.business-surface .business-portal-header {
-  border-bottom: 1px solid rgb(222 227 237 / 90%);
-  background: rgb(255 255 255 / 94%);
-  box-shadow: 0 8px 24px rgb(32 44 70 / 4%);
-  backdrop-filter: blur(16px);
-}
-
-body.business-surface .business-nav {
-  width: min(1280px, calc(100% - 40px));
-  height: 72px;
-  margin-inline: auto;
-  padding-inline: 0;
-  gap: 22px;
-}
-
-body.business-surface .business-nav .business-nav-logo {
-  color: var(--business-ink);
-}
-
-body.business-surface .business-nav .nav-logo-badge {
-  border: 1px solid #dce3ff;
-  border-radius: 7px;
-  background: var(--business-accent-soft);
-  color: var(--business-accent-strong);
-  font-size: 12px;
-}
-
-body.business-surface .business-nav .nav-links {
-  gap: 4px;
-}
-
-body.business-surface .business-nav .nav-btn {
-  min-height: 38px;
-  padding: 10px 13px;
-  border-radius: 9px;
-  color: #657084;
-  font-size: 14px;
-  transition:
-    background-color 180ms ease,
-    color 180ms ease,
-    transform 180ms ease;
-}
-
-body.business-surface .business-nav .nav-btn:hover {
-  background: #f1f3f8;
-  color: var(--business-ink);
-}
-
-body.business-surface .business-nav .nav-btn:active {
-  transform: translateY(1px);
-}
-
-body.business-surface .business-nav .nav-btn.active {
-  background: var(--business-accent-soft);
-  color: var(--business-accent-strong);
-  box-shadow: inset 0 0 0 1px #dce3ff;
-}
-
-body.business-surface .business-nav .business-notification-button,
-body.business-surface .business-account-avatar {
-  border-radius: 10px;
-}
-
-body.business-surface .business-account-link {
-  min-height: 42px;
-  padding-left: 10px;
-  border-left-color: var(--business-border);
-}
-
-body.business-surface .business-account-avatar {
-  background: var(--business-accent);
-}
-
-body.business-surface .business-notification-dropdown,
-body.business-surface .business-account-dropdown {
-  border-color: var(--business-border);
-  box-shadow: 0 22px 52px rgb(30 42 70 / 18%);
-}
-
-body.business-surface .business-notification-heading strong {
-  font-size: 16px;
-}
-
-body.business-surface .business-notification-heading span,
-body.business-surface .business-notification-dismiss-all {
-  font-size: 13px;
-}
-
-body.business-surface .business-notification-empty {
-  font-size: 14px;
-}
-
-body.business-surface .business-notification-copy strong,
-body.business-surface .business-account-copy strong {
-  font-size: 14px;
-}
-
-body.business-surface .business-notification-copy > span,
-body.business-surface .business-account-copy > span {
-  font-size: 13px;
-}
-
-body.business-surface .business-notification-copy time,
-body.business-surface .business-account-dropdown-label {
-  font-size: 12px;
-}
-
-body.business-surface .business-account-menu-item {
-  font-size: 14px;
-}
-
-body.business-surface .business-account-avatar {
-  font-size: 13px;
-}
-
-body.business-surface .business-account-name {
-  font-size: 14px;
-}
-
-body.business-surface .business-account-dropdown > p {
-  font-size: 12px;
-}
-
-body.business-surface .business-account-dropdown > a {
-  font-size: 14px;
 }
 
 /* Deals */
@@ -2504,144 +2388,7 @@ body.business-surface .business-settings-actions .btn-danger svg {
   height: 15px;
 }
 
-/* Onboarding */
-body.business-surface .business-onboarding-page {
-  min-height: 100dvh;
-  background:
-    radial-gradient(circle at 9% 12%, rgb(63 91 211 / 7%), transparent 24rem),
-    var(--business-canvas);
-}
-
-body.business-surface .business-onboarding-main {
-  width: min(1080px, calc(100% - 56px));
-  padding-block: 42px 64px;
-}
-
-body.business-surface .business-onboarding-mark {
-  border-radius: 12px;
-  background: var(--business-accent);
-  box-shadow: 0 7px 18px rgb(63 91 211 / 20%);
-}
-
-.business-onboarding-summary {
-  margin: 22px 0 18px;
-  padding: 16px;
-  border: 1px solid var(--business-border);
-  border-radius: 13px;
-  display: grid;
-  gap: 9px;
-  background: rgb(255 255 255 / 76%);
-}
-
-.business-onboarding-summary > strong {
-  margin-bottom: 2px;
-  color: var(--business-ink);
-  font-size: 14px;
-}
-
-.business-onboarding-summary > span {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 7px;
-  color: var(--business-muted);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.business-onboarding-summary > span svg {
-  width: 14px;
-  height: 14px;
-  color: var(--business-faint);
-}
-
-.business-onboarding-summary > span.is-complete {
-  color: var(--business-ink-soft);
-}
-
-.business-onboarding-summary > span.is-complete svg {
-  color: var(--business-accent);
-}
-
-body.business-surface .business-onboarding-card {
-  padding: clamp(30px, 4.5vw, 48px);
-  border-color: var(--business-border);
-  border-radius: 20px;
-  box-shadow: var(--business-shadow-md);
-}
-
-body.business-surface .business-step {
-  border-radius: 9px;
-  background: var(--business-accent-soft);
-  color: var(--business-accent-strong);
-  font-size: 12px;
-}
-
-body.business-surface .business-onboarding-field > span {
-  color: var(--business-ink-soft);
-  font-weight: 700;
-  letter-spacing: 0;
-  text-transform: none;
-  font-size: 14px;
-}
-
-body.business-surface .business-onboarding-field input,
-body.business-surface .business-onboarding-field textarea {
-  border-color: var(--business-border-strong);
-  border-radius: var(--business-radius-control);
-  background: var(--business-surface-soft);
-  font-size: 15px;
-}
-
-body.business-surface .business-onboarding-field small,
-body.business-surface .business-onboarding-locations > small,
-body.business-surface .business-verification-note {
-  font-size: 13px;
-  line-height: 1.55;
-}
-
-body.business-surface .business-onboarding-section h2 {
-  font-size: 21px;
-}
-
-body.business-surface .business-capability-options strong {
-  font-size: 14px;
-}
-
-body.business-surface .business-capability-options small {
-  font-size: 12px;
-}
-
-body.business-surface .business-capability-options button {
-  border-color: var(--business-border);
-  border-radius: 10px;
-}
-
-body.business-surface .business-capability-options button.selected {
-  border-color: var(--business-accent);
-  background: var(--business-accent-soft);
-}
-
-.business-capability-selection-count {
-  margin: 10px 0 0;
-  color: var(--business-muted);
-  font-size: 13px;
-  font-weight: 700;
-  text-align: right;
-}
-
-body.business-surface .business-onboarding-submit {
-  min-height: 48px;
-  border-radius: var(--business-radius-control);
-  background: linear-gradient(135deg, #2f4ac4, #4b69e8);
-  font-size: 14px;
-}
-
 @media (max-width: 900px) {
-  body.business-surface .business-nav {
-    width: min(100% - 32px, 1280px);
-  }
-
   .service-profile-context {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2670,16 +2417,6 @@ body.business-surface .business-onboarding-submit {
 @media (max-width: 760px) {
   body.business-surface .portal-main {
     padding: 28px 16px 48px;
-  }
-
-  body.business-surface .business-nav {
-    width: 100%;
-    min-height: 78px;
-    padding: 11px 16px 9px;
-  }
-
-  body.business-surface .business-nav .nav-links {
-    padding-top: 9px;
   }
 
   .deal-filter-bar {

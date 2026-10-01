@@ -7,10 +7,15 @@ function read(relativePath) {
 }
 
 test('business text fields use red borders and rings for invalid values', async () => {
-  const [portalStyles, onboarding, onboardingStyles] = await Promise.all([
+  const [portalStyles, basics, setup, onboardingStyles] = await Promise.all([
     read('../src/pages/business/BusinessPortal.css'),
-    read('../src/pages/business/BusinessOnboarding.jsx'),
-    read('../src/pages/business/BusinessOnboarding.css'),
+    read(
+      '../src/features/business-onboarding/components/BusinessBasicsStep.jsx',
+    ),
+    read(
+      '../src/features/business-onboarding/components/ConditionalSetupStep.jsx',
+    ),
+    read('../src/features/business-onboarding/BusinessOnboarding.css'),
   ])
 
   assert.match(
@@ -30,8 +35,12 @@ test('business text fields use red borders and rings for invalid values', async 
     /service-price-input:has\(input\[aria-invalid='true'\]\)/,
   )
   assert.match(portalStyles, /rgb\(201 42 42 \/ 18%\)/)
-  assert.match(onboarding, /aria-invalid=\{invalidFields\.includes/)
-  assert.match(onboarding, /invalid=\{invalidFields\.includes\('location'\)\}/)
+  assert.match(
+    basics,
+    /aria-invalid=\{invalidFields\.includes\('businessName'\)\}/,
+  )
+  assert.match(setup, /aria-invalid=\{invalidFields\.includes/)
+  assert.match(setup, /invalid=\{invalidFields\.includes\('location'\)\}/)
   assert.match(
     onboardingStyles,
     /\.business-onboarding-error[\s\S]*?background: transparent/,

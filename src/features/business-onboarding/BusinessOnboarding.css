@@ -722,3 +722,136 @@
     width: 100%;
   }
 }
+
+/* Onboarding */
+body.business-surface .business-onboarding-page {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 9% 12%, rgb(63 91 211 / 7%), transparent 24rem),
+    var(--business-canvas);
+}
+
+body.business-surface .business-onboarding-main {
+  width: min(1080px, calc(100% - 56px));
+  padding-block: 42px 64px;
+}
+
+body.business-surface .business-onboarding-mark {
+  border-radius: 12px;
+  background: var(--business-accent);
+  box-shadow: 0 7px 18px rgb(63 91 211 / 20%);
+}
+
+.business-onboarding-summary {
+  margin: 22px 0 18px;
+  padding: 16px;
+  border: 1px solid var(--business-border);
+  border-radius: 13px;
+  display: grid;
+  gap: 9px;
+  background: rgb(255 255 255 / 76%);
+}
+
+.business-onboarding-summary > strong {
+  margin-bottom: 2px;
+  color: var(--business-ink);
+  font-size: 14px;
+}
+
+.business-onboarding-summary > span {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  color: var(--business-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.business-onboarding-summary > span svg {
+  width: 14px;
+  height: 14px;
+  color: var(--business-faint);
+}
+
+.business-onboarding-summary > span.is-complete {
+  color: var(--business-ink-soft);
+}
+
+.business-onboarding-summary > span.is-complete svg {
+  color: var(--business-accent);
+}
+
+body.business-surface .business-onboarding-card {
+  padding: clamp(30px, 4.5vw, 48px);
+  border-color: var(--business-border);
+  border-radius: 20px;
+  box-shadow: var(--business-shadow-md);
+}
+
+body.business-surface .business-step {
+  border-radius: 9px;
+  background: var(--business-accent-soft);
+  color: var(--business-accent-strong);
+  font-size: 12px;
+}
+
+body.business-surface .business-onboarding-field > span {
+  color: var(--business-ink-soft);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 14px;
+}
+
+body.business-surface .business-onboarding-field input,
+body.business-surface .business-onboarding-field textarea {
+  border-color: var(--business-border-strong);
+  border-radius: var(--business-radius-control);
+  background: var(--business-surface-soft);
+  font-size: 15px;
+}
+
+body.business-surface .business-onboarding-field small,
+body.business-surface .business-onboarding-locations > small,
+body.business-surface .business-verification-note {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+body.business-surface .business-onboarding-section h2 {
+  font-size: 21px;
+}
+
+body.business-surface .business-capability-options strong {
+  font-size: 14px;
+}
+
+body.business-surface .business-capability-options small {
+  font-size: 12px;
+}
+
+body.business-surface .business-capability-options button {
+  border-color: var(--business-border);
+  border-radius: 10px;
+}
+
+body.business-surface .business-capability-options button.selected {
+  border-color: var(--business-accent);
+  background: var(--business-accent-soft);
+}
+
+.business-capability-selection-count {
+  margin: 10px 0 0;
+  color: var(--business-muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+}
+
+body.business-surface .business-onboarding-submit {
+  min-height: 48px;
+  border-radius: var(--business-radius-control);
+  background: linear-gradient(135deg, #2f4ac4, #4b69e8);
+  font-size: 14px;
+}
