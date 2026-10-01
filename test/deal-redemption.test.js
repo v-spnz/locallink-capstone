@@ -75,54 +75,71 @@ test('US0097: invalid claim states have clear and different messages', () => {
 })
 
 test('US0097: the business flow validates, reviews, and explicitly confirms', async () => {
-  const [dashboard, page, panel, styles, claimRecords, settings, hook, api] =
-    await Promise.all([
-      readFile(
-        new URL('../src/pages/business/Dashboard.jsx', import.meta.url),
-        'utf8',
+  const [
+    dashboard,
+    cta,
+    page,
+    panel,
+    styles,
+    claimRecords,
+    settings,
+    hook,
+    api,
+  ] = await Promise.all([
+    readFile(
+      new URL('../src/pages/business/Dashboard.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/dashboard/components/RedemptionCallToAction.jsx',
+        import.meta.url,
       ),
-      readFile(
-        new URL('../src/pages/business/CreateDeal.jsx', import.meta.url),
-        'utf8',
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/pages/business/CreateDeal.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/deals/components/DealRedemptionPanel.jsx',
+        import.meta.url,
       ),
-      readFile(
-        new URL(
-          '../src/features/deals/components/DealRedemptionPanel.jsx',
-          import.meta.url,
-        ),
-        'utf8',
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/features/deals/DealRedemption.css', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/pages/business/ClaimRecords.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/pages/business/Settings.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/deals/hooks/useBusinessDealRedemption.js',
+        import.meta.url,
       ),
-      readFile(
-        new URL('../src/features/deals/DealRedemption.css', import.meta.url),
-        'utf8',
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/deals/api/businessDealRedemptions.js',
+        import.meta.url,
       ),
-      readFile(
-        new URL('../src/pages/business/ClaimRecords.jsx', import.meta.url),
-        'utf8',
-      ),
-      readFile(
-        new URL('../src/pages/business/Settings.jsx', import.meta.url),
-        'utf8',
-      ),
-      readFile(
-        new URL(
-          '../src/features/deals/hooks/useBusinessDealRedemption.js',
-          import.meta.url,
-        ),
-        'utf8',
-      ),
-      readFile(
-        new URL(
-          '../src/features/deals/api/businessDealRedemptions.js',
-          import.meta.url,
-        ),
-        'utf8',
-      ),
-    ])
+      'utf8',
+    ),
+  ])
 
   assert.match(dashboard, /capabilities\.deals_enabled/)
-  assert.match(dashboard, /Redeem a customer deal/)
-  assert.match(dashboard, /to="\/business\/create-deal\?redeem=scan"/)
+  assert.match(dashboard, /<RedemptionCallToAction \/>/)
+  assert.match(cta, /Redeem a customer deal/)
+  assert.match(cta, /to="\/business\/create-deal\?redeem=scan"/)
   assert.match(page, /DealRedemptionPanel/)
   assert.match(page, /searchParams\.get\('redeem'\) === 'scan'/)
   assert.match(panel, /openScannerOnLoad/)
