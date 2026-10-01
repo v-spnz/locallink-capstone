@@ -241,7 +241,7 @@ export default function Dashboard() {
       className: 'is-services',
     },
   ].filter(Boolean)
-    const recordedTransactionValue = formatRecordedCurrency(
+  const recordedTransactionValue = formatRecordedCurrency(
     metrics?.recordedTransactionValueCents,
   )
   const recordedCustomerSavings = formatRecordedCurrency(
@@ -328,7 +328,7 @@ export default function Dashboard() {
                 description="Claims, in-store redemptions and recorded sales from your deals."
                 to="/business/create-deal"
                 actionLabel="View deals"
-                note="Sales value, average value and customer savings are based only on redemptions where a transaction amount was recorded — they are not total revenue, profit, or a guaranteed return."
+                note="Sales value and average value use only redemptions with a recorded transaction amount. Customer savings uses only recorded savings amounts. These figures are not total revenue, profit, ROI, or guaranteed additional revenue."
               >
                 <PerformanceMetric
                   label="Claims"

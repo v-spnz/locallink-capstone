@@ -51,6 +51,10 @@ function ClaimDetail({ label, value }) {
   )
 }
 
+function amountInCents(value) {
+  return value === '' ? null : Math.round(Number(value) * 100)
+}
+
 export default function DealRedemptionPanel({
   redemption,
   openScannerOnLoad = false,
@@ -58,6 +62,15 @@ export default function DealRedemptionPanel({
   const [isScannerOpen, setIsScannerOpen] = useState(() => openScannerOnLoad)
   const claim = redemption.validatedClaim
   const closeScanner = useCallback(() => setIsScannerOpen(false), [])
+
+  function handleConfirmRedemption(event) {
+    event.preventDefault()
+    const values = new FormData(event.currentTarget)
+    void redemption.handleConfirmRedemption({
+      transactionAmountCents: amountInCents(values.get('transactionAmount')),
+      savingsAmountCents: amountInCents(values.get('savingsAmount')),
+    })
+  }
 
   return (
     <section className="deal-redemption-workspace" aria-label="Deal redemption">
@@ -125,7 +138,11 @@ export default function DealRedemptionPanel({
         )}
 
         {claim && !redemption.completedRedemption && (
-          <div className="deal-redemption-review" aria-live="polite">
+          <form
+            className="deal-redemption-review"
+            aria-live="polite"
+            onSubmit={handleConfirmRedemption}
+          >
             <div className="deal-redemption-review-heading">
               <span aria-hidden="true">
                 <ShieldCheck />
@@ -156,6 +173,43 @@ export default function DealRedemptionPanel({
               <strong>Redemption method</strong>
               {DEAL_REDEMPTION_METHOD}
             </p>
+            <fieldset className="deal-redemption-values">
+              <legend>Recorded deal value (optional)</legend>
+              <p>
+                Leave an amount blank if it is unknown. Enter $0 only when the
+                recorded amount is zero.
+              </p>
+              <div>
+                <label htmlFor="deal-transaction-amount">
+                  Transaction amount (NZD)
+                  <input
+                    id="deal-transaction-amount"
+                    name="transactionAmount"
+                    type="number"
+                    inputMode="decimal"
+                    min="0"
+                    max="1000000"
+                    step="0.01"
+                    placeholder="0.00"
+                    disabled={redemption.isRedeeming}
+                  />
+                </label>
+                <label htmlFor="deal-savings-amount">
+                  Customer savings (NZD)
+                  <input
+                    id="deal-savings-amount"
+                    name="savingsAmount"
+                    type="number"
+                    inputMode="decimal"
+                    min="0"
+                    max="1000000"
+                    step="0.01"
+                    placeholder="0.00"
+                    disabled={redemption.isRedeeming}
+                  />
+                </label>
+              </div>
+            </fieldset>
             <div className="deal-redemption-review-actions">
               <Button
                 variant="secondary"
@@ -164,15 +218,12 @@ export default function DealRedemptionPanel({
               >
                 Cancel
               </Button>
-              <Button
-                onClick={redemption.handleConfirmRedemption}
-                disabled={redemption.isRedeeming}
-              >
+              <Button type="submit" disabled={redemption.isRedeeming}>
                 <BadgeCheck aria-hidden="true" />
                 {redemption.isRedeeming ? 'Redeeming...' : 'Confirm redemption'}
               </Button>
             </div>
-          </div>
+          </form>
         )}
 
         {claim && redemption.completedRedemption && (
