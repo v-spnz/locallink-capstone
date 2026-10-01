@@ -279,6 +279,56 @@
   font-size: 12px;
 }
 
+.deal-redemption-values {
+  margin: 18px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.deal-redemption-values legend {
+  color: var(--business-ink, var(--text));
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.deal-redemption-values p {
+  margin: 3px 0 12px;
+  color: var(--business-muted, var(--text-muted));
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.deal-redemption-values > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.deal-redemption-values label {
+  min-width: 0;
+  color: var(--business-ink, var(--text));
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.deal-redemption-values input {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  margin-top: 6px;
+  padding: 0 10px;
+  border: 1px solid var(--business-border, var(--border));
+  border-radius: var(--business-radius-control, 7px);
+  background: #fff;
+  color: var(--business-ink, var(--text));
+  font: inherit;
+}
+
+.deal-redemption-values input:focus-visible {
+  border-color: var(--business-accent, var(--blue));
+  outline: 3px solid rgb(63 91 211 / 14%);
+}
+
 .deal-redemption-review-actions {
   margin-top: 18px;
   display: flex;
@@ -833,6 +883,10 @@
   .deal-redemption-review dl {
     grid-template-columns: 1fr;
     gap: 11px;
+  }
+
+  .deal-redemption-values > div {
+    grid-template-columns: 1fr;
   }
 
   .deal-redemption-success {

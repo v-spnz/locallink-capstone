@@ -179,7 +179,10 @@ export default function useBusinessDealRedemption({ loadRecords = true } = {}) {
     setClaimLookupError('')
   }
 
-  async function handleConfirmRedemption() {
+  async function handleConfirmRedemption({
+    transactionAmountCents = null,
+    savingsAmountCents = null,
+  } = {}) {
     if (!validatedClaim || redemptionInProgressRef.current) return false
 
     redemptionInProgressRef.current = true
@@ -188,6 +191,7 @@ export default function useBusinessDealRedemption({ loadRecords = true } = {}) {
     try {
       const redemption = await redeemBusinessDealClaim(
         validatedClaim.redemptionCode,
+        { transactionAmountCents, savingsAmountCents },
       )
       setCompletedRedemption(redemption)
       setValidatedClaim((current) => ({

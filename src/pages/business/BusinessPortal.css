@@ -3213,3 +3213,13 @@ a.business-performance-refresh {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.business-performance-note {
+  margin: 0;
+  padding: 15px 22px;
+  border-top: 1px solid #edf0f5;
+  grid-column: 1 / -1;
+  color: var(--business-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}

@@ -51,6 +51,7 @@ function PerformanceSection({
   description,
   to,
   actionLabel,
+  note,
   children,
 }) {
   const Icon = icon
@@ -71,6 +72,7 @@ function PerformanceSection({
         </Link>
       </div>
       <dl className="business-performance-metrics">{children}</dl>
+      {note && <p className="business-performance-note">{note}</p>}
     </article>
   )
 }
@@ -245,6 +247,9 @@ export default function Dashboard() {
   const recordedCustomerSavings = formatRecordedCurrency(
     metrics?.recordedCustomerSavingsCents,
   )
+  const recordedAverageTransaction = formatRecordedCurrency(
+    metrics?.averageRecordedTransactionCents,
+  )
 
   return (
     <div className="business-dashboard">
@@ -323,6 +328,7 @@ export default function Dashboard() {
                 description="Claims, in-store redemptions and recorded sales from your deals."
                 to="/business/create-deal"
                 actionLabel="View deals"
+                note="Sales value and average value use only redemptions with a recorded transaction amount. Customer savings uses only recorded savings amounts. These figures are not total revenue, profit, ROI, or guaranteed additional revenue."
               >
                 <PerformanceMetric
                   label="Claims"
@@ -347,6 +353,16 @@ export default function Dashboard() {
                       : 'No valued redemptions'
                   }
                   unavailable={recordedTransactionValue == null}
+                />
+                <PerformanceMetric
+                  label="Average transaction value"
+                  value={recordedAverageTransaction ?? 'Not recorded'}
+                  detail={
+                    metrics.redemptionsWithTransactionValue > 0
+                      ? `From ${formatDashboardCount(metrics.redemptionsWithTransactionValue)} valued ${metrics.redemptionsWithTransactionValue === 1 ? 'redemption' : 'redemptions'}`
+                      : 'No valued redemptions'
+                  }
+                  unavailable={recordedAverageTransaction == null}
                 />
                 <PerformanceMetric
                   label="Deal customers"
