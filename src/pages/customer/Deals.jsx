@@ -217,7 +217,7 @@ export default function Deals() {
 
   useEffect(() => {
     if (!user?.id) return
-    const requestedDealId = new URLSearchParams(window.location.search).get(
+    const requestedDealId = new URLSearchParams(routerLocation.search).get(
       'deal',
     )
     if (!requestedDealId) return
@@ -227,7 +227,12 @@ export default function Deals() {
       openDeal(businessFromState ?? { deal_id: requestedDealId })
     }, 0)
     return () => window.clearTimeout(timer)
-  }, [openDeal, routerLocation.state?.openDeal, user?.id])
+  }, [
+    openDeal,
+    routerLocation.search,
+    routerLocation.state?.openDeal,
+    user?.id,
+  ])
 
   async function openClaimedDeal(claim) {
     setSelectedDeal(claim)
@@ -261,9 +266,6 @@ export default function Deals() {
     }
   }
 
-  // Reacts to the URL's ?claim= param on every navigation, not just mount —
-  // so clicking the global ActiveClaimBanner while already on this page
-  // still reopens the modal, since the route itself doesn't change.
   useEffect(() => {
     if (!user?.id) return
     const requestedDealId = new URLSearchParams(routerLocation.search).get(
@@ -367,7 +369,6 @@ export default function Deals() {
     }
   }
 
-
   function switchTab(nextTab) {
     if (nextTab === activeTab) return
     setSlide(nextTab === 'wallet' ? 'right' : 'left')
@@ -385,18 +386,6 @@ export default function Deals() {
     )
   }, [businesses, discoverySearch])
 
-  // businesses_in_my_suburb() returns up to 3 rows per business, one per
-  // active deal — correct for the list/grid, which shows a separate card
-  // per deal, but the map should only ever draw one pin per business
-  // location, not one per deal sharing the same coordinates.
-  //
-  // Memoized deliberately: DiscoveryMap's internal MapViewport re-fits
-  // the map any time this array's *reference* changes, even if the
-  // actual businesses are identical. An unmemoized array here recreated
-  // on every unrelated re-render (e.g. the claims-polling state update),
-  // causing Leaflet to repeatedly interrupt its own pan/zoom animation —
-  // the cause of an intermittent "Cannot read properties of undefined
-  // (reading '_leaflet_pos')" crash from leaflet.js.
   const uniqueBusinessesForMap = useMemo(
     () =>
       Array.from(
@@ -451,321 +440,327 @@ export default function Deals() {
       )}
 
       <div key={activeTab} className={`dd-pane dd-pane--${slide}`}>
-      {activeTab === 'discover' && (
-        <>
-          <input
-            type="text"
-            className="discovery-search-input"
-            placeholder="Search businesses or deals..."
-            value={discoverySearch}
-            onChange={(event) => setDiscoverySearch(event.target.value)}
-            aria-label="Search businesses or deals"
-          />
+        {activeTab === 'discover' && (
+          <>
+            <input
+              type="text"
+              className="discovery-search-input"
+              placeholder="Search businesses or deals..."
+              value={discoverySearch}
+              onChange={(event) => setDiscoverySearch(event.target.value)}
+              aria-label="Search businesses or deals"
+            />
 
-          <div
-            className="pill-filter-row"
-            aria-label="Business category filters"
-          >
-            {FILTERS.map((filter) => (
-              <button
-                key={filter}
-                type="button"
-                className={`pill discovery-pill${activeFilter === filter ? ' active' : ''}`}
-                onClick={() => setActiveFilter(filter)}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
-
-          {location ? (
-            <Suspense
-              fallback={<div className="discovery-map-empty">Loading map…</div>}
-            >
-              <DiscoveryMap
-                location={location}
-                businesses={uniqueBusinessesForMap}
-              />
-            </Suspense>
-          ) : (
-            <div className="discovery-map-empty">
-              {isLoadingLocation
-                ? 'Loading your registered suburb...'
-                : 'Add your suburb in Profile to discover local businesses.'}
-            </div>
-          )}
-
-          <div className="placeholder-section discovery-results-panel">
             <div
-              className="placeholder-section-title is-complete"
-              style={{ justifyContent: 'space-between' }}
+              className="pill-filter-row"
+              aria-label="Business category filters"
             >
-              <span>
-                {location
-                  ? `Businesses in ${location.suburb}`
-                  : 'Local businesses'}
-              </span>
-              <span style={resultCountStyles}>
-                {isSearching
-                  ? 'Searching…'
-                  : `${searchedBusinesses.length} result${searchedBusinesses.length !== 1 ? 's' : ''}`}
-              </span>
+              {FILTERS.map((filter) => (
+                <button
+                  key={filter}
+                  type="button"
+                  className={`pill discovery-pill${activeFilter === filter ? ' active' : ''}`}
+                  onClick={() => setActiveFilter(filter)}
+                >
+                  {filter}
+                </button>
+              ))}
             </div>
-            {!location ? (
-              <div className="dd-empty-state">
-                <span className="dd-empty-state-icon" aria-hidden="true">
-                  <MapPin />
-                </span>
-                <p>Add your suburb in Profile to discover local businesses.</p>
-              </div>
-            ) : !isSearching && searchedBusinesses.length === 0 ? (
-              <div className="dd-empty-state">
-                <span className="dd-empty-state-icon" aria-hidden="true">
-                  <MapPin />
-                </span>
-                <p>
-                  {discoverySearch.trim()
-                    ? `No businesses or deals match "${discoverySearch.trim()}".`
-                    : `No businesses or deals are available in ${location.suburb} right now.`}
-                </p>
-              </div>
+
+            {location ? (
+              <Suspense
+                fallback={
+                  <div className="discovery-map-empty">Loading map…</div>
+                }
+              >
+                <DiscoveryMap
+                  location={location}
+                  businesses={uniqueBusinessesForMap}
+                />
+              </Suspense>
             ) : (
-              <div className="discovery-category-sections">
-                {groupBusinessesByCategory(searchedBusinesses).map(
-                  ({ category, items }) => (
-                    <section
-                      className="discovery-category-section"
-                      key={category}
-                    >
-                      <h3 className="discovery-category-heading">
-                        <span aria-hidden="true">
-                          {getCategoryEmoji(category)}
-                        </span>
-                        {category}
-                        <span className="discovery-category-count">
-                          {items.length}
-                        </span>
-                      </h3>
-                      <div className="business-grid discovery-grid discovery-card-grid">
-                        {items.map((business) => (
-                          <div
-                            className={`business-card discovery-business-card${business.deal_id ? ' business-card-clickable' : ''}`}
-                            key={business.business_id}
-                            onClick={() => openDeal(business)}
-                            role={business.deal_id ? 'button' : undefined}
-                            tabIndex={business.deal_id ? 0 : undefined}
-                          >
-                            <div className="discovery-card-media">
-                              {business.deal_image_url ? (
-                                <img
-                                  src={business.deal_image_url}
-                                  alt=""
-                                  className="discovery-card-photo"
-                                />
-                              ) : (
-                                <span
-                                  className="discovery-card-icon"
-                                  aria-hidden="true"
-                                >
-                                  {getCategoryEmoji(business.category)}
-                                </span>
-                              )}
-                              {business.deal_is_sold_out && (
-                                <span className="discovery-sold-out-badge">
-                                  Sold out
-                                </span>
-                              )}
-                              {business.deal_id && (
-                                <button
-                                  type="button"
-                                  className={`discovery-save-btn${savedDealIds.includes(business.deal_id) ? ' is-saved' : ''}`}
-                                  aria-label={
-                                    savedDealIds.includes(business.deal_id)
-                                      ? 'Remove from wallet'
-                                      : 'Save to wallet'
-                                  }
-                                  onClick={(event) => {
-                                    event.stopPropagation()
-                                    toggleSaveDeal(business.deal_id)
-                                  }}
-                                >
-                                  <Bookmark
-                                    aria-hidden="true"
-                                    fill={
-                                      savedDealIds.includes(business.deal_id)
-                                        ? 'currentColor'
-                                        : 'none'
-                                    }
-                                  />
-                                </button>
-                              )}
-                            </div>
-
-                            <div className="business-card-body">
-                              <div className="business-card-name">
-                                {business.business_name}
-                              </div>
-                              <div className="business-card-category">
-                                {business.category}
-                              </div>
-                              <div className="business-card-desc">
-                                {business.deal_description ||
-                                  business.description}
-                              </div>
-                              {business.deal_title && (
-                                <div className="business-card-deal">
-                                  Deal: {business.deal_title}
-                                </div>
-                              )}
-
-                              <div className="discovery-card-footer">
-                                <span className="business-card-address">
-                                  {business.formatted_address}
-                                </span>
-                                <span className="business-card-distance discovery-distance-badge">
-                                  {Number(business.distance_km).toFixed(1)} km
-                                </span>
-                              </div>
-
-                              {business.deal_id && (
-                                <button
-                                  type="button"
-                                  className="discovery-view-deal-btn"
-                                  onClick={(event) => {
-                                    event.stopPropagation()
-                                    openDeal(business)
-                                  }}
-                                >
-                                  View Deal
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  ),
-                )}
+              <div className="discovery-map-empty">
+                {isLoadingLocation
+                  ? 'Loading your registered suburb...'
+                  : 'Add your suburb in Profile to discover local businesses.'}
               </div>
             )}
-          </div>
-        </>
-      )}
 
-      {activeTab === 'wallet' && (
-        <section className="wallet-section" aria-label="Your wallet">
-          <div className="wallet-section-block">
-            <h3 className="wallet-section-title">Saved deals</h3>
-            {savedDeals.length === 0 ? (
-              <div className="dd-empty-state">
-                <span className="dd-empty-state-icon" aria-hidden="true">
-                  <Bookmark />
-                </span>
-                <p>
-                  No saved deals yet. Tap the bookmark icon on a deal to keep it
-                  here for later.
-                </p>
-              </div>
-            ) : (
-              <div className="wallet-saved-grid">
-                {savedDeals.map((saved) => (
-                  <div className="wallet-saved-card" key={saved.deal_id}>
-                    <button
-                      type="button"
-                      className="wallet-saved-media"
-                      onClick={() => openSavedDeal(saved)}
-                      aria-label={`View ${saved.deal_title}`}
-                    >
-                      {saved.deal_image_url ? (
-                        <img src={saved.deal_image_url} alt="" />
-                      ) : (
-                        <span aria-hidden="true">
-                          {getCategoryEmoji(saved.category)}
-                        </span>
-                      )}
-                    </button>
-                    <div className="wallet-saved-body">
-                      <div className="wallet-saved-business">
-                        {saved.business_name}
-                      </div>
-                      <div className="wallet-saved-title">
-                        {saved.deal_title}
-                      </div>
-                      {saved.distance_km != null && (
-                        <div className="wallet-saved-distance">
-                          {Number(saved.distance_km).toFixed(1)} km
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      className="wallet-saved-remove"
-                      aria-label="Remove from wallet"
-                      onClick={() => toggleSaveDeal(saved.deal_id)}
-                    >
-                      <Bookmark aria-hidden="true" fill="currentColor" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="wallet-section-block">
-            <h3 className="wallet-section-title">Claim history</h3>
-            {pastClaims.length === 0 ? (
-              <div className="dd-claim-history-empty">
-                <Clock3 aria-hidden="true" size={16} />
+            <div className="placeholder-section discovery-results-panel">
+              <div
+                className="placeholder-section-title is-complete"
+                style={{ justifyContent: 'space-between' }}
+              >
                 <span>
-                  No past deals yet. Deals move here once you've claimed them.
+                  {location
+                    ? `Businesses in ${location.suburb}`
+                    : 'Local businesses'}
+                </span>
+                <span style={resultCountStyles}>
+                  {isSearching
+                    ? 'Searching…'
+                    : `${searchedBusinesses.length} result${searchedBusinesses.length !== 1 ? 's' : ''}`}
                 </span>
               </div>
-            ) : (
-              <details className="dd-past-deals">
-                <summary>
-                  <span className="dd-past-chev">▶</span> Past deals
-                </summary>
-                <div className="dd-past-deals-body">
-                  {pastClaims.map((claim) => {
-                    const endedEarly = claim.status === 'ended_early'
-                    return (
-                      <div
-                        className="dd-past-row"
-                        key={claim.claim_id}
-                        onClick={() => openClaimedDeal(claim)}
-                      >
-                        <span
-                          className="dd-past-icon dd-past-icon--default"
-                          aria-hidden="true"
-                        >
-                          {getCategoryEmoji(claim.category)}
-                        </span>
-                        <div className="dd-past-row-text">
-                          <div className="dd-past-row-title">{claim.title}</div>
-                          <div className="dd-past-row-sub">
-                            {claim.redeemed_at
-                              ? `Redeemed ${formatClaimDate(claim.redeemed_at)}`
-                              : endedEarly &&
-                                  claim.expires_at &&
-                                  new Date(claim.expires_at) > now
-                                ? 'Claim remains redeemable'
-                                : 'Expired'}
-                            {' · '}
-                            {claim.business_name}
-                          </div>
-                        </div>
-                        <span className="dd-past-row-cat">
-                          {claim.category}
-                        </span>
-                      </div>
-                    )
-                  })}
+              {!location ? (
+                <div className="dd-empty-state">
+                  <span className="dd-empty-state-icon" aria-hidden="true">
+                    <MapPin />
+                  </span>
+                  <p>
+                    Add your suburb in Profile to discover local businesses.
+                  </p>
                 </div>
-              </details>
-            )}
-          </div>
-        </section>
-      )}
+              ) : !isSearching && searchedBusinesses.length === 0 ? (
+                <div className="dd-empty-state">
+                  <span className="dd-empty-state-icon" aria-hidden="true">
+                    <MapPin />
+                  </span>
+                  <p>
+                    {discoverySearch.trim()
+                      ? `No businesses or deals match "${discoverySearch.trim()}".`
+                      : `No businesses or deals are available in ${location.suburb} right now.`}
+                  </p>
+                </div>
+              ) : (
+                <div className="discovery-category-sections">
+                  {groupBusinessesByCategory(searchedBusinesses).map(
+                    ({ category, items }) => (
+                      <section
+                        className="discovery-category-section"
+                        key={category}
+                      >
+                        <h3 className="discovery-category-heading">
+                          <span aria-hidden="true">
+                            {getCategoryEmoji(category)}
+                          </span>
+                          {category}
+                          <span className="discovery-category-count">
+                            {items.length}
+                          </span>
+                        </h3>
+                        <div className="business-grid discovery-grid discovery-card-grid">
+                          {items.map((business) => (
+                            <div
+                              className={`business-card discovery-business-card${business.deal_id ? ' business-card-clickable' : ''}`}
+                              key={business.business_id}
+                              onClick={() => openDeal(business)}
+                              role={business.deal_id ? 'button' : undefined}
+                              tabIndex={business.deal_id ? 0 : undefined}
+                            >
+                              <div className="discovery-card-media">
+                                {business.deal_image_url ? (
+                                  <img
+                                    src={business.deal_image_url}
+                                    alt=""
+                                    className="discovery-card-photo"
+                                  />
+                                ) : (
+                                  <span
+                                    className="discovery-card-icon"
+                                    aria-hidden="true"
+                                  >
+                                    {getCategoryEmoji(business.category)}
+                                  </span>
+                                )}
+                                {business.deal_is_sold_out && (
+                                  <span className="discovery-sold-out-badge">
+                                    Sold out
+                                  </span>
+                                )}
+                                {business.deal_id && (
+                                  <button
+                                    type="button"
+                                    className={`discovery-save-btn${savedDealIds.includes(business.deal_id) ? ' is-saved' : ''}`}
+                                    aria-label={
+                                      savedDealIds.includes(business.deal_id)
+                                        ? 'Remove from wallet'
+                                        : 'Save to wallet'
+                                    }
+                                    onClick={(event) => {
+                                      event.stopPropagation()
+                                      toggleSaveDeal(business.deal_id)
+                                    }}
+                                  >
+                                    <Bookmark
+                                      aria-hidden="true"
+                                      fill={
+                                        savedDealIds.includes(business.deal_id)
+                                          ? 'currentColor'
+                                          : 'none'
+                                      }
+                                    />
+                                  </button>
+                                )}
+                              </div>
+
+                              <div className="business-card-body">
+                                <div className="business-card-name">
+                                  {business.business_name}
+                                </div>
+                                <div className="business-card-category">
+                                  {business.category}
+                                </div>
+                                <div className="business-card-desc">
+                                  {business.deal_description ||
+                                    business.description}
+                                </div>
+                                {business.deal_title && (
+                                  <div className="business-card-deal">
+                                    Deal: {business.deal_title}
+                                  </div>
+                                )}
+
+                                <div className="discovery-card-footer">
+                                  <span className="business-card-address">
+                                    {business.formatted_address}
+                                  </span>
+                                  <span className="business-card-distance discovery-distance-badge">
+                                    {Number(business.distance_km).toFixed(1)} km
+                                  </span>
+                                </div>
+
+                                {business.deal_id && (
+                                  <button
+                                    type="button"
+                                    className="discovery-view-deal-btn"
+                                    onClick={(event) => {
+                                      event.stopPropagation()
+                                      openDeal(business)
+                                    }}
+                                  >
+                                    View Deal
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    ),
+                  )}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {activeTab === 'wallet' && (
+          <section className="wallet-section" aria-label="Your wallet">
+            <div className="wallet-section-block">
+              <h3 className="wallet-section-title">Saved deals</h3>
+              {savedDeals.length === 0 ? (
+                <div className="dd-empty-state">
+                  <span className="dd-empty-state-icon" aria-hidden="true">
+                    <Bookmark />
+                  </span>
+                  <p>
+                    No saved deals yet. Tap the bookmark icon on a deal to keep
+                    it here for later.
+                  </p>
+                </div>
+              ) : (
+                <div className="wallet-saved-grid">
+                  {savedDeals.map((saved) => (
+                    <div className="wallet-saved-card" key={saved.deal_id}>
+                      <button
+                        type="button"
+                        className="wallet-saved-media"
+                        onClick={() => openSavedDeal(saved)}
+                        aria-label={`View ${saved.deal_title}`}
+                      >
+                        {saved.deal_image_url ? (
+                          <img src={saved.deal_image_url} alt="" />
+                        ) : (
+                          <span aria-hidden="true">
+                            {getCategoryEmoji(saved.category)}
+                          </span>
+                        )}
+                      </button>
+                      <div className="wallet-saved-body">
+                        <div className="wallet-saved-business">
+                          {saved.business_name}
+                        </div>
+                        <div className="wallet-saved-title">
+                          {saved.deal_title}
+                        </div>
+                        {saved.distance_km != null && (
+                          <div className="wallet-saved-distance">
+                            {Number(saved.distance_km).toFixed(1)} km
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        className="wallet-saved-remove"
+                        aria-label="Remove from wallet"
+                        onClick={() => toggleSaveDeal(saved.deal_id)}
+                      >
+                        <Bookmark aria-hidden="true" fill="currentColor" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="wallet-section-block">
+              <h3 className="wallet-section-title">Claim history</h3>
+              {pastClaims.length === 0 ? (
+                <div className="dd-claim-history-empty">
+                  <Clock3 aria-hidden="true" size={16} />
+                  <span>
+                    No past deals yet. Deals move here once you've claimed them.
+                  </span>
+                </div>
+              ) : (
+                <details className="dd-past-deals">
+                  <summary>
+                    <span className="dd-past-chev">▶</span> Past deals
+                  </summary>
+                  <div className="dd-past-deals-body">
+                    {pastClaims.map((claim) => {
+                      const endedEarly = claim.status === 'ended_early'
+                      return (
+                        <div
+                          className="dd-past-row"
+                          key={claim.claim_id}
+                          onClick={() => openClaimedDeal(claim)}
+                        >
+                          <span
+                            className="dd-past-icon dd-past-icon--default"
+                            aria-hidden="true"
+                          >
+                            {getCategoryEmoji(claim.category)}
+                          </span>
+                          <div className="dd-past-row-text">
+                            <div className="dd-past-row-title">
+                              {claim.title}
+                            </div>
+                            <div className="dd-past-row-sub">
+                              {claim.redeemed_at
+                                ? `Redeemed ${formatClaimDate(claim.redeemed_at)}`
+                                : endedEarly &&
+                                    claim.expires_at &&
+                                    new Date(claim.expires_at) > now
+                                  ? 'Claim remains redeemable'
+                                  : 'Expired'}
+                              {' · '}
+                              {claim.business_name}
+                            </div>
+                          </div>
+                          <span className="dd-past-row-cat">
+                            {claim.category}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </details>
+              )}
+            </div>
+          </section>
+        )}
       </div>
 
       {isDealLoading && !selectedDeal && (

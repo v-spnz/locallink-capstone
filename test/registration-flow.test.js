@@ -114,14 +114,13 @@ test('registration progressively introduces value before identity creation', asy
     login,
     protectedRoute,
     businessProtectedRoute,
-  ] =
-    await Promise.all([
-      read('../src/pages/auth/RegisterPage.jsx'),
-      read('../src/pages/auth/RegisterPage.css'),
-      read('../src/pages/auth/LoginPage.jsx'),
-      read('../src/auth/ProtectedRoute.jsx'),
-      read('../src/business/BusinessProtectedRoute.jsx'),
-    ])
+  ] = await Promise.all([
+    read('../src/pages/auth/RegisterPage.jsx'),
+    read('../src/pages/auth/RegisterPage.css'),
+    read('../src/pages/auth/LoginPage.jsx'),
+    read('../src/auth/ProtectedRoute.jsx'),
+    read('../src/business/BusinessProtectedRoute.jsx'),
+  ])
 
   for (const stage of [
     'WelcomeStep',

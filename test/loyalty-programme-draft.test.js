@@ -121,10 +121,7 @@ test('AC5: draft loyalty programmes are not visible or usable by consumers', asy
     ),
   ])
 
-  assert.match(
-    form,
-    /Private draft/,
-  )
+  assert.match(form, /Private draft/)
   assert.match(migration, /status = 'draft'/)
   assert.match(
     publicationMigration,
