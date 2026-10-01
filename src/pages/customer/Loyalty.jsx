@@ -47,6 +47,7 @@ export default function Loyalty() {
 
   useEffect(() => {
     const recordId = new URLSearchParams(routerLocation.search).get('record')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (recordId) setAutoOpenRecordId(recordId)
   }, [routerLocation.search])
 

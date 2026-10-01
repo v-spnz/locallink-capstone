@@ -43,6 +43,7 @@ export default function ProgramCard({
   const [view, setView] = useState(null)
 
   useLayoutEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (autoOpen) setView('details')
   }, [autoOpen])
 
