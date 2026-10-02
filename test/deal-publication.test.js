@@ -77,6 +77,31 @@ test('business deal filters open on Draft and group terminal deals in History', 
   assert.match(list, /Show more/)
 })
 
+test('deal rows retain detail selection and lifecycle action wiring', async () => {
+  const [list, row] = await Promise.all([
+    readFile(
+      new URL('../src/features/deals/components/DealList.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/features/deals/components/DealRow.jsx', import.meta.url),
+      'utf8',
+    ),
+  ])
+
+  assert.match(list, /<DealRow/)
+  assert.match(list, /selected=\{selectedDealId === record\.deal\.id\}/)
+  assert.match(list, /if \(selectedDealId === dealId\) onClose\(\)/)
+  assert.match(row, /onClick=\{\(\) => onSelect\(deal\.id\)\}/)
+  assert.match(row, /aria-expanded=\{selected\}/)
+  assert.match(row, /<DealDetails/)
+  assert.match(row, /onEdit=\{\(\) => onEdit\(deal\.id\)\}/)
+  assert.match(row, /onConfirmDelete=\{onConfirmDelete\}/)
+  assert.match(row, /onCancelScheduling=\{onCancelScheduling\}/)
+  assert.match(row, /onRequestEnd=\{\(\) => onRequestEnd\(deal\.id\)\}/)
+  assert.match(row, /onEnd=\{\(\) => onEnd\(deal\.id\)\}/)
+})
+
 test('US0091: preview includes the consumer-facing details and an explicit confirmation', async () => {
   const review = await readFile(
     new URL('../src/features/deals/components/DealReview.jsx', import.meta.url),

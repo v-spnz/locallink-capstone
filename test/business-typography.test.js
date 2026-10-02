@@ -34,9 +34,13 @@ test('business pages use Figtree for UI text and numeric data', async () => {
 })
 
 test('deal campaign rows retain the readable Services marketplace type scale', async () => {
-  const [portalStyles, marketplaceStyles] = await Promise.all([
+  const [portalStyles, dealStyles, marketplaceStyles] = await Promise.all([
     readFile(
       new URL('../src/pages/business/BusinessPortal.css', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/features/deals/BusinessDeals.css', import.meta.url),
       'utf8',
     ),
     readFile(
@@ -53,13 +57,10 @@ test('deal campaign rows retain the readable Services marketplace type scale', a
     /\.service-marketplace-card h3 \{[\s\S]*?font-size: 20px/,
   )
   assert.match(portalStyles, /\.business-deals-page,[\s\S]*?var\(--font-ui\)/)
-  assert.match(portalStyles, /\.deal-card-title \{[\s\S]*?font-size: 20px/)
+  assert.match(dealStyles, /\.deal-card-title \{[\s\S]*?font-size: 20px/)
+  assert.match(dealStyles, /\.deal-card-description \{[\s\S]*?font-size: 14px/)
   assert.match(
-    portalStyles,
-    /\.deal-card-description \{[\s\S]*?font-size: 14px/,
-  )
-  assert.match(
-    portalStyles,
+    dealStyles,
     /\.deal-card-timing > small \{[\s\S]*?font-size: 13px/,
   )
 })

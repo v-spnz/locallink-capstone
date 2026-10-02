@@ -177,7 +177,7 @@ test('US0105 and US0109: loyalty creation and preview reuse the Deals workspace'
     ),
   ])
 
-  assert.match(page, /CreateDeal\.css/)
+  assert.match(page, /BusinessCampaignWorkspace\.css/)
   assert.match(page, /business-deals-page/)
   assert.match(form, /className="deal-form loyalty-draft-form"/)
   assert.match(form, /deal-form-workspace/)

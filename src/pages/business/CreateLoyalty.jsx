@@ -11,7 +11,7 @@ import useBusinessLoyaltyProgrammes from '../../features/loyalty/hooks/useBusine
 import LoyaltyCustomerLookup from './LoyaltyCustomerLookup'
 import '../../features/loyalty/Loyalty.css'
 import '../../features/loyalty/BusinessLoyalty.css'
-import '../../features/deals/CreateDeal.css'
+import '../../features/deals/BusinessCampaignWorkspace.css'
 
 export default function CreateLoyalty() {
   const loyalty = useBusinessLoyaltyProgrammes()

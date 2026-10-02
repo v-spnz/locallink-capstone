@@ -10,6 +10,7 @@ import ActionToast from '../../components/ui/ActionToast'
 import UnsavedChangesDialog from '../../components/ui/UnsavedChangesDialog'
 import { useSearchParams } from 'react-router-dom'
 import '../../features/deals/CreateDeal.css'
+import '../../features/deals/BusinessCampaignWorkspace.css'
 import '../../features/deals/DealRedemption.css'
 
 export default function CreateDeal() {
