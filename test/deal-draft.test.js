@@ -317,7 +317,7 @@ test('deal form sections keep draft progress, live preview, and image URL cleanu
 })
 
 test('AC11-12: draft saving and custom unsaved-change protection are wired into the flow', async () => {
-  const [form, hook, page, dialog, styles] = await Promise.all([
+  const [form, hook, guard, page, dialog, styles] = await Promise.all([
     readFile(
       new URL('../src/features/deals/components/DealForm.jsx', import.meta.url),
       'utf8',
@@ -325,6 +325,13 @@ test('AC11-12: draft saving and custom unsaved-change protection are wired into 
     readFile(
       new URL(
         '../src/features/deals/hooks/useBusinessDeals.js',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/business/useUnsavedBusinessDraftGuard.js',
         import.meta.url,
       ),
       'utf8',
@@ -353,7 +360,9 @@ test('AC11-12: draft saving and custom unsaved-change protection are wired into 
   )
   assert.match(styles, /\.deal-draft-rail\s*\{[\s\S]*?grid-column:\s*2/)
   assert.match(hook, /persist\('draft'\)/)
-  assert.match(hook, /beforeunload/)
+  assert.match(hook, /useUnsavedBusinessDraftGuard\(/)
+  assert.match(guard, /beforeunload/)
+  assert.match(guard, /document\.addEventListener\('click'/)
   assert.doesNotMatch(hook, /window\.confirm/)
   assert.match(hook, /isLeaveConfirmationOpen/)
   assert.match(page, /UnsavedChangesDialog/)

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useBusiness from '../../../business/useBusiness'
+import useUnsavedBusinessDraftGuard from '../../../business/useUnsavedBusinessDraftGuard'
 import {
   cancelBusinessLoyaltySchedule,
   deleteBusinessLoyaltyDraft,
@@ -53,11 +54,19 @@ export default function useBusinessLoyaltyProgrammes() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [busyProgrammeId, setBusyProgrammeId] = useState(null)
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  const [isLeaveConfirmationOpen, setIsLeaveConfirmationOpen] = useState(false)
   const saveInProgressRef = useRef(false)
-  const pendingLeaveActionRef = useRef(null)
-  const pendingLeaveIsNavigationRef = useRef(false)
+  const {
+    setHasUnsavedChanges,
+    isLeaveConfirmationOpen,
+    requestLeave,
+    cancelLeave,
+    discardAndLeave,
+    saveDraftAndLeave,
+  } = useUnsavedBusinessDraftGuard({
+    isActive: step !== 'list',
+    navigate,
+    onSaveDraft: () => persist('draft'),
+  })
 
   const loadProgrammes = useCallback(async () => {
     setIsLoading(true)
@@ -80,53 +89,6 @@ export default function useBusinessLoyaltyProgrammes() {
     const loadTimer = window.setTimeout(loadProgrammes, 0)
     return () => window.clearTimeout(loadTimer)
   }, [loadProgrammes])
-
-  useEffect(() => {
-    if (!hasUnsavedChanges || step === 'list') return undefined
-
-    function warnBeforeUnload(event) {
-      event.preventDefault()
-      event.returnValue = ''
-    }
-
-    function warnBeforeInternalNavigation(event) {
-      const link = event.target.closest?.('a[href]')
-      const href = link?.getAttribute('href')
-      if (
-        !link ||
-        !href ||
-        href.startsWith('#') ||
-        link.target === '_blank' ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey
-      )
-        return
-
-      event.preventDefault()
-      event.stopPropagation()
-      const destination = new URL(link.href, window.location.href)
-      pendingLeaveActionRef.current = () => {
-        if (destination.origin === window.location.origin) {
-          navigate(
-            `${destination.pathname}${destination.search}${destination.hash}`,
-          )
-        } else {
-          window.location.assign(destination.href)
-        }
-      }
-      pendingLeaveIsNavigationRef.current = true
-      setIsLeaveConfirmationOpen(true)
-    }
-
-    window.addEventListener('beforeunload', warnBeforeUnload)
-    document.addEventListener('click', warnBeforeInternalNavigation, true)
-    return () => {
-      window.removeEventListener('beforeunload', warnBeforeUnload)
-      document.removeEventListener('click', warnBeforeInternalNavigation, true)
-    }
-  }, [hasUnsavedChanges, navigate, step])
 
   function setField(field, value) {
     setForm((current) =>
@@ -274,40 +236,7 @@ export default function useBusinessLoyaltyProgrammes() {
   }
 
   function handleBackToList() {
-    if (!hasUnsavedChanges) {
-      leaveToList()
-      return
-    }
-
-    pendingLeaveActionRef.current = leaveToList
-    pendingLeaveIsNavigationRef.current = false
-    setIsLeaveConfirmationOpen(true)
-  }
-
-  function cancelLeave() {
-    pendingLeaveActionRef.current = null
-    pendingLeaveIsNavigationRef.current = false
-    setIsLeaveConfirmationOpen(false)
-  }
-
-  function discardAndLeave() {
-    const leave = pendingLeaveActionRef.current
-    pendingLeaveActionRef.current = null
-    pendingLeaveIsNavigationRef.current = false
-    setIsLeaveConfirmationOpen(false)
-    setHasUnsavedChanges(false)
-    leave?.()
-  }
-
-  async function saveDraftAndLeave() {
-    const leave = pendingLeaveActionRef.current
-    const shouldNavigate = pendingLeaveIsNavigationRef.current
-    const saved = await persist('draft')
-    if (!saved) return
-    pendingLeaveActionRef.current = null
-    pendingLeaveIsNavigationRef.current = false
-    setIsLeaveConfirmationOpen(false)
-    if (shouldNavigate) leave?.()
+    requestLeave(leaveToList)
   }
 
   async function persist(status) {

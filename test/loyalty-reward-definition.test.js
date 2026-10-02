@@ -188,6 +188,7 @@ test('US0105: spend rewards use a filtered percentage picker and the Deals calen
     /body\.business-surface \.loyalty-input-with-prefix \.form-input\s*\{[\s\S]*?padding-left:\s*40px/,
   )
   assert.match(page, /UnsavedChangesDialog/)
+  assert.match(hook, /useUnsavedBusinessDraftGuard\(/)
   assert.match(hook, /isLeaveConfirmationOpen/)
   assert.doesNotMatch(hook, /window\.confirm/)
 })
