@@ -40,10 +40,25 @@ export default function Loyalty() {
     loyalty.reload()
   })
 
-  const autoOpenRecordId = new URLSearchParams(routerLocation.search).get(
-    'record',
+  const [autoOpenRecordId, setAutoOpenRecordId] = useState(() =>
+    new URLSearchParams(routerLocation.search).get('record'),
   )
   const effectiveActiveTab = autoOpenRecordId ? 'cards' : activeTab
+
+  useEffect(() => {
+    const recordId = new URLSearchParams(routerLocation.search).get('record')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (recordId) setAutoOpenRecordId(recordId)
+  }, [routerLocation.search])
+
+  function handleAutoOpenHandled() {
+    setAutoOpenRecordId(null)
+    const url = new URL(window.location.href)
+    if (url.searchParams.has('record')) {
+      url.searchParams.delete('record')
+      window.history.replaceState(window.history.state, '', url)
+    }
+  }
 
   function switchTab(nextTab) {
     if (nextTab === activeTab) return
@@ -56,10 +71,6 @@ export default function Loyalty() {
     setActiveTab(nextTab)
   }
 
-  // A business could add a stamp at any moment while the customer is just
-  // browsing this tab, with no modal open at all — poll for fresh progress
-  // while "Your Loyalty Cards" is the active tab, rather than only when a
-  // specific card's QR view happens to be open.
   useEffect(() => {
     if (effectiveActiveTab !== 'cards') return undefined
     const interval = window.setInterval(() => {
@@ -78,9 +89,25 @@ export default function Loyalty() {
     return join.error || 'Unable to join right now. Please try again.'
   }
 
+  function handleLeaveProgramme() {
+    discovery.reload()
+    loyalty.reload()
+  }
+
+  const [discoverySearch, setDiscoverySearch] = useState('')
+
   const notStartedBusinesses = discovery.businesses.filter(
     (business) => !business.isJoined,
   )
+  const searchedDiscoverBusinesses = discoverySearch.trim()
+    ? notStartedBusinesses.filter((business) => {
+        const query = discoverySearch.trim().toLowerCase()
+        return (
+          business.businessName?.toLowerCase().includes(query) ||
+          business.programmeName?.toLowerCase().includes(query)
+        )
+      })
+    : notStartedBusinesses
 
   const activePrograms = loyalty.programs.filter(
     (program) =>
@@ -216,6 +243,14 @@ export default function Loyalty() {
               />
             )}
 
+            <input
+              type="text"
+              className="ly-search"
+              placeholder="Search businesses or programmes..."
+              value={discoverySearch}
+              onChange={(event) => setDiscoverySearch(event.target.value)}
+            />
+
             {discovery.error && (
               <div className="auth-error" role="alert">
                 {discovery.error}
@@ -226,9 +261,9 @@ export default function Loyalty() {
               <div className="loyalty-empty-state">
                 Loading loyalty programmes near you…
               </div>
-            ) : notStartedBusinesses.length > 0 ? (
+            ) : searchedDiscoverBusinesses.length > 0 ? (
               <div className="loyalty-program-grid">
-                {notStartedBusinesses.map((business, index) => (
+                {searchedDiscoverBusinesses.map((business, index) => (
                   <ProgramCard
                     key={business.programmeId}
                     program={business}
@@ -243,7 +278,9 @@ export default function Loyalty() {
                   <Gift />
                 </span>
                 <p>
-                  No new loyalty programmes to start in your suburb right now.
+                  {discoverySearch.trim()
+                    ? `No businesses or programmes match "${discoverySearch.trim()}".`
+                    : 'No new loyalty programmes to start in your suburb right now.'}
                 </p>
               </div>
             )}
@@ -278,6 +315,8 @@ export default function Loyalty() {
                     program={program}
                     index={index}
                     autoOpen={program.id === autoOpenRecordId}
+                    onAutoOpenHandled={handleAutoOpenHandled}
+                    onLeave={handleLeaveProgramme}
                   />
                 ))}
               </div>

@@ -1,4 +1,11 @@
-import { BadgePercent, BriefcaseBusiness, Clock3, Gift, MapPin, Search } from 'lucide-react'
+import {
+  BadgePercent,
+  BriefcaseBusiness,
+  Clock3,
+  Gift,
+  MapPin,
+  Search,
+} from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAuth from '../../auth/useAuth'
@@ -21,7 +28,11 @@ import { buildHomeSearchResults } from './homeSearch'
 
 const MAX_STAMP_CIRCLES = 12
 
-const ACTIVITY_ICONS = { job: BriefcaseBusiness, deal: BadgePercent, loyalty: Gift }
+const ACTIVITY_ICONS = {
+  job: BriefcaseBusiness,
+  deal: BadgePercent,
+  loyalty: Gift,
+}
 
 const CATEGORY_EMOJI = {
   'Food & Drink': '🍔',
@@ -340,8 +351,8 @@ export default function Home() {
             <div className="home-empty-state">{history.error}</div>
           ) : recentActivity.length === 0 ? (
             <div className="home-empty-state">
-              Nothing here yet. Redeem a deal or complete a job and it will
-              show up here.
+              Nothing here yet. Redeem a deal or complete a job and it will show
+              up here.
             </div>
           ) : (
             <div className="home-activity-list">

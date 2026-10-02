@@ -300,6 +300,99 @@
   line-height: 1.45;
 }
 
+.loyalty-join-confirm {
+  margin-top: 4px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--amber);
+  border-radius: var(--radius);
+  background: var(--amber-light);
+  color: #7a5c00;
+}
+
+.loyalty-join-confirm-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.loyalty-join-confirm-heading svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #92700a;
+}
+
+.loyalty-join-confirm p {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.loyalty-join-confirm-actions {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.loyalty-join-confirm-cancel {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.loyalty-join-confirm-cancel:hover {
+  border-color: var(--blue);
+}
+
+.loyalty-join-confirm-actions .ly-redeem-btn {
+  flex: 1;
+}
+
+.loyalty-leave-trigger {
+  margin-top: 10px;
+  padding: 0;
+  border: none;
+  background: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.loyalty-leave-trigger:hover {
+  color: var(--danger);
+}
+
+.loyalty-leave-confirm {
+  margin-top: 10px;
+  border-color: var(--danger);
+  background: var(--danger-light);
+  color: var(--danger-dark);
+}
+
+.loyalty-leave-confirm .loyalty-join-confirm-heading svg {
+  color: var(--danger);
+}
+
+.loyalty-leave-confirm .ly-redeem-btn {
+  background: var(--danger);
+}
+
+.loyalty-leave-confirm .ly-redeem-btn:hover {
+  background: var(--danger-dark);
+}
+
 .loyalty-qr-dialog {
   position: relative;
   padding: 28px;
