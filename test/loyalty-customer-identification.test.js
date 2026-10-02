@@ -156,7 +156,7 @@ test('US0109 AC1-3: the protected business workflow finds and presents its match
 })
 
 test('US0105 and US0109: loyalty creation and preview reuse the Deals workspace', async () => {
-  const [page, form, review] = await Promise.all([
+  const [page, form, preview, sections, review] = await Promise.all([
     readFile(
       new URL('../src/pages/business/CreateLoyalty.jsx', import.meta.url),
       'utf8',
@@ -164,6 +164,20 @@ test('US0105 and US0109: loyalty creation and preview reuse the Deals workspace'
     readFile(
       new URL(
         '../src/features/loyalty/components/LoyaltyDraftForm.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/loyalty/components/LoyaltyProgrammePreview.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/loyalty/components/LoyaltyFormSections.jsx',
         import.meta.url,
       ),
       'utf8',
@@ -181,10 +195,11 @@ test('US0105 and US0109: loyalty creation and preview reuse the Deals workspace'
   assert.match(page, /business-deals-page/)
   assert.match(form, /className="deal-form loyalty-draft-form"/)
   assert.match(form, /deal-form-workspace/)
-  assert.match(form, /deal-draft-rail/)
-  assert.match(form, /deal-live-preview/)
-  assert.match(form, /Customer Preview/)
-  assert.match(form, /Customer-presented loyalty QR/)
+  assert.match(form, /LoyaltyProgrammePreview/)
+  assert.match(preview, /deal-draft-rail/)
+  assert.match(preview, /deal-live-preview/)
+  assert.match(preview, /Customer Preview/)
+  assert.match(sections, /Customer-presented loyalty QR/)
   assert.match(review, /placeholder-section deal-review/)
   assert.match(review, /deal-publish-confirmation/)
 })

@@ -455,229 +455,6 @@ body.business-surface .deal-image-action {
   gap: 0 22px;
 }
 
-/* Loyalty */
-.portal-main-content:has(> .business-loyalty-page) {
-  max-width: 1080px;
-}
-
-.business-loyalty-coming-soon {
-  min-height: 0;
-  padding: 16px;
-  border: 1px solid var(--business-border);
-  border-radius: 18px;
-  display: grid;
-  grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
-  align-items: center;
-  gap: 16px 30px;
-  background:
-    radial-gradient(circle at 9% 14%, rgb(63 91 211 / 10%), transparent 28%),
-    var(--business-surface);
-  box-shadow: var(--business-shadow-sm);
-}
-
-.business-loyalty-intro {
-  max-width: 520px;
-  padding: 34px 22px 34px 34px;
-}
-
-.business-loyalty-icon {
-  width: 48px;
-  height: 48px;
-  margin-bottom: 22px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  background: var(--business-accent-soft);
-  color: var(--business-accent);
-}
-
-.business-loyalty-icon svg {
-  width: 22px;
-  height: 22px;
-}
-
-.business-feature-status {
-  margin-bottom: 10px;
-  display: block;
-  color: var(--business-accent-strong);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.business-loyalty-intro h2 {
-  margin: 0;
-  color: var(--business-ink);
-  font-size: clamp(31px, 3.4vw, 42px);
-  letter-spacing: -0.035em;
-  line-height: 1.1;
-}
-
-.business-loyalty-intro p {
-  margin: 13px 0 20px;
-  color: var(--business-muted);
-  font-size: 16px;
-  line-height: 1.65;
-}
-
-.business-loyalty-intro .btn-primary:disabled {
-  background: #dfe4ef;
-  color: #69758a;
-  box-shadow: none;
-  cursor: not-allowed;
-  opacity: 1;
-}
-
-.business-loyalty-plan {
-  grid-column: 1 / -1;
-  padding: 24px;
-  border: 1px solid #dfe4f1;
-  border-radius: 15px;
-  background: var(--business-surface-soft);
-}
-
-.business-loyalty-art {
-  min-width: 0;
-  height: 390px;
-  margin: 0;
-  border-radius: 15px;
-  overflow: hidden;
-  background: var(--business-accent-soft);
-}
-
-.business-loyalty-art img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-  object-position: center;
-}
-
-.business-loyalty-plan h3 {
-  margin: 0 0 14px;
-  color: var(--business-ink);
-  font-size: 16px;
-}
-
-.business-loyalty-plan ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.business-loyalty-plan li {
-  padding: 11px 0;
-  border-top: 1px solid #e6eaf1;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 9px;
-  color: var(--business-ink-soft);
-  font-size: 15px;
-}
-
-.business-loyalty-plan li svg {
-  width: 15px;
-  height: 15px;
-  color: var(--business-accent);
-}
-
-.business-loyalty-flow {
-  margin-top: 20px;
-  padding-top: 18px;
-  border-top: 1px solid var(--business-border);
-}
-
-.business-loyalty-flow ol {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.business-loyalty-flow li {
-  padding: 7px 0;
-  border: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.business-loyalty-flow li svg {
-  width: 13px;
-  height: 13px;
-  color: var(--business-faint);
-}
-
-.business-loyalty-preparation {
-  margin-top: 16px;
-  padding: 24px;
-  border: 1px solid var(--business-border);
-  border-radius: var(--business-radius-card);
-  display: grid;
-  grid-template-columns: auto minmax(220px, 0.8fr) minmax(360px, 1.2fr);
-  align-items: center;
-  gap: 16px;
-  background: var(--business-surface);
-  box-shadow: var(--business-shadow-sm);
-}
-
-.business-loyalty-preparation > span {
-  width: 40px;
-  height: 40px;
-  border-radius: 11px;
-  display: grid;
-  place-items: center;
-  background: var(--business-accent-soft);
-  color: var(--business-accent);
-}
-
-.business-loyalty-preparation > span svg {
-  width: 18px;
-  height: 18px;
-}
-
-.business-loyalty-preparation h2 {
-  margin: 0;
-  color: var(--business-ink);
-  font-size: 18px;
-}
-
-.business-loyalty-preparation p {
-  margin: 5px 0 0;
-  color: var(--business-muted);
-  font-size: 15px;
-  line-height: 1.5;
-}
-
-.business-loyalty-preparation dl {
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.business-loyalty-preparation dl > div {
-  padding: 11px;
-  border-radius: 9px;
-  background: var(--business-surface-soft);
-}
-
-.business-loyalty-preparation dt {
-  color: var(--business-accent-strong);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.business-loyalty-preparation dd {
-  margin: 4px 0 0;
-  color: var(--business-ink-soft);
-  font-size: 13px;
-  line-height: 1.45;
-}
-
 .service-empty-state-visual {
   min-width: 0;
   min-height: 360px;
@@ -729,16 +506,6 @@ body.business-surface .deal-image-action {
   text-decoration: underline;
 }
 
-@media (max-width: 900px) {
-  .business-loyalty-preparation {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .business-loyalty-preparation dl {
-    grid-column: 1 / -1;
-  }
-}
-
 @media (max-width: 760px) {
   body.business-surface .portal-main {
     padding: 28px 16px 48px;
@@ -769,21 +536,6 @@ body.business-surface .deal-image-action {
     grid-template-columns: 1fr;
   }
 
-  .business-loyalty-coming-soon {
-    padding: 12px;
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .business-loyalty-intro {
-    max-width: none;
-    padding: 30px;
-  }
-
-  .business-loyalty-art {
-    height: 310px;
-  }
-
   .service-empty-state-visual {
     min-height: 280px;
   }
@@ -812,23 +564,6 @@ body.business-surface .deal-image-action {
     padding: 24px 18px 26px;
   }
 
-  .business-loyalty-coming-soon {
-    padding: 8px;
-    border-radius: 14px;
-  }
-
-  .business-loyalty-intro {
-    padding: 24px 18px;
-  }
-
-  .business-loyalty-art {
-    height: 240px;
-  }
-
-  .business-loyalty-plan {
-    padding: 20px;
-  }
-
   body.business-surface .deal-list-row {
     grid-template-columns: 56px minmax(0, 1fr) 18px;
     padding: 13px 12px;
@@ -842,15 +577,6 @@ body.business-surface .deal-image-action {
   body.business-surface .deal-form,
   body.business-surface .deal-review {
     padding: 18px;
-  }
-
-  .business-loyalty-preparation {
-    grid-template-columns: 1fr;
-  }
-
-  .business-loyalty-preparation dl {
-    grid-column: auto;
-    grid-template-columns: 1fr;
   }
 }
 

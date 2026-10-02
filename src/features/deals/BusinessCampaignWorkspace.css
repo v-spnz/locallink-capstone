@@ -314,24 +314,6 @@ body.business-surface .business-deals-page .deal-form {
   font-size: 13px;
 }
 
-.deal-live-preview-placeholder {
-  height: 100%;
-  padding: 18px;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 8px;
-  color: #66718a;
-  font-size: 12px;
-  text-align: center;
-}
-
-.deal-live-preview-placeholder svg {
-  width: 24px;
-  height: 24px;
-  color: var(--business-accent);
-}
-
 @media (max-width: 980px) {
   .deal-form-workspace {
     grid-template-columns: 1fr;

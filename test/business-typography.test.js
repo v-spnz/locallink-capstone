@@ -66,16 +66,10 @@ test('deal campaign rows retain the readable Services marketplace type scale', a
 })
 
 test('loyalty typography follows the Deals page type hierarchy', async () => {
-  const [loyaltyStyles, portalStyles] = await Promise.all([
-    readFile(
-      new URL('../src/features/loyalty/BusinessLoyalty.css', import.meta.url),
-      'utf8',
-    ),
-    readFile(
-      new URL('../src/pages/business/BusinessPortal.css', import.meta.url),
-      'utf8',
-    ),
-  ])
+  const loyaltyStyles = await readFile(
+    new URL('../src/features/loyalty/BusinessLoyalty.css', import.meta.url),
+    'utf8',
+  )
 
   assert.match(
     loyaltyStyles,
@@ -110,7 +104,7 @@ test('loyalty typography follows the Deals page type hierarchy', async () => {
     /\.loyalty-review-section-heading h3 \{[\s\S]*?font-size: 17px/,
   )
   assert.match(
-    portalStyles,
+    loyaltyStyles,
     /\.portal-main-content:has\(> \.business-loyalty-page\) \{\s*max-width: 1080px/,
   )
 })

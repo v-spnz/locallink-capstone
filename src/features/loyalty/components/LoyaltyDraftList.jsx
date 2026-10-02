@@ -11,70 +11,12 @@ import localBusinessNeighbourhood from '../../../assets/images/local-business-ne
 import Button from '../../../components/ui/Button'
 import BusinessPageLoader from '../../../components/ui/BusinessPageLoader'
 import Modal from '../../../components/ui/Modal'
-import {
-  getCustomerReward,
-  getProgrammeAvailability,
-  getProgrammeTypeLabel,
-  getRewardTarget,
-  LOYALTY_STATUS_FILTERS,
-} from '../businessLoyaltyTemplates'
+import { LOYALTY_STATUS_FILTERS } from '../businessLoyaltyTemplates'
+import LoyaltyProgrammeRow from './LoyaltyProgrammeRow'
+import { formatProgrammeDate } from './loyaltyListPresentation'
 
 const PRIMARY_FILTER_VALUES = ['draft', 'active', 'scheduled']
 const OVERFLOW_FILTER_VALUES = ['history', 'all']
-
-function formatUpdatedAt(value) {
-  if (!value) return 'Not saved yet'
-
-  return new Intl.DateTimeFormat('en-NZ', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(value))
-}
-
-function getAvailabilityLabel(programme) {
-  if (!programme.startDate) return 'Not set'
-  if (programme.endDate) {
-    return `${formatProgrammeDate(programme.startDate)} – ${formatProgrammeDate(programme.endDate)}`
-  }
-  return `From ${formatProgrammeDate(programme.startDate)}`
-}
-
-function formatProgrammeDate(value) {
-  const [year, month, day] = String(value).split('-').map(Number)
-  if (!year || !month || !day) return value
-
-  return new Intl.DateTimeFormat('en-NZ', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'Pacific/Auckland',
-  }).format(new Date(Date.UTC(year, month - 1, day)))
-}
-
-function getProgrammeTheme(programme) {
-  const name = programme.name?.toLowerCase() || ''
-
-  if (/flower|floral|garden|botanical|bloom|plant/.test(name)) {
-    return 'loyalty-theme-emerald'
-  }
-  if (/coffee|cafe|café|bakery|brunch|roast/.test(name)) {
-    return 'loyalty-theme-coffee'
-  }
-  if (
-    ['spend_and_save', 'spend_and_reward'].includes(programme.programmeType)
-  ) {
-    return 'loyalty-theme-emerald'
-  }
-  if (programme.programmeType === 'purchase_card') {
-    return 'loyalty-theme-coffee'
-  }
-  return 'loyalty-theme-blue'
-}
-
-function formatMetric(value, singular, plural) {
-  return `${value} ${Number(value) === 1 ? singular : plural}`
-}
 
 export function LoyaltyDraftListSkeleton() {
   return <BusinessPageLoader label="Loading loyalty programmes…" />
@@ -326,186 +268,17 @@ export default function LoyaltyDraftList({
             <span />
           </div>
           <div className="deal-card-list">
-            {programmes.map((programme) => {
-              const availability = getProgrammeAvailability(programme)
-              const isDraft = programme.status === 'draft'
-              const isScheduled = availability.value === 'scheduled'
-              const isActive = availability.value === 'active'
-              const customerReward = getCustomerReward(programme)
-              const programmeTitle =
-                programme.name || 'Untitled loyalty programme'
-              const hasCustomerMetrics =
-                programme.customerCount != null ||
-                programme.rewardsRedeemed != null
-
-              return (
-                <article
-                  className={`deal-management-card loyalty-programme-row ${getProgrammeTheme(programme)}`}
-                  key={programme.id}
-                >
-                  <div className="deal-list-row">
-                    <section
-                      className={`loyalty-programme-visual${programme.imageUrl ? ' has-background-image' : ''}`}
-                      aria-labelledby={`loyalty-programme-title-${programme.id}`}
-                    >
-                      {programme.imageUrl && (
-                        <img
-                          className="loyalty-programme-background"
-                          src={programme.imageUrl}
-                          alt=""
-                        />
-                      )}
-                      <div className="loyalty-programme-visual-heading">
-                        <span
-                          className={`loyalty-programme-status is-${availability.value}`}
-                        >
-                          <span aria-hidden="true" />
-                          {availability.label}
-                        </span>
-                      </div>
-                      <div className="loyalty-programme-identity">
-                        <small>
-                          {getProgrammeTypeLabel(programme.programmeType)}
-                        </small>
-                        <h3 id={`loyalty-programme-title-${programme.id}`}>
-                          {programmeTitle}
-                        </h3>
-                        <p>
-                          {customerReward ||
-                            'Add the reward customers can work towards.'}
-                        </p>
-                      </div>
-                    </section>
-
-                    <section
-                      className="loyalty-programme-info"
-                      aria-label={`${programmeTitle} programme details`}
-                    >
-                      <dl className="loyalty-programme-specs">
-                        <div>
-                          <dt>Target</dt>
-                          <dd>
-                            {programme.rewardThreshold
-                              ? getRewardTarget(programme)
-                              : 'Not set'}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt>Reward</dt>
-                          <dd>{customerReward || 'Not set'}</dd>
-                        </div>
-                        <div className="loyalty-programme-period">
-                          <dt>Programme period</dt>
-                          <dd>{getAvailabilityLabel(programme)}</dd>
-                        </div>
-                      </dl>
-
-                      {!isDraft && programme.joinCode ? (
-                        <div className="loyalty-programme-code">
-                          <span className="loyalty-programme-code-copy">
-                            <small>Customer join code</small>
-                            <code>{programme.joinCode}</code>
-                          </span>
-                          <button
-                            type="button"
-                            className="loyalty-join-code"
-                            onClick={() => copyJoinCode(programme)}
-                            aria-label={`Copy customer join code ${programme.joinCode}`}
-                          >
-                            <span aria-live="polite">
-                              {copiedProgrammeId === programme.id
-                                ? 'Copied'
-                                : 'Copy code'}
-                            </span>
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="loyalty-programme-code is-draft">
-                          <span>
-                            <strong>Customer join code</strong>
-                            <small>
-                              Available after this programme is published.
-                            </small>
-                          </span>
-                        </div>
-                      )}
-                    </section>
-                  </div>
-
-                  <footer className="loyalty-programme-footer">
-                    <div className="loyalty-programme-footer-meta">
-                      {hasCustomerMetrics && (
-                        <span className="loyalty-programme-metrics">
-                          {programme.customerCount != null && (
-                            <span>
-                              {formatMetric(
-                                programme.customerCount,
-                                'customer',
-                                'customers',
-                              )}
-                            </span>
-                          )}
-                          {programme.rewardsRedeemed != null && (
-                            <span>
-                              {formatMetric(
-                                programme.rewardsRedeemed,
-                                'reward redeemed',
-                                'rewards redeemed',
-                              )}
-                            </span>
-                          )}
-                        </span>
-                      )}
-                      <span className="loyalty-programme-updated">
-                        Updated {formatUpdatedAt(programme.updatedAt)}
-                      </span>
-                    </div>
-                    <div className="loyalty-programme-actions">
-                      {isDraft && (
-                        <button
-                          type="button"
-                          className="loyalty-programme-action is-danger"
-                          onClick={() =>
-                            openActionConfirmation('delete', programme)
-                          }
-                        >
-                          Delete draft
-                        </button>
-                      )}
-                      {isScheduled && (
-                        <button
-                          type="button"
-                          className="loyalty-programme-action is-danger"
-                          onClick={() =>
-                            openActionConfirmation('cancel', programme)
-                          }
-                        >
-                          Cancel schedule
-                        </button>
-                      )}
-                      {(isDraft || isScheduled) && (
-                        <button
-                          type="button"
-                          className="loyalty-programme-action"
-                          onClick={() => onEdit(programme.id)}
-                        >
-                          {isDraft ? 'Continue draft' : 'Edit programme'}
-                        </button>
-                      )}
-                      {isActive && (
-                        <button
-                          type="button"
-                          className="loyalty-programme-action is-danger"
-                          onClick={() => openEndConfirmation(programme)}
-                        >
-                          End programme
-                        </button>
-                      )}
-                    </div>
-                  </footer>
-                </article>
-              )
-            })}
+            {programmes.map((programme) => (
+              <LoyaltyProgrammeRow
+                key={programme.id}
+                programme={programme}
+                copiedProgrammeId={copiedProgrammeId}
+                copyJoinCode={copyJoinCode}
+                openActionConfirmation={openActionConfirmation}
+                onEdit={onEdit}
+                openEndConfirmation={openEndConfirmation}
+              />
+            ))}
           </div>
         </div>
       )}

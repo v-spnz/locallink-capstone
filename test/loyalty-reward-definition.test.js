@@ -115,11 +115,18 @@ test('US0105 AC5: saved reward information is mapped back into the draft', async
 })
 
 test('US0105: spend rewards use a filtered percentage picker and the Deals calendar', async () => {
-  const [form, percentagePicker, page, hook, loyaltyStyles] = await Promise.all(
-    [
+  const [form, sections, percentagePicker, page, hook, loyaltyStyles] =
+    await Promise.all([
       readFile(
         new URL(
           '../src/features/loyalty/components/LoyaltyDraftForm.jsx',
+          import.meta.url,
+        ),
+        'utf8',
+      ),
+      readFile(
+        new URL(
+          '../src/features/loyalty/components/LoyaltyFormSections.jsx',
           import.meta.url,
         ),
         'utf8',
@@ -146,11 +153,10 @@ test('US0105: spend rewards use a filtered percentage picker and the Deals calen
         new URL('../src/features/loyalty/BusinessLoyalty.css', import.meta.url),
         'utf8',
       ),
-    ],
-  )
+    ])
 
-  assert.match(form, /DiscountPercentageCombobox/)
-  assert.doesNotMatch(form, /Discount amount \(\$\)/)
+  assert.match(sections, /DiscountPercentageCombobox/)
+  assert.doesNotMatch(sections, /Discount amount \(\$\)/)
   assert.match(percentagePicker, /LOYALTY_DISCOUNT_PERCENTAGES\.filter/)
   assert.match(percentagePicker, /role="combobox"/)
   assert.match(percentagePicker, /role="listbox"/)
@@ -173,8 +179,9 @@ test('US0105: spend rewards use a filtered percentage picker and the Deals calen
     ),
     {},
   )
-  assert.match(form, /<DateRangeCalendar/)
-  assert.match(form, /endOptional/)
+  assert.match(form, /LoyaltyAvailabilitySection/)
+  assert.match(sections, /<DateRangeCalendar/)
+  assert.match(sections, /endOptional/)
   assert.doesNotMatch(form, /Customer-facing earning rules:/)
   assert.match(
     loyaltyStyles,

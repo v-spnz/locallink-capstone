@@ -45,6 +45,46 @@ test('AC1-2: a business can start and save an incomplete loyalty programme draft
   assert.match(hook, /saveBusinessLoyaltyProgramme/)
 })
 
+test('optional programme images keep their file, preview, removal, and accessibility contracts', async () => {
+  const [form, fields, preview] = await Promise.all([
+    readFile(
+      new URL(
+        '../src/features/loyalty/components/LoyaltyDraftForm.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/loyalty/components/LoyaltyFormFields.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/loyalty/components/LoyaltyProgrammePreview.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
+
+  assert.match(form, /URL\.createObjectURL\(programme\.imageFile\)/)
+  assert.match(form, /URL\.revokeObjectURL\(imagePreviewUrl\)/)
+  assert.match(
+    fields,
+    /Programme image <span className="loyalty-optional">Optional/,
+  )
+  assert.match(fields, /accept="image\/jpeg,image\/png,image\/webp"/)
+  assert.match(fields, /JPG, PNG or WebP, up to 5 MB/)
+  assert.match(fields, /onChange\(event\.target\.files\?\.\[0\] \|\| null\)/)
+  assert.match(fields, /event\.target\.value = ''/)
+  assert.match(fields, /onClick=\{onRemove\}/)
+  assert.match(fields, /loyalty-programme-image-error/)
+  assert.match(preview, /<LoyaltyTicket/)
+})
+
 test('AC3: loyalty programme saves are scoped to the current business', async () => {
   const [api, migration] = await Promise.all([
     readFile(
@@ -73,10 +113,10 @@ test('AC3: loyalty programme saves are scoped to the current business', async ()
 })
 
 test('AC4: a saved loyalty draft can be reopened without losing its information', async () => {
-  const [list, hook] = await Promise.all([
+  const [row, hook] = await Promise.all([
     readFile(
       new URL(
-        '../src/features/loyalty/components/LoyaltyDraftList.jsx',
+        '../src/features/loyalty/components/LoyaltyProgrammeRow.jsx',
         import.meta.url,
       ),
       'utf8',
@@ -90,7 +130,7 @@ test('AC4: a saved loyalty draft can be reopened without losing its information'
     ),
   ])
 
-  assert.match(list, /Continue draft/)
+  assert.match(row, /Continue draft/)
   assert.match(hook, /handleEditProgramme/)
   assert.match(hook, /setForm\(\{ \.\.\.programme \}\)/)
   assert.match(hook, /filter\(\(programme\) => programme\.id !== saved\.id\)/)
@@ -121,10 +161,7 @@ test('AC5: draft loyalty programmes are not visible or usable by consumers', asy
     ),
   ])
 
-  assert.match(
-    form,
-    /Private draft/,
-  )
+  assert.match(form, /Private draft/)
   assert.match(migration, /status = 'draft'/)
   assert.match(
     publicationMigration,
