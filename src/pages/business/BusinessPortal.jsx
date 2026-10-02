@@ -14,7 +14,7 @@ import './BusinessPortal.css'
 import Dashboard from './Dashboard'
 import Settings from './Settings'
 import BusinessOnboarding from './BusinessOnboarding'
-import './BusinessMarketplace.css'
+import '../../features/service-marketplace/BusinessMarketplace.css'
 
 function BusinessPage({ children, capability, roles }) {
   return (

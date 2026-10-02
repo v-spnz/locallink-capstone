@@ -163,7 +163,7 @@ test('business form field containers do not enlarge their control hit areas', as
     ),
     readFile(
       new URL(
-        '../src/pages/business/ServiceMarketplacePage.jsx',
+        '../src/features/service-marketplace/components/business/MarketplaceToolbar.jsx',
         import.meta.url,
       ),
       'utf8',

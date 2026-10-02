@@ -7,35 +7,50 @@ import {
 } from '../src/features/service-marketplace/jobTracking.js'
 
 test('business services separates leads, quotes, active jobs, and job history', async () => {
-  const [page, navigation, routes, marketplacePage] = await Promise.all([
-    readFile(
-      new URL('../src/pages/business/Services.jsx', import.meta.url),
-      'utf8',
-    ),
-    readFile(
-      new URL(
-        '../src/components/navigation/BusinessNavigation.jsx',
-        import.meta.url,
+  const [page, navigation, routes, content, toolbar, select] =
+    await Promise.all([
+      readFile(
+        new URL('../src/pages/business/Services.jsx', import.meta.url),
+        'utf8',
       ),
-      'utf8',
-    ),
-    readFile(
-      new URL('../src/pages/business/BusinessPortal.jsx', import.meta.url),
-      'utf8',
-    ),
-    readFile(
-      new URL(
-        '../src/pages/business/ServiceMarketplacePage.jsx',
-        import.meta.url,
+      readFile(
+        new URL(
+          '../src/components/navigation/BusinessNavigation.jsx',
+          import.meta.url,
+        ),
+        'utf8',
       ),
-      'utf8',
-    ),
-  ])
+      readFile(
+        new URL('../src/pages/business/BusinessPortal.jsx', import.meta.url),
+        'utf8',
+      ),
+      readFile(
+        new URL(
+          '../src/features/service-marketplace/components/business/BusinessMarketplaceContent.jsx',
+          import.meta.url,
+        ),
+        'utf8',
+      ),
+      readFile(
+        new URL(
+          '../src/features/service-marketplace/components/business/MarketplaceToolbar.jsx',
+          import.meta.url,
+        ),
+        'utf8',
+      ),
+      readFile(
+        new URL(
+          '../src/features/service-marketplace/components/business/MarketplaceSelect.jsx',
+          import.meta.url,
+        ),
+        'utf8',
+      ),
+    ])
 
   for (const label of ['Leads', 'Quotes', 'Jobs']) {
     assert.match(page, new RegExp(label))
   }
-  assert.match(marketplacePage, /type === 'jobs'[\s\S]+View Job History/)
+  assert.match(toolbar, /type === 'jobs'[\s\S]+View Job History/)
   assert.match(page, /value: quotes\.allItems\.length/)
   assert.match(page, /value: jobs\.allItems\.length/)
   assert.match(page, /Accepted and active jobs/)
@@ -47,6 +62,8 @@ test('business services separates leads, quotes, active jobs, and job history', 
   assert.match(page, /business-services-hero/)
   assert.doesNotMatch(page, /ChevronRight/)
   assert.match(page, /onClick=\{\(\) => selectTab\(summary\.type\)\}/)
+  assert.match(page, /<BusinessMarketplaceContent/)
+  assert.match(content, /<MarketplaceToolbar/)
   assert.match(page, /value: 'history', label: 'History'/)
   assert.match(page, /aria-controls=\{`marketplace-panel-/)
   assert.match(page, /event\.key === 'ArrowRight'/)
@@ -59,9 +76,18 @@ test('business services separates leads, quotes, active jobs, and job history', 
   assert.match(routes, /path="services"/)
   assert.match(routes, /services\?tab=quotes/)
   assert.match(routes, /services\?tab=jobs/)
-  assert.match(marketplacePage, /role="listbox"/)
-  assert.match(marketplacePage, /aria-haspopup="listbox"/)
-  assert.doesNotMatch(marketplacePage, /<select/)
+  assert.match(select, /role="listbox"/)
+  assert.match(select, /role="option"/)
+  assert.match(select, /aria-haspopup="listbox"/)
+  assert.match(select, /aria-expanded=\{isOpen\}/)
+  assert.match(select, /aria-selected=\{option\.value === value\}/)
+  assert.match(select, /selected \?\? options\?\.\[0\]/)
+  assert.match(select, /event\.key === 'Escape'/)
+  assert.match(select, /triggerRef\.current\?\.focus\(\)/)
+  for (const key of ['ArrowUp', 'ArrowDown', 'Home', 'End']) {
+    assert.match(select, new RegExp(key))
+  }
+  assert.doesNotMatch(select, /<select/)
 })
 
 test('active-job filters no longer offer completed work', () => {

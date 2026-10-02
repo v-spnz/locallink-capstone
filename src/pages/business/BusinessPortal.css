@@ -1632,307 +1632,6 @@ body.business-surface .review-actions {
   line-height: 1.45;
 }
 
-/* Services */
-body.business-surface .business-services-hero {
-  margin-bottom: 22px;
-  padding: 28px;
-  border: 1px solid var(--business-border);
-  border-radius: 18px;
-  background:
-    radial-gradient(circle at 94% 8%, rgb(63 91 211 / 10%), transparent 28%),
-    var(--business-surface);
-  box-shadow: var(--business-shadow-sm);
-}
-
-body.business-surface .business-services-hero .page-header {
-  margin-bottom: 24px;
-}
-
-body.business-surface .business-services-hero .page-header h1,
-body.business-surface .business-services-hero .page-header h2 {
-  color: var(--business-ink);
-}
-
-body.business-surface .business-services-hero .service-overview-card {
-  padding: 16px;
-  border-color: var(--business-border);
-  border-radius: 13px;
-  background: var(--business-surface-soft);
-  box-shadow: none;
-}
-
-body.business-surface .service-overview-icon,
-body.business-surface .service-overview-card.is-quotes .service-overview-icon,
-body.business-surface .service-overview-card.is-jobs .service-overview-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 11px;
-  background: var(--business-accent-soft);
-  color: var(--business-accent);
-}
-
-body.business-surface .service-overview-icon svg {
-  width: 19px;
-  height: 19px;
-}
-
-body.business-surface .service-overview-copy strong {
-  color: var(--business-ink);
-  font-size: 28px;
-  font-variant-numeric: tabular-nums;
-}
-
-body.business-surface .service-overview-copy > span {
-  font-size: 13px;
-}
-
-body.business-surface .service-overview-copy small {
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.service-profile-context {
-  margin: 18px 0 0;
-  padding-top: 18px;
-  border-top: 1px solid var(--business-border);
-  display: grid;
-  grid-template-columns: 0.75fr 1.25fr 1.25fr 1fr;
-  gap: 10px;
-}
-
-.service-profile-context > div {
-  min-width: 0;
-  padding: 11px 12px;
-  border-radius: 10px;
-  background: rgb(248 249 252 / 86%);
-}
-
-.service-profile-context dt {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--business-muted);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.service-profile-context dt svg {
-  width: 13px;
-  height: 13px;
-  color: var(--business-accent);
-}
-
-.service-profile-context dd {
-  margin: 6px 0 0;
-  overflow: hidden;
-  color: var(--business-ink-soft);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.45;
-  text-overflow: ellipsis;
-  text-transform: capitalize;
-}
-
-body.business-surface .service-tabs {
-  width: 100%;
-  margin-bottom: 18px;
-  padding: 4px;
-  border-color: var(--business-border);
-  border-radius: 12px;
-  background: #e9edf4;
-}
-
-body.business-surface .service-tabs button {
-  min-height: 38px;
-  padding: 9px 18px;
-  border-radius: 9px;
-  flex: 1;
-  color: var(--business-muted);
-  font-size: 15px;
-}
-
-body.business-surface .service-tabs button.active {
-  background: var(--business-surface);
-  color: var(--business-accent-strong);
-  box-shadow: 0 2px 7px rgb(35 50 82 / 10%);
-}
-
-body.business-surface .service-marketplace-toolbar {
-  padding: 15px;
-  border-color: var(--business-border);
-  border-radius: 14px;
-  background: var(--business-surface);
-  box-shadow: var(--business-shadow-sm);
-}
-
-body.business-surface .service-marketplace-toolbar label > span {
-  color: var(--business-ink-soft);
-  letter-spacing: 0;
-  text-transform: none;
-  font-size: 13px;
-}
-
-body.business-surface .service-marketplace-toolbar input,
-body.business-surface .service-marketplace-toolbar select,
-body.business-surface
-  .service-marketplace-toolbar
-  .service-toolbar-select-trigger {
-  min-height: 42px;
-  border-color: var(--business-border-strong);
-  border-radius: 9px;
-  font-size: 14px;
-}
-
-body.business-surface .service-marketplace-toolbar input,
-body.business-surface .service-marketplace-toolbar select {
-  font-size: 14px;
-}
-
-body.business-surface .service-marketplace-card {
-  padding: 21px;
-  border-color: var(--business-border);
-  border-radius: 14px;
-  box-shadow: var(--business-shadow-sm);
-}
-
-body.business-surface .business-services-page .service-marketplace-card h3 {
-  font-size: 20px;
-  line-height: 1.3;
-}
-
-body.business-surface .business-services-page .service-marketplace-card h4 {
-  font-size: 17px;
-}
-
-body.business-surface .business-services-page .service-marketplace-card h5 {
-  font-size: 15px;
-}
-
-body.business-surface .business-services-page .service-marketplace-card p {
-  font-size: 15px;
-  line-height: 1.65;
-}
-
-body.business-surface .business-services-page .service-marketplace-meta,
-body.business-surface .business-services-page .service-lead-meta,
-body.business-surface .business-services-page .service-quote-summary span,
-body.business-surface .business-services-page .service-opportunity-facts dd {
-  font-size: 14px;
-}
-
-body.business-surface .business-services-page .service-opportunity-facts dt,
-body.business-surface .business-services-page .service-lead-attachment-count,
-body.business-surface .business-services-page .service-marketplace-timestamp {
-  font-size: 13px;
-}
-
-body.business-surface .service-lead-card.is-expanded,
-body.business-surface .service-quote-card.is-expanded {
-  border-color: #b9c6f0;
-  transform: translateY(-1px);
-  box-shadow: var(--business-shadow-md);
-}
-
-body.business-surface .service-lead-urgency,
-body.business-surface .service-history-status {
-  border-radius: 7px;
-}
-
-body.business-surface
-  :where(
-    .service-history-link,
-    .service-lead-decline,
-    .service-job-progress-label,
-    .service-quote-timeline-label,
-    .service-quote-summary span,
-    .sm-field-label,
-    .sm-empty-sub,
-    .sm-quote-message
-  ) {
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-body.business-surface
-  :where(
-    .service-history-status,
-    .service-history-completed-at,
-    .service-marketplace-card-head > div > span,
-    .service-job-progress-marker,
-    .service-job-progress-time,
-    .service-quote-timeline-marker,
-    .service-quote-timeline-deadline,
-    .service-quote-modal > header span,
-    .service-quote-field-title,
-    .service-arrival-window legend,
-    .service-quote-form .form-error,
-    .sm-badge,
-    .sm-quote-count-label,
-    .sm-tab-count,
-    .sm-quote-sidebar-sub,
-    .sm-repeat-tag,
-    .sm-past-row-sub,
-    .sm-past-row-cat,
-    .sm-quote-avatar,
-    .sm-quote-price-type,
-    .sm-quote-fact-label,
-    .sm-quote-fact-value
-  ) {
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-body.business-surface .service-marketplace-list > .empty-state {
-  min-height: 390px;
-  padding: 12px;
-  border: 1px solid #dbe2f2;
-  border-radius: 16px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
-  align-items: stretch;
-  gap: 0;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 90% 8%, rgb(63 91 211 / 10%), transparent 34%),
-    var(--business-surface-soft);
-  text-align: left;
-}
-
-body.business-surface
-  :where(
-    .service-quote-modal,
-    .service-quote-details,
-    .service-opportunity-review,
-    .service-withdraw-confirmation,
-    .service-decline-confirmation
-  )
-  :where(p, li, dd, label, input, textarea, select, button) {
-  font-size: 14px;
-  line-height: 1.55;
-}
-
-body.business-surface
-  :where(
-    .service-quote-modal,
-    .service-quote-details,
-    .service-opportunity-review
-  )
-  dt {
-  font-size: 13px;
-}
-
-body.business-surface .service-quote-modal h2 {
-  font-size: 26px;
-}
-
-body.business-surface .service-quote-modal h3 {
-  font-size: 20px;
-}
-
-body.business-surface .service-quote-modal h4 {
-  font-size: 17px;
-}
-
 .service-empty-state-visual {
   min-width: 0;
   min-height: 360px;
@@ -1965,13 +1664,6 @@ body.business-surface .service-quote-modal h4 {
   line-height: 1.15;
 }
 
-body.business-surface .service-empty-state-copy p {
-  margin: 12px 0 0;
-  color: var(--business-ink-soft);
-  font-size: 16px;
-  line-height: 1.55;
-}
-
 .service-empty-state-copy small {
   margin-top: 8px;
   color: var(--business-muted);
@@ -1992,10 +1684,6 @@ body.business-surface .service-empty-state-copy p {
 }
 
 @media (max-width: 900px) {
-  .service-profile-context {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .business-loyalty-preparation {
     grid-template-columns: auto minmax(0, 1fr);
   }
@@ -2106,8 +1794,7 @@ body.business-surface .service-empty-state-copy p {
     height: 310px;
   }
 
-  .deal-empty-state,
-  body.business-surface .service-marketplace-list > .empty-state {
+  .deal-empty-state {
     grid-template-columns: 1fr;
   }
 
@@ -2119,14 +1806,6 @@ body.business-surface .service-empty-state-copy p {
   .deal-empty-copy,
   .service-empty-state-copy {
     padding: 30px;
-  }
-
-  body.business-surface .business-services-hero {
-    padding: 22px;
-  }
-
-  body.business-surface .service-overview {
-    grid-template-columns: 1fr;
   }
 
   body.business-surface .deal-form-actions {
@@ -2152,14 +1831,12 @@ body.business-surface .service-empty-state-copy p {
     align-self: flex-start;
   }
 
-  body.business-surface .business-services-hero,
   body.business-surface .placeholder-section {
     padding: 20px;
     border-radius: 14px;
   }
 
-  .deal-empty-state,
-  body.business-surface .service-marketplace-list > .empty-state {
+  .deal-empty-state {
     padding: 8px;
     border-radius: 14px;
   }
@@ -2275,25 +1952,12 @@ body.business-surface .service-empty-state-copy p {
     grid-template-columns: 1fr;
   }
 
-  .service-profile-context {
-    grid-template-columns: 1fr;
-  }
-
   body.business-surface .review-actions {
     flex-direction: column-reverse;
   }
 
   body.business-surface .review-actions button {
     width: 100%;
-  }
-
-  body.business-surface .service-tabs {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  body.business-surface .service-tabs button {
-    flex: 0 0 auto;
   }
 }
 

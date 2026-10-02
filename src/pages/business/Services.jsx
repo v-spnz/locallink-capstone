@@ -16,7 +16,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import useBusiness from '../../business/useBusiness'
 import BusinessPageLoader from '../../components/ui/BusinessPageLoader'
 import useBusinessMarketplace from '../../features/service-marketplace/hooks/useBusinessMarketplace'
-import { ServiceMarketplaceContent } from './ServiceMarketplacePage'
+import BusinessMarketplaceContent from '../../features/service-marketplace/components/business/BusinessMarketplaceContent'
 
 const SERVICE_TABS = [
   { value: 'leads', label: 'Leads', icon: UsersRound },
@@ -313,7 +313,7 @@ export default function Services() {
             }
           </p>
         </div>
-        <ServiceMarketplaceContent
+        <BusinessMarketplaceContent
           type={activeTab}
           marketplace={activeMarketplace}
           onViewHistory={() => selectTab('history')}

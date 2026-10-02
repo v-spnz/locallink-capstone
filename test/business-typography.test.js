@@ -40,7 +40,10 @@ test('deal campaign rows retain the readable Services marketplace type scale', a
       'utf8',
     ),
     readFile(
-      new URL('../src/pages/business/BusinessMarketplace.css', import.meta.url),
+      new URL(
+        '../src/features/service-marketplace/BusinessMarketplace.css',
+        import.meta.url,
+      ),
       'utf8',
     ),
   ])

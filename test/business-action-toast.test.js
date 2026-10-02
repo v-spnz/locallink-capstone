@@ -37,7 +37,7 @@ test('deal and service actions provide contextual toast messages', async () => {
     ),
     readFile(
       new URL(
-        '../src/pages/business/ServiceMarketplacePage.jsx',
+        '../src/features/service-marketplace/components/business/BusinessMarketplaceContent.jsx',
         import.meta.url,
       ),
       'utf8',
