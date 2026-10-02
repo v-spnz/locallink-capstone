@@ -81,10 +81,7 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
         if (active) setMetrics(nextMetrics)
       } catch (loadError) {
         if (!active) return
-        console.error(
-          'Unable to load business dashboard metrics.',
-          loadError,
-        )
+        console.error('Unable to load business dashboard metrics.', loadError)
         setMetrics(null)
         setError('Unable to load dashboard analytics. Please try again.')
       } finally {
