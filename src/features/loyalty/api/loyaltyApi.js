@@ -65,6 +65,14 @@ export async function joinLoyaltyProgramme(joinCode) {
   }
 }
 
+export async function leaveLoyaltyProgramme(loyaltyRecordId) {
+  const { error } = await supabase.rpc('leave_loyalty_programme', {
+    p_loyalty_record_id: loyaltyRecordId,
+  })
+
+  if (error) throw error
+}
+
 export async function discoverLoyaltyProgrammes() {
   const { data, error } = await supabase.rpc('discover_loyalty_programmes')
   if (error) throw error
