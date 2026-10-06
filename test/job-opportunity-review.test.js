@@ -118,7 +118,7 @@ test('only one business lead review can be expanded at a time', async () => {
   const [page, hook] = await Promise.all([
     readFile(
       new URL(
-        '../src/pages/business/ServiceMarketplacePage.jsx',
+        '../src/features/service-marketplace/components/business/BusinessMarketplaceContent.jsx',
         import.meta.url,
       ),
       'utf8',

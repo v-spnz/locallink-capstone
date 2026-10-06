@@ -101,46 +101,121 @@ test('empty-state helpers use actual activity rather than sample data', () => {
 })
 
 test('the dashboard only renders performance sections for enabled capabilities', async () => {
-  const dashboard = await readFile(
-    new URL('../src/pages/business/Dashboard.jsx', import.meta.url),
-    'utf8',
-  )
+  const [dashboard, performance] = await Promise.all([
+    readFile(
+      new URL('../src/pages/business/Dashboard.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/dashboard/components/PerformanceOverview.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
 
+  assert.match(dashboard, /<PerformanceOverview/)
+  assert.match(dashboard, /capabilities=\{capabilities\}/)
   assert.match(
-    dashboard,
+    performance,
     /capabilities\.deals_enabled && \([\s\S]*?title="Deals & Discovery"/,
   )
   assert.match(
-    dashboard,
+    performance,
     /capabilities\.loyalty_enabled && \([\s\S]*?title="Loyalty"/,
   )
   assert.match(
-    dashboard,
+    performance,
     /capabilities\.service_marketplace_enabled && \([\s\S]*?title="Service Marketplace"/,
   )
-  assert.match(dashboard, /label="Claims"/)
-  assert.match(dashboard, /label="Redemptions"/)
-  assert.match(dashboard, /label="Recorded sales value"/)
-  assert.match(dashboard, /label="Loyalty customers"/)
-  assert.match(dashboard, /label="Matched leads"/)
-  assert.match(dashboard, /label="Quotes submitted"/)
-  assert.match(dashboard, /label="Jobs won"/)
+  for (const label of [
+    'Claims',
+    'Redemptions',
+    'Claim conversion',
+    'Recorded sales value',
+    'Average transaction value',
+    'Deal customers',
+    'Recorded customer savings',
+    'Loyalty customers',
+    'Active customers',
+    'Activity events',
+    'Rewards earned',
+    'Rewards redeemed',
+    'Matched leads',
+    'Quotes submitted',
+    'Jobs won',
+    'Completed jobs',
+    'Lead to quote',
+    'Lead to job',
+  ]) {
+    assert.match(performance, new RegExp(`label="${label}"`))
+  }
 })
 
 test('the dashboard provides loading, retry, zero, and unknown-value states', async () => {
-  const dashboard = await readFile(
-    new URL('../src/pages/business/Dashboard.jsx', import.meta.url),
-    'utf8',
-  )
+  const [dashboard, performance] = await Promise.all([
+    readFile(
+      new URL('../src/pages/business/Dashboard.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/dashboard/components/PerformanceOverview.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
 
-  assert.match(dashboard, /PerformanceSkeleton/)
-  assert.match(dashboard, /Performance information is unavailable/)
-  assert.match(dashboard, /Try again/)
-  assert.match(dashboard, /Not recorded/)
-  assert.match(dashboard, /No deal claims or redemptions were recorded/)
-  assert.match(dashboard, /No loyalty activity was recorded/)
-  assert.match(dashboard, /No marketplace leads, quotes or jobs were recorded/)
-  assert.doesNotMatch(dashboard, /sample data|mock data/i)
+  assert.match(dashboard, /recordedTransactionValueCents/)
+  assert.match(dashboard, /averageRecordedTransactionCents/)
+  assert.match(dashboard, /recordedCustomerSavingsCents/)
+  assert.match(dashboard, /<PerformanceOverview/)
+  assert.match(performance, /PerformanceSkeleton/)
+  assert.match(performance, /Performance information is unavailable/)
+  assert.match(performance, /Try again/)
+  assert.match(performance, /disabled=\{isLoading\}/)
+  assert.match(performance, /Not recorded/)
+  assert.match(performance, /redemptionsWithTransactionValue/)
+  assert.match(
+    performance,
+    /These figures are not total revenue, profit, ROI, or guaranteed additional revenue\./,
+  )
+  assert.match(performance, /No deal claims or redemptions were recorded/)
+  assert.match(performance, /No loyalty activity was recorded/)
+  assert.match(
+    performance,
+    /No marketplace leads, quotes or jobs were recorded/,
+  )
+  assert.match(performance, /No business tools are enabled/)
+  assert.doesNotMatch(performance, /sample data|mock data/i)
+})
+
+test('deal status keeps lifecycle counts, ending-soon state and unfinished drafts', async () => {
+  const [dashboard, status] = await Promise.all([
+    readFile(
+      new URL('../src/pages/business/Dashboard.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/dashboard/components/DealStatusOverview.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
+
+  assert.match(dashboard, /getDealStatusSummary\(deals\)/)
+  assert.match(dashboard, /capabilities\.deals_enabled/)
+  assert.match(dashboard, /<DealStatusOverview summary=\{dealSummary\}/)
+  assert.match(status, /DEAL_STATUS_ORDER\.map/)
+  assert.match(status, /summary\.counts\[state\]/)
+  assert.match(status, /summary\.endingSoon\.length/)
+  assert.match(status, /summary\.drafts\.slice\(0, 5\)/)
+  assert.match(status, /Unfinished drafts/)
+  assert.match(status, /to="\/business\/create-deal"/)
 })
 
 test('analytics preserve unknown transaction values and expose raw deal measures', async () => {

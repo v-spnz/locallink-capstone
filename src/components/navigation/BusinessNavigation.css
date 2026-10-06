@@ -432,25 +432,6 @@ button.business-account-link {
   stroke-width: 2;
 }
 
-.business-settings-section {
-  scroll-margin-top: 96px;
-}
-
-.business-settings-section > p {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.business-settings-actions {
-  margin-top: 14px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
 @media (max-width: 1120px) {
   .business-nav {
     gap: 12px;

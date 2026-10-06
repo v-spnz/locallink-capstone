@@ -91,10 +91,30 @@ test('AC11: an incomplete but internally valid deal can be saved as a draft', ()
 })
 
 test('AC1-6 and AC8-9: the form exposes every deal draft field', async () => {
-  const form = await readFile(
-    new URL('../src/features/deals/components/DealForm.jsx', import.meta.url),
-    'utf8',
-  )
+  const [sections, fields, offer] = await Promise.all([
+    readFile(
+      new URL(
+        '../src/features/deals/components/DealFormSections.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/deals/components/DealFormFields.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/deals/components/DealOfferFields.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
+  const form = sections + fields + offer
 
   for (const expected of [
     'Deal title',
@@ -121,7 +141,10 @@ test('AC1-6 and AC8-9: the form exposes every deal draft field', async () => {
 test('the fixed in-store redemption method is supplied when a deal is saved', async () => {
   const [form, api] = await Promise.all([
     readFile(
-      new URL('../src/features/deals/components/DealForm.jsx', import.meta.url),
+      new URL(
+        '../src/features/deals/components/DealFormSections.jsx',
+        import.meta.url,
+      ),
       'utf8',
     ),
     readFile(
@@ -138,7 +161,10 @@ test('the fixed in-store redemption method is supplied when a deal is saved', as
 test('the deal form automatically uses one concise business address', async () => {
   const [form, api, hook] = await Promise.all([
     readFile(
-      new URL('../src/features/deals/components/DealForm.jsx', import.meta.url),
+      new URL(
+        '../src/features/deals/components/DealFormSections.jsx',
+        import.meta.url,
+      ),
       'utf8',
     ),
     readFile(
@@ -209,9 +235,13 @@ test('all deals persist as GST included', async () => {
 })
 
 test('deal management cards omit location and GST metadata', async () => {
-  const [list, details] = await Promise.all([
+  const [list, row, details] = await Promise.all([
     readFile(
       new URL('../src/features/deals/components/DealList.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL('../src/features/deals/components/DealRow.jsx', import.meta.url),
       'utf8',
     ),
     readFile(
@@ -224,6 +254,7 @@ test('deal management cards omit location and GST metadata', async () => {
   ])
 
   assert.doesNotMatch(list, /GstIncluded|locationCount/)
+  assert.doesNotMatch(row, /GstIncluded|locationCount/)
   assert.doesNotMatch(
     details,
     /GstIncluded|GST treatment|Participating locations|<img|deal-detail-image/,
@@ -232,8 +263,61 @@ test('deal management cards omit location and GST metadata', async () => {
   assert.ok(details.indexOf('Delete draft') < details.indexOf('Continue draft'))
 })
 
+test('deal form sections keep draft progress, live preview, and image URL cleanup', async () => {
+  const [form, overview, sections, fields] = await Promise.all([
+    readFile(
+      new URL('../src/features/deals/components/DealForm.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/deals/components/DealDraftOverview.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/deals/components/DealFormSections.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/deals/components/DealFormFields.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
+
+  assert.match(form, /URL\.createObjectURL\(deal\.imageFile\)/)
+  assert.match(form, /URL\.revokeObjectURL\(previewUrl\)/)
+  for (const section of ['Basics', 'Offer', 'Availability', 'Redemption']) {
+    assert.match(form, new RegExp(`<Deal${section}Section`))
+  }
+  for (const id of [
+    'deal-basics-section',
+    'deal-offer-section',
+    'deal-availability-section',
+    'deal-redemption-section',
+  ]) {
+    assert.match(overview, new RegExp(id))
+    assert.match(sections, new RegExp(id))
+  }
+  assert.match(
+    overview,
+    /aria-label=\{`\$\{section\.label\}, \$\{section\.isComplete \? 'filled' : 'not filled'\}`\}/,
+  )
+  assert.match(overview, /formatDealOffer\(deal\)/)
+  assert.match(overview, /formatBusinessDealAddress\(locations\[0\]\)/)
+  assert.match(overview, /getPreviewPeriod\(deal\)/)
+  assert.match(fields, /onChange\(event\.target\.files\?\.\[0\] \|\| null\)/)
+})
+
 test('AC11-12: draft saving and custom unsaved-change protection are wired into the flow', async () => {
-  const [form, hook, page, dialog, styles] = await Promise.all([
+  const [form, hook, guard, page, dialog, styles] = await Promise.all([
     readFile(
       new URL('../src/features/deals/components/DealForm.jsx', import.meta.url),
       'utf8',
@@ -241,6 +325,13 @@ test('AC11-12: draft saving and custom unsaved-change protection are wired into 
     readFile(
       new URL(
         '../src/features/deals/hooks/useBusinessDeals.js',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/business/useUnsavedBusinessDraftGuard.js',
         import.meta.url,
       ),
       'utf8',
@@ -254,7 +345,10 @@ test('AC11-12: draft saving and custom unsaved-change protection are wired into 
       'utf8',
     ),
     readFile(
-      new URL('../src/features/deals/CreateDeal.css', import.meta.url),
+      new URL(
+        '../src/features/deals/BusinessCampaignWorkspace.css',
+        import.meta.url,
+      ),
       'utf8',
     ),
   ])
@@ -266,7 +360,9 @@ test('AC11-12: draft saving and custom unsaved-change protection are wired into 
   )
   assert.match(styles, /\.deal-draft-rail\s*\{[\s\S]*?grid-column:\s*2/)
   assert.match(hook, /persist\('draft'\)/)
-  assert.match(hook, /beforeunload/)
+  assert.match(hook, /useUnsavedBusinessDraftGuard\(/)
+  assert.match(guard, /beforeunload/)
+  assert.match(guard, /document\.addEventListener\('click'/)
   assert.doesNotMatch(hook, /window\.confirm/)
   assert.match(hook, /isLeaveConfirmationOpen/)
   assert.match(page, /UnsavedChangesDialog/)

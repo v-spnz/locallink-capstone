@@ -8,10 +8,17 @@ const migrationUrl = new URL(
 )
 
 test('draft and scheduled loyalty programmes have guarded lifecycle actions', async () => {
-  const [list, api, migration] = await Promise.all([
+  const [list, row, api, migration] = await Promise.all([
     readFile(
       new URL(
         '../src/features/loyalty/components/LoyaltyDraftList.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/loyalty/components/LoyaltyProgrammeRow.jsx',
         import.meta.url,
       ),
       'utf8',
@@ -26,17 +33,22 @@ test('draft and scheduled loyalty programmes have guarded lifecycle actions', as
     readFile(migrationUrl, 'utf8'),
   ])
 
-  assert.match(list, /Delete draft/)
-  assert.match(list, /Cancel schedule/)
-  assert.match(list, /Edit programme/)
+  assert.match(row, /Delete draft/)
+  assert.match(row, /Cancel schedule/)
+  assert.match(row, /Edit programme/)
+  assert.match(list, /<LoyaltyProgrammeRow/)
+  assert.match(list, /openActionConfirmation=\{openActionConfirmation\}/)
+  assert.match(list, /openEndConfirmation=\{openEndConfirmation\}/)
+  assert.match(row, /onEdit\(programme\.id\)/)
+  assert.match(row, /openEndConfirmation\(programme\)/)
   assert.match(list, /Delete this draft\?/)
   assert.match(list, /Cancel this scheduled programme\?/)
   assert.match(list, /actionInProgressRef/)
   assert.match(list, /className="loyalty-confirm-danger"/)
   assert.match(list, /Keep programme active/)
   assert.ok(
-    list.indexOf("openActionConfirmation('cancel', programme)") <
-      list.indexOf("{isDraft ? 'Continue draft' : 'Edit programme'}"),
+    row.indexOf("openActionConfirmation('cancel', programme)") <
+      row.indexOf("{isDraft ? 'Continue draft' : 'Edit programme'}"),
     'cancel schedule is rendered before the right-side edit action',
   )
   assert.ok(

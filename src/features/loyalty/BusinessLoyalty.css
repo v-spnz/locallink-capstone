@@ -1,3 +1,7 @@
+.portal-main-content:has(> .business-loyalty-page) {
+  max-width: 1080px;
+}
+
 .business-loyalty-page {
   width: 100%;
 }

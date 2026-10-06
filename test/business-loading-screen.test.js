@@ -46,7 +46,9 @@ test('business routes and business data pages use the loader without changing cu
     read('../src/features/deals/components/DealList.jsx'),
     read('../src/features/loyalty/components/LoyaltyDraftList.jsx'),
     read('../src/pages/business/Services.jsx'),
-    read('../src/pages/business/ServiceMarketplacePage.jsx'),
+    read(
+      '../src/features/service-marketplace/components/business/BusinessMarketplaceContent.jsx',
+    ),
     read('../src/pages/business/Settings.jsx'),
     read('../src/pages/business/ClaimRecords.jsx'),
     read('../src/pages/customer/Jobs.jsx'),

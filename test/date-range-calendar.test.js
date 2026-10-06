@@ -9,7 +9,10 @@ test('business deal availability uses the shared accessible range calendar', asy
       'utf8',
     ),
     readFile(
-      new URL('../src/features/deals/components/DealForm.jsx', import.meta.url),
+      new URL(
+        '../src/features/deals/components/DealFormSections.jsx',
+        import.meta.url,
+      ),
       'utf8',
     ),
     readFile(
