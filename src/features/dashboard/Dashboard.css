@@ -1,3 +1,64 @@
+.business-module-grid {
+  margin-bottom: 28px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.business-module-card {
+  min-height: 170px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: var(--white);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.business-module-card:hover {
+  border-color: #bac8ff;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.business-module-card > span {
+  width: 38px;
+  height: 38px;
+  margin-bottom: 20px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: #eef2ff;
+  color: #4263eb;
+}
+
+.business-module-card svg {
+  width: 17px;
+  height: 17px;
+}
+
+.business-module-card strong {
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.business-module-card p {
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .business-module-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Dashboard */
 .business-dashboard-header {
   min-height: 252px;
@@ -1004,6 +1065,160 @@ body.business-surface .business-module-card .business-module-action {
   .business-presence-facts {
     grid-template-columns: 1fr;
   }
+}
+
+.business-deal-status-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.business-deal-status-grid > div {
+  padding: 16px;
+  border: 1px solid var(--business-border);
+  border-radius: 12px;
+  display: grid;
+  gap: 4px;
+  background: var(--business-surface);
+}
+
+.business-deal-status-grid dt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  color: var(--business-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.business-deal-status-grid dd {
+  margin: 0;
+  color: var(--business-ink);
+  font-size: 28px;
+  font-weight: 750;
+  line-height: 1.1;
+}
+
+.business-deal-status-grid small {
+  color: var(--business-muted);
+  font-size: 12px;
+}
+
+.business-deal-ending-soon {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: #fff0cc;
+  color: #8a5b00;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.business-deal-status-grid .is-active:not(.is-empty) dd {
+  color: #087f5b;
+}
+
+.business-deal-status-grid .is-draft:not(.is-empty) dd {
+  color: var(--business-accent-strong);
+}
+
+.business-deal-status-grid .is-ended_early:not(.is-empty) dd {
+  color: var(--business-danger);
+}
+
+.business-deal-status-grid .is-empty {
+  background: var(--business-surface-soft);
+}
+
+.business-deal-status-grid .is-empty dd {
+  color: var(--business-muted);
+}
+
+.business-deal-attention {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+.business-deal-attention-group {
+  padding: 16px;
+  border: 1px solid var(--business-border);
+  border-radius: 12px;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  background: var(--business-surface);
+}
+
+.business-deal-attention-group h3 {
+  margin: 0 0 4px;
+  color: var(--business-ink);
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.business-deal-attention-group a {
+  padding: 10px 12px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--business-surface-soft);
+  color: inherit;
+  text-decoration: none;
+}
+
+.business-deal-attention-group a:hover {
+  background: var(--business-accent-soft);
+}
+
+.business-deal-attention-group a span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.business-deal-attention-group a strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.business-deal-attention-group a small {
+  color: var(--business-muted);
+  font-size: 12px;
+}
+
+.business-deal-attention-group a svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+
+a.business-performance-refresh {
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .business-deal-status-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.business-performance-note {
+  margin: 0;
+  padding: 15px 22px;
+  border-top: 1px solid #edf0f5;
+  grid-column: 1 / -1;
+  color: var(--business-muted);
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .business-deal-perf-heading h2 {

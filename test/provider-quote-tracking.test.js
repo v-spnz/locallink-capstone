@@ -217,7 +217,7 @@ test('quote summaries show price and progress while details reveal withdrawal co
     ),
     readFile(
       new URL(
-        '../src/pages/business/ServiceMarketplacePage.jsx',
+        '../src/features/service-marketplace/components/business/BusinessMarketplaceContent.jsx',
         import.meta.url,
       ),
       'utf8',

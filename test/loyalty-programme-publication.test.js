@@ -169,7 +169,18 @@ test('consumer loyalty discovery does not require business membership', async ()
 })
 
 test('US0107 AC3-5: review, correction, persisted publication, and status tabs are wired together', async () => {
-  const [page, form, review, list, hook, api, migration] = await Promise.all([
+  const [
+    page,
+    form,
+    sections,
+    preview,
+    review,
+    list,
+    row,
+    hook,
+    api,
+    migration,
+  ] = await Promise.all([
     readFile(
       new URL('../src/pages/business/CreateLoyalty.jsx', import.meta.url),
       'utf8',
@@ -177,6 +188,20 @@ test('US0107 AC3-5: review, correction, persisted publication, and status tabs a
     readFile(
       new URL(
         '../src/features/loyalty/components/LoyaltyDraftForm.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/loyalty/components/LoyaltyFormSections.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/loyalty/components/LoyaltyProgrammePreview.jsx',
         import.meta.url,
       ),
       'utf8',
@@ -191,6 +216,13 @@ test('US0107 AC3-5: review, correction, persisted publication, and status tabs a
     readFile(
       new URL(
         '../src/features/loyalty/components/LoyaltyDraftList.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/loyalty/components/LoyaltyProgrammeRow.jsx',
         import.meta.url,
       ),
       'utf8',
@@ -219,11 +251,11 @@ test('US0107 AC3-5: review, correction, persisted publication, and status tabs a
   ])
 
   assert.match(form, /Review and publish/)
-  assert.match(form, /Redemption method/)
-  assert.match(form, /Programme image/)
-  assert.match(form, /LoyaltyTicket/)
-  assert.match(form, /getLoyaltyProgressPresentation/)
-  assert.match(form, /loyalty-preview-details/)
+  assert.match(sections, /Redemption method/)
+  assert.match(sections, /ProgrammeImageField/)
+  assert.match(preview, /LoyaltyTicket/)
+  assert.match(preview, /getLoyaltyProgressPresentation/)
+  assert.match(preview, /loyalty-preview-details/)
   assert.doesNotMatch(form, /Once published:/)
   assert.doesNotMatch(
     form,
@@ -240,15 +272,16 @@ test('US0107 AC3-5: review, correction, persisted publication, and status tabs a
   assert.match(list, /deal-filters-overflow-trigger/)
   assert.match(list, /PRIMARY_FILTER_VALUES/)
   assert.match(list, /OVERFLOW_FILTER_VALUES/)
-  assert.match(list, /deal-management-card loyalty-programme-row/)
-  assert.match(list, /className="deal-list-row"/)
-  assert.match(list, /programme\.imageUrl/)
-  assert.match(list, /loyalty-programme-background/)
-  assert.match(list, /has-background-image/)
-  assert.doesNotMatch(list, /QRCodeSVG/)
-  const cardMarkup = list.slice(
-    list.indexOf('<article'),
-    list.indexOf('</article>'),
+  assert.match(list, /<LoyaltyProgrammeRow/)
+  assert.match(row, /deal-management-card loyalty-programme-row/)
+  assert.match(row, /className="deal-list-row"/)
+  assert.match(row, /programme\.imageUrl/)
+  assert.match(row, /loyalty-programme-background/)
+  assert.match(row, /has-background-image/)
+  assert.doesNotMatch(row, /QRCodeSVG/)
+  const cardMarkup = row.slice(
+    row.indexOf('<article'),
+    row.indexOf('</article>'),
   )
   assert.doesNotMatch(
     cardMarkup,

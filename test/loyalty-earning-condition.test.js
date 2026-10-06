@@ -119,19 +119,28 @@ test('count-based loyalty programmes allow a maximum of 12 stamps', async () => 
     )
   }
 
-  const form = await readFile(
-    new URL(
-      '../src/features/loyalty/components/LoyaltyDraftForm.jsx',
-      import.meta.url,
+  const [sections, preview] = await Promise.all([
+    readFile(
+      new URL(
+        '../src/features/loyalty/components/LoyaltyFormSections.jsx',
+        import.meta.url,
+      ),
+      'utf8',
     ),
-    'utf8',
-  )
-  assert.match(form, /`Maximum \$\{MAX_COUNT_BASED_REWARD_THRESHOLD\}`/)
+    readFile(
+      new URL(
+        '../src/features/loyalty/components/LoyaltyProgrammePreview.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
+  assert.match(sections, /`Maximum \$\{MAX_COUNT_BASED_REWARD_THRESHOLD\}`/)
   assert.match(
-    form,
+    preview,
     /Number\(programme\.rewardThreshold\) > MAX_COUNT_BASED_REWARD_THRESHOLD/,
   )
-  assert.match(form, /getEarningRules\(previewProgram\)/)
+  assert.match(preview, /getEarningRules\(previewProgram\)/)
 })
 
 test('US0104 AC3: incomplete or invalid earning conditions cannot be confirmed', () => {
@@ -231,10 +240,17 @@ test('US0104 AC4: the earning condition is saved against the selected loyalty pr
 })
 
 test('US0104 AC5: the generated earning condition is reviewed before publication', async () => {
-  const [form, review, hook] = await Promise.all([
+  const [form, preview, review, hook] = await Promise.all([
     readFile(
       new URL(
         '../src/features/loyalty/components/LoyaltyDraftForm.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/loyalty/components/LoyaltyProgrammePreview.jsx',
         import.meta.url,
       ),
       'utf8',
@@ -256,7 +272,7 @@ test('US0104 AC5: the generated earning condition is reviewed before publication
   ])
 
   assert.doesNotMatch(form, /Customer-facing earning rules:/)
-  assert.match(form, /getEarningRules\(previewProgram\)/)
+  assert.match(preview, /getEarningRules\(previewProgram\)/)
   assert.match(form, /Review and publish/)
   assert.match(review, /label="How customers earn"/)
   assert.match(review, /value=\{getEarningRules\(programme\)\}/)

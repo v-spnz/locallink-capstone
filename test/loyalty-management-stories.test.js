@@ -8,7 +8,7 @@ const MIGRATION_URL = new URL(
 )
 
 test('US0108: one database-backed list presents every business programme', async () => {
-  const [api, hook, list] = await Promise.all([
+  const [api, hook, list, row] = await Promise.all([
     readFile(
       new URL(
         '../src/features/loyalty/api/businessLoyalty.js',
@@ -30,14 +30,22 @@ test('US0108: one database-backed list presents every business programme', async
       ),
       'utf8',
     ),
+    readFile(
+      new URL(
+        '../src/features/loyalty/components/LoyaltyProgrammeRow.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
   ])
 
   assert.match(api, /from\('business_loyalty_programmes'\)/)
   assert.match(api, /eq\('business_id', businessId\)/)
   assert.match(hook, /fetchBusinessLoyaltyProgrammes\(business\.id\)/)
   assert.equal(list.match(/programmes\.map\(/g)?.length, 1)
-  assert.match(list, /deal-management-card loyalty-programme-row/)
-  assert.match(list, /loyalty-join-code/)
+  assert.match(list, /<LoyaltyProgrammeRow/)
+  assert.match(row, /deal-management-card loyalty-programme-row/)
+  assert.match(row, /loyalty-join-code/)
 })
 
 test('US0106: inactive programmes reject progress and redemption in the database and UI', async () => {
