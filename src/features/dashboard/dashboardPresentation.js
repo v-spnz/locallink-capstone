@@ -160,3 +160,39 @@ export function getDealStatusSummary(deals = [], today = new Date()) {
     endingSoon,
   }
 }
+
+export function getDealMoneyCoverage(deal) {
+  const redemptions = deal.redemptions
+  const valued = deal.redemptionsWithTransactionValue
+
+  if (redemptions === 0) {
+    return { state: 'none', message: 'No redemptions in this period.' }
+  }
+  if (valued === 0) {
+    return {
+      state: 'missing',
+      message:
+        'No transaction values were recorded for these redemptions, so sales value is not available.',
+    }
+  }
+  if (valued < redemptions) {
+    return {
+      state: 'partial',
+      message: `Partial data: ${valued} of ${redemptions} redemptions have a recorded transaction value. Sales figures only include those and are not the deal's full sales.`,
+    }
+  }
+  return {
+    state: 'complete',
+    message:
+      'Every redemption in this period has a recorded transaction value.',
+  }
+}
+
+export function getDealPerformanceSummary(deal) {
+  if (deal.claims === 0 && deal.redemptions === 0) {
+    return 'No claims or redemptions were recorded for this deal in the selected period.'
+  }
+  const claims = `${formatDashboardCount(deal.claims)} ${deal.claims === 1 ? 'claim' : 'claims'}`
+  const redemptions = `${formatDashboardCount(deal.redemptions)} ${deal.redemptions === 1 ? 'redemption' : 'redemptions'}`
+  return `${claims} and ${redemptions} were recorded in this period. ${formatDashboardPercentage(deal.claimToRedemptionRate)} of claims made in the period have been redeemed.`
+}

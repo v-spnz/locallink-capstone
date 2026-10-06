@@ -1005,3 +1005,100 @@ body.business-surface .business-module-card .business-module-action {
     grid-template-columns: 1fr;
   }
 }
+
+.business-deal-perf-heading h2 {
+  text-transform: none;
+}
+
+.business-deal-perf-summary {
+  margin: 0;
+  padding: 18px 22px;
+  border-bottom: 1px solid #edf0f5;
+  grid-column: 1 / -1;
+  color: var(--business-ink-soft);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.business-deal-perf .business-performance-card {
+  margin-top: 14px;
+  grid-template-columns: 1fr;
+}
+
+.business-deal-perf-coverage.is-partial,
+.business-deal-perf-coverage.is-missing {
+  background: #fffaf0;
+  color: #8a5b00;
+}
+
+.business-deal-perf-coverage.is-complete {
+  color: var(--business-success);
+}
+
+.business-deal-perf-list {
+  display: grid;
+  gap: 10px;
+}
+
+.business-deal-perf-list > button {
+  padding: 14px 18px;
+  border: 1px solid var(--business-border);
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 0.6fr)) auto;
+  align-items: center;
+  gap: 16px;
+  background: var(--business-surface);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.business-deal-perf-list > button:hover {
+  border-color: #b9c6f0;
+  background: var(--business-surface-soft);
+}
+
+.business-deal-perf-list > button > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.business-deal-perf-list strong {
+  overflow: hidden;
+  color: var(--business-ink);
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.business-deal-perf-list small {
+  color: var(--business-muted);
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.business-deal-perf-list > button > svg {
+  width: 15px;
+  height: 15px;
+  color: var(--business-faint);
+}
+
+@media (max-width: 760px) {
+  .business-deal-perf-list > button {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .business-deal-perf-name {
+    grid-column: 1 / -1;
+  }
+
+  .business-deal-perf-list > button > svg {
+    display: none;
+  }
+}
