@@ -11,7 +11,15 @@ function CategoryDonut({ groups, totalRedemptions }) {
   const circumference = 2 * Math.PI * radius
   const hasGaps = groups.filter((group) => group.redemptions > 0).length > 1
   const gap = hasGaps ? 1.5 : 0
-  let offset = 0
+  const visibleGroups = groups.filter((group) => group.redemptions > 0)
+  const segments = visibleGroups.map((group, index) => {
+    const lengthOf = (item) =>
+      (item.redemptions / totalRedemptions) * circumference
+    const offset = visibleGroups
+      .slice(0, index)
+      .reduce((sum, previous) => sum + lengthOf(previous), 0)
+    return { group, length: lengthOf(group), offset }
+  })
 
   return (
     <svg
@@ -28,28 +36,22 @@ function CategoryDonut({ groups, totalRedemptions }) {
         stroke="#edf0f5"
         strokeWidth="14"
       />
-      {groups.map((group) => {
-        if (group.redemptions === 0) return null
-        const length = (group.redemptions / totalRedemptions) * circumference
-        const segment = (
-          <circle
-            key={group.category}
-            cx="50"
-            cy="50"
-            r={radius}
-            fill="none"
-            stroke={group.colour}
-            strokeWidth="14"
-            strokeDasharray={`${Math.max(length - gap, 0.5)} ${circumference}`}
-            strokeDashoffset={-offset}
-            transform="rotate(-90 50 50)"
-          >
-            <title>{`${group.category}: ${group.redemptions} redemptions`}</title>
-          </circle>
-        )
-        offset += length
-        return segment
-      })}
+      {segments.map(({ group, length, offset }) => (
+        <circle
+          key={group.category}
+          cx="50"
+          cy="50"
+          r={radius}
+          fill="none"
+          stroke={group.colour}
+          strokeWidth="14"
+          strokeDasharray={`${Math.max(length - gap, 0.5)} ${circumference}`}
+          strokeDashoffset={-offset}
+          transform="rotate(-90 50 50)"
+        >
+          <title>{`${group.category}: ${group.redemptions} redemptions`}</title>
+        </circle>
+      ))}
       <text
         x="50"
         y="49"
