@@ -5,6 +5,7 @@ import useBusiness from '../../business/useBusiness'
 import BusinessProfileSnapshot from '../../features/dashboard/components/BusinessProfileSnapshot'
 import DashboardHeader from '../../features/dashboard/components/DashboardHeader'
 import DashboardQuickLinks from '../../features/dashboard/components/DashboardQuickLinks'
+import CategoryPerformanceSection from '../../features/dashboard/components/CategoryPerformanceSection'
 import DealPerformanceSection from '../../features/dashboard/components/DealPerformanceSection'
 import DealStatusOverview from '../../features/dashboard/components/DealStatusOverview'
 import PerformanceOverview from '../../features/dashboard/components/PerformanceOverview'
@@ -140,6 +141,18 @@ export default function Dashboard() {
           onBack={clearSelectedDeal}
         />
       )}
+
+      {capabilities.deals_enabled &&
+        !isLoading &&
+        !error &&
+        metrics &&
+        !selectedDealId && (
+          <CategoryPerformanceSection
+            deals={dealPerformance}
+            period={analyticsPeriod}
+            onSelect={selectDeal}
+          />
+        )}
 
       {capabilities.deals_enabled && <RedemptionCallToAction />}
 
