@@ -11,8 +11,8 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
   const { business } = useBusiness()
   const [metrics, setMetrics] = useState(null)
   const [dealPerformance, setDealPerformance] = useState([])
-  const [performancePeriod, setPerformancePeriod] = useState('')
-  const [performanceError, setPerformanceError] = useState('')
+  const [dealPerformanceLoading, setDealPerformanceLoading] = useState(true)
+  const [dealPerformanceError, setDealPerformanceError] = useState(false)
   const [deals, setDeals] = useState([])
   const [dealsFailed, setDealsFailed] = useState(false)
   const [dealsLoading, setDealsLoading] = useState(true)
@@ -106,7 +106,8 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
     let active = true
 
     async function load() {
-      setPerformanceError('')
+      setDealPerformanceLoading(true)
+      setDealPerformanceError(false)
       try {
         const result = await loadPerformanceBreakdowns()
         if (!active) return
@@ -118,24 +119,13 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
         }
 
         const [dealsResult, loyaltyResult] = result
-        if (dealsResult.status === 'fulfilled') {
-          setDealPerformance(dealsResult.value)
-        } else {
-          console.error('Unable to load deal performance.', dealsResult.reason)
-          setDealPerformance([])
-          setPerformanceError(
-            'Unable to load deal performance. Please try again.',
-          )
-        }
-        if (loyaltyResult.status === 'fulfilled') {
-          setLoyaltyProgrammePerformance(loyaltyResult.value)
-        } else {
-          console.error(
-            'Unable to load loyalty performance.',
-            loyaltyResult.reason,
-          )
-          setLoyaltyProgrammePerformance([])
-        }
+        setDealPerformance(
+          dealsResult.status === 'fulfilled' ? dealsResult.value : [],
+        )
+        setDealPerformanceError(dealsResult.status === 'rejected')
+        setLoyaltyProgrammePerformance(
+          loyaltyResult.status === 'fulfilled' ? loyaltyResult.value : [],
+        )
       } catch (loadError) {
         if (!active) return
         console.error(
@@ -144,11 +134,9 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
         )
         setDealPerformance([])
         setLoyaltyProgrammePerformance([])
-        setPerformanceError(
-          'Unable to load deal performance. Please try again.',
-        )
+        setDealPerformanceError(true)
       } finally {
-        if (active) setPerformancePeriod(periodKey)
+        if (active) setDealPerformanceLoading(false)
       }
     }
 
@@ -161,8 +149,8 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
   return {
     metrics,
     dealPerformance,
-    performanceLoading: performancePeriod !== periodKey,
-    performanceError,
+    dealPerformanceLoading,
+    dealPerformanceError,
     deals,
     dealsFailed,
     dealsLoading,

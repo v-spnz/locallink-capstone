@@ -1,5 +1,4 @@
-import { useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useMemo, useState } from 'react'
 import { BadgePercent, BriefcaseBusiness, Gift } from 'lucide-react'
 import useBusiness from '../../business/useBusiness'
 import BusinessProfileSnapshot from '../../features/dashboard/components/BusinessProfileSnapshot'
@@ -36,45 +35,16 @@ export default function Dashboard() {
     serviceCategories,
     serviceAreas,
   } = useBusiness()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const defaultPeriod = useMemo(() => getDefaultDashboardDateRange(), [])
-  const requestedStart = searchParams.get('start')
-  const requestedEnd = searchParams.get('end')
-  const analyticsPeriod =
-    validDate(requestedStart) &&
-    validDate(requestedEnd) &&
-    requestedStart <= requestedEnd
-      ? { startDate: requestedStart, endDate: requestedEnd }
-      : defaultPeriod
-  const selectedDealId = searchParams.get('deal')
-
-  function changePeriod({ startDate, endDate }) {
-    setSearchParams((current) => {
-      const next = new URLSearchParams(current)
-      next.set('start', startDate)
-      next.set('end', endDate)
-      return next
-    })
-  }
-
-  function selectDeal(dealId) {
-    setSearchParams((current) => {
-      const next = new URLSearchParams(current)
-      next.set('deal', dealId)
-      return next
-    })
-  }
-
-  function clearSelectedDeal() {
-    setSearchParams((current) => {
-      const next = new URLSearchParams(current)
-      next.delete('deal')
-      return next
-    })
-  }
+  const [reportingDays, setReportingDays] = useState(30)
+  const analyticsPeriod = useMemo(
+    () => getDefaultDashboardDateRange(new Date(), reportingDays),
+    [reportingDays],
+  )
   const {
     metrics,
     dealPerformance,
+    dealPerformanceLoading,
+    dealPerformanceError,
     deals,
     dealsFailed,
     dealsLoading,
@@ -133,8 +103,12 @@ export default function Dashboard() {
 
       <PerformanceOverview
         analyticsPeriod={analyticsPeriod}
-        onPeriodChange={changePeriod}
+        reportingDays={reportingDays}
+        onReportingDaysChange={setReportingDays}
         metrics={metrics}
+        dealPerformance={dealPerformance}
+        dealPerformanceLoading={dealPerformanceLoading}
+        dealPerformanceError={dealPerformanceError}
         capabilities={capabilities}
         moduleCount={modules.length}
         isLoading={isLoading}

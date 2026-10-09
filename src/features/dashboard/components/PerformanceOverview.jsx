@@ -12,6 +12,7 @@ import {
   formatDashboardCount,
   formatDashboardDateRange,
   formatDashboardPercentage,
+  formatRecordedCurrency,
   hasDealActivity,
   hasLoyaltyActivity,
   hasMarketplaceActivity,
@@ -88,10 +89,79 @@ function PerformanceSkeleton({ capabilityCount }) {
   )
 }
 
+function DealComparison({ deals, isLoading, error, reload }) {
+  return (
+    <section
+      className="business-deal-comparison"
+      aria-labelledby="deal-comparison-title"
+    >
+      <h3 id="deal-comparison-title">Compare your deals</h3>
+      <p>
+        Claims show customer interest. Redemptions show completed visits.
+        Conversion uses claims made in this period, including those redeemed
+        later.
+      </p>
+      {isLoading ? (
+        <p role="status">Loading deal comparison…</p>
+      ) : error ? (
+        <div className="business-performance-error" role="alert">
+          <p>Unable to load deal comparison.</p>
+          <button type="button" onClick={reload}>
+            Try again
+          </button>
+        </div>
+      ) : deals.length === 0 ? (
+        <p>No deals to compare yet.</p>
+      ) : (
+        <div className="business-deal-comparison-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Deal</th>
+                <th scope="col">Claims</th>
+                <th scope="col">Redemptions</th>
+                <th scope="col">Claim conversion</th>
+                <th scope="col">Recorded sales</th>
+                <th scope="col">Customer savings</th>
+              </tr>
+            </thead>
+            <tbody>
+              {deals.map((deal) => (
+                <tr key={deal.dealId}>
+                  <th scope="row">{deal.dealName}</th>
+                  <td>{formatDashboardCount(deal.claims)}</td>
+                  <td>{formatDashboardCount(deal.redemptions)}</td>
+                  <td>
+                    {formatDashboardPercentage(deal.claimToRedemptionRate)}
+                  </td>
+                  <td>
+                    {formatRecordedCurrency(
+                      deal.recordedTransactionValueCents,
+                    ) ?? 'Not recorded'}
+                  </td>
+                  <td>
+                    {formatRecordedCurrency(
+                      deal.recordedCustomerSavingsCents,
+                    ) ?? 'Not recorded'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  )
+}
+
 export default function PerformanceOverview({
   analyticsPeriod,
-  onPeriodChange,
+  reportingDays,
+  onReportingDaysChange,
   metrics,
+  dealPerformance,
+  dealPerformanceLoading,
+  dealPerformanceError,
   capabilities,
   moduleCount,
   isLoading,
@@ -127,15 +197,29 @@ export default function PerformanceOverview({
           <h2 id="business-performance-title">Your LocalLink activity</h2>
           <p>{formatDashboardDateRange(analyticsPeriod)}</p>
         </div>
-        <button
-          type="button"
-          className="business-performance-refresh"
-          onClick={reload}
-          disabled={isLoading}
-        >
-          <RefreshCw aria-hidden="true" />
-          Refresh
-        </button>
+        <div className="business-performance-actions">
+          <label htmlFor="business-reporting-days">Reporting period</label>
+          <select
+            id="business-reporting-days"
+            value={reportingDays}
+            onChange={(event) =>
+              onReportingDaysChange(Number(event.target.value))
+            }
+          >
+            <option value={7}>Last 7 days</option>
+            <option value={30}>Last 30 days</option>
+            <option value={90}>Last 90 days</option>
+          </select>
+          <button
+            type="button"
+            className="business-performance-refresh"
+            onClick={reload}
+            disabled={isLoading}
+          >
+            <RefreshCw aria-hidden="true" />
+            Refresh
+          </button>
+        </div>
       </div>
 
       <form
@@ -184,6 +268,15 @@ export default function PerformanceOverview({
 
       {!isLoading && !error && metrics && (
         <div className="business-performance-list">
+          {capabilities.deals_enabled && (
+            <DealComparison
+              deals={dealPerformance}
+              isLoading={dealPerformanceLoading}
+              error={dealPerformanceError}
+              reload={reload}
+            />
+          )}
+
           {capabilities.deals_enabled && (
             <PerformanceSection
               className="is-deals"
