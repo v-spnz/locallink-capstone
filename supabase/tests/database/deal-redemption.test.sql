@@ -1,6 +1,6 @@
 begin;
 
-select plan(39);
+select plan(41);
 
 select has_column(
   'public',
@@ -315,6 +315,28 @@ select throws_ok(
   '55000',
   'This claim''s redemption window has expired',
   'an expired claim cannot be redeemed'
+);
+
+select throws_ok(
+  $$
+    select * from public.redeem_business_deal_claim_by_code(
+      'VALID0097001', -1, null
+    )
+  $$,
+  '22023',
+  'Enter a valid transaction amount',
+  'negative transaction amounts are rejected'
+);
+
+select throws_ok(
+  $$
+    select * from public.redeem_business_deal_claim_by_code(
+      'VALID0097001', null, -1
+    )
+  $$,
+  '22023',
+  'Enter a valid customer savings amount',
+  'negative savings amounts are rejected'
 );
 
 select lives_ok(

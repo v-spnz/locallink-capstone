@@ -55,12 +55,23 @@ function amountInCents(value) {
   return value === '' ? null : Math.round(Number(value) * 100)
 }
 
+function knownSavingsCents(claim) {
+  if (claim.offerType === 'fixed_discount') return claim.discountAmountCents
+  if (claim.offerType === 'special_price') {
+    if (claim.originalPriceCents == null || claim.dealPriceCents == null)
+      return null
+    return Math.max(0, claim.originalPriceCents - claim.dealPriceCents)
+  }
+  return null
+}
+
 export default function DealRedemptionPanel({
   redemption,
   openScannerOnLoad = false,
 }) {
   const [isScannerOpen, setIsScannerOpen] = useState(() => openScannerOnLoad)
   const claim = redemption.validatedClaim
+  const knownSavings = claim ? knownSavingsCents(claim) : null
   const closeScanner = useCallback(() => setIsScannerOpen(false), [])
 
   function handleConfirmRedemption(event) {
@@ -177,7 +188,8 @@ export default function DealRedemptionPanel({
               <legend>Recorded deal value (optional)</legend>
               <p>
                 Leave an amount blank if it is unknown. Enter $0 only when the
-                recorded amount is zero.
+                recorded amount is zero. Savings from a fixed discount or
+                special price are filled in from the offer and can be adjusted.
               </p>
               <div>
                 <label htmlFor="deal-transaction-amount">
@@ -205,6 +217,11 @@ export default function DealRedemptionPanel({
                     max="1000000"
                     step="0.01"
                     placeholder="0.00"
+                    defaultValue={
+                      knownSavings == null
+                        ? undefined
+                        : (knownSavings / 100).toFixed(2)
+                    }
                     disabled={redemption.isRedeeming}
                   />
                 </label>

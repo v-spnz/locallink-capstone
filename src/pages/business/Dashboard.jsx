@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { BadgePercent, BriefcaseBusiness, Gift } from 'lucide-react'
 import useBusiness from '../../business/useBusiness'
@@ -37,16 +37,31 @@ export default function Dashboard() {
     serviceAreas,
   } = useBusiness()
   const [searchParams, setSearchParams] = useSearchParams()
-  const defaultPeriod = useMemo(() => getDefaultDashboardDateRange(), [])
+  const [reportingDays, setReportingDays] = useState(30)
+  const defaultPeriod = useMemo(
+    () => getDefaultDashboardDateRange(new Date(), reportingDays),
+    [reportingDays],
+  )
   const requestedStart = searchParams.get('start')
   const requestedEnd = searchParams.get('end')
-  const analyticsPeriod =
+  const hasCustomPeriod =
     validDate(requestedStart) &&
     validDate(requestedEnd) &&
     requestedStart <= requestedEnd
-      ? { startDate: requestedStart, endDate: requestedEnd }
-      : defaultPeriod
+  const analyticsPeriod = hasCustomPeriod
+    ? { startDate: requestedStart, endDate: requestedEnd }
+    : defaultPeriod
   const selectedDealId = searchParams.get('deal')
+
+  function changeReportingDays(days) {
+    setReportingDays(days)
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      next.delete('start')
+      next.delete('end')
+      return next
+    })
+  }
 
   function changePeriod({ startDate, endDate }) {
     setSearchParams((current) => {
@@ -75,11 +90,11 @@ export default function Dashboard() {
   const {
     metrics,
     dealPerformance,
+    dealPerformanceLoading,
+    dealPerformanceError,
     deals,
     dealsFailed,
     dealsLoading,
-    performanceLoading,
-    performanceError,
     isLoading,
     error,
     reload,
@@ -134,7 +149,12 @@ export default function Dashboard() {
       <PerformanceOverview
         analyticsPeriod={analyticsPeriod}
         onPeriodChange={changePeriod}
+        reportingDays={hasCustomPeriod ? 'custom' : reportingDays}
+        onReportingDaysChange={changeReportingDays}
         metrics={metrics}
+        dealPerformance={dealPerformance}
+        dealPerformanceLoading={dealPerformanceLoading}
+        dealPerformanceError={dealPerformanceError}
         capabilities={capabilities}
         moduleCount={modules.length}
         isLoading={isLoading}
@@ -167,13 +187,13 @@ export default function Dashboard() {
         !isLoading &&
         !error &&
         metrics &&
-        !performanceLoading &&
-        performanceError && (
+        !dealPerformanceLoading &&
+        dealPerformanceError && (
           <section className="business-dashboard-section">
             <div className="business-performance-error" role="alert">
               <div>
                 <strong>Deal performance is unavailable</strong>
-                <p>{performanceError}</p>
+                <p>Unable to load deal performance. Please try again.</p>
               </div>
               <button type="button" onClick={reload}>
                 Try again
@@ -186,8 +206,8 @@ export default function Dashboard() {
         !isLoading &&
         !error &&
         metrics &&
-        !performanceLoading &&
-        !performanceError && (
+        !dealPerformanceLoading &&
+        !dealPerformanceError && (
           <DealPerformanceSection
             deals={dealPerformance}
             period={analyticsPeriod}
@@ -201,8 +221,8 @@ export default function Dashboard() {
         !isLoading &&
         !error &&
         metrics &&
-        !performanceLoading &&
-        !performanceError &&
+        !dealPerformanceLoading &&
+        !dealPerformanceError &&
         !hasSelectedDeal && (
           <CategoryPerformanceSection
             deals={dealPerformance}

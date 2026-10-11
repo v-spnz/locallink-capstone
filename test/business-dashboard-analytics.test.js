@@ -50,7 +50,7 @@ test('dashboard analytics use the feature API and business-scoped hook', async (
   assert.match(api, /recordedTransactionValueCents/)
   assert.match(api, /redemptionsWithTransactionValue/)
   assert.match(hook, /useBusiness/)
-  assert.match(hook, /Promise\.all/)
+  assert.match(hook, /Promise\.allSettled/)
   assert.match(hook, /businessId: business\.id/)
   assert.match(dashboard, /useBusinessDashboardAnalytics/)
   assert.doesNotMatch(dashboard, /get_business_dashboard_metrics/)
@@ -66,6 +66,10 @@ test('the dashboard uses an inclusive 30-day Auckland reporting period', () => {
     endDate: '2026-09-25',
   })
   assert.equal(formatDashboardDateRange(period), '27 Aug 2026 – 25 Sept 2026')
+  assert.deepEqual(
+    getDefaultDashboardDateRange(new Date('2026-09-24T12:00:00.000Z'), 7),
+    { startDate: '2026-09-19', endDate: '2026-09-25' },
+  )
 })
 
 test('dashboard values format real zeroes while unknown sales stay unavailable', () => {
@@ -192,6 +196,34 @@ test('the dashboard only renders performance sections for enabled capabilities',
   ]) {
     assert.match(performance, new RegExp(`label="${label}"`))
   }
+})
+
+test('deal comparison uses the selected reporting period and shows separate measures', async () => {
+  const [dashboard, performance] = await Promise.all([
+    readFile(
+      new URL('../src/pages/business/Dashboard.jsx', import.meta.url),
+      'utf8',
+    ),
+    readFile(
+      new URL(
+        '../src/features/dashboard/components/PerformanceOverview.jsx',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ])
+
+  assert.match(
+    dashboard,
+    /getDefaultDashboardDateRange\(new Date\(\), reportingDays\)/,
+  )
+  assert.match(performance, /Compare your deals/)
+  assert.match(performance, /deal\.claims/)
+  assert.match(performance, /deal\.redemptions/)
+  assert.match(performance, /deal\.claimToRedemptionRate/)
+  assert.match(performance, /deal\.recordedTransactionValueCents/)
+  assert.match(performance, /deal\.recordedCustomerSavingsCents/)
+  assert.doesNotMatch(performance, /Best deal|top performing/i)
 })
 
 test('the dashboard provides loading, retry, zero, and unknown-value states', async () => {

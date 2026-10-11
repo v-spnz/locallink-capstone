@@ -289,6 +289,28 @@
   font-variant-numeric: tabular-nums;
 }
 
+.business-performance-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.business-performance-actions label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--business-ink-soft);
+}
+
+.business-performance-actions select {
+  min-height: 40px;
+  padding: 8px;
+  border: 1px solid var(--business-border-strong);
+  border-radius: var(--business-radius-control);
+  background: var(--business-surface);
+  color: var(--business-ink-soft);
+  font: inherit;
+}
+
 .business-performance-period {
   margin: 0 0 18px;
   display: flex;
@@ -321,6 +343,52 @@
   margin: 0;
   color: var(--business-danger);
   font-size: 12px;
+}
+
+.business-deal-comparison {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid var(--business-border);
+  border-radius: var(--business-radius-card);
+  background: var(--business-surface);
+  box-shadow: var(--business-shadow-sm);
+}
+
+.business-deal-comparison h3 {
+  margin: 0 0 6px;
+}
+
+.business-deal-comparison > p {
+  margin: 0 0 18px;
+  color: var(--business-ink-soft);
+  font-size: 13px;
+}
+
+.business-deal-comparison-scroll {
+  overflow-x: auto;
+}
+
+.business-deal-comparison table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+
+.business-deal-comparison th,
+.business-deal-comparison td {
+  padding: 12px;
+  border-bottom: 1px solid var(--business-border);
+  white-space: nowrap;
+}
+
+.business-deal-comparison thead th {
+  color: var(--business-ink-soft);
+  font-size: 12px;
+}
+
+.business-deal-comparison tbody th {
+  font-weight: 700;
 }
 
 .business-performance-refresh,
@@ -1049,6 +1117,10 @@ body.business-surface .business-module-card .business-module-action {
     align-items: stretch;
     flex-direction: column;
     gap: 13px;
+  }
+
+  .business-performance-actions {
+    flex-wrap: wrap;
   }
 
   .business-performance-refresh {
