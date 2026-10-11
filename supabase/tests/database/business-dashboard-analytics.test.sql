@@ -1,6 +1,6 @@
 begin;
 
-select plan(38);
+select plan(41);
 
 select has_function(
   'public',
@@ -100,6 +100,13 @@ values (
 update public.business_deals
 set status = 'published'
 where id = '94000000-0000-0000-0000-000000000021';
+
+insert into public.business_deals (id, business_id, title)
+values (
+  '94000000-0000-0000-0000-000000000022',
+  '94000000-0000-0000-0000-000000000001',
+  'Second analytics deal'
+);
 
 insert into public.business_deal_claims (
   id,
@@ -327,7 +334,7 @@ select is(
   (select total_deals from public.get_business_dashboard_metrics(
     '94000000-0000-0000-0000-000000000001', current_date - 7, current_date
   )),
-  1::bigint,
+  2::bigint,
   'deal snapshot counts are scoped to the requested business'
 );
 
@@ -376,6 +383,10 @@ select is((select claims from public.get_business_deal_performance(
 ) where deal_id = '94000000-0000-0000-0000-000000000021'), 2::bigint,
   'deal-level claim counts are correct');
 
+select is((select count(*) from public.get_business_deal_performance(
+  '94000000-0000-0000-0000-000000000001', current_date - 7, current_date
+)), 2::bigint, 'both deals are returned for comparison');
+
 select is((select redemptions from public.get_business_deal_performance(
   '94000000-0000-0000-0000-000000000001', current_date - 7, current_date
 ) where deal_id = '94000000-0000-0000-0000-000000000021'), 2::bigint,
@@ -396,10 +407,31 @@ select is((select claims from public.get_business_deal_performance(
 ) where deal_id = '94000000-0000-0000-0000-000000000021'), 0::bigint,
   'date filtering excludes claims outside the selected Auckland day');
 
+select is((select claim_to_redemption_rate from public.get_business_deal_performance(
+  '94000000-0000-0000-0000-000000000001', current_date - 7, current_date
+) where deal_id = '94000000-0000-0000-0000-000000000022'), 0::numeric,
+  'a deal with no claims has a valid zero conversion rate');
+
 select is((select average_recorded_transaction_cents from public.get_business_deal_performance(
   '94000000-0000-0000-0000-000000000001', current_date + 10, current_date + 10
 ) where deal_id = '94000000-0000-0000-0000-000000000021'), null::numeric,
   'an absent transaction average remains null rather than becoming zero');
+
+reset role;
+update public.business_deal_redemptions
+set redeemed_at = now() + interval '20 days'
+where claim_id = '94000000-0000-0000-0000-000000000032';
+set local role authenticated;
+
+select ok(exists (
+  select 1 from public.get_business_deal_performance(
+    '94000000-0000-0000-0000-000000000001', current_date - 7, current_date
+  ) where deal_id = '94000000-0000-0000-0000-000000000021'
+    and redemptions = 1
+    and claim_cohort_redemptions = 2
+    and claim_to_redemption_rate = 100
+),
+  'redemptions in the period remain separate from later claim-cohort conversions');
 
 select is((select loyalty_customers from public.get_business_dashboard_metrics(
   '94000000-0000-0000-0000-000000000001', current_date - 7, current_date

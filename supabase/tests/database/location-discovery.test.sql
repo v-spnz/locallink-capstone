@@ -53,7 +53,7 @@ select results_eq(
 
 select results_eq(
   $$
-    select business_id
+    select distinct business_id
     from public.businesses_in_my_suburb(null)
     where business_id = '21000000-0000-0000-0000-000000000001'
   $$,

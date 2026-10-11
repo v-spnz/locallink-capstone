@@ -277,11 +277,14 @@ select is(
 
 reset role;
 
+select public.refresh_loyalty_programme_statuses(
+  (now() at time zone 'Pacific/Auckland')::date + 1
+);
+
 select is(
-  public.refresh_loyalty_programme_statuses(
-    (now() at time zone 'Pacific/Auckland')::date + 1
-  ),
-  1,
+  (select status from public.business_loyalty_programmes
+   where id = '47000000-0000-0000-0000-000000000107'),
+  'active',
   'scheduled programmes become active on their start date'
 );
 

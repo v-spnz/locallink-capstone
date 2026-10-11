@@ -42,10 +42,13 @@ function getAucklandCalendarDate(referenceDate) {
   return new Date(Date.UTC(values.year, values.month - 1, values.day))
 }
 
-export function getDefaultDashboardDateRange(referenceDate = new Date()) {
+export function getDefaultDashboardDateRange(
+  referenceDate = new Date(),
+  days = 30,
+) {
   const end = getAucklandCalendarDate(referenceDate)
   const start = new Date(end)
-  start.setUTCDate(start.getUTCDate() - 29)
+  start.setUTCDate(start.getUTCDate() - days + 1)
 
   return {
     startDate: formatIsoDate(start),
