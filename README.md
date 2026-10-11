@@ -6,9 +6,7 @@
 ![Supabase](https://img.shields.io/badge/Supabase-Postgres-3FCF8E?logo=supabase&logoColor=white)
 ![PostGIS](https://img.shields.io/badge/PostGIS-enabled-336791?logo=postgresql&logoColor=white)
 ![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8?logo=pwa&logoColor=white)
-<!-- CI badge: replace OWNER/REPO with your GitHub path, then uncomment.
-[![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yaml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yaml)
--->
+[![CI](https://github.com/v-spnz/locallink-capstone/actions/workflows/ci.yaml/badge.svg)](https://github.com/v-spnz/locallink-capstone/actions/workflows/ci.yaml)
 
 LocalLink connects local consumers with the local businesses around them. Customers discover local deals, collect loyalty rewards and request services from nearby tradespeople. Businesses publish offers, run loyalty programmes and respond to job leads from one portal.
 
