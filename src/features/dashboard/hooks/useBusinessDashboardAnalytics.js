@@ -11,14 +11,18 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
   const { business } = useBusiness()
   const [metrics, setMetrics] = useState(null)
   const [dealPerformance, setDealPerformance] = useState([])
+  const [performancePeriod, setPerformancePeriod] = useState('')
+  const [performanceError, setPerformanceError] = useState('')
   const [deals, setDeals] = useState([])
   const [dealsFailed, setDealsFailed] = useState(false)
   const [dealsLoading, setDealsLoading] = useState(true)
   const [loyaltyProgrammePerformance, setLoyaltyProgrammePerformance] =
     useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [metricsPeriod, setMetricsPeriod] = useState('')
   const [error, setError] = useState('')
   const [reloadKey, setReloadKey] = useState(0)
+  const periodKey = `${business.id}:${startDate}:${endDate}:${reloadKey}`
 
   const loadMetrics = useCallback(async () => {
     if (!startDate || !endDate) return null
@@ -38,7 +42,7 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
       startDate,
       endDate,
     }
-    return Promise.all([
+    return Promise.allSettled([
       fetchBusinessDealPerformance(options),
       fetchBusinessLoyaltyProgrammePerformance(options),
     ])
@@ -85,7 +89,10 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
         setMetrics(null)
         setError('Unable to load dashboard analytics. Please try again.')
       } finally {
-        if (active) setIsLoading(false)
+        if (active) {
+          setIsLoading(false)
+          setMetricsPeriod(periodKey)
+        }
       }
     }
 
@@ -93,12 +100,13 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
     return () => {
       active = false
     }
-  }, [loadMetrics, reloadKey])
+  }, [loadMetrics, periodKey])
 
   useEffect(() => {
     let active = true
 
     async function load() {
+      setPerformanceError('')
       try {
         const result = await loadPerformanceBreakdowns()
         if (!active) return
@@ -109,9 +117,25 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
           return
         }
 
-        const [nextDeals, nextLoyaltyProgrammes] = result
-        setDealPerformance(nextDeals)
-        setLoyaltyProgrammePerformance(nextLoyaltyProgrammes)
+        const [dealsResult, loyaltyResult] = result
+        if (dealsResult.status === 'fulfilled') {
+          setDealPerformance(dealsResult.value)
+        } else {
+          console.error('Unable to load deal performance.', dealsResult.reason)
+          setDealPerformance([])
+          setPerformanceError(
+            'Unable to load deal performance. Please try again.',
+          )
+        }
+        if (loyaltyResult.status === 'fulfilled') {
+          setLoyaltyProgrammePerformance(loyaltyResult.value)
+        } else {
+          console.error(
+            'Unable to load loyalty performance.',
+            loyaltyResult.reason,
+          )
+          setLoyaltyProgrammePerformance([])
+        }
       } catch (loadError) {
         if (!active) return
         console.error(
@@ -120,6 +144,11 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
         )
         setDealPerformance([])
         setLoyaltyProgrammePerformance([])
+        setPerformanceError(
+          'Unable to load deal performance. Please try again.',
+        )
+      } finally {
+        if (active) setPerformancePeriod(periodKey)
       }
     }
 
@@ -127,16 +156,18 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
     return () => {
       active = false
     }
-  }, [loadPerformanceBreakdowns, reloadKey])
+  }, [loadPerformanceBreakdowns, periodKey])
 
   return {
     metrics,
     dealPerformance,
+    performanceLoading: performancePeriod !== periodKey,
+    performanceError,
     deals,
     dealsFailed,
     dealsLoading,
     loyaltyProgrammePerformance,
-    isLoading,
+    isLoading: isLoading || metricsPeriod !== periodKey,
     error,
     reload: () => setReloadKey((current) => current + 1),
   }

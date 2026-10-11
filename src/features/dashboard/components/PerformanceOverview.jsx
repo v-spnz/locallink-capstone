@@ -7,6 +7,7 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import {
   formatDashboardCount,
   formatDashboardDateRange,
@@ -89,6 +90,7 @@ function PerformanceSkeleton({ capabilityCount }) {
 
 export default function PerformanceOverview({
   analyticsPeriod,
+  onPeriodChange,
   metrics,
   capabilities,
   moduleCount,
@@ -99,6 +101,21 @@ export default function PerformanceOverview({
   recordedCustomerSavings,
   recordedAverageTransaction,
 }) {
+  const [periodError, setPeriodError] = useState('')
+
+  function applyPeriod(event) {
+    event.preventDefault()
+    const values = new FormData(event.currentTarget)
+    const startDate = values.get('startDate')
+    const endDate = values.get('endDate')
+    if (startDate > endDate) {
+      setPeriodError('Start date must be on or before end date.')
+      return
+    }
+    setPeriodError('')
+    onPeriodChange({ startDate, endDate })
+  }
+
   return (
     <section
       className="business-dashboard-section business-performance-section"
@@ -120,6 +137,36 @@ export default function PerformanceOverview({
           Refresh
         </button>
       </div>
+
+      <form
+        key={`${analyticsPeriod.startDate}:${analyticsPeriod.endDate}`}
+        className="business-performance-period"
+        onSubmit={applyPeriod}
+        onChange={() => setPeriodError('')}
+      >
+        <label>
+          From
+          <input
+            type="date"
+            name="startDate"
+            required
+            defaultValue={analyticsPeriod.startDate}
+          />
+        </label>
+        <label>
+          To
+          <input
+            type="date"
+            name="endDate"
+            required
+            defaultValue={analyticsPeriod.endDate}
+          />
+        </label>
+        <button type="submit" className="business-performance-refresh">
+          Apply period
+        </button>
+        {periodError && <p role="alert">{periodError}</p>}
+      </form>
 
       {isLoading && <PerformanceSkeleton capabilityCount={moduleCount} />}
 

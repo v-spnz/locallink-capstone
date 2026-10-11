@@ -1,9 +1,12 @@
 import { useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { BadgePercent, BriefcaseBusiness, Gift } from 'lucide-react'
 import useBusiness from '../../business/useBusiness'
 import BusinessProfileSnapshot from '../../features/dashboard/components/BusinessProfileSnapshot'
 import DashboardHeader from '../../features/dashboard/components/DashboardHeader'
 import DashboardQuickLinks from '../../features/dashboard/components/DashboardQuickLinks'
+import CategoryPerformanceSection from '../../features/dashboard/components/CategoryPerformanceSection'
+import DealPerformanceSection from '../../features/dashboard/components/DealPerformanceSection'
 import DealStatusOverview from '../../features/dashboard/components/DealStatusOverview'
 import PerformanceOverview from '../../features/dashboard/components/PerformanceOverview'
 import RedemptionCallToAction from '../../features/dashboard/components/RedemptionCallToAction'
@@ -16,6 +19,14 @@ import {
 import useBusinessDashboardAnalytics from '../../features/dashboard/hooks/useBusinessDashboardAnalytics'
 import '../../features/dashboard/Dashboard.css'
 
+function validDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value ?? '')) return false
+  const date = new Date(`${value}T00:00:00Z`)
+  return (
+    !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+  )
+}
+
 export default function Dashboard() {
   const {
     business,
@@ -25,16 +36,57 @@ export default function Dashboard() {
     serviceCategories,
     serviceAreas,
   } = useBusiness()
-  const analyticsPeriod = useMemo(() => getDefaultDashboardDateRange(), [])
+  const [searchParams, setSearchParams] = useSearchParams()
+  const defaultPeriod = useMemo(() => getDefaultDashboardDateRange(), [])
+  const requestedStart = searchParams.get('start')
+  const requestedEnd = searchParams.get('end')
+  const analyticsPeriod =
+    validDate(requestedStart) &&
+    validDate(requestedEnd) &&
+    requestedStart <= requestedEnd
+      ? { startDate: requestedStart, endDate: requestedEnd }
+      : defaultPeriod
+  const selectedDealId = searchParams.get('deal')
+
+  function changePeriod({ startDate, endDate }) {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      next.set('start', startDate)
+      next.set('end', endDate)
+      return next
+    })
+  }
+
+  function selectDeal(dealId) {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      next.set('deal', dealId)
+      return next
+    })
+  }
+
+  function clearSelectedDeal() {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      next.delete('deal')
+      return next
+    })
+  }
   const {
     metrics,
+    dealPerformance,
     deals,
     dealsFailed,
     dealsLoading,
+    performanceLoading,
+    performanceError,
     isLoading,
     error,
     reload,
   } = useBusinessDashboardAnalytics(analyticsPeriod)
+  const hasSelectedDeal = dealPerformance.some(
+    (deal) => deal.dealId === selectedDealId && deal.status !== 'draft',
+  )
   const dealSummary = useMemo(() => getDealStatusSummary(deals), [deals])
   const verificationLabel = business.verification_status
     .replaceAll('_', ' ')
@@ -81,6 +133,7 @@ export default function Dashboard() {
 
       <PerformanceOverview
         analyticsPeriod={analyticsPeriod}
+        onPeriodChange={changePeriod}
         metrics={metrics}
         capabilities={capabilities}
         moduleCount={modules.length}
@@ -109,6 +162,54 @@ export default function Dashboard() {
         ) : (
           <DealStatusOverview summary={dealSummary} />
         ))}
+
+      {capabilities.deals_enabled &&
+        !isLoading &&
+        !error &&
+        metrics &&
+        !performanceLoading &&
+        performanceError && (
+          <section className="business-dashboard-section">
+            <div className="business-performance-error" role="alert">
+              <div>
+                <strong>Deal performance is unavailable</strong>
+                <p>{performanceError}</p>
+              </div>
+              <button type="button" onClick={reload}>
+                Try again
+              </button>
+            </div>
+          </section>
+        )}
+
+      {capabilities.deals_enabled &&
+        !isLoading &&
+        !error &&
+        metrics &&
+        !performanceLoading &&
+        !performanceError && (
+          <DealPerformanceSection
+            deals={dealPerformance}
+            period={analyticsPeriod}
+            selectedDealId={selectedDealId}
+            onSelect={selectDeal}
+            onBack={clearSelectedDeal}
+          />
+        )}
+
+      {capabilities.deals_enabled &&
+        !isLoading &&
+        !error &&
+        metrics &&
+        !performanceLoading &&
+        !performanceError &&
+        !hasSelectedDeal && (
+          <CategoryPerformanceSection
+            deals={dealPerformance}
+            period={analyticsPeriod}
+            onSelect={selectDeal}
+          />
+        )}
 
       {capabilities.deals_enabled && <RedemptionCallToAction />}
 
