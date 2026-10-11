@@ -11,6 +11,7 @@ import {
   hasLoyaltyActivity,
   hasMarketplaceActivity,
 } from '../src/features/dashboard/dashboardPresentation.js'
+import { groupDealsByCategory } from '../src/features/dashboard/categoryPerformance.js'
 
 const ANALYTICS_MIGRATION_URL = new URL(
   '../supabase/migrations/20260924030000_add_business_dashboard_analytics_rpcs.sql',
@@ -74,6 +75,46 @@ test('dashboard values format real zeroes while unknown sales stay unavailable',
   assert.equal(formatDashboardPercentage(47.25), '47.3%')
   assert.equal(formatRecordedCurrency(4875), '$48.75')
   assert.equal(formatRecordedCurrency(null), null)
+})
+
+test('category distribution counts published deals independently of period activity', () => {
+  const deal = (category, claims, cohort, status = 'published') => ({
+    status,
+    category,
+    claims,
+    redemptions: 0,
+    claimCohortRedemptions: cohort,
+  })
+  const deals = [
+    deal('Retail', 2, 0),
+    deal('Retail', 0, 0),
+    deal('Services', 1, 1),
+    deal('Other', 0, 0, 'draft'),
+  ]
+
+  assert.deepEqual(groupDealsByCategory([]), [])
+  assert.deepEqual(groupDealsByCategory(deals.slice(3)), [])
+  assert.equal(groupDealsByCategory(deals.slice(0, 1))[0].deals.length, 1)
+  assert.deepEqual(
+    groupDealsByCategory(deals.slice(0, 2)).map((group) => group.deals.length),
+    [2],
+  )
+
+  const groups = groupDealsByCategory(deals)
+  assert.deepEqual(
+    groups.map((group) => [
+      group.category,
+      group.deals.length,
+      group.claims,
+      group.redemptions,
+    ]),
+    [
+      ['Retail', 2, 2, 0],
+      ['Services', 1, 1, 0],
+    ],
+  )
+  assert.equal(groups[0].conversion, 0)
+  assert.equal(groups[1].conversion, 1)
 })
 
 test('empty-state helpers use actual activity rather than sample data', () => {

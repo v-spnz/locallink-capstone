@@ -3,30 +3,34 @@ import { ChevronDown } from 'lucide-react'
 import {
   formatDashboardCount,
   formatDashboardDateRange,
+  formatDashboardPercentage,
 } from '../dashboardPresentation'
-import { groupDealsByCategory } from '../categoryPerformance'
+import {
+  formatCategoryConversion,
+  groupDealsByCategory,
+} from '../categoryPerformance'
 
-function CategoryDonut({ groups, totalRedemptions }) {
+function CategoryDonut({ groups, totalDeals, openCategory, onToggle }) {
   const radius = 40
   const circumference = 2 * Math.PI * radius
-  const hasGaps = groups.filter((group) => group.redemptions > 0).length > 1
-  const gap = hasGaps ? 1.5 : 0
-  const visibleGroups = groups.filter((group) => group.redemptions > 0)
-  const segments = visibleGroups.map((group, index) => {
-    const lengthOf = (item) =>
-      (item.redemptions / totalRedemptions) * circumference
-    const offset = visibleGroups
+  const segments = groups.map((group, index) => {
+    const length = (group.deals.length / totalDeals) * circumference
+    const previousDeals = groups
       .slice(0, index)
-      .reduce((sum, previous) => sum + lengthOf(previous), 0)
-    return { group, length: lengthOf(group), offset }
+      .reduce((sum, previous) => sum + previous.deals.length, 0)
+    return {
+      group,
+      length,
+      offset: (previousDeals / totalDeals) * circumference,
+    }
   })
 
   return (
     <svg
       className="business-category-donut"
       viewBox="0 0 100 100"
-      role="img"
-      aria-label="Share of redemptions by deal category"
+      role="group"
+      aria-label="Published deals by category. Select a segment to see its deals."
     >
       <circle
         cx="50"
@@ -45,12 +49,24 @@ function CategoryDonut({ groups, totalRedemptions }) {
           fill="none"
           stroke={group.colour}
           strokeWidth="14"
-          strokeDasharray={`${Math.max(length - gap, 0.5)} ${circumference}`}
+          strokeDasharray={`${length} ${circumference}`}
           strokeDashoffset={-offset}
           transform="rotate(-90 50 50)"
-        >
-          <title>{`${group.category}: ${group.redemptions} redemptions`}</title>
-        </circle>
+          className={
+            openCategory === group.category ? 'is-selected' : undefined
+          }
+          role="button"
+          tabIndex={0}
+          aria-label={`${group.category}: ${group.deals.length} ${group.deals.length === 1 ? 'deal' : 'deals'}, ${formatDashboardPercentage((group.deals.length / totalDeals) * 100)}`}
+          aria-expanded={openCategory === group.category}
+          onClick={() => onToggle(group.category)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              onToggle(group.category)
+            }
+          }}
+        />
       ))}
       <text
         x="50"
@@ -58,7 +74,7 @@ function CategoryDonut({ groups, totalRedemptions }) {
         textAnchor="middle"
         className="business-category-donut-total"
       >
-        {formatDashboardCount(totalRedemptions)}
+        {formatDashboardCount(totalDeals)}
       </text>
       <text
         x="50"
@@ -66,7 +82,7 @@ function CategoryDonut({ groups, totalRedemptions }) {
         textAnchor="middle"
         className="business-category-donut-label"
       >
-        redemptions
+        {totalDeals === 1 ? 'deal' : 'deals'}
       </text>
     </svg>
   )
@@ -80,33 +96,23 @@ export default function CategoryPerformanceSection({
   const [openCategory, setOpenCategory] = useState(null)
   const groups = groupDealsByCategory(deals)
   const periodLabel = formatDashboardDateRange(period)
-  const totalRedemptions = groups.reduce(
-    (sum, group) => sum + group.redemptions,
-    0,
+  const totalDeals = groups.reduce((sum, group) => sum + group.deals.length, 0)
+  const categoryDeals =
+    groups.length === 1
+      ? groups[0].deals.toSorted(
+          (a, b) => b.claims - a.claims || b.redemptions - a.redemptions,
+        )
+      : []
+  const hasDealActivity = categoryDeals.some(
+    (deal) => deal.claims > 0 || deal.redemptions > 0,
+  )
+  const largestCount = categoryDeals.reduce(
+    (largest, deal) => Math.max(largest, deal.claims, deal.redemptions),
+    1,
   )
 
-  if (groups.length === 0) return null
-
-  if (groups.length === 1) {
-    return (
-      <section
-        className="business-dashboard-section business-category-perf"
-        aria-labelledby="business-category-perf-title"
-      >
-        <div className="business-section-heading business-performance-heading">
-          <div>
-            <span>Category performance</span>
-            <h2 id="business-category-perf-title">Performance by category</h2>
-            <p>{periodLabel}</p>
-          </div>
-        </div>
-        <p className="business-category-single">
-          All your deals are in {groups[0].category}, so there is nothing to
-          compare yet. Create a deal in another category to see how different
-          kinds of offers perform.
-        </p>
-      </section>
-    )
+  function toggleCategory(category) {
+    setOpenCategory((current) => (current === category ? null : category))
   }
 
   return (
@@ -117,87 +123,176 @@ export default function CategoryPerformanceSection({
       <div className="business-section-heading business-performance-heading">
         <div>
           <span>Category performance</span>
-          <h2 id="business-category-perf-title">Performance by category</h2>
+          <h2 id="business-category-perf-title">
+            {groups.length === 1
+              ? 'How your deals are performing'
+              : 'Performance by category'}
+          </h2>
           <p>
-            {periodLabel}. Select a category to see the deals behind its
-            numbers.
+            {groups.length === 1
+              ? `${groups[0].category} deals · ${periodLabel}. Select a deal to see its full breakdown.`
+              : 'Current published deals by category.'}
+            {groups.length > 1 && ' Select a category to see its deals.'}
           </p>
         </div>
       </div>
 
-      <div className="business-category-layout">
-        <div className="business-category-chart">
-          {totalRedemptions > 0 ? (
-            <CategoryDonut
-              groups={groups}
-              totalRedemptions={totalRedemptions}
-            />
-          ) : (
-            <p className="business-category-no-redemptions">
-              No redemptions were recorded in this period, so there is no share
-              to show yet.
-            </p>
-          )}
-        </div>
-
-        <ul className="business-category-list">
-          {groups.map((group) => {
-            const isOpen = openCategory === group.category
-            const panelId = `business-category-deals-${group.category.replace(/\W+/g, '-')}`
-
-            return (
-              <li key={group.category}>
+      {totalDeals === 0 ? (
+        <p className="business-category-single">
+          No published deals to compare yet.
+        </p>
+      ) : groups.length === 1 ? (
+        <>
+          {hasDealActivity ? (
+            <div
+              className={`business-category-deal-bars${totalDeals === 1 ? ' is-single' : ''}`}
+              role="group"
+              aria-label="Claims and redemptions by deal"
+            >
+              {categoryDeals.map((deal) => (
                 <button
                   type="button"
-                  className="business-category-row"
-                  aria-expanded={isOpen}
-                  aria-controls={panelId}
-                  onClick={() =>
-                    setOpenCategory(isOpen ? null : group.category)
-                  }
+                  key={deal.dealId}
+                  className="business-category-row business-category-deal-bar"
+                  onClick={() => onSelect(deal.dealId)}
                 >
-                  <span className="business-category-name">
-                    <i
-                      style={{ background: group.colour }}
-                      aria-hidden="true"
-                    />
-                    <span>
-                      <strong>{group.category}</strong>
-                      <small>
-                        {group.deals.length}{' '}
-                        {group.deals.length === 1 ? 'deal' : 'deals'}
-                      </small>
+                  <strong>{deal.dealName}</strong>
+                  {[
+                    { label: 'Claims', value: deal.claims, style: 'is-claims' },
+                    {
+                      label: 'Redemptions',
+                      value: deal.redemptions,
+                      style: 'is-redemptions',
+                    },
+                  ].map(({ label, value, style }) => (
+                    <span
+                      key={label}
+                      className={`business-category-bar-measure ${style}`}
+                    >
+                      <span>{label}</span>
+                      <span
+                        className="business-category-bar-track"
+                        aria-hidden="true"
+                      >
+                        <span
+                          style={{ width: `${(value / largestCount) * 100}%` }}
+                        />
+                      </span>
+                      <b>{formatDashboardCount(value)}</b>
                     </span>
-                  </span>
-                  <ChevronDown
-                    className={isOpen ? 'is-open' : ''}
-                    aria-hidden="true"
-                  />
+                  ))}
                 </button>
+              ))}
+            </div>
+          ) : (
+            <>
+              <p className="business-category-single">
+                No claims or redemptions were recorded for these deals in this
+                period.
+              </p>
+              <ul className="business-category-deals is-empty">
+                {categoryDeals.map((deal) => (
+                  <li key={deal.dealId}>
+                    <button type="button" onClick={() => onSelect(deal.dealId)}>
+                      <strong>{deal.dealName}</strong>
+                      <span>View deal details</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <p className="business-category-period-note">
+            Claims and redemptions are separate counts for {periodLabel}. A
+            redemption may belong to a claim made earlier.
+          </p>
+        </>
+      ) : (
+        <>
+          <div className="business-category-layout">
+            <div className="business-category-chart">
+              <CategoryDonut
+                groups={groups}
+                totalDeals={totalDeals}
+                openCategory={openCategory}
+                onToggle={toggleCategory}
+              />
+            </div>
 
-                {isOpen && (
-                  <ul className="business-category-deals" id={panelId}>
-                    {group.deals.map((deal) => (
-                      <li key={deal.dealId}>
-                        <button
-                          type="button"
-                          onClick={() => onSelect(deal.dealId)}
-                        >
-                          <strong>{deal.dealName}</strong>
-                          <span>
-                            {formatDashboardCount(deal.claims)} claims ·{' '}
-                            {formatDashboardCount(deal.redemptions)} redemptions
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
-            )
-          })}
-        </ul>
-      </div>
+            <ul className="business-category-list">
+              {groups.map((group) => {
+                const isOpen = openCategory === group.category
+                const panelId = `business-category-deals-${group.category.replace(/\W+/g, '-')}`
+
+                return (
+                  <li key={group.category}>
+                    <button
+                      type="button"
+                      className="business-category-row"
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                      onClick={() => toggleCategory(group.category)}
+                    >
+                      <span className="business-category-name">
+                        <i
+                          style={{ background: group.colour }}
+                          aria-hidden="true"
+                        />
+                        <span>
+                          <strong>{group.category}</strong>
+                          <small>
+                            {formatDashboardCount(group.deals.length)}{' '}
+                            {group.deals.length === 1 ? 'deal' : 'deals'} ·{' '}
+                            {formatDashboardPercentage(
+                              (group.deals.length / totalDeals) * 100,
+                            )}{' '}
+                            of published deals
+                          </small>
+                          <small>
+                            {formatDashboardCount(group.claims)} claims ·{' '}
+                            {formatDashboardCount(group.redemptions)}{' '}
+                            redemptions · Claim conversion:{' '}
+                            {formatCategoryConversion(group.conversion)}
+                          </small>
+                        </span>
+                      </span>
+                      <ChevronDown
+                        className={isOpen ? 'is-open' : ''}
+                        aria-hidden="true"
+                      />
+                    </button>
+
+                    {isOpen && (
+                      <ul className="business-category-deals" id={panelId}>
+                        {group.deals.map((deal) => (
+                          <li key={deal.dealId}>
+                            <button
+                              type="button"
+                              onClick={() => onSelect(deal.dealId)}
+                            >
+                              <strong>{deal.dealName}</strong>
+                              <span>
+                                {formatDashboardCount(deal.claims)} claims ·{' '}
+                                {formatDashboardCount(deal.redemptions)}{' '}
+                                redemptions
+                              </span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+          <p className="business-category-period-note">
+            Deal counts show your current published deals. Claims and
+            redemptions use {periodLabel}; conversion shows how many claims from
+            that period have been redeemed so far.
+          </p>
+        </>
+      )}
     </section>
   )
 }

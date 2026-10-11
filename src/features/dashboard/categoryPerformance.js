@@ -1,4 +1,4 @@
-import { DEAL_CATEGORIES } from '../deals/constants'
+import { DEAL_CATEGORIES } from '../deals/constants.js'
 
 export const CATEGORY_COLOURS = {
   'Food & Drink': '#2a78d6',
@@ -44,7 +44,10 @@ export function groupDealsByCategory(deals) {
       conversion:
         group.claims > 0 ? group.claimCohortRedemptions / group.claims : null,
     }))
-    .toSorted((a, b) => b.redemptions - a.redemptions || b.claims - a.claims)
+    .toSorted(
+      (a, b) =>
+        b.deals.length - a.deals.length || a.category.localeCompare(b.category),
+    )
 }
 
 export function formatCategoryConversion(conversion) {

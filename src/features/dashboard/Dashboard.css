@@ -289,6 +289,40 @@
   font-variant-numeric: tabular-nums;
 }
 
+.business-performance-period {
+  margin: 0 0 18px;
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.business-performance-period label {
+  display: grid;
+  gap: 5px;
+  color: var(--business-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.business-performance-period input {
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid var(--business-border-strong);
+  border-radius: var(--business-radius-control);
+  background: var(--business-surface);
+  color: var(--business-ink);
+  font: inherit;
+  font-size: 14px;
+}
+
+.business-performance-period p {
+  width: 100%;
+  margin: 0;
+  color: var(--business-danger);
+  font-size: 12px;
+}
+
 .business-performance-refresh,
 .business-performance-error button {
   min-height: 40px;
@@ -1320,7 +1354,7 @@ a.business-performance-refresh {
 
 .business-category-layout {
   display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
+  grid-template-columns: 260px minmax(0, 1fr);
   align-items: start;
   gap: 24px;
 }
@@ -1332,8 +1366,20 @@ a.business-performance-refresh {
 
 .business-category-donut {
   width: 100%;
-  max-width: 200px;
+  max-width: 240px;
   height: auto;
+}
+
+.business-category-donut circle[role='button'] {
+  cursor: pointer;
+  transition: stroke-width 160ms ease;
+}
+
+.business-category-donut circle[role='button']:hover,
+.business-category-donut circle[role='button']:focus-visible,
+.business-category-donut circle.is-selected {
+  stroke-width: 18px;
+  outline: none;
 }
 
 .business-category-donut-total {
@@ -1348,7 +1394,6 @@ a.business-performance-refresh {
   font-weight: 600;
 }
 
-.business-category-no-redemptions,
 .business-category-single {
   margin: 0;
   padding: 16px 18px;
@@ -1360,11 +1405,75 @@ a.business-performance-refresh {
   line-height: 1.55;
 }
 
+.business-category-period-note {
+  margin-top: 16px;
+  color: var(--business-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.business-category-deal-bars {
+  display: grid;
+  gap: 10px;
+}
+
+.business-category-deal-bars.is-single {
+  max-width: 620px;
+}
+
+.business-category-deal-bar {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 10px;
+}
+
+.business-category-deal-bar > .business-category-bar-measure {
+  display: grid;
+  grid-template-columns: 95px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 10px;
+  color: var(--business-muted);
+  font-size: 12px;
+}
+
+.business-category-bar-measure b {
+  color: var(--business-ink);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.business-category-bar-track {
+  height: 9px;
+  border-radius: 999px;
+  display: block;
+  overflow: hidden;
+  background: #edf0f5;
+}
+
+.business-category-bar-track > span {
+  height: 100%;
+  border-radius: inherit;
+  display: block;
+  background: var(--business-accent);
+}
+
+.business-category-bar-measure.is-redemptions
+  .business-category-bar-track
+  > span {
+  background: #1baf7a;
+}
+
 .business-category-list,
 .business-category-deals {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.business-category-deals.is-empty {
+  margin-top: 12px;
+  padding-left: 0;
 }
 
 .business-category-list {
@@ -1394,6 +1503,17 @@ a.business-performance-refresh {
 .business-category-row:hover {
   border-color: #b9c6f0;
   background: var(--business-surface-soft);
+}
+
+.business-category-row[aria-expanded='true'] {
+  border-color: #b9c6f0;
+  background: var(--business-surface-soft);
+}
+
+.business-category-row:focus-visible,
+.business-category-deals button:focus-visible {
+  outline: 3px solid rgb(63 91 211 / 24%);
+  outline-offset: 2px;
 }
 
 .business-category-row > span {
@@ -1489,5 +1609,25 @@ a.business-performance-refresh {
 @media (max-width: 900px) {
   .business-category-layout {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .business-category-deal-bar {
+    padding: 15px;
+  }
+
+  .business-category-bar-measure {
+    grid-template-columns: 80px minmax(0, 1fr) 32px;
+    gap: 7px;
+  }
+
+  .business-category-deals button {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .business-category-deals button span {
+    white-space: normal;
   }
 }
