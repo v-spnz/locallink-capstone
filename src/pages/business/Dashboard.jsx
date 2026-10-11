@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { BadgePercent, BriefcaseBusiness, Gift } from 'lucide-react'
 import useBusiness from '../../business/useBusiness'
 import BusinessProfileSnapshot from '../../features/dashboard/components/BusinessProfileSnapshot'
@@ -35,11 +36,57 @@ export default function Dashboard() {
     serviceCategories,
     serviceAreas,
   } = useBusiness()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [reportingDays, setReportingDays] = useState(30)
-  const analyticsPeriod = useMemo(
+  const defaultPeriod = useMemo(
     () => getDefaultDashboardDateRange(new Date(), reportingDays),
     [reportingDays],
   )
+  const requestedStart = searchParams.get('start')
+  const requestedEnd = searchParams.get('end')
+  const hasCustomPeriod =
+    validDate(requestedStart) &&
+    validDate(requestedEnd) &&
+    requestedStart <= requestedEnd
+  const analyticsPeriod = hasCustomPeriod
+    ? { startDate: requestedStart, endDate: requestedEnd }
+    : defaultPeriod
+  const selectedDealId = searchParams.get('deal')
+
+  function changeReportingDays(days) {
+    setReportingDays(days)
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      next.delete('start')
+      next.delete('end')
+      return next
+    })
+  }
+
+  function changePeriod({ startDate, endDate }) {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      next.set('start', startDate)
+      next.set('end', endDate)
+      return next
+    })
+  }
+
+  function selectDeal(dealId) {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      next.set('deal', dealId)
+      return next
+    })
+  }
+
+  function clearSelectedDeal() {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      next.delete('deal')
+      return next
+    })
+  }
   const {
     metrics,
     dealPerformance,
@@ -48,8 +95,6 @@ export default function Dashboard() {
     deals,
     dealsFailed,
     dealsLoading,
-    performanceLoading,
-    performanceError,
     isLoading,
     error,
     reload,
@@ -103,8 +148,9 @@ export default function Dashboard() {
 
       <PerformanceOverview
         analyticsPeriod={analyticsPeriod}
-        reportingDays={reportingDays}
-        onReportingDaysChange={setReportingDays}
+        onPeriodChange={changePeriod}
+        reportingDays={hasCustomPeriod ? 'custom' : reportingDays}
+        onReportingDaysChange={changeReportingDays}
         metrics={metrics}
         dealPerformance={dealPerformance}
         dealPerformanceLoading={dealPerformanceLoading}
@@ -141,13 +187,13 @@ export default function Dashboard() {
         !isLoading &&
         !error &&
         metrics &&
-        !performanceLoading &&
-        performanceError && (
+        !dealPerformanceLoading &&
+        dealPerformanceError && (
           <section className="business-dashboard-section">
             <div className="business-performance-error" role="alert">
               <div>
                 <strong>Deal performance is unavailable</strong>
-                <p>{performanceError}</p>
+                <p>Unable to load deal performance. Please try again.</p>
               </div>
               <button type="button" onClick={reload}>
                 Try again
@@ -160,8 +206,8 @@ export default function Dashboard() {
         !isLoading &&
         !error &&
         metrics &&
-        !performanceLoading &&
-        !performanceError && (
+        !dealPerformanceLoading &&
+        !dealPerformanceError && (
           <DealPerformanceSection
             deals={dealPerformance}
             period={analyticsPeriod}
@@ -175,8 +221,8 @@ export default function Dashboard() {
         !isLoading &&
         !error &&
         metrics &&
-        !performanceLoading &&
-        !performanceError &&
+        !dealPerformanceLoading &&
+        !dealPerformanceError &&
         !hasSelectedDeal && (
           <CategoryPerformanceSection
             deals={dealPerformance}

@@ -311,6 +311,40 @@
   font: inherit;
 }
 
+.business-performance-period {
+  margin: 0 0 18px;
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.business-performance-period label {
+  display: grid;
+  gap: 5px;
+  color: var(--business-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.business-performance-period input {
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid var(--business-border-strong);
+  border-radius: var(--business-radius-control);
+  background: var(--business-surface);
+  color: var(--business-ink);
+  font: inherit;
+  font-size: 14px;
+}
+
+.business-performance-period p {
+  width: 100%;
+  margin: 0;
+  color: var(--business-danger);
+  font-size: 12px;
+}
+
 .business-deal-comparison {
   min-width: 0;
   padding: 22px;

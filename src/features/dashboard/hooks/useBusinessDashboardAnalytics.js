@@ -12,6 +12,7 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
   const [metrics, setMetrics] = useState(null)
   const [dealPerformance, setDealPerformance] = useState([])
   const [dealPerformanceLoading, setDealPerformanceLoading] = useState(true)
+  const [dealPerformancePeriod, setDealPerformancePeriod] = useState('')
   const [dealPerformanceError, setDealPerformanceError] = useState(false)
   const [deals, setDeals] = useState([])
   const [dealsFailed, setDealsFailed] = useState(false)
@@ -136,7 +137,10 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
         setLoyaltyProgrammePerformance([])
         setDealPerformanceError(true)
       } finally {
-        if (active) setDealPerformanceLoading(false)
+        if (active) {
+          setDealPerformanceLoading(false)
+          setDealPerformancePeriod(periodKey)
+        }
       }
     }
 
@@ -149,7 +153,8 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
   return {
     metrics,
     dealPerformance,
-    dealPerformanceLoading,
+    dealPerformanceLoading:
+      dealPerformanceLoading || dealPerformancePeriod !== periodKey,
     dealPerformanceError,
     deals,
     dealsFailed,

@@ -156,6 +156,7 @@ function DealComparison({ deals, isLoading, error, reload }) {
 
 export default function PerformanceOverview({
   analyticsPeriod,
+  onPeriodChange,
   reportingDays,
   onReportingDaysChange,
   metrics,
@@ -209,6 +210,9 @@ export default function PerformanceOverview({
             <option value={7}>Last 7 days</option>
             <option value={30}>Last 30 days</option>
             <option value={90}>Last 90 days</option>
+            <option value="custom" disabled>
+              Custom dates
+            </option>
           </select>
           <button
             type="button"
