@@ -65,13 +65,6 @@ function TrendChart({ title, points, sales = false }) {
     max < 2 && !sales
       ? [0, max]
       : [0, sales ? max / 2 : Math.ceil(max / 2), max]
-  const tooltipY = active
-    ? y(
-        sales
-          ? (active.recordedValueCents ?? 0)
-          : Math.max(active.claims, active.redemptions),
-      )
-    : 0
   return (
     <article className="business-trend-card">
       <div className="business-trend-heading">
@@ -186,10 +179,6 @@ function TrendChart({ title, points, sales = false }) {
             <div
               className="business-trend-tooltip"
               role="tooltip"
-              style={{
-                left: `clamp(110px, ${(x(selected) / 600) * 100}%, calc(100% - 110px))`,
-                top: `clamp(6px, calc(${(tooltipY / 220) * 100}% - 30px), calc(100% - 72px))`,
-              }}
             >
               <strong>
                 {dateLabel(active.date)}

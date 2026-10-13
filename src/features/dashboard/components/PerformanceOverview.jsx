@@ -98,7 +98,13 @@ function PerformanceSkeleton({ capabilityCount }) {
 }
 
 function DealComparison({ deals, isLoading, error, reload }) {
-  const performanceDeals = getPerformanceDeals(deals)
+  const [visibleCount, setVisibleCount] = useState(5)
+  const performanceDeals = getPerformanceDeals(deals).toSorted(
+    (a, b) =>
+      b.redemptions - a.redemptions ||
+      b.claims - a.claims ||
+      b.claimToRedemptionRate - a.claimToRedemptionRate,
+  )
   return (
     <section
       className="business-deal-comparison"
@@ -135,7 +141,7 @@ function DealComparison({ deals, isLoading, error, reload }) {
               </tr>
             </thead>
             <tbody>
-              {performanceDeals.map((deal) => (
+              {performanceDeals.slice(0, visibleCount).map((deal) => (
                 <tr key={deal.dealId}>
                   <th scope="row">{deal.dealName}</th>
                   <td>{formatDashboardCount(deal.claims)}</td>
@@ -158,6 +164,15 @@ function DealComparison({ deals, isLoading, error, reload }) {
             </tbody>
           </table>
         </div>
+      )}
+      {!isLoading && !error && visibleCount < performanceDeals.length && (
+        <button
+          type="button"
+          className="business-performance-refresh business-deal-comparison-more"
+          onClick={() => setVisibleCount((count) => count + 5)}
+        >
+          Load More
+        </button>
       )}
     </section>
   )
@@ -358,6 +373,7 @@ export default function PerformanceOverview({
           )}
           {capabilities.deals_enabled && (
             <DealComparison
+              key={`${analyticsPeriod.startDate}:${analyticsPeriod.endDate}`}
               deals={dealPerformance}
               isLoading={dealPerformanceLoading}
               error={dealPerformanceError}

@@ -295,6 +295,11 @@
   font-weight: 700;
 }
 
+.business-deal-comparison .business-deal-comparison-more {
+  display: flex;
+  margin: 18px auto 0;
+}
+
 .business-performance-refresh,
 .business-performance-error button {
   min-height: 40px;
@@ -578,6 +583,7 @@
   width: 100%;
   max-width: 600px;
   margin: 8px auto 0;
+  padding-top: 58px;
 }
 
 .business-trend-scroll svg {
@@ -618,17 +624,20 @@
 
 .business-trend-tooltip {
   position: absolute;
+  top: 0;
+  left: 50%;
   z-index: 1;
   width: 220px;
   max-width: calc(100% - 16px);
-  padding: 6px 8px;
+  box-sizing: border-box;
+  padding: 4px 8px;
   border: 1px solid var(--business-border-strong);
   border-radius: 9px;
   background: var(--business-surface);
   color: var(--business-ink-soft);
   box-shadow: var(--business-shadow-md);
   font-size: 12px;
-  line-height: 1.3;
+  line-height: 1.2;
   font-variant-numeric: tabular-nums;
   pointer-events: none;
   transform: translateX(-50%);
