@@ -2,14 +2,19 @@ import { useCallback, useEffect, useState } from 'react'
 import useBusiness from '../../../business/useBusiness'
 import {
   fetchBusinessDashboardMetrics,
+  fetchBusinessDashboardTrends,
   fetchBusinessDealPerformance,
   fetchBusinessLoyaltyProgrammePerformance,
 } from '../api/businessDashboard'
+import { getPreviousDashboardDateRange } from '../dashboardPresentation'
 import { fetchBusinessDeals } from '../../deals/api/businessDeals'
 
 export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
   const { business } = useBusiness()
   const [metrics, setMetrics] = useState(null)
+  const [previousMetrics, setPreviousMetrics] = useState(null)
+  const [trends, setTrends] = useState([])
+  const [trendsError, setTrendsError] = useState(false)
   const [dealPerformance, setDealPerformance] = useState([])
   const [dealPerformanceLoading, setDealPerformanceLoading] = useState(true)
   const [dealPerformancePeriod, setDealPerformancePeriod] = useState('')
@@ -24,16 +29,6 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
   const [error, setError] = useState('')
   const [reloadKey, setReloadKey] = useState(0)
   const periodKey = `${business.id}:${startDate}:${endDate}:${reloadKey}`
-
-  const loadMetrics = useCallback(async () => {
-    if (!startDate || !endDate) return null
-
-    return fetchBusinessDashboardMetrics({
-      businessId: business.id,
-      startDate,
-      endDate,
-    })
-  }, [business.id, endDate, startDate])
 
   const loadPerformanceBreakdowns = useCallback(async () => {
     if (!startDate || !endDate) return null
@@ -82,12 +77,25 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
       setError('')
 
       try {
-        const nextMetrics = await loadMetrics()
-        if (active) setMetrics(nextMetrics)
+        const options = { businessId: business.id, startDate, endDate }
+        const previous = getPreviousDashboardDateRange(options)
+        const [currentResult, previousResult, trendsResult] = await Promise.allSettled([
+          fetchBusinessDashboardMetrics(options),
+          fetchBusinessDashboardMetrics({ ...options, ...previous }),
+          fetchBusinessDashboardTrends(options),
+        ])
+        if (!active) return
+        if (currentResult.status === 'rejected') throw currentResult.reason
+        setMetrics(currentResult.value)
+        setPreviousMetrics(previousResult.status === 'fulfilled' ? previousResult.value : null)
+        setTrends(trendsResult.status === 'fulfilled' ? trendsResult.value : [])
+        setTrendsError(trendsResult.status === 'rejected')
       } catch (loadError) {
         if (!active) return
         console.error('Unable to load business dashboard metrics.', loadError)
         setMetrics(null)
+        setPreviousMetrics(null)
+        setTrends([])
         setError('Unable to load dashboard analytics. Please try again.')
       } finally {
         if (active) {
@@ -101,7 +109,7 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
     return () => {
       active = false
     }
-  }, [loadMetrics, periodKey])
+  }, [business.id, startDate, endDate, periodKey])
 
   useEffect(() => {
     let active = true
@@ -152,6 +160,9 @@ export default function useBusinessDashboardAnalytics({ startDate, endDate }) {
 
   return {
     metrics,
+    previousMetrics,
+    trends,
+    trendsError,
     dealPerformance,
     dealPerformanceLoading:
       dealPerformanceLoading || dealPerformancePeriod !== periodKey,

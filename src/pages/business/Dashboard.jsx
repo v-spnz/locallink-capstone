@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router-dom'
 import { BadgePercent, BriefcaseBusiness, Gift } from 'lucide-react'
 import useBusiness from '../../business/useBusiness'
 import BusinessProfileSnapshot from '../../features/dashboard/components/BusinessProfileSnapshot'
-import DashboardHeader from '../../features/dashboard/components/DashboardHeader'
 import DashboardQuickLinks from '../../features/dashboard/components/DashboardQuickLinks'
 import CategoryPerformanceSection from '../../features/dashboard/components/CategoryPerformanceSection'
 import DealPerformanceSection from '../../features/dashboard/components/DealPerformanceSection'
@@ -11,10 +10,12 @@ import DealStatusOverview from '../../features/dashboard/components/DealStatusOv
 import PerformanceOverview from '../../features/dashboard/components/PerformanceOverview'
 import RedemptionCallToAction from '../../features/dashboard/components/RedemptionCallToAction'
 import WorkspaceModules from '../../features/dashboard/components/WorkspaceModules'
+import { groupDealsByCategory } from '../../features/dashboard/categoryPerformance'
 import {
   formatRecordedCurrency,
   getDealStatusSummary,
   getDefaultDashboardDateRange,
+  getPerformanceDeals,
 } from '../../features/dashboard/dashboardPresentation'
 import useBusinessDashboardAnalytics from '../../features/dashboard/hooks/useBusinessDashboardAnalytics'
 import '../../features/dashboard/Dashboard.css'
@@ -31,7 +32,6 @@ export default function Dashboard() {
   const {
     business,
     capabilities,
-    membership,
     serviceProfile,
     serviceCategories,
     serviceAreas,
@@ -89,6 +89,9 @@ export default function Dashboard() {
   }
   const {
     metrics,
+    previousMetrics,
+    trends,
+    trendsError,
     dealPerformance,
     dealPerformanceLoading,
     dealPerformanceError,
@@ -99,9 +102,10 @@ export default function Dashboard() {
     error,
     reload,
   } = useBusinessDashboardAnalytics(analyticsPeriod)
-  const hasSelectedDeal = dealPerformance.some(
-    (deal) => deal.dealId === selectedDealId && deal.status !== 'draft',
+  const hasSelectedDeal = getPerformanceDeals(dealPerformance).some(
+    (deal) => deal.dealId === selectedDealId,
   )
+  const categoryGroups = groupDealsByCategory(dealPerformance)
   const dealSummary = useMemo(() => getDealStatusSummary(deals), [deals])
   const verificationLabel = business.verification_status
     .replaceAll('_', ' ')
@@ -144,26 +148,10 @@ export default function Dashboard() {
 
   return (
     <div className="business-dashboard">
-      <DashboardHeader business={business} membership={membership} />
-
-      <PerformanceOverview
-        analyticsPeriod={analyticsPeriod}
-        onPeriodChange={changePeriod}
-        reportingDays={hasCustomPeriod ? 'custom' : reportingDays}
-        onReportingDaysChange={changeReportingDays}
-        metrics={metrics}
-        dealPerformance={dealPerformance}
-        dealPerformanceLoading={dealPerformanceLoading}
-        dealPerformanceError={dealPerformanceError}
-        capabilities={capabilities}
-        moduleCount={modules.length}
-        isLoading={isLoading}
-        error={error}
-        reload={reload}
-        recordedTransactionValue={recordedTransactionValue}
-        recordedCustomerSavings={recordedCustomerSavings}
-        recordedAverageTransaction={recordedAverageTransaction}
-      />
+      <header className="business-dashboard-title">
+        <h1>Business dashboard</h1>
+        <p>{business.business_name}</p>
+      </header>
 
       {capabilities.deals_enabled &&
         !dealsLoading &&
@@ -182,6 +170,28 @@ export default function Dashboard() {
         ) : (
           <DealStatusOverview summary={dealSummary} />
         ))}
+
+      <PerformanceOverview
+        analyticsPeriod={analyticsPeriod}
+        onPeriodChange={changePeriod}
+        reportingDays={hasCustomPeriod ? 'custom' : reportingDays}
+        onReportingDaysChange={changeReportingDays}
+        metrics={metrics}
+        previousMetrics={previousMetrics}
+        trends={trends}
+        trendsError={trendsError}
+        dealPerformance={dealPerformance}
+        dealPerformanceLoading={dealPerformanceLoading}
+        dealPerformanceError={dealPerformanceError}
+        capabilities={capabilities}
+        moduleCount={modules.length}
+        isLoading={isLoading}
+        error={error}
+        reload={reload}
+        recordedTransactionValue={recordedTransactionValue}
+        recordedCustomerSavings={recordedCustomerSavings}
+        recordedAverageTransaction={recordedAverageTransaction}
+      />
 
       {capabilities.deals_enabled &&
         !isLoading &&
@@ -223,9 +233,10 @@ export default function Dashboard() {
         metrics &&
         !dealPerformanceLoading &&
         !dealPerformanceError &&
-        !hasSelectedDeal && (
+        !hasSelectedDeal &&
+        categoryGroups.length > 1 && (
           <CategoryPerformanceSection
-            deals={dealPerformance}
+            groups={categoryGroups}
             period={analyticsPeriod}
             onSelect={selectDeal}
           />
