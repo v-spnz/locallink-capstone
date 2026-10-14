@@ -6,7 +6,7 @@ import {
   UserRound,
   X,
 } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import BusinessPageLoader from '../../components/ui/BusinessPageLoader'
 import useBusinessDealRedemption from '../../features/deals/hooks/useBusinessDealRedemption'
@@ -39,6 +39,7 @@ export default function ClaimRecords() {
   const requestedReferenceRef = useRef('')
   const records = useBusinessDealRedemption()
   const { lookupClaim } = records
+  const [visibleCount, setVisibleCount] = useState(5)
 
   useEffect(() => {
     if (
@@ -144,34 +145,45 @@ export default function ClaimRecords() {
               <p>Completed redemptions will appear here.</p>
             </div>
           ) : (
-            <ol className="deal-redemption-history-list">
-              {records.redemptions.map((item) => (
-                <li key={item.claimReference}>
-                  <button
-                    type="button"
-                    className={
-                      records.claimLookupResult?.claimReference ===
-                      item.claimReference
-                        ? 'is-selected'
-                        : undefined
-                    }
-                    onClick={() => records.selectClaimRecord(item)}
-                    aria-label={`Open claim ${item.claimReference} for ${item.customerDisplayName}`}
-                  >
-                    <span aria-hidden="true">
-                      <UserRound />
-                    </span>
-                    <span>
-                      <strong>{item.customerDisplayName}</strong>
-                      <small>{item.claimReference}</small>
-                    </span>
-                    <time dateTime={item.redeemedAt}>
-                      {formatDateTime(item.redeemedAt)}
-                    </time>
-                  </button>
-                </li>
-              ))}
-            </ol>
+            <>
+              <ol className="deal-redemption-history-list">
+                {records.redemptions.slice(0, visibleCount).map((item) => (
+                  <li key={item.claimReference}>
+                    <button
+                      type="button"
+                      className={
+                        records.claimLookupResult?.claimReference ===
+                        item.claimReference
+                          ? 'is-selected'
+                          : undefined
+                      }
+                      onClick={() => records.selectClaimRecord(item)}
+                      aria-label={`Open claim ${item.claimReference} for ${item.customerDisplayName}`}
+                    >
+                      <span aria-hidden="true">
+                        <UserRound />
+                      </span>
+                      <span>
+                        <strong>{item.customerDisplayName}</strong>
+                        <small>{item.claimReference}</small>
+                      </span>
+                      <time dateTime={item.redeemedAt}>
+                        {formatDateTime(item.redeemedAt)}
+                      </time>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+              {visibleCount < records.redemptions.length && (
+                <button
+                  type="button"
+                  className="business-claim-record-load-more"
+                  onClick={() => setVisibleCount((count) => count + 5)}
+                >
+                  Load More
+                </button>
+              )}
+            </>
           )}
         </section>
 

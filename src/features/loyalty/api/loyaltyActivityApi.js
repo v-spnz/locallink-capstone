@@ -33,7 +33,7 @@ function mapActivity(record) {
 
 export async function fetchBusinessLoyaltyActivity(
   businessId,
-  { limit = 50 } = {},
+  { limit = 100 } = {},
 ) {
   const { data, error } = await supabase.rpc('get_business_loyalty_activity', {
     p_business_id: businessId,

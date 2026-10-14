@@ -1834,6 +1834,11 @@ body.business-surface .loyalty-input-with-prefix .form-input {
   background: var(--business-accent-soft);
 }
 
+.loyalty-activity-more {
+  display: flex;
+  margin: 16px auto 0;
+}
+
 .loyalty-activity-empty {
   padding: 24px 0;
   color: var(--business-muted);
@@ -1850,7 +1855,7 @@ body.business-surface .loyalty-input-with-prefix .form-input {
   gap: 14px;
 }
 
-.loyalty-activity-row:last-child {
+.loyalty-activity-row:last-of-type {
   border-bottom: 0;
 }
 
