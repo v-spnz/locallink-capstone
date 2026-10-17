@@ -1,4 +1,5 @@
 import { DEAL_CATEGORIES } from '../deals/constants.js'
+import { getPerformanceDeals } from './dashboardPresentation.js'
 
 export const CATEGORY_COLOURS = {
   'Food & Drink': '#2a78d6',
@@ -13,8 +14,7 @@ export const CATEGORY_COLOURS = {
 export function groupDealsByCategory(deals) {
   const groups = new Map()
 
-  for (const deal of deals) {
-    if (deal.status === 'draft') continue
+  for (const deal of getPerformanceDeals(deals)) {
 
     const category = DEAL_CATEGORIES.includes(deal.category)
       ? deal.category

@@ -117,6 +117,22 @@ export async function fetchBusinessDashboardMetrics(options) {
   return mapDashboardMetrics(data)
 }
 
+export async function fetchBusinessDashboardTrends(options) {
+  const { data, error } = await supabase.rpc(
+    'get_business_dashboard_trends',
+    analyticsParameters(options),
+  )
+
+  if (error) throw error
+  return (data ?? []).map((record) => ({
+    date: record.date,
+    claims: numberOrZero(record.claims),
+    redemptions: numberOrZero(record.redemptions),
+    valuedRedemptions: numberOrZero(record.valued_redemptions),
+    recordedValueCents: nullableNumber(record.recorded_value_cents),
+  }))
+}
+
 export async function fetchBusinessDealPerformance(options) {
   const { data, error } = await supabase.rpc(
     'get_business_deal_performance',

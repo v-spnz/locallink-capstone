@@ -56,6 +56,58 @@ export function getDefaultDashboardDateRange(
   }
 }
 
+export function getPreviousDashboardDateRange({ startDate, endDate }) {
+  const start = new Date(`${startDate}T00:00:00Z`)
+  const end = new Date(`${endDate}T00:00:00Z`)
+  const days = Math.round((end - start) / 86_400_000) + 1
+  end.setTime(start.getTime() - 86_400_000)
+  start.setTime(start.getTime() - days * 86_400_000)
+  return { startDate: formatIsoDate(start), endDate: formatIsoDate(end) }
+}
+
+export function getPerformanceChange(current, previous, percentagePoints = false) {
+  if (current == null || previous == null || !Number.isFinite(current) || !Number.isFinite(previous)) return null
+  const difference = current - previous
+  if (difference === 0) return previous === 0 ? null : { direction: 'same', label: 'Unchanged vs previous period' }
+  if (previous === 0 && !percentagePoints) return current > 0 ? { direction: 'up', label: 'New activity vs previous period' } : null
+  const amount = percentagePoints ? Math.abs(difference) : Math.abs(difference / previous * 100)
+  return {
+    direction: difference > 0 ? 'up' : 'down',
+    label: `${percentageFormatter.format(amount)}${percentagePoints ? ' percentage points' : '%'} vs previous period`,
+  }
+}
+
+export function groupDashboardTrends(rows, { startDate, endDate }) {
+  const start = new Date(`${startDate}T00:00:00Z`)
+  const end = new Date(`${endDate}T00:00:00Z`)
+  const days = Math.round((end - start) / 86_400_000) + 1
+  const interval = days <= 31 ? 'day' : days <= 180 ? 'week' : 'month'
+  const byDate = new Map(rows.map((row) => [row.date, row]))
+  const buckets = []
+  for (const date = new Date(start); date <= end;) {
+    const key = interval === 'month' ? formatIsoDate(new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1))) : formatIsoDate(date)
+    const next = new Date(date)
+    if (interval === 'day') next.setUTCDate(next.getUTCDate() + 1)
+    else if (interval === 'week') next.setUTCDate(next.getUTCDate() + 7)
+    else next.setUTCMonth(next.getUTCMonth() + 1, 1)
+    const row = byDate.get(key)
+    buckets.push({
+      date: formatIsoDate(date),
+      endDate: formatIsoDate(new Date(Math.min(end.getTime(), next.getTime() - 86_400_000))),
+      claims: row?.claims ?? 0,
+      redemptions: row?.redemptions ?? 0,
+      valuedRedemptions: row?.valuedRedemptions ?? 0,
+      recordedValueCents: row?.recordedValueCents ?? (row?.redemptions ? null : 0),
+    })
+    date.setTime(next.getTime())
+  }
+  return buckets
+}
+
+export function getPerformanceDeals(deals) {
+  return deals.filter((deal) => deal.status !== 'draft' && deal.status !== 'scheduled')
+}
+
 export function formatDashboardDateRange({ startDate, endDate }) {
   const start = displayDateFormatter.format(new Date(`${startDate}T00:00:00Z`))
   const end = displayDateFormatter.format(new Date(`${endDate}T00:00:00Z`))
