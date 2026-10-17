@@ -7,6 +7,7 @@ import {
   formatRecordedCurrency,
   getDealMoneyCoverage,
   getDealPerformanceSummary,
+  getPerformanceDeals,
 } from '../dashboardPresentation'
 
 function PerformanceMetric({ label, value, detail, unavailable = false }) {
@@ -27,15 +28,19 @@ export default function DealPerformanceSection({
   onBack,
 }) {
   const [showAll, setShowAll] = useState(false)
-  const publishedDeals = deals.filter((deal) => deal.status !== 'draft')
-  const rankedDeals = publishedDeals.toSorted(
+  const performanceDeals = getPerformanceDeals(deals)
+  const rankedDeals = performanceDeals.toSorted(
     (a, b) =>
       b.redemptions - a.redemptions ||
       b.claims - a.claims ||
       b.claimToRedemptionRate - a.claimToRedemptionRate,
   )
   const visibleDeals = showAll ? rankedDeals : rankedDeals.slice(0, 3)
-  const selected = publishedDeals.find((deal) => deal.dealId === selectedDealId)
+  const largestCount = rankedDeals.reduce(
+    (maximum, deal) => Math.max(maximum, deal.claims, deal.redemptions),
+    1,
+  )
+  const selected = performanceDeals.find((deal) => deal.dealId === selectedDealId)
   const periodLabel = formatDashboardDateRange(period)
 
   if (selected) {
@@ -53,27 +58,25 @@ export default function DealPerformanceSection({
         className="business-dashboard-section business-deal-perf"
         aria-labelledby="business-deal-perf-title"
       >
-        <button
-          type="button"
-          className="business-performance-refresh"
-          onClick={onBack}
-        >
-          <ArrowLeft aria-hidden="true" />
-          Back to dashboard
-        </button>
-
-        <div className="business-section-heading business-performance-heading business-deal-perf-heading">
-          <div>
-            <span>Deal performance</span>
-            <h2 id="business-deal-perf-title">{selected.dealName}</h2>
-            <p>
-              {selected.category || 'Uncategorised'} ·{' '}
-              {selected.status.replaceAll('_', ' ')} · {periodLabel}
-            </p>
-          </div>
-        </div>
-
         <article className="business-performance-card is-deals">
+          <div className="business-section-heading business-performance-heading business-deal-perf-heading business-deal-perf-detail-heading">
+            <div>
+              <span>Deal performance</span>
+              <h2 id="business-deal-perf-title">{selected.dealName}</h2>
+              <p>
+                {selected.category || 'Uncategorised'} ·{' '}
+                {selected.status.replaceAll('_', ' ')} · {periodLabel}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="business-performance-refresh"
+              aria-label="Back to dashboard"
+              onClick={onBack}
+            >
+              <ArrowLeft aria-hidden="true" />
+            </button>
+          </div>
           <p className="business-deal-perf-summary">
             {getDealPerformanceSummary(selected)}
           </p>
@@ -164,7 +167,7 @@ export default function DealPerformanceSection({
       {rankedDeals.length === 0 ? (
         <div className="business-performance-empty">
           <dt>No deal activity</dt>
-          <dd>No published deals have performance information yet.</dd>
+          <dd>No active or past deals have performance information yet.</dd>
         </div>
       ) : (
         <div className="business-deal-perf-list">
@@ -181,15 +184,29 @@ export default function DealPerformanceSection({
                   {deal.status.replaceAll('_', ' ')}
                 </small>
               </span>
-              <span>
-                <small>Claims</small>
-                <strong>{formatDashboardCount(deal.claims)}</strong>
+              <span className="business-deal-perf-bars">
+                <span className="business-deal-perf-measure">
+                  <small>Claims</small>
+                  <strong>{formatDashboardCount(deal.claims)}</strong>
+                  <span className="business-deal-perf-track" aria-hidden="true">
+                    <span
+                      className="is-claims"
+                      style={{ width: `${(deal.claims / largestCount) * 100}%` }}
+                    />
+                  </span>
+                </span>
+                <span className="business-deal-perf-measure">
+                  <small>Redemptions</small>
+                  <strong>{formatDashboardCount(deal.redemptions)}</strong>
+                  <span className="business-deal-perf-track" aria-hidden="true">
+                    <span
+                      className="is-redemptions"
+                      style={{ width: `${(deal.redemptions / largestCount) * 100}%` }}
+                    />
+                  </span>
+                </span>
               </span>
-              <span>
-                <small>Redemptions</small>
-                <strong>{formatDashboardCount(deal.redemptions)}</strong>
-              </span>
-              <span>
+              <span className="business-deal-perf-conversion">
                 <small>Conversion</small>
                 <strong>
                   {formatDashboardPercentage(deal.claimToRedemptionRate)}

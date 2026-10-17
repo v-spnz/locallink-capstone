@@ -5,6 +5,9 @@ import {
   BriefcaseBusiness,
   Gift,
   RefreshCw,
+  TrendingDown,
+  TrendingUp,
+  Minus,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
@@ -16,14 +19,19 @@ import {
   hasDealActivity,
   hasLoyaltyActivity,
   hasMarketplaceActivity,
+  getPerformanceChange,
+  getPerformanceDeals,
 } from '../dashboardPresentation'
+import PerformanceTrends from './PerformanceTrends'
 
-function PerformanceMetric({ label, value, detail, unavailable = false }) {
+function PerformanceMetric({ label, value, detail, trend, unavailable = false }) {
+  const Icon = trend?.direction === 'up' ? TrendingUp : trend?.direction === 'down' ? TrendingDown : Minus
   return (
-    <div className={unavailable ? 'is-unavailable' : undefined}>
+    <div className={unavailable ? 'is-unavailable' : trend?.direction === 'up' || trend?.direction === 'down' ? `is-${trend.direction}` : undefined}>
       <dt>{label}</dt>
       <dd>{value}</dd>
       {detail && <small>{detail}</small>}
+      {trend && <small className={`business-metric-trend is-${trend.direction}`}><Icon aria-hidden="true" />{trend.label}</small>}
     </div>
   )
 }
@@ -90,6 +98,13 @@ function PerformanceSkeleton({ capabilityCount }) {
 }
 
 function DealComparison({ deals, isLoading, error, reload }) {
+  const [visibleCount, setVisibleCount] = useState(5)
+  const performanceDeals = getPerformanceDeals(deals).toSorted(
+    (a, b) =>
+      b.redemptions - a.redemptions ||
+      b.claims - a.claims ||
+      b.claimToRedemptionRate - a.claimToRedemptionRate,
+  )
   return (
     <section
       className="business-deal-comparison"
@@ -110,8 +125,8 @@ function DealComparison({ deals, isLoading, error, reload }) {
             Try again
           </button>
         </div>
-      ) : deals.length === 0 ? (
-        <p>No deals to compare yet.</p>
+      ) : performanceDeals.length === 0 ? (
+        <p>No active or past deals to compare yet.</p>
       ) : (
         <div className="business-deal-comparison-scroll">
           <table>
@@ -126,7 +141,7 @@ function DealComparison({ deals, isLoading, error, reload }) {
               </tr>
             </thead>
             <tbody>
-              {deals.map((deal) => (
+              {performanceDeals.slice(0, visibleCount).map((deal) => (
                 <tr key={deal.dealId}>
                   <th scope="row">{deal.dealName}</th>
                   <td>{formatDashboardCount(deal.claims)}</td>
@@ -150,6 +165,15 @@ function DealComparison({ deals, isLoading, error, reload }) {
           </table>
         </div>
       )}
+      {!isLoading && !error && visibleCount < performanceDeals.length && (
+        <button
+          type="button"
+          className="business-performance-refresh business-deal-comparison-more"
+          onClick={() => setVisibleCount((count) => count + 5)}
+        >
+          Load More
+        </button>
+      )}
     </section>
   )
 }
@@ -160,6 +184,9 @@ export default function PerformanceOverview({
   reportingDays,
   onReportingDaysChange,
   metrics,
+  previousMetrics,
+  trends,
+  trendsError,
   dealPerformance,
   dealPerformanceLoading,
   dealPerformanceError,
@@ -173,6 +200,10 @@ export default function PerformanceOverview({
   recordedAverageTransaction,
 }) {
   const [periodError, setPeriodError] = useState('')
+  function change(key, rate = false, denominatorKey) {
+    if (!previousMetrics || (denominatorKey && (!metrics[denominatorKey] || !previousMetrics[denominatorKey]))) return null
+    return getPerformanceChange(metrics[key], previousMetrics[key], rate)
+  }
 
   function applyPeriod(event) {
     event.preventDefault()
@@ -273,15 +304,6 @@ export default function PerformanceOverview({
       {!isLoading && !error && metrics && (
         <div className="business-performance-list">
           {capabilities.deals_enabled && (
-            <DealComparison
-              deals={dealPerformance}
-              isLoading={dealPerformanceLoading}
-              error={dealPerformanceError}
-              reload={reload}
-            />
-          )}
-
-          {capabilities.deals_enabled && (
             <PerformanceSection
               className="is-deals"
               icon={BadgePercent}
@@ -294,16 +316,19 @@ export default function PerformanceOverview({
               <PerformanceMetric
                 label="Claims"
                 value={formatDashboardCount(metrics.dealClaims)}
+                trend={change('dealClaims')}
               />
               <PerformanceMetric
                 label="Redemptions"
                 value={formatDashboardCount(metrics.dealRedemptions)}
+                trend={change('dealRedemptions')}
               />
               <PerformanceMetric
                 label="Claim conversion"
                 value={formatDashboardPercentage(
                   metrics.dealClaimToRedemptionRate,
                 )}
+                trend={change('dealClaimToRedemptionRate', true, 'dealClaims')}
               />
               <PerformanceMetric
                 label="Recorded sales value"
@@ -314,6 +339,7 @@ export default function PerformanceOverview({
                     : 'No valued redemptions'
                 }
                 unavailable={recordedTransactionValue == null}
+                trend={change('recordedTransactionValueCents')}
               />
               <PerformanceMetric
                 label="Average transaction value"
@@ -342,6 +368,19 @@ export default function PerformanceOverview({
             </PerformanceSection>
           )}
 
+          {capabilities.deals_enabled && (
+            <PerformanceTrends rows={trends} period={analyticsPeriod} error={trendsError} reload={reload} />
+          )}
+          {capabilities.deals_enabled && (
+            <DealComparison
+              key={`${analyticsPeriod.startDate}:${analyticsPeriod.endDate}`}
+              deals={dealPerformance}
+              isLoading={dealPerformanceLoading}
+              error={dealPerformanceError}
+              reload={reload}
+            />
+          )}
+
           {capabilities.loyalty_enabled && (
             <PerformanceSection
               className="is-loyalty"
@@ -362,6 +401,7 @@ export default function PerformanceOverview({
               <PerformanceMetric
                 label="Activity events"
                 value={formatDashboardCount(metrics.loyaltyActivityEvents)}
+                trend={change('loyaltyActivityEvents')}
               />
               <PerformanceMetric
                 label="Rewards earned"
@@ -391,14 +431,17 @@ export default function PerformanceOverview({
               <PerformanceMetric
                 label="Matched leads"
                 value={formatDashboardCount(metrics.marketplaceMatchedLeads)}
+                trend={change('marketplaceMatchedLeads')}
               />
               <PerformanceMetric
                 label="Quotes submitted"
                 value={formatDashboardCount(metrics.marketplaceQuotesSubmitted)}
+                trend={change('marketplaceQuotesSubmitted')}
               />
               <PerformanceMetric
                 label="Jobs won"
                 value={formatDashboardCount(metrics.marketplaceJobsWon)}
+                trend={change('marketplaceJobsWon')}
               />
               <PerformanceMetric
                 label="Completed jobs"

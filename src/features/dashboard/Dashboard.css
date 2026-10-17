@@ -60,120 +60,24 @@
 }
 
 /* Dashboard */
-.business-dashboard-header {
-  min-height: 252px;
-  padding: 0;
-  border: 1px solid var(--business-border);
-  border-radius: 20px;
-  display: grid;
-  grid-template-columns: minmax(330px, 0.9fr) minmax(420px, 1.1fr);
-  align-items: stretch;
-  gap: 0;
-  overflow: hidden;
-  background: var(--business-surface);
-  box-shadow: var(--business-shadow-sm);
-}
-
-.business-dashboard-header-copy {
-  position: relative;
-  z-index: 1;
-  padding: 36px;
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
-  justify-content: center;
-  background:
-    radial-gradient(circle at 0 0, rgb(63 91 211 / 11%), transparent 48%),
-    var(--business-surface);
-}
-
-.business-dashboard-eyebrow {
-  margin-bottom: 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--business-accent-strong);
-  font-size: 13px;
-  font-weight: 750;
-  letter-spacing: 0.02em;
-}
-
-.business-dashboard-eyebrow svg {
-  width: 16px;
-  height: 16px;
-}
-
-.business-dashboard-header-copy > p {
-  max-width: 42ch;
-  margin: 13px 0 0;
-  color: var(--business-muted);
-  font-size: 15px;
-  line-height: 1.55;
-  text-wrap: pretty;
-}
-
-.business-dashboard-header-meta {
-  margin-top: 24px;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 9px;
-}
-
-.business-dashboard-header-meta > span {
-  min-height: 34px;
-  padding: 7px 10px;
-  border: 1px solid #d8e0f9;
-  border-radius: 9px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgb(255 255 255 / 78%);
-  color: var(--business-accent-strong);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.business-dashboard-header-meta > span svg {
-  width: 14px;
-  height: 14px;
-}
-
-.business-dashboard-hero-art {
-  min-width: 0;
-  min-height: 252px;
+.business-dashboard-title h1 {
   margin: 0;
-  overflow: hidden;
-  background: var(--business-accent-soft);
+  color: var(--business-ink);
+  font-size: clamp(24px, 3vw, 28px);
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
 }
 
-.business-dashboard-hero-art img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-  object-position: center;
+.business-dashboard-title p {
+  margin: 4px 0 0;
+  color: var(--business-muted);
+  font-size: 14px;
+  overflow-wrap: anywhere;
 }
 
-.business-role-badge {
-  margin-top: 0;
-  padding: 8px 10px;
-  border: 1px solid #d8e0f9;
-  border-radius: 9px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
-  background: rgb(255 255 255 / 78%);
-  color: var(--business-accent-strong);
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: capitalize;
-}
-
-.business-role-badge svg {
-  width: 14px;
-  height: 14px;
+.business-dashboard-title + .business-dashboard-section {
+  margin-top: 20px;
 }
 
 .business-redemption-cta {
@@ -391,6 +295,11 @@
   font-weight: 700;
 }
 
+.business-deal-comparison .business-deal-comparison-more {
+  display: flex;
+  margin: 18px auto 0;
+}
+
 .business-performance-refresh,
 .business-performance-error button {
   min-height: 40px;
@@ -545,7 +454,7 @@
 
 .business-performance-metrics > div {
   min-width: 0;
-  padding: 22px;
+  padding: 19px 20px;
   border-bottom: 1px solid #edf0f5;
   border-left: 1px solid #edf0f5;
   display: flex;
@@ -579,12 +488,181 @@
   overflow-wrap: anywhere;
 }
 
+.business-performance-metrics > div.is-up dd {
+  color: var(--business-success);
+}
+
+.business-performance-metrics > div.is-down dd {
+  color: var(--business-danger);
+}
+
 .business-performance-metrics small {
   margin-top: 6px;
   color: var(--business-faint);
   font-size: 11px;
   font-weight: 600;
   line-height: 1.35;
+}
+
+.business-metric-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.business-metric-trend svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.business-performance-metrics .business-metric-trend.is-up {
+  color: var(--business-success);
+}
+
+.business-performance-metrics .business-metric-trend.is-down {
+  color: var(--business-danger);
+}
+
+.business-performance-metrics .business-metric-trend.is-same {
+  color: var(--business-muted);
+}
+
+.business-trend-list {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 12px;
+}
+
+.business-trend-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--business-border);
+  border-radius: var(--business-radius-card);
+  display: flex;
+  flex-direction: column;
+  background: var(--business-surface);
+  box-shadow: var(--business-shadow-sm);
+}
+
+.business-trend-heading {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.business-trend-heading h3 {
+  margin: 0;
+  font-size: 17px;
+  color: var(--business-ink);
+}
+
+.business-trend-heading span,
+.business-trend-list > p {
+  color: var(--business-muted);
+  font-size: 12px;
+}
+
+.business-trend-heading i {
+  display: inline-block;
+  width: 18px;
+  height: 3px;
+  margin: 0 5px 3px 12px;
+  border-radius: 2px;
+}
+
+.business-trend-scroll {
+  min-width: 0;
+}
+
+.business-trend-plot {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 8px auto 0;
+  padding-top: 58px;
+}
+
+.business-trend-scroll svg {
+  display: block;
+  width: 100%;
+}
+
+.business-trend-grid {
+  stroke: #e8ecf3;
+}
+
+.business-trend-axis {
+  fill: var(--business-muted);
+  font-size: 17px;
+}
+
+.business-trend-date {
+  font-size: 15px;
+}
+
+.business-trend-line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.business-trend-line.is-claims,
+.business-trend-heading i.is-claims { stroke: var(--business-accent); background: var(--business-accent); }
+.business-trend-line.is-redemptions,
+.business-trend-heading i.is-redemptions { stroke: var(--business-success); background: var(--business-success); }
+.business-trend-line.is-sales { stroke: var(--business-accent); }
+.business-trend-dot.is-claims,
+.business-trend-dot.is-sales { fill: var(--business-accent); }
+.business-trend-dot.is-redemptions { fill: var(--business-success); }
+.business-trend-target { cursor: pointer; }
+.business-trend-target:focus-visible { stroke: var(--business-ink); stroke-width: 2; }
+
+.business-trend-tooltip {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 1;
+  width: 220px;
+  max-width: calc(100% - 16px);
+  box-sizing: border-box;
+  padding: 4px 8px;
+  border: 1px solid var(--business-border-strong);
+  border-radius: 9px;
+  background: var(--business-surface);
+  color: var(--business-ink-soft);
+  box-shadow: var(--business-shadow-md);
+  font-size: 12px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.business-trend-tooltip strong,
+.business-trend-tooltip span {
+  display: block;
+}
+
+.business-trend-tooltip strong {
+  margin-bottom: 2px;
+  color: var(--business-ink);
+}
+
+.business-trend-list > p { margin: 0 2px; line-height: 1.5; }
+
+.business-trend-list > p {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .business-trend-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 .business-performance-metrics > div.is-unavailable dd {
@@ -1030,21 +1108,6 @@ body.business-surface .business-module-card .business-module-action {
 }
 
 @media (max-width: 760px) {
-  .business-dashboard-header {
-    min-height: 0;
-    padding: 0;
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-
-  .business-dashboard-header-copy {
-    padding: 30px;
-  }
-
-  .business-dashboard-hero-art {
-    min-height: 240px;
-  }
-
   .business-redemption-cta {
     align-items: stretch;
     flex-direction: column;
@@ -1094,23 +1157,6 @@ body.business-surface .business-module-card .business-module-action {
   .business-dashboard-panel {
     padding: 20px;
     border-radius: 14px;
-  }
-
-  .business-dashboard-header-copy {
-    padding: 24px;
-  }
-
-  .business-dashboard-hero-art {
-    min-height: 220px;
-  }
-
-  .business-dashboard-header-meta {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .business-dashboard-header-meta > span {
-    width: fit-content;
   }
 
   .business-performance-heading {
@@ -1193,6 +1239,7 @@ body.business-surface .business-module-card .business-module-action {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 6px;
   color: var(--business-muted);
   font-size: 12px;
@@ -1331,6 +1378,42 @@ a.business-performance-refresh {
   text-transform: none;
 }
 
+.business-deal-perf-detail-heading {
+  margin: 0;
+  padding: 18px 22px;
+  border-bottom: 1px solid #edf0f5;
+  grid-column: 1 / -1;
+  align-items: flex-start;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.business-deal-perf-detail-heading > div {
+  min-width: 0;
+}
+
+.business-deal-perf-detail-heading h2,
+.business-deal-perf-detail-heading p {
+  overflow-wrap: anywhere;
+}
+
+.business-deal-perf-detail-heading .business-performance-refresh {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  flex: 0 0 40px;
+}
+
+.business-deal-perf-detail-heading .business-performance-refresh svg {
+  width: 18px;
+  height: 18px;
+}
+
+.business-deal-perf-detail-heading .business-performance-refresh:focus-visible {
+  outline: 3px solid var(--business-accent);
+  outline-offset: 2px;
+}
+
 .business-deal-perf-summary {
   margin: 0;
   padding: 18px 22px;
@@ -1342,7 +1425,6 @@ a.business-performance-refresh {
 }
 
 .business-deal-perf .business-performance-card {
-  margin-top: 14px;
   grid-template-columns: 1fr;
 }
 
@@ -1362,11 +1444,11 @@ a.business-performance-refresh {
 }
 
 .business-deal-perf-list > button {
-  padding: 14px 18px;
+  padding: 13px 18px;
   border: 1px solid var(--business-border);
   border-radius: 12px;
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 0.6fr)) auto;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 2.4fr) minmax(80px, 0.42fr) auto;
   align-items: center;
   gap: 16px;
   background: var(--business-surface);
@@ -1384,6 +1466,11 @@ a.business-performance-refresh {
   background: var(--business-surface-soft);
 }
 
+.business-deal-perf-list > button:focus-visible {
+  outline: 3px solid var(--business-accent);
+  outline-offset: 2px;
+}
+
 .business-deal-perf-list > button > span {
   min-width: 0;
   display: grid;
@@ -1396,6 +1483,58 @@ a.business-performance-refresh {
   font-size: 15px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.business-deal-perf-name strong,
+.business-deal-perf-name small {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.business-deal-perf-list > button > .business-deal-perf-bars {
+  gap: 8px;
+}
+
+.business-deal-perf-measure {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 3px 8px;
+}
+
+.business-deal-perf-measure strong {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.business-deal-perf-track {
+  height: 7px;
+  border-radius: 999px;
+  grid-column: 1 / -1;
+  overflow: hidden;
+  background: #edf0f5;
+}
+
+.business-deal-perf-track > span {
+  height: 100%;
+  border-radius: inherit;
+  display: block;
+}
+
+.business-deal-perf-track > .is-claims {
+  background: var(--business-accent);
+}
+
+.business-deal-perf-track > .is-redemptions {
+  background: var(--business-success);
+}
+
+.business-deal-perf-conversion {
+  align-self: center;
+  justify-items: end;
+  text-align: right;
 }
 
 .business-deal-perf-list small {
@@ -1412,15 +1551,29 @@ a.business-performance-refresh {
 
 @media (max-width: 760px) {
   .business-deal-perf-list > button {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 12px;
   }
 
   .business-deal-perf-name {
-    grid-column: 1 / -1;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .business-deal-perf-bars {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .business-deal-perf-conversion {
+    grid-column: 2;
+    grid-row: 2;
   }
 
   .business-deal-perf-list > button > svg {
-    display: none;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
   }
 }
 
@@ -1466,17 +1619,6 @@ a.business-performance-refresh {
   font-weight: 600;
 }
 
-.business-category-single {
-  margin: 0;
-  padding: 16px 18px;
-  border: 1px solid var(--business-border);
-  border-radius: 12px;
-  background: var(--business-surface-soft);
-  color: var(--business-muted);
-  font-size: 14px;
-  line-height: 1.55;
-}
-
 .business-category-period-note {
   margin-top: 16px;
   color: var(--business-muted);
@@ -1484,68 +1626,11 @@ a.business-performance-refresh {
   line-height: 1.5;
 }
 
-.business-category-deal-bars {
-  display: grid;
-  gap: 10px;
-}
-
-.business-category-deal-bars.is-single {
-  max-width: 620px;
-}
-
-.business-category-deal-bar {
-  grid-template-columns: minmax(0, 1fr);
-  align-items: stretch;
-  gap: 10px;
-}
-
-.business-category-deal-bar > .business-category-bar-measure {
-  display: grid;
-  grid-template-columns: 95px minmax(0, 1fr) 42px;
-  align-items: center;
-  gap: 10px;
-  color: var(--business-muted);
-  font-size: 12px;
-}
-
-.business-category-bar-measure b {
-  color: var(--business-ink);
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-}
-
-.business-category-bar-track {
-  height: 9px;
-  border-radius: 999px;
-  display: block;
-  overflow: hidden;
-  background: #edf0f5;
-}
-
-.business-category-bar-track > span {
-  height: 100%;
-  border-radius: inherit;
-  display: block;
-  background: var(--business-accent);
-}
-
-.business-category-bar-measure.is-redemptions
-  .business-category-bar-track
-  > span {
-  background: #1baf7a;
-}
-
 .business-category-list,
 .business-category-deals {
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.business-category-deals.is-empty {
-  margin-top: 12px;
-  padding-left: 0;
 }
 
 .business-category-list {
@@ -1685,15 +1770,6 @@ a.business-performance-refresh {
 }
 
 @media (max-width: 560px) {
-  .business-category-deal-bar {
-    padding: 15px;
-  }
-
-  .business-category-bar-measure {
-    grid-template-columns: 80px minmax(0, 1fr) 32px;
-    gap: 7px;
-  }
-
   .business-category-deals button {
     align-items: flex-start;
     flex-direction: column;

@@ -72,7 +72,7 @@ export default function DealStatusOverview({ summary }) {
         <div className="business-deal-attention">
           <div className="business-deal-attention-group">
             <h3>Unfinished drafts</h3>
-            {summary.drafts.slice(0, 5).map((draft) => (
+            {summary.drafts.slice(0, 2).map((draft) => (
               <Link to="/business/create-deal" key={draft.id}>
                 <span>
                   <strong>{draft.title}</strong>
@@ -85,6 +85,12 @@ export default function DealStatusOverview({ summary }) {
                 <ArrowRight aria-hidden="true" />
               </Link>
             ))}
+            {summary.drafts.length > 2 && (
+              <Link to="/business/create-deal">
+                View all {summary.drafts.length} drafts
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            )}
           </div>
         </div>
       )}

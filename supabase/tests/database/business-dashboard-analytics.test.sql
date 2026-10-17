@@ -1,6 +1,6 @@
 begin;
 
-select plan(41);
+select plan(51);
 
 select has_function(
   'public',
@@ -21,6 +21,12 @@ select has_function(
   'get_business_loyalty_programme_performance',
   array['uuid', 'date', 'date'],
   'the loyalty programme performance RPC exists'
+);
+select has_function(
+  'public',
+  'get_business_dashboard_trends',
+  array['uuid', 'date', 'date'],
+  'the business trend RPC exists'
 );
 
 insert into public.businesses (id, business_name)
@@ -433,6 +439,63 @@ select ok(exists (
 ),
   'redemptions in the period remain separate from later claim-cohort conversions');
 
+reset role;
+update public.business_deal_claims
+set claimed_at = (((now() at time zone 'Pacific/Auckland')::date - 4)::timestamp + interval '10 hours') at time zone 'Pacific/Auckland'
+where id = '94000000-0000-0000-0000-000000000031';
+update public.business_deal_claims
+set claimed_at = (((now() at time zone 'Pacific/Auckland')::date - 2)::timestamp + interval '10 hours') at time zone 'Pacific/Auckland'
+where id = '94000000-0000-0000-0000-000000000032';
+update public.business_deal_redemptions
+set redeemed_at = (((now() at time zone 'Pacific/Auckland')::date - 3)::timestamp + interval '11 hours') at time zone 'Pacific/Auckland'
+where claim_id = '94000000-0000-0000-0000-000000000031';
+update public.business_deal_redemptions
+set redeemed_at = (((now() at time zone 'Pacific/Auckland')::date - 1)::timestamp + interval '11 hours') at time zone 'Pacific/Auckland'
+where claim_id = '94000000-0000-0000-0000-000000000032';
+set local role authenticated;
+
+select is((select claims from public.get_business_dashboard_trends(
+  '94000000-0000-0000-0000-000000000001',
+  (now() at time zone 'Pacific/Auckland')::date - 4,
+  (now() at time zone 'Pacific/Auckland')::date
+) where date = (now() at time zone 'Pacific/Auckland')::date - 4),
+  1::bigint, 'claims use the Auckland claim date');
+select is((select redemptions from public.get_business_dashboard_trends(
+  '94000000-0000-0000-0000-000000000001',
+  (now() at time zone 'Pacific/Auckland')::date - 4,
+  (now() at time zone 'Pacific/Auckland')::date
+) where date = (now() at time zone 'Pacific/Auckland')::date - 3),
+  1::bigint, 'redemptions use the distinct Auckland redemption date');
+select is((select recorded_value_cents from public.get_business_dashboard_trends(
+  '94000000-0000-0000-0000-000000000001',
+  (now() at time zone 'Pacific/Auckland')::date - 4,
+  (now() at time zone 'Pacific/Auckland')::date
+) where date = (now() at time zone 'Pacific/Auckland')::date - 3),
+  5000::bigint, 'sales trends use recorded transaction values');
+select ok(exists (select 1 from public.get_business_dashboard_trends(
+  '94000000-0000-0000-0000-000000000001',
+  (now() at time zone 'Pacific/Auckland')::date - 4,
+  (now() at time zone 'Pacific/Auckland')::date
+) where date = (now() at time zone 'Pacific/Auckland')::date - 1
+  and redemptions = 1 and valued_redemptions = 0
+  and recorded_value_cents is null),
+  'redemptions without values retain an unknown sales amount');
+select is((select sum(claims)::bigint from public.get_business_dashboard_trends(
+  '94000000-0000-0000-0000-000000000001',
+  (now() at time zone 'Pacific/Auckland')::date - 44,
+  (now() at time zone 'Pacific/Auckland')::date
+)), 2::bigint, 'weekly grouping preserves all claims');
+select ok(not exists (select 1 from public.get_business_dashboard_trends(
+  '94000000-0000-0000-0000-000000000001',
+  (now() at time zone 'Pacific/Auckland')::date + 5,
+  (now() at time zone 'Pacific/Auckland')::date + 6
+)), 'empty selected periods have no fabricated event rows');
+select is((select sum(redemptions)::bigint from public.get_business_dashboard_trends(
+  '94000000-0000-0000-0000-000000000001',
+  (now() at time zone 'Pacific/Auckland')::date - 200,
+  (now() at time zone 'Pacific/Auckland')::date
+)), 2::bigint, 'monthly grouping preserves all redemptions');
+
 select is((select loyalty_customers from public.get_business_dashboard_metrics(
   '94000000-0000-0000-0000-000000000001', current_date - 7, current_date
 )), 2::bigint, 'total loyalty customers are counted across business programmes');
@@ -530,6 +593,17 @@ select throws_ok(
 select is((select total_deals from public.get_business_dashboard_metrics(
   '94000000-0000-0000-0000-000000000002', current_date - 7, current_date
 )), 0::bigint, 'an empty business does not receive another business''s deal totals');
+
+select throws_ok(
+  $$select * from public.get_business_dashboard_trends(
+    '94000000-0000-0000-0000-000000000001', current_date - 7, current_date
+  )$$,
+  '42501', 'Business membership required',
+  'another business cannot retrieve private trend data'
+);
+select is((select count(*) from public.get_business_dashboard_trends(
+  '94000000-0000-0000-0000-000000000002', current_date - 7, current_date
+)), 0::bigint, 'an empty business receives no other business trend data');
 
 select * from finish();
 rollback;

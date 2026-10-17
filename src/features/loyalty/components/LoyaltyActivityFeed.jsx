@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Gift, RefreshCw, Sparkles } from 'lucide-react'
 
 function formatOccurredAt(value) {
@@ -29,6 +30,8 @@ export default function LoyaltyActivityFeed({
   requestError,
   onRefresh,
 }) {
+  const [visibleCount, setVisibleCount] = useState(5)
+
   return (
     <section
       className="loyalty-activity-feed"
@@ -68,7 +71,7 @@ export default function LoyaltyActivityFeed({
       )}
 
       {!isLoading &&
-        activity.map((item) => (
+        activity.slice(0, visibleCount).map((item) => (
           <div className="loyalty-activity-row" key={item.id}>
             <span
               className={`loyalty-activity-badge is-${item.type === 'reward_redeemed' ? 'redeem' : 'earn'}`}
@@ -97,6 +100,15 @@ export default function LoyaltyActivityFeed({
             </time>
           </div>
         ))}
+      {!isLoading && !requestError && visibleCount < activity.length && (
+        <button
+          type="button"
+          className="loyalty-activity-refresh loyalty-activity-more"
+          onClick={() => setVisibleCount((count) => count + 5)}
+        >
+          Load More
+        </button>
+      )}
     </section>
   )
 }
